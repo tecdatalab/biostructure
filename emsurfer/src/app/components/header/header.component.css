@@ -1,18 +1,7 @@
 .fit-image{
     width: 100%;
     object-fit: cover;
-    height: 350px;
-}
-a:hover {
-  font: bold 20px Arial;
-  text-decoration: none;
-  background-color: #8a8888;
-  color: #EEEEEE;
-  padding: 10px 30px 10px 30px;
-  border-top: 1px solid #CCCCCC;
-  border-right: 1px solid #333333;
-  border-bottom: 1px solid #333333;
-  border-left: 1px solid #CCCCCC;
+    height: auto;
 }
 .button {
   font: bold 20px Arial;
@@ -25,7 +14,7 @@ a:hover {
   border-bottom: 1px solid #333333;
   border-left: 1px solid #CCCCCC;
 }
-.button_active {
+.button_active, a:hover {
   font: bold 20px Arial;
   text-decoration: none;
   background-color: #8a8888;
