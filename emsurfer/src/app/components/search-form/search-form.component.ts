@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ContourShapeInputComponent } from '../contour-shape-input/contour-shape-input.component'
 
 @Component({
   selector: 'app-search-form',
