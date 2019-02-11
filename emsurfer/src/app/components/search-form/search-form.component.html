@@ -12,12 +12,12 @@
   <p class="blue-text">Step 2 (Query entry)</p>
 
   <div class="form-group row">
-    <label for="emdbid" class="col-sm-4 col-form-label">Query method:</label>
-    <div class="custom-control custom-radio col-sm-4">
+    <label class="col-sm-4 col-form-label ">Query method:</label>
+    <div class="custom-control custom-radio col-sm-2 offset-sm-1">
       <input type="radio" class="custom-control-input" id="emdb" name="radio-stacked" checked>
       <label class="custom-control-label" for="emdb">EMDB ID entry</label>
     </div>
-    <div class="custom-control custom-radio col-sm-4">
+    <div class="custom-control custom-radio col-sm-3">
       <input type="radio" class="custom-control-input" id="fileupload" name="radio-stacked">
       <label class="custom-control-label" for="fileupload">Upload an EM map</label>
     </div>
@@ -46,4 +46,46 @@
   </div>
   
   <p class="blue-text">Step 3 (Filter)</p>
+
+  <div class="form-group row" >
+    <label class="col-sm-4 col-form-label">
+        <strong> Volume filter: </strong>
+        (The volume of the EM entry in the database is between 0.8 and 1.2 
+        times the volume of the query entry if ON, or else if OFF)
+    </label>
+    <div class="custom-control custom-radio col-sm-1 offset-sm-1">
+      <input type="radio" class="custom-control-input" id="on" name="radio-stacked" checked>
+      <label class="custom-control-label" for="on">On</label>
+    </div>
+    <div class="custom-control custom-radio col-sm-1">
+      <input type="radio" class="custom-control-input" id="off" name="radio-stacked">
+      <label class="custom-control-label" for="off">Off</label>
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <label class="col-sm-4 col-form-label">
+        <strong> Resolution filter: </strong>
+        (The query is only compared against maps in this resolution range. 
+        If both are left blank, no filtering is applied. If only one is 
+        provided, it will be the only restriction imposed) 
+    </label>
+    <label class="col-form-label" for="min">Min:</label>
+    <div class="col-2">
+      <input id="min" type="number" class="form-control" min="0" step="0.0001">
+    </div>
+    <label class="col-form-label" for="max">Max:</label>
+    <div class="col-2">
+      <input id="max" type="number" class="form-control" min="0" step="0.0001">
+    </div>
+  </div>
+
+  <div class="form-group row">
+    <div class="col-2 offset-5">
+      <button>Submit</button>
+    </div>
+    <div class="col-2">
+      <button>Reset</button>
+    </div>
+  </div>
 </form>

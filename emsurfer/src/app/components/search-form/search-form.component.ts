@@ -8,6 +8,7 @@ import { ContourShapeInputComponent } from '../contour-shape-input/contour-shape
 })
 export class SearchFormComponent implements OnInit {
 
+  
   constructor() { }
 
   ngOnInit() {
