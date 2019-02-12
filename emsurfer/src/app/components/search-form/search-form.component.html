@@ -58,10 +58,12 @@
         times the volume of the query entry if ON, or else if OFF)
     </label>
     <div class="custom-control custom-radio col-sm-1 offset-sm-1">
-        <label><input formControlName="volume_filter" type="radio" value="On" >On</label>
+        <input type="radio" formControlName="volume_filter" class="custom-control-input" id="on" value="On">
+        <label class="custom-control-label" for="on">On</label>
     </div>
     <div class="custom-control custom-radio col-sm-1">
-        <label><input formControlName="volume_filter" type="radio" value="Off" >Off</label>
+        <input type="radio" formControlName="volume_filter" class="custom-control-input" id="off" value="Off">
+        <label class="custom-control-label" for="off">Off</label>
     </div>
   </div>
 
