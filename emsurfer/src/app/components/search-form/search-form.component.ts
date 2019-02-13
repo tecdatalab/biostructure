@@ -10,17 +10,15 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 export class SearchFormComponent implements OnInit {
 
   searchForm: FormGroup;
+  defaultFormState: any;
+  cb_emdb: boolean;
 
-  constructor(private fb: FormBuilder, private router: Router) { }
+  constructor(private fb: FormBuilder, private router: Router) { 
+    this.cb_emdb = true;
+  }
 
   ngOnInit() {
-    
-    const countour_representations = this.fb.array([
-      "1",
-      "2",
-      "3"
-    ])
-   
+     
     const query_group = this.fb.group({
       emdb_id: ['1884',[
         Validators.required,
@@ -38,11 +36,13 @@ export class SearchFormComponent implements OnInit {
     })
 
     this.searchForm = this.fb.group({
-      contour_shape_representation: countour_representations,
+      contour_representation: 0,
       query: query_group,
       volume_filter: "On",
       resolution_filter: rf_group
     })
+
+    this.defaultFormState = this.searchForm.getRawValue();
 
     this.searchForm.valueChanges.subscribe(console.log)
   }
@@ -55,5 +55,23 @@ export class SearchFormComponent implements OnInit {
                 "/" + this.searchForm.get("resolution_filter").get("max").value
     console.log(params)
     this.router.navigateByUrl(params)
+  }
+
+  cbEmdbChange(){
+    this.cb_emdb = !this.cb_emdb
+    if (this.cb_emdb){
+      this.searchForm.patchValue({
+        query: {
+          em_map: {
+            file : null
+          }
+        }
+      })
+    }
+  }
+
+  reset(){
+    this.searchForm.patchValue(this.defaultFormState);
+    this.cb_emdb = true
   }
 }
