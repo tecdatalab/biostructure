@@ -1,1 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
+.blue-text{
+    color: blue;
+    font-size: 15px;
+    font-weight: bold;
+}
