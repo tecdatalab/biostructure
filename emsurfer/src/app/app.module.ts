@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
 import { HeaderComponent} from './components/header/header.component'
@@ -42,10 +42,18 @@ const appRoutes: Routes = [
   imports: [
     BrowserModule,
     ReactiveFormsModule,
+    FormsModule,
     RouterModule.forRoot(
-      appRoutes,
-      {useHash: true}
+      appRoutes
     )
+  ],
+  exports: [
+    RouterModule,
+    HeaderComponent,
+    HomeComponent,
+    ContourShapeInputComponent,
+    UploadEmMapComponent,
+    SearchFormComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

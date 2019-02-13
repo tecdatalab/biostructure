@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ReactiveFormsModule } from '@angular/forms';
+import { RouterTestingModule } from '@angular/router/testing';
+import { ContourShapeInputComponent } from '../contour-shape-input/contour-shape-input.component';
 import { SearchFormComponent } from './search-form.component';
+import { HeaderComponent } from '../header/header.component';
 
 describe('SearchFormComponent', () => {
   let component: SearchFormComponent;
@@ -8,7 +11,8 @@ describe('SearchFormComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SearchFormComponent ]
+      imports: [ReactiveFormsModule, RouterTestingModule],
+      declarations: [SearchFormComponent, HeaderComponent, ContourShapeInputComponent]
     })
     .compileComponents();
   }));
@@ -18,7 +22,7 @@ describe('SearchFormComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
-
+  
   it('should create', () => {
     expect(component).toBeTruthy();
   });
