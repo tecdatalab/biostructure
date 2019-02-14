@@ -115,32 +115,38 @@ class MRC_Reader():
     def get_densities(self):
         
         if self.mode == 0:
-            dt = np.dtype('b')
+            dt = np.dtype(np.int8)
             if self.is_endianness_reversed:
                 dt = dt.newbyteorder('>')
             else:
-                dt = dt.newbyteorder('>')
-            density_array = np.ndarray((self.nz,self.ny,self.nx), dtype=dt, buffer=self.mrc_data).astype(float)
+                dt = dt.newbyteorder('<')
+            density_array =  np.frombuffer(self.mrc_data, dtype=dt).reshape((self.nz,self.ny,self.nx))
         if self.mode == 1:
-            dt = np.dtype('h')
+            dt = np.dtype(np.int16)
             if self.is_endianness_reversed:
                 dt = dt.newbyteorder('>')
             else:
-                dt = dt.newbyteorder('>')
-            density_array = np.ndarray((self.nz,self.ny,self.nx), dtype=dt, buffer=self.mrc_data).astype(float)
+                dt = dt.newbyteorder('<')
+            density_array = np.frombuffer(self.mrc_data, dtype=dt).reshape((self.nz,self.ny,self.nx))
         if self.mode == 2:
-            dt = np.dtype('f')
+            dt = np.dtype(np.float32)
             if self.is_endianness_reversed:
                 dt = dt.newbyteorder('>')
             else:
-                dt = dt.newbyteorder('>')
-            density_array = np.ndarray((self.nz,self.ny,self.nx), dtype=dt, buffer=self.mrc_data).astype(float)
-        return density_array
+                dt = dt.newbyteorder('<')
+            density_array = np.frombuffer(self.mrc_data, dtype=dt).reshape((self.nz,self.ny,self.nx))
+        return density_array.astype(float)
+
+    def write(self,filename):
+
+
+
+
 
 
 
 '''
-filename = "EMD-2984.map"
+filename = "emd_2847.map"
 myreader = MRC_Reader(filename)
-d = myreader.get_densities()
+D = myreader.get_densities()
 '''
