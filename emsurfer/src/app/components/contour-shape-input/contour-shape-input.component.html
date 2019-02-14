@@ -1,0 +1,8 @@
+<div class="form-group row"  [formGroup]='parentForm'>
+  <label for="contour" class="col-sm-4 col-form-label">Contour shape representation:</label>
+  <div class="col-sm-8" >
+    <select formControlName="contour_representation" class="custom-select mr-sm-2" id="contour">
+      <option *ngFor="let contour of countour_representations; let i = index" [ngValue]=i>{{contour}}</option>
+    </select>
+  </div>
+</div>
