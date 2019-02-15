@@ -9,6 +9,8 @@ import { AppComponent } from './app.component';
 import { HeaderComponent} from './components/header/header.component'
 import { ContourShapeInputComponent } from './components/contour-shape-input/contour-shape-input.component';
 import { VolumeFilterInputComponent } from './components/volume-filter-input/volume-filter-input.component';
+import { SearchFormComponent } from './components/search-form/search-form.component';
+import { HomeComponent } from './components/home/home.component';
 
 const appRoutes: Routes = [
   {
@@ -18,7 +20,11 @@ const appRoutes: Routes = [
   },
   {
     path: 'search', 
-    component: VolumeFilterInputComponent
+    component: SearchFormComponent
+  },
+  {
+    path: 'query/:id/:volume/:min/:max',
+    component: HomeComponent
   }
 ]
 
@@ -27,7 +33,9 @@ const appRoutes: Routes = [
     AppComponent,
     HeaderComponent,
     ContourShapeInputComponent,
-    VolumeFilterInputComponent
+    VolumeFilterInputComponent,
+    SearchFormComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
