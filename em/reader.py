@@ -51,6 +51,7 @@
  '''
 
 import struct
+import array
 import numpy as np
 
 class MRC_Reader():
@@ -60,14 +61,13 @@ class MRC_Reader():
     def __init__(self, filename):
         try:
             with open(filename, 'rb') as mrc_file:
-                self.mrc_buffer = mrc_file.read()
+                mrc_buffer = mrc_file.read()
         except IOError as err:
             print("Could not open MRC file", err)
             return
-
+        self.mrc_header = mrc_buffer[0:self.HEADER_SIZE]
         self.is_endianness_reversed = self.test_and_set_endianness()
-        self.mrc_header = self.mrc_buffer[0:self.HEADER_SIZE]
-        self.mrc_data = self.mrc_buffer[self.HEADER_SIZE:]
+        self.mrc_data = mrc_buffer[self.HEADER_SIZE:]
         #Read number of collumns(x), rows(y) and sections(z)
         self.nx = self.read_header_word(self.mrc_header[0:4])
         self.ny = self.read_header_word(self.mrc_header[4:8])
@@ -101,8 +101,8 @@ class MRC_Reader():
 
             
     def test_and_set_endianness(self):
-        regular_nx = struct.unpack('<I', self.mrc_buffer[0:4])
-        reversed_nx = struct.unpack('>I', self.mrc_buffer[0:4])
+        regular_nx = struct.unpack('<I', self.mrc_header[0:4])
+        reversed_nx = struct.unpack('>I', self.mrc_header[0:4])
         return reversed_nx < regular_nx
 
     def read_header_word(self,buffer):
@@ -112,41 +112,40 @@ class MRC_Reader():
             return struct.unpack('<I', buffer)[0]
 
 
-    def get_densities(self):
-        
+    def read_densities(self):
+        if self.is_endianness_reversed:
+            endianness = '>'
+        else:
+            endianness = '<'
         if self.mode == 0:
             dt = np.dtype(np.int8)
-            if self.is_endianness_reversed:
-                dt = dt.newbyteorder('>')
-            else:
-                dt = dt.newbyteorder('<')
-            density_array =  np.frombuffer(self.mrc_data, dtype=dt).reshape((self.nz,self.ny,self.nx))
         if self.mode == 1:
             dt = np.dtype(np.int16)
-            if self.is_endianness_reversed:
-                dt = dt.newbyteorder('>')
-            else:
-                dt = dt.newbyteorder('<')
-            density_array = np.frombuffer(self.mrc_data, dtype=dt).reshape((self.nz,self.ny,self.nx))
         if self.mode == 2:
             dt = np.dtype(np.float32)
-            if self.is_endianness_reversed:
-                dt = dt.newbyteorder('>')
-            else:
-                dt = dt.newbyteorder('<')
-            density_array = np.frombuffer(self.mrc_data, dtype=dt).reshape((self.nz,self.ny,self.nx))
-        return density_array.astype(float)
+        dt = dt.newbyteorder(endianness)
+        density_array =  np.frombuffer(self.mrc_data, dtype=dt)
+        self.data_array = density_array.reshape((self.nz,self.ny,self.nx)).astype(float)
+        return self.data_array
 
+    # Write density map as ".map" format. Default write mode is set to mode 2. 
     def write(self,filename):
-
-
-
-
+        #First generate buffer from array data in mode 2
+        data = bytearray()
+        for voxel in np.nditer(self.data_array):
+            data+=struct.pack('f',voxel)        
+        try:
+            with open(filename, 'wb') as output:
+                output.write(self.mrc_header)
+                output.write(data)
+        except IOError as err:
+            print("Could not write file, error ", err)
 
 
 
 '''
-filename = "emd_2847.map"
+filename = "../../emd_2847.map"
 myreader = MRC_Reader(filename)
-D = myreader.get_densities()
+D = myreader.read_densities()
+myreader.write("emd_2847_2.map")
 '''
