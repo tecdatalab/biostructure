@@ -54,7 +54,7 @@ import struct
 import array
 import numpy as np
 
-class MRC_Reader():
+class Reader():
     #Header size in bytes
     HEADER_SIZE = 1024
     
