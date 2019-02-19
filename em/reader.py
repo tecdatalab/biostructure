@@ -138,7 +138,7 @@ class Reader():
     def write(self,filename, molecule):
         #First generate buffer from array data in mode 2
         data = bytearray()
-        for voxel in np.nditer(molecule.data):
+        for voxel in np.nditer(molecule.getDataArray()):
             data+=struct.pack('f',voxel)        
         try:
             with open(filename, 'wb') as output:
