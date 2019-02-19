@@ -54,6 +54,8 @@ import struct
 import array
 import numpy as np
 
+import molecule
+
 class Reader():
     #Header size in bytes
     HEADER_SIZE = 1024
@@ -68,37 +70,41 @@ class Reader():
         self.mrc_header = mrc_buffer[0:self.HEADER_SIZE]
         self.is_endianness_reversed = self.test_and_set_endianness()
         self.mrc_data = mrc_buffer[self.HEADER_SIZE:]
+        
+    def read(self):
         #Read number of collumns(x), rows(y) and sections(z)
-        self.nx = self.read_header_word(self.mrc_header[0:4])
-        self.ny = self.read_header_word(self.mrc_header[4:8])
-        self.nz = self.read_header_word(self.mrc_header[8:12])
+        nx = self.read_header_word(self.mrc_header[0:4])
+        ny = self.read_header_word(self.mrc_header[4:8])
+        nz = self.read_header_word(self.mrc_header[8:12])
         self.mode = self.read_header_word(self.mrc_header[12:16])
         if (self.mode > 2):
             print("Only map modes 0, 1 and 2 are supported. Mode %d found" % self.mode)
             return
         #Read start x, y, z positions
-        self.nxstart = self.read_header_word(self.mrc_header[16:20])
-        self.nystart = self.read_header_word(self.mrc_header[20:24])
-        self.nzstart = self.read_header_word(self.mrc_header[24:28])
+        nxstart = self.read_header_word(self.mrc_header[16:20])
+        nystart = self.read_header_word(self.mrc_header[20:24])
+        nzstart = self.read_header_word(self.mrc_header[24:28])
         #Read grid size
-        self.mx = self.read_header_word(self.mrc_header[28:32])
-        self.my = self.read_header_word(self.mrc_header[32:36])
-        self.mz = self.read_header_word(self.mrc_header[36:40])
+        mx = self.read_header_word(self.mrc_header[28:32])
+        my = self.read_header_word(self.mrc_header[32:36])
+        mz = self.read_header_word(self.mrc_header[36:40])
         #Read cell dimensions
-        self.xlen = self.read_header_word(self.mrc_header[40:44])
-        self.ylen = self.read_header_word(self.mrc_header[44:48])
-        self.zlen = self.read_header_word(self.mrc_header[48:52])
+        xlen = self.read_header_word(self.mrc_header[40:44])
+        ylen = self.read_header_word(self.mrc_header[44:48])
+        zlen = self.read_header_word(self.mrc_header[48:52])
         #Skip 3 cell angle words and the 3 words corresponding to axes
         #Read density ranges
-        self.dmin = self.read_header_word(self.mrc_header[76:80])
-        self.dmax = self.read_header_word(self.mrc_header[80:84])
-        self.dmean = self.read_header_word(self.mrc_header[84:88])
+        dmin = self.read_header_word(self.mrc_header[76:80])
+        dmax = self.read_header_word(self.mrc_header[80:84])
+        dmean = self.read_header_word(self.mrc_header[84:88])
         #Read origin
-        self.xorigin = self.read_header_word(self.mrc_header[196:200])
-        self.yorigin = self.read_header_word(self.mrc_header[200:204])
-        self.zorigin = self.read_header_word(self.mrc_header[204:208])
-
-
+        xorigin = self.read_header_word(self.mrc_header[196:200])
+        yorigin = self.read_header_word(self.mrc_header[200:204])
+        zorigin = self.read_header_word(self.mrc_header[204:208])
+        #Read densities
+        densities = self.read_densities((nz, ny, nx))
+        #Generate Molecule object with parameters
+        return molecule.Molecule(self.mrc_header, densities,  (nx, ny, nz), (nxstart, nystart, nzstart), (mx, my, mz), (xlen, ylen, zlen), (dmin, dmax, dmean), (xorigin, yorigin, zorigin))
             
     def test_and_set_endianness(self):
         regular_nx = struct.unpack('<I', self.mrc_header[0:4])
@@ -112,7 +118,7 @@ class Reader():
             return struct.unpack('<I', buffer)[0]
 
 
-    def read_densities(self):
+    def read_densities(self, shape):
         if self.is_endianness_reversed:
             endianness = '>'
         else:
@@ -125,27 +131,26 @@ class Reader():
             dt = np.dtype(np.float32)
         dt = dt.newbyteorder(endianness)
         density_array =  np.frombuffer(self.mrc_data, dtype=dt)
-        self.data_array = density_array.reshape((self.nz,self.ny,self.nx)).astype(float)
-        return self.data_array
+        data_array = density_array.reshape(shape).astype(float)
+        return data_array
 
     # Write density map as ".map" format. Default write mode is set to mode 2. 
-    def write(self,filename):
+    def write(self,filename, molecule):
         #First generate buffer from array data in mode 2
         data = bytearray()
-        for voxel in np.nditer(self.data_array):
+        for voxel in np.nditer(molecule.data):
             data+=struct.pack('f',voxel)        
         try:
             with open(filename, 'wb') as output:
-                output.write(self.mrc_header)
+                output.write(molecule.rawHeader)
                 output.write(data)
         except IOError as err:
             print("Could not write file, error ", err)
 
 
 
-'''
+
 filename = "../../emd_2847.map"
-myreader = MRC_Reader(filename)
-D = myreader.read_densities()
-myreader.write("emd_2847_2.map")
-'''
+myreader = Reader(filename)
+D = myreader.read()
+myreader.write("emd_2847_2.map", D)
