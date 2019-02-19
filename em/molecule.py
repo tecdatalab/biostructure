@@ -1,7 +1,4 @@
 
-
-
-
 class Molecule():
 
 
@@ -14,5 +11,7 @@ class Molecule():
         self.cell_dim = cell_dim
         self.density_ranges = density_ranges
         self.origin = origin
+
     
-    
+    def getDataArray(self):
+        return self.data
