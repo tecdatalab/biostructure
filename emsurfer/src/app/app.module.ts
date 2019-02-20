@@ -8,13 +8,17 @@ import { AppComponent } from './app.component';
 import { HeaderComponent } from './components/header/header.component';
 import { ContourShapeInputComponent } from './components/contour-shape-input/contour-shape-input.component';
 import { VolumeFilterInputComponent } from './components/volume-filter-input/volume-filter-input.component';
+import { EmdbIdInputComponent } from './components/emdb-id-input/emdb-id-input.component';
+import { UploadEmMapComponent } from './components/upload-em-map/upload-em-map.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HeaderComponent,
     ContourShapeInputComponent,
-    VolumeFilterInputComponent
+    VolumeFilterInputComponent,
+    EmdbIdInputComponent,
+    UploadEmMapComponent
   ],
   imports: [BrowserModule, ReactiveFormsModule, routes],
   providers: [],

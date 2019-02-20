@@ -1,0 +1,30 @@
+<div *class="form - group; row" [formGroup]="parentForm">
+  <label for="emdbid" class="col-4 col-form-label"
+    >4-digit EMDB entry ID:</label
+  >
+  <div class="col-8">
+    <input
+      id="emdb_id"
+      placeholder="EMDB entry ID"
+      formControlName="emdb_id"
+      type="text"
+      class="form-control"
+      maxlength="4"
+      [ngClass]="{
+        'is-invalid': parentForm.controls['emdb_id'].invalid &&
+        parentForm..controls['emdb_id'].touched
+      }"
+    />
+    <div *ngIf="parentForm.controls['emdb_id'].invalid" class="invalid-feedback">
+      <div *ngIf="parentForm.controls['emdb_id'].errors?.required">
+        ID required
+      </div>
+      <div *ngIf="parentForm.controls['emdb_id'].errors?.minlength">
+        Enter a 4-digit ID
+      </div>
+      <div *ngIf="parentForm.controls['emdb_id'].errors?.pattern">
+        Only digits (0-9) allowed
+      </div>
+    </div>
+  </div>
+</div>
