@@ -3,8 +3,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-volume-filter-input',
-  templateUrl: './volume-filter-input.component.html',
-  styleUrls: ['./volume-filter-input.component.css']
+  templateUrl: './volume-filter-input.component.html'
 })
 export class VolumeFilterInputComponent implements OnInit {
 

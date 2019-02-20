@@ -3,8 +3,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-contour-shape-input',
-  templateUrl: './contour-shape-input.component.html',
-  styleUrls: ['./contour-shape-input.component.css']
+  templateUrl: './contour-shape-input.component.html'
 })
 export class ContourShapeInputComponent implements OnInit {
   @Input() parentForm: FormGroup;
