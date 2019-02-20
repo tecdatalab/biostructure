@@ -1,6 +1,7 @@
 import { ModuleWithProviders } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ContourShapeInputComponent } from './components/contour-shape-input/contour-shape-input.component';
+import { SearchFormComponent } from './components/search-form/search-form.component';
+import { HomeComponent } from './components/home/home.component';
 
 export const router: Routes = [
   {
@@ -10,7 +11,11 @@ export const router: Routes = [
   },
   {
     path: 'search',
-    component: ContourShapeInputComponent
+    component: SearchFormComponent
+  },
+  {
+    path: 'query/:id/:volume/:min/:max',
+    component: HomeComponent
   }
 ];
 
