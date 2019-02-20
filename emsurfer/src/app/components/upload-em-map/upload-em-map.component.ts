@@ -2,13 +2,14 @@ import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
-  selector: 'app-volume-filter-input',
-  templateUrl: './volume-filter-input.component.html'
+  selector: 'app-upload-em-map',
+  templateUrl: './upload-em-map.component.html'
 })
-export class VolumeFilterInputComponent {
+export class UploadEmMapComponent {
 
   @Input() parentForm: FormGroup;
 
   constructor() { }
+
 
 }

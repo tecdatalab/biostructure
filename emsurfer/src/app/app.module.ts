@@ -10,6 +10,10 @@ import { ContourShapeInputComponent } from './components/contour-shape-input/con
 import { VolumeFilterInputComponent } from './components/volume-filter-input/volume-filter-input.component';
 import { SearchFormComponent } from './components/search-form/search-form.component';
 import { HomeComponent } from './components/home/home.component';
+import { EmdbIdInputComponent } from './components/emdb-id-input/emdb-id-input.component';
+import { UploadEmMapComponent } from './components/upload-em-map/upload-em-map.component';
+import { QueryMethodComponent } from './components/query-method/query-method.component';
+import { ResolutionFilterComponent } from './components/resolution-filter/resolution-filter.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +22,11 @@ import { HomeComponent } from './components/home/home.component';
     ContourShapeInputComponent,
     VolumeFilterInputComponent,
     SearchFormComponent,
-    HomeComponent
+    HomeComponent,
+    EmdbIdInputComponent,
+    UploadEmMapComponent,
+    QueryMethodComponent,
+    ResolutionFilterComponent
   ],
   imports: [BrowserModule, ReactiveFormsModule, routes],
   providers: [],

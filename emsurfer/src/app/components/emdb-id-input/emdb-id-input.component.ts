@@ -2,11 +2,11 @@ import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
-  selector: 'app-volume-filter-input',
-  templateUrl: './volume-filter-input.component.html'
+  selector: 'app-emdb-id-input',
+  templateUrl: './emdb-id-input.component.html'
 })
-export class VolumeFilterInputComponent {
-
+export class EmdbIdInputComponent {
+  
   @Input() parentForm: FormGroup;
 
   constructor() { }
