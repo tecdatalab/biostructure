@@ -10,6 +10,8 @@ import { ContourShapeInputComponent } from './components/contour-shape-input/con
 import { VolumeFilterInputComponent } from './components/volume-filter-input/volume-filter-input.component';
 import { EmdbIdInputComponent } from './components/emdb-id-input/emdb-id-input.component';
 import { UploadEmMapComponent } from './components/upload-em-map/upload-em-map.component';
+import { QueryMethodComponent } from './components/query-method/query-method.component';
+import { ResolutionFilterComponent } from './components/resolution-filter/resolution-filter.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +20,9 @@ import { UploadEmMapComponent } from './components/upload-em-map/upload-em-map.c
     ContourShapeInputComponent,
     VolumeFilterInputComponent,
     EmdbIdInputComponent,
-    UploadEmMapComponent
+    UploadEmMapComponent,
+    QueryMethodComponent,
+    ResolutionFilterComponent
   ],
   imports: [BrowserModule, ReactiveFormsModule, routes],
   providers: [],

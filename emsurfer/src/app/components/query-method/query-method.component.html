@@ -1,0 +1,32 @@
+<div class="form-group row">
+  <label class="col-sm-4 col-form-label ">Query method:</label>
+  <div class="custom-control custom-radio col-sm-2 offset-sm-1">
+    <input
+      type="radio"
+      class="custom-control-input"
+      id="emdb"
+      [checked]="cbEmdb"
+      (change)="cbEmdbChange()"
+    />
+    <label class="custom-control-label" for="emdb">EMDB ID entry</label>
+  </div>
+  <div class="custom-control custom-radio col-sm-3">
+    <input
+      type="radio"
+      class="custom-control-input"
+      id="fileupload"
+      [checked]="!cbEmdb"
+      (change)="cbEmdbChange()"
+    />
+    <label class="custom-control-label" for="fileupload"
+      >Upload an EM map</label
+    >
+  </div>
+</div>
+
+<div *ngIf="cbEmdb" class="form-group row" [formGroup]="parentForm">
+  <app-emdb-id-input [parentForm]="parentForm"></app-emdb-id-input>
+</div>
+<div *ngIf="!cbEmdb" class="form-group row" [formGroup]="parentForm">
+  <app-upload-em-map [parentForm]="parentForm"></app-upload-em-map>
+</div>
