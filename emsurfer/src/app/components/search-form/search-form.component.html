@@ -2,87 +2,196 @@
   <p class="blue-text">Submit an EM map</p>
   <p>Please refer to the tips below when uploading a file:</p>
   <ul>
-    <li>It is possible that the EMDB ID already exists in the database. Try to use the search box first.</li>
-    <li>If you benchmark our program, please <a href="#">access the page.</a></li>
+    <li>
+      It is possible that the EMDB ID already exists in the database. Try to use
+      the search box first.
+    </li>
+    <li>
+      If you benchmark our program, please <a href="#">access the page.</a>
+    </li>
   </ul>
-  <p class="blue-text">(For the purpose of review, please directly click the Submit button to get the search result, 
-      with the default options provided.)</p>
+  <p class="blue-text">
+    (For the purpose of review, please directly click the Submit button to get
+    the search result, with the default options provided.)
+  </p>
   <p class="blue-text">Step 1 (Representation)</p>
-  <app-contour-shape-input [parentForm]="searchForm" ></app-contour-shape-input>
+  <app-contour-shape-input [parentForm]="searchForm"></app-contour-shape-input>
   <p class="blue-text">Step 2 (Query entry)</p>
 
   <div class="form-group row">
     <label class="col-sm-4 col-form-label ">Query method:</label>
-    <div  class="custom-control custom-radio col-sm-2 offset-sm-1">
-      <input type="radio" class="custom-control-input" id="emdb" [checked]="cb_emdb" (change)="cbEmdbChange()">
+    <div class="custom-control custom-radio col-sm-2 offset-sm-1">
+      <input
+        type="radio"
+        class="custom-control-input"
+        id="emdb"
+        [checked]="cb_emdb"
+        (change)="cbEmdbChange()"
+      />
       <label class="custom-control-label" for="emdb">EMDB ID entry</label>
     </div>
     <div class="custom-control custom-radio col-sm-3">
-      <input type="radio" class="custom-control-input" id="fileupload"  [checked]="!cb_emdb" (change)="cbEmdbChange()">
-      <label class="custom-control-label" for="fileupload">Upload an EM map</label>
+      <input
+        type="radio"
+        class="custom-control-input"
+        id="fileupload"
+        [checked]="!cb_emdb"
+        (change)="cbEmdbChange()"
+      />
+      <label class="custom-control-label" for="fileupload"
+        >Upload an EM map</label
+      >
     </div>
   </div>
 
   <div *ngIf="cb_emdb" class="form-group row" formGroupName="query">
-    <label for="emdbid" class="col-sm-4 col-form-label">4-digit EMDB entry ID:</label>
+    <label for="emdbid" class="col-sm-4 col-form-label"
+      >4-digit EMDB entry ID:</label
+    >
     <div class="col-sm-8">
-      <input id="emdb_id" placeholder="EMDB entry ID" formControlName="emdb_id" type="text" class="form-control" maxlength="4"
-      [ngClass]="{'is-invalid': searchForm.get('query').controls['emdb_id'].invalid && searchForm.get('query').controls['emdb_id'].touched && cb_emdb}" >
+      <input
+        id="emdb_id"
+        placeholder="EMDB entry ID"
+        formControlName="emdb_id"
+        type="text"
+        class="form-control"
+        maxlength="4"
+        [ngClass]="{
+          'is-invalid':
+            searchForm.get('query').controls['emdb_id'].invalid &&
+            searchForm.get('query').controls['emdb_id'].touched &&
+            cb_emdb
+        }"
+      />
       <div *ngIf="cb_emdb" class="invalid-feedback">
-          <div *ngIf="searchForm.get('query').controls['emdb_id'].errors?.required && cb_emdb" >ID required</div>
-          <div *ngIf="searchForm.get('query').controls['emdb_id'].errors?.minlength && cb_emdb" >Enter a 4-digit ID</div>
-          <div *ngIf="searchForm.get('query').controls['emdb_id'].errors?.pattern && cb_emdb" >Only digits (0-9) allowed</div>
+        <div
+          *ngIf="
+            searchForm.get('query').controls['emdb_id'].errors?.required &&
+            cb_emdb
+          "
+        >
+          ID required
+        </div>
+        <div
+          *ngIf="
+            searchForm.get('query').controls['emdb_id'].errors?.minlength &&
+            cb_emdb
+          "
+        >
+          Enter a 4-digit ID
+        </div>
+        <div
+          *ngIf="
+            searchForm.get('query').controls['emdb_id'].errors?.pattern &&
+            cb_emdb
+          "
+        >
+          Only digits (0-9) allowed
+        </div>
       </div>
     </div>
   </div>
-  
+
   <div *ngIf="!cb_emdb" formGroupName="query">
     <div class="form-group row" formGroupName="em_map">
-      <label for="emmap" class="col-sm-4 col-form-label">Upload an EM map (.map or .mrc) file (Upload troubleshooting):</label>
+      <label for="emmap" class="col-sm-4 col-form-label"
+        >Upload an EM map (.map or .mrc) file (Upload troubleshooting):</label
+      >
       <div class="col-sm-6">
-        <input id="file" placeholder="file" formControlName="file"  type="file" class="from-control-file border" accept=".map,.mrc">
+        <input
+          id="file"
+          placeholder="file"
+          formControlName="file"
+          type="file"
+          class="from-control-file border"
+          accept=".map,.mrc"
+        />
       </div>
       <a class="col-sm-2" href="#">An example file.</a>
     </div>
     <div class="form-group row" formGroupName="em_map">
-      <label for="contourlvl" class="col-sm-4 col-form-label">Recommended contour level:</label>
+      <label for="contourlvl" class="col-sm-4 col-form-label"
+        >Recommended contour level:</label
+      >
       <div class="col-sm-8">
-        <input id="contour_level" placeholder="contour_level" formControlName="contour_level" type="text" class="form-control">
+        <input
+          id="contour_level"
+          placeholder="contour_level"
+          formControlName="contour_level"
+          type="text"
+          class="form-control"
+        />
       </div>
     </div>
   </div>
 
   <p class="blue-text">Step 3 (Filter)</p>
-  <app-volume-filter-input [parentForm]="searchForm" ></app-volume-filter-input>
+  <app-volume-filter-input [parentForm]="searchForm"></app-volume-filter-input>
 
   <div class="form-group row" formGroupName="resolution_filter">
     <label class="col-sm-4 col-form-label">
-        <strong> Resolution filter: </strong>
-        (The query is only compared against maps in this resolution range. 
-        If both are left blank, no filtering is applied. If only one is 
-        provided, it will be the only restriction imposed) 
+      <strong> Resolution filter: </strong>
+      (The query is only compared against maps in this resolution range. If both
+      are left blank, no filtering is applied. If only one is provided, it will
+      be the only restriction imposed)
     </label>
     <label class="col-form-label offset-1" for="min">Min:</label>
     <div class="col-2">
-      <input id="min" formControlName="min" type="number" class="form-control" min="0" step="0.0001"
-      [ngClass]="{'is-invalid': searchForm.get('resolution_filter').controls['min'].invalid && searchForm.get('resolution_filter').controls['min'].touched}">
+      <input
+        id="min"
+        formControlName="min"
+        type="number"
+        class="form-control"
+        min="0"
+        step="0.0001"
+        [ngClass]="{
+          'is-invalid':
+            searchForm.get('resolution_filter').controls['min'].invalid &&
+            searchForm.get('resolution_filter').controls['min'].touched
+        }"
+      />
       <div class="invalid-feedback">
-          <div *ngIf="searchForm.get('resolution_filter').controls['min'].errors?.required" >Min required</div>
+        <div
+          *ngIf="
+            searchForm.get('resolution_filter').controls['min'].errors?.required
+          "
+        >
+          Min required
+        </div>
       </div>
     </div>
     <label class="col-form-label" for="max">Max:</label>
     <div class="col-2">
-      <input id="max" formControlName="max" type="number" class="form-control" min="0" step="0.0001"
-      [ngClass]="{'is-invalid': searchForm.get('resolution_filter').controls['max'].invalid && searchForm.get('resolution_filter').controls['max'].touched}">
+      <input
+        id="max"
+        formControlName="max"
+        type="number"
+        class="form-control"
+        min="0"
+        step="0.0001"
+        [ngClass]="{
+          'is-invalid':
+            searchForm.get('resolution_filter').controls['max'].invalid &&
+            searchForm.get('resolution_filter').controls['max'].touched
+        }"
+      />
       <div class="invalid-feedback">
-          <div *ngIf="searchForm.get('resolution_filter').controls['max'].errors?.required" >Min required</div>
+        <div
+          *ngIf="
+            searchForm.get('resolution_filter').controls['max'].errors?.required
+          "
+        >
+          Min required
+        </div>
       </div>
     </div>
   </div>
 
   <div class="form-group row">
     <div class="col-2 offset-5">
-      <button id="submitButton" type="submit" [disabled]="!searchForm.valid">Submit</button>
+      <button id="submitButton" type="submit" [disabled]="!searchForm.valid">
+        Submit
+      </button>
     </div>
     <div class="col-2">
       <button id="resetButton" type="button" (click)="reset()">Reset</button>
