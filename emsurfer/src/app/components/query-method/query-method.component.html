@@ -24,9 +24,11 @@
   </div>
 </div>
 
-<div *ngIf="cbEmdb" class="form-group row" [formGroup]="parentForm">
+<div *ngIf="cbEmdb" [formGroup]="parentForm">
   <app-emdb-id-input [parentForm]="parentForm"></app-emdb-id-input>
 </div>
-<div *ngIf="!cbEmdb" class="form-group row" [formGroup]="parentForm">
-  <app-upload-em-map [parentForm]="parentForm"></app-upload-em-map>
+<div *ngIf="!cbEmdb" [formGroup]="parentForm">
+  <app-upload-em-map
+    [parentForm]="parentForm.controls.em_map"
+  ></app-upload-em-map>
 </div>

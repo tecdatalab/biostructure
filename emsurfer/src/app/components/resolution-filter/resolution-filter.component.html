@@ -2,23 +2,39 @@
   <label class="col-sm-4 col-form-label">
     <strong> Resolution filter: </strong>
     (The query is only compared against maps in this resolution range. If both
-    are left blank, no filtering is applied. If only one is provided, it will
-    be the only restriction imposed)
+    are left blank, no filtering is applied. If only one is provided, it will be
+    the only restriction imposed)
   </label>
   <label class="col-form-label offset-1" for="min">Min:</label>
   <div class="col-2">
-    <input id="min" formControlName="min" type="number" class="form-control" min="0" step="0.0001" [ngClass]="{
-          'is-invalid':
-            searchForm.get('resolution_filter').controls['min'].invalid &&
-            searchForm.get('resolution_filter').controls['min'].touched
-        }" />
+    <input
+      id="min"
+      formControlName="min"
+      type="number"
+      class="form-control"
+      min="0"
+      step="0.0001"
+      [ngClass]="{
+        'is-invalid':
+          parentForm.controls['min'].invalid &&
+          parentForm.controls['min'].touched
+      }"
+    />
   </div>
   <label class="col-form-label" for="max">Max:</label>
   <div class="col-2">
-    <input id="max" formControlName="max" type="number" class="form-control" min="0" step="0.0001" [ngClass]="{
-          'is-invalid':
-            searchForm.get('resolution_filter').controls['max'].invalid &&
-            searchForm.get('resolution_filter').controls['max'].touched
-        }" />
+    <input
+      id="max"
+      formControlName="max"
+      type="number"
+      class="form-control"
+      min="0"
+      step="0.0001"
+      [ngClass]="{
+        'is-invalid':
+          parentForm.controls['max'].invalid &&
+          parentForm.controls['max'].touched
+      }"
+    />
   </div>
 </div>

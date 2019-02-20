@@ -1,4 +1,4 @@
-<div *class="form - group; row" [formGroup]="parentForm">
+<div class="form-group row" [formGroup]="parentForm">
   <label for="emdbid" class="col-4 col-form-label"
     >4-digit EMDB entry ID:</label
   >
@@ -11,11 +11,15 @@
       class="form-control"
       maxlength="4"
       [ngClass]="{
-        'is-invalid': parentForm.controls['emdb_id'].invalid &&
-        parentForm..controls['emdb_id'].touched
+        'is-invalid':
+          parentForm.controls['emdb_id'].invalid &&
+          parentForm.controls['emdb_id'].touched
       }"
     />
-    <div *ngIf="parentForm.controls['emdb_id'].invalid" class="invalid-feedback">
+    <div
+      *ngIf="parentForm.controls['emdb_id'].invalid"
+      class="invalid-feedback"
+    >
       <div *ngIf="parentForm.controls['emdb_id'].errors?.required">
         ID required
       </div>
