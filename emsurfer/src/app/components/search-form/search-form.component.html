@@ -25,7 +25,7 @@
         type="radio"
         class="custom-control-input"
         id="emdb"
-        [checked]="cb_emdb"
+        [checked]="cbEmdb"
         (change)="cbEmdbChange()"
       />
       <label class="custom-control-label" for="emdb">EMDB ID entry</label>
@@ -35,7 +35,7 @@
         type="radio"
         class="custom-control-input"
         id="fileupload"
-        [checked]="!cb_emdb"
+        [checked]="!cbEmdb"
         (change)="cbEmdbChange()"
       />
       <label class="custom-control-label" for="fileupload"
@@ -44,7 +44,7 @@
     </div>
   </div>
 
-  <div *ngIf="cb_emdb" class="form-group row" formGroupName="query">
+  <div *ngIf="cbEmdb" class="form-group row" formGroupName="query">
     <label for="emdbid" class="col-sm-4 col-form-label"
       >4-digit EMDB entry ID:</label
     >
@@ -60,14 +60,14 @@
           'is-invalid':
             searchForm.get('query').controls['emdb_id'].invalid &&
             searchForm.get('query').controls['emdb_id'].touched &&
-            cb_emdb
+            cbEmdb
         }"
       />
-      <div *ngIf="cb_emdb" class="invalid-feedback">
+      <div *ngIf="cbEmdb" class="invalid-feedback">
         <div
           *ngIf="
             searchForm.get('query').controls['emdb_id'].errors?.required &&
-            cb_emdb
+            cbEmdb
           "
         >
           ID required
@@ -75,7 +75,7 @@
         <div
           *ngIf="
             searchForm.get('query').controls['emdb_id'].errors?.minlength &&
-            cb_emdb
+            cbEmdb
           "
         >
           Enter a 4-digit ID
@@ -83,7 +83,7 @@
         <div
           *ngIf="
             searchForm.get('query').controls['emdb_id'].errors?.pattern &&
-            cb_emdb
+            cbEmdb
           "
         >
           Only digits (0-9) allowed
@@ -92,7 +92,7 @@
     </div>
   </div>
 
-  <div *ngIf="!cb_emdb" formGroupName="query">
+  <div *ngIf="!cbEmdb" formGroupName="query">
     <div class="form-group row" formGroupName="em_map">
       <label for="emmap" class="col-sm-4 col-form-label"
         >Upload an EM map (.map or .mrc) file (Upload troubleshooting):</label
@@ -150,15 +150,6 @@
             searchForm.get('resolution_filter').controls['min'].touched
         }"
       />
-      <div class="invalid-feedback">
-        <div
-          *ngIf="
-            searchForm.get('resolution_filter').controls['min'].errors?.required
-          "
-        >
-          Min required
-        </div>
-      </div>
     </div>
     <label class="col-form-label" for="max">Max:</label>
     <div class="col-2">
@@ -175,15 +166,6 @@
             searchForm.get('resolution_filter').controls['max'].touched
         }"
       />
-      <div class="invalid-feedback">
-        <div
-          *ngIf="
-            searchForm.get('resolution_filter').controls['max'].errors?.required
-          "
-        >
-          Min required
-        </div>
-      </div>
     </div>
   </div>
 

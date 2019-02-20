@@ -11,19 +11,19 @@ export class HomeComponent implements OnInit {
   constructor(private route: ActivatedRoute) { }
 
   params = {
-    id: "",
-    volume: "",
-    min: "",
-    max: ""
+    id: '',
+    volume: '',
+    min: '',
+    max: ''
   }
 
   ngOnInit() {
     this.route.paramMap
       .subscribe(params => {
-       this.params.id  = params.get("id");
-       this.params.volume  = params.get("volume");
-       this.params.min = params.get("min");
-       this.params.max = params.get("max");
+       this.params.id  = params.get('id');
+       this.params.volume  = params.get('volume');
+       this.params.min = params.get('min');
+       this.params.max = params.get('max');
       });
   }
 }
