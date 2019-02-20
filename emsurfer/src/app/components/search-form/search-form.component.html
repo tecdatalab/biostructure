@@ -1,5 +1,5 @@
 <form [formGroup]="searchForm" (ngSubmit)="submitHandler()">
-  <p class="blue-text">Submit an EM map</p>
+  <p class="text-primary">Submit an EM map</p>
   <p>Please refer to the tips below when uploading a file:</p>
   <ul>
     <li>
@@ -10,14 +10,15 @@
       If you benchmark our program, please <a href="#">access the page.</a>
     </li>
   </ul>
-  <p class="blue-text">
-    (For the purpose of review, please directly click the Submit button to get
-    the search result, with the default options provided.)
+  <p>
+    <strong class="text-primary">
+      (For the purpose of review, please directly click the Submit button to get
+      the search result, with the default options provided.)
+    </strong>
   </p>
-  <p class="blue-text">Step 1 (Representation)</p>
+  <p><strong class="text-primary">Step 1 (Representation)</strong></p>
   <app-contour-shape-input [parentForm]="searchForm"></app-contour-shape-input>
-  <p class="blue-text">Step 2 (Query entry)</p>
-
+  <p><strong class="text-primary">Step 2 (Query entry)</strong></p>
   <div class="form-group row">
     <label class="col-sm-4 col-form-label ">Query method:</label>
     <div class="custom-control custom-radio col-sm-2 offset-sm-1">
@@ -125,7 +126,7 @@
     </div>
   </div>
 
-  <p class="blue-text">Step 3 (Filter)</p>
+  <p><strong class="text-primary">Step 3 (Filter)</strong></p>
   <app-volume-filter-input [parentForm]="searchForm"></app-volume-filter-input>
 
   <div class="form-group row" formGroupName="resolution_filter">
