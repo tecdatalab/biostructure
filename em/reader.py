@@ -66,7 +66,7 @@ class Reader():
                 mrc_buffer = mrc_file.read()
         except IOError as err:
             print("Could not open MRC file", err)
-            return
+            raise
         self.mrc_header = mrc_buffer[0:self.HEADER_SIZE]
         self.is_endianness_reversed = self.test_and_set_endianness()
         self.mrc_data = mrc_buffer[self.HEADER_SIZE:]
@@ -149,8 +149,9 @@ class Reader():
 
 
 
-
+'''
 filename = "../../emd_2847.map"
 myreader = Reader(filename)
 D = myreader.read()
 myreader.write("emd_2847_2.map", D)
+'''
