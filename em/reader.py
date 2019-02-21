@@ -79,7 +79,7 @@ class Reader():
         self.mode = self.read_header_word(self.mrc_header[12:16])
         if (self.mode > 2):
             print("Only map modes 0, 1 and 2 are supported. Mode %d found" % self.mode)
-            return
+            raise ValueError
         #Read start x, y, z positions
         nxstart = self.read_header_word(self.mrc_header[16:20])
         nystart = self.read_header_word(self.mrc_header[20:24])
