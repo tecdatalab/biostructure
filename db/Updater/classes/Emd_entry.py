@@ -4,7 +4,7 @@ Created on 22 feb. 2019
 @author: luis98
 '''
 
-class Emd_Entry(object):
+class Emd_entry(object):
     '''
     classdocs
     '''
