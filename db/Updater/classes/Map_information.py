@@ -37,14 +37,14 @@ class Map_information(object):
     __average = None
     __std = None
     __space_group_number = None
-    __datails = None
+    __details = None
     __pixel_x = None
     __pixel_y = None
     __pixel_z = None
     __countour_level = None
     __annotation_details = None
 
-    def __init__(self, id, file_information, data_type, num_columns, num_rows, num_sections, origin_col, origin_row, origin_sec, limit_col, limit_row, limit_sec, spacing_col, spacing_row, spacing_sec, cell_a, cell_b, cell_c, cell_alpha, cell_beta, cell_gamma, axis_order_fast, axis_order_medium, axis_order_slow, minimum, maximum, average, std, space_group_number, datails, pixel_x, pixel_y, pixel_z, countour_level, annotation_details):
+    def __init__(self, id, file_information, data_type, num_columns, num_rows, num_sections, origin_col, origin_row, origin_sec, limit_col, limit_row, limit_sec, spacing_col, spacing_row, spacing_sec, cell_a, cell_b, cell_c, cell_alpha, cell_beta, cell_gamma, axis_order_fast, axis_order_medium, axis_order_slow, minimum, maximum, average, std, space_group_number, details, pixel_x, pixel_y, pixel_z, countour_level, annotation_details):
         self.__id = id
         self.__file_information = file_information
         self.__data_type = data_type
@@ -74,7 +74,7 @@ class Map_information(object):
         self.__average = average
         self.__std = std
         self.__space_group_number = space_group_number
-        self.__datails = datails
+        self.__details = details
         self.__pixel_x = pixel_x
         self.__pixel_y = pixel_y
         self.__pixel_z = pixel_z
@@ -197,8 +197,8 @@ class Map_information(object):
         return self.__space_group_number
 
 
-    def get_datails(self):
-        return self.__datails
+    def get_details(self):
+        return self.__details
 
 
     def get_pixel_x(self):
@@ -337,8 +337,8 @@ class Map_information(object):
         self.__space_group_number = value
 
 
-    def set_datails(self, value):
-        self.__datails = value
+    def set_details(self, value):
+        self.__details = value
 
 
     def set_pixel_x(self, value):
@@ -477,8 +477,8 @@ class Map_information(object):
         del self.__space_group_number
 
 
-    def del_datails(self):
-        del self.__datails
+    def del_details(self):
+        del self.__details
 
 
     def del_pixel_x(self):
@@ -529,7 +529,7 @@ class Map_information(object):
     average = property(get_average, set_average, del_average, "average's docstring")
     std = property(get_std, set_std, del_std, "std's docstring")
     space_group_number = property(get_space_group_number, set_space_group_number, del_space_group_number, "space_group_number's docstring")
-    datails = property(get_datails, set_datails, del_datails, "datails's docstring")
+    details = property(get_details, set_details, del_details, "details's docstring")
     pixel_x = property(get_pixel_x, set_pixel_x, del_pixel_x, "pixel_x's docstring")
     pixel_y = property(get_pixel_y, set_pixel_y, del_pixel_y, "pixel_y's docstring")
     pixel_z = property(get_pixel_z, set_pixel_z, del_pixel_z, "pixel_z's docstring")
