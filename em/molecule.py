@@ -4,7 +4,7 @@ class Molecule():
 
     def __init__(self, rawHeader, data, size, start, grid_size, cell_dim, density_ranges, origin):
         self.rawHeader = rawHeader
-        self.data = data
+        self.array = data
         (self.ny, self.nx, self.nz) = size
         (self.nystart, self.nxstart, self.nzstart) = start
         (self.my, self.mx, self.mz) = grid_size
@@ -14,7 +14,7 @@ class Molecule():
 
     
     def data(self):
-        return self.data
+        return self.array
 
 
     def shape(self):
