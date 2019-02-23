@@ -35,7 +35,7 @@ CREATE TABLE map_information(
 	average FLOAT8 NOT NULL,
 	std FLOAT8 NOT NULL,
 	space_group_number INT NOT NULL,
-	datails TEXT NOT NULL,
+	details TEXT NOT NULL,
 	pixel_x FLOAT8 NOT NULL,
 	pixel_y FLOAT8 NOT NULL,
 	pixel_z FLOAT8 NOT NULL,
