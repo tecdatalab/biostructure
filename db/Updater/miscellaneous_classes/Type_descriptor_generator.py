@@ -9,23 +9,23 @@ Created on 22 feb. 2019
 directory = "../db/"
 directories_to_ignore = ["img","xml"]
 
-def clean_directories(directoys):
+def clean_directories(directories):
     for k in directories_to_ignore:
-        directoys.remove(k)
+        directories.remove(k)
         
     i = 0
-    while i < len(directoys):
-        if(directoys[i].find('.') != -1):
-            directoys.pop(i)
+    while i < len(directories):
+        if(directories[i].find('.') != -1):
+            directories.pop(i)
             i-=1
         else:
             i+=1
-    return directoys
+    return directories
 
-def name_for_directories(directoys,rootDir):
+def get_name_for_directories(directories,rootDir):
     result = []
     
-    for directory in directoys:
+    for directory in directories:
         for dirName, _subdirList, fileList in os.walk(rootDir+directory+"/"):
             if fileList != []:
                 add = dirName.replace(rootDir,"")
@@ -38,7 +38,7 @@ def get_type_descriptors():
     result = []
     
     clean = clean_directories(list(os.listdir(directory)))
-    names = name_for_directories(clean,directory)
+    names = get_name_for_directories(clean,directory)
     for i in names:
         add = Type_descriptor(0,i,i+" is a type of descriptor.")
         result.append(add)

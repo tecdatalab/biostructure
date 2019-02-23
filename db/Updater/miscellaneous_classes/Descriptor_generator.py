@@ -8,10 +8,10 @@ Created on 22 feb. 2019
 '''
 directory = "../db/"
 
-def get_descriptor(emd_id, descriptor):
+def get_descriptor(emd_id, typeDescriptor):
     result_temp = []
     
-    path = directory + descriptor.name
+    path = directory + typeDescriptor.name
     path = path.replace("->","/")
     for i in os.listdir(path):
         if (i.find(str(emd_id)) != -1):
@@ -20,11 +20,11 @@ def get_descriptor(emd_id, descriptor):
                 result_temp.append(line.replace('\n',''))
             file.close()
             
-    return Descriptor(emd_id, None, result_temp, descriptor.name)
+    return Descriptor(emd_id, None, result_temp, typeDescriptor.name)
     
-def get_descriptors(emd_id, descriptorList):
+def get_descriptors(emd_id, typeDescriptorList):
     result = []
-    for descriptor in descriptorList:
+    for descriptor in typeDescriptorList:
         result.append(get_descriptor(emd_id, descriptor))
     
     return result
