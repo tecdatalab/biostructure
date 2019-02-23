@@ -1,6 +1,6 @@
+import numpy as np
 
 class Molecule():
-
 
     def __init__(self, rawHeader, data, size, start, grid_size, cell_dim, density_ranges, origin):
         self.rawHeader = rawHeader
@@ -12,10 +12,16 @@ class Molecule():
         (self.dmin, self.dmax, self.dmean) = density_ranges
         (self.yorigin, self.xorigin, self.zorigin) = origin
 
+
+    def __eq__(self, other):
+        return (self.__class__ == other.__class__ and np.equal(self.data,other.data)
+                and self.shape == other.shape and self.start_point == other.start_point
+                and self.grid_size == other.grid_size and self.cell_dim == other.cell_dim
+                and self.density_range == other.density_range and self.origin == other.origin
+               )
     
     def data(self):
         return self.array
-
 
     def shape(self):
         return (self.ny, self.nx, self.nz)
