@@ -1,5 +1,6 @@
 import unittest
 import reader as rd
+import molecule as m
 
 
 class TestReader(unittest.TestCase):
@@ -12,8 +13,8 @@ class TestReader(unittest.TestCase):
 
     def test_read(self):
         myreader = rd.Reader('tests/EMD-2677.map')
-        otherreader = rd.Reader('tests/EMD-2677.map')
-        mymolecule = myreader.read()
-        othermolecule = otherreader.read()
-        self.assertEqual(mymolecule, othermolecule)
+        mym = myreader.read()
+        
+        othermolecule = m.Molecule(mym.rawHeader, mym.data(), mym.shape(), mym.start_point(), mym.grid_size(), mym.cell_dim(), mym.density_range(), mym.origin())
+        self.assertEqual(mym, othermolecule)
  
