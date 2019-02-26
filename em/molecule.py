@@ -14,11 +14,10 @@ class Molecule():
 
 
     def __eq__(self, other):
-        return (self.__class__ == other.__class__ and np.equal(self.data,other.data)
-                and self.shape == other.shape and self.start_point == other.start_point
-                and self.grid_size == other.grid_size and self.cell_dim == other.cell_dim
-                and self.density_range == other.density_range and self.origin == other.origin
-               )
+        if isinstance(other, self.__class__):
+            hasSameData = ~(~np.isclose(other.array, self.array)).sum()
+            return hasSameData
+        return False
     
     def data(self):
         return self.array
