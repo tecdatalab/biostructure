@@ -25,7 +25,6 @@ class Molecule():
     def shape(self):
         return (self.ny, self.nx, self.nz)
 
-
     def start_point(self):
         return (self.nystart, self.nxstart, self.nzstart)
 
