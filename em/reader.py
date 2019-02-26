@@ -142,6 +142,7 @@ class Reader():
             data+=struct.pack('f',voxel)        
         try:
             with open(filename, 'wb') as output:
+                #TODO: apropiate file header generation from attributes of class
                 output.write(molecule.rawHeader)
                 output.write(data)
         except IOError as err:
