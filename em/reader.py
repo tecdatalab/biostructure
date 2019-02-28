@@ -89,22 +89,22 @@ class Reader():
         my = self.read_header_word(self.mrc_header[32:36])
         mz = self.read_header_word(self.mrc_header[36:40])
         #Read cell dimensions
-        xlen = self.read_header_word(self.mrc_header[40:44])
-        ylen = self.read_header_word(self.mrc_header[44:48])
-        zlen = self.read_header_word(self.mrc_header[48:52])
+        xlen = self.read_header_float(self.mrc_header[40:44])
+        ylen = self.read_header_float(self.mrc_header[44:48])
+        zlen = self.read_header_float(self.mrc_header[48:52])
         #Skip 3 cell angle words and the 3 words corresponding to axes
         #Read density ranges
-        dmin = self.read_header_word(self.mrc_header[76:80])
-        dmax = self.read_header_word(self.mrc_header[80:84])
-        dmean = self.read_header_word(self.mrc_header[84:88])
+        dmin = self.read_header_float(self.mrc_header[76:80])
+        dmax = self.read_header_float(self.mrc_header[80:84])
+        dmean = self.read_header_float(self.mrc_header[84:88])
         #Read origin
-        xorigin = self.read_header_word(self.mrc_header[196:200])
-        yorigin = self.read_header_word(self.mrc_header[200:204])
-        zorigin = self.read_header_word(self.mrc_header[204:208])
+        xorigin = self.read_header_float(self.mrc_header[196:200])
+        yorigin = self.read_header_float(self.mrc_header[200:204])
+        zorigin = self.read_header_float(self.mrc_header[204:208])
         #Read densities
         densities = self.read_densities((nz, ny, nx))
         #Generate Molecule object with parameters
-        return molecule.Molecule(self.mrc_header, densities,  (ny, nx, nz), (nystart, nxstart, nzstart), (my, mx, mz), (ylen, xlen, zlen), (dmin, dmax, dmean), (yorigin, xorigin, zorigin))
+        return molecule.Molecule(self.mrc_header, densities,  (nz, ny, nx), (nzstart, nystart, nxstart), (mz, my, mx), (zlen, ylen, xlen), (dmin, dmax, dmean), (zorigin, yorigin, zorigin))
             
     def test_and_set_endianness(self):
         regular_nx = struct.unpack('<I', self.mrc_header[0:4])
@@ -116,6 +116,12 @@ class Reader():
             return struct.unpack('>I', buffer)[0]
         else: 
             return struct.unpack('<I', buffer)[0]
+
+    def read_header_float(self,buffer):
+        if self.is_endianness_reversed:
+            return struct.unpack('>f', buffer)[0]
+        else: 
+            return struct.unpack('<f', buffer)[0]
 
 
     def read_densities(self, shape):
@@ -133,8 +139,6 @@ class Reader():
         density_array =  np.frombuffer(self.mrc_data, dtype=dt)
         data_array = density_array.reshape(shape).astype(float)
         return data_array
-
-    
 
 '''
 filename = "../../emd_2847.map"
