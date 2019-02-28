@@ -134,21 +134,7 @@ class Reader():
         data_array = density_array.reshape(shape).astype(float)
         return data_array
 
-    # Write density map as ".map" format. Default write mode is set to mode 2. 
-    def write(self,filename, molecule):
-        #First generate buffer from array data in mode 2
-        data = bytearray()
-        for voxel in np.nditer(molecule.getDataArray()):
-            data+=struct.pack('f',voxel)        
-        try:
-            with open(filename, 'wb') as output:
-                #TODO: apropiate file header generation from attributes of class
-                output.write(molecule.rawHeader)
-                output.write(data)
-        except IOError as err:
-            print("Could not write file, error ", err)
-
-
+    
 
 '''
 filename = "../../emd_2847.map"
