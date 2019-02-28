@@ -24,7 +24,7 @@ class Writer():
                 header[64:76] = struct.pack('<III', 1, 2, 3)
                 header[76:88] = struct.pack('<fff', *molecule.density_range())
                 header[196:208] = struct.pack('<fff', *molecule.origin())
-                header[208:212] = struct.pack('<b', "MAP ")
+                header[208:212] = struct.pack('<s', bytes("MAP ", 'ascii'))
 
                 output.write(molecule.rawHeader)
                 output.write(data)
