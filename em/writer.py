@@ -15,7 +15,7 @@ class Writer():
             data+=struct.pack('f',voxel)        
         try:
             with open(filename, 'wb') as output:
-                header = bytearray(HEADER_SIZE)
+                header = bytearray(self.HEADER_SIZE)
                 header[0:12] = struct.pack('<III', *molecule.shape())
                 header[12:16] = struct.pack('<I', 2)
                 header[16:28] = struct.pack('<III', *molecule.start_point())
