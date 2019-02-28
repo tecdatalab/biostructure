@@ -19,6 +19,8 @@ class Molecule():
             return hasSameData
         return False
 
+    def set_origin(self, new_origin):
+        (self.zorigin, self.yorigin, self.xorigin) = new_origin
     
     def data(self):
         return self.array
