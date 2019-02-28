@@ -90,7 +90,7 @@ export class SearchFormComponent implements OnInit {
   }
 
   reset() {
-    this.searchForm.patchValue(this.defaultFormState);
+    this.searchForm.reset(this.defaultFormState);
     this.cbEmdb = true;
   }
 }
