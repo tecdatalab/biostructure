@@ -21,8 +21,10 @@ class Writer():
                 header[16:28] = struct.pack('<III', *molecule.start_point())
                 header[28:40] = struct.pack('<III', *molecule.grid_size())
                 header[40:52] = struct.pack('<fff', *molecule.cell_dim())
+                header[64:76] = struct.pack('<III', 1, 2, 3)
                 header[76:88] = struct.pack('<fff', *molecule.density_range())
                 header[196:208] = struct.pack('<fff', *molecule.origin())
+                header[208:212] = struct.pack('<b', "MAP ")
 
                 output.write(molecule.rawHeader)
                 output.write(data)
