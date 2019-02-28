@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectorRef } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
@@ -6,10 +6,21 @@ import { FormGroup } from '@angular/forms';
   templateUrl: './upload-em-map.component.html'
 })
 export class UploadEmMapComponent {
-
   @Input() parentForm: FormGroup;
 
-  constructor() { }
+  constructor(private cd: ChangeDetectorRef) {}
 
-
+  onFileChange(event: any) {
+    const reader = new FileReader();
+    if (event.target.files && event.target.files.length) {
+      const [file] = event.target.files;
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        this.parentForm.patchValue({
+          file: reader.result
+        });
+        this.cd.markForCheck();
+      };
+    }
+  }
 }

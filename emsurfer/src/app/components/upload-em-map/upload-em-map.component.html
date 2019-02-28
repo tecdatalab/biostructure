@@ -6,10 +6,10 @@
     <input
       id="file"
       placeholder="file"
-      formControlName="file"
       type="file"
       class="from-control-file border"
       accept=".map,.mrc"
+      (change)="onFileChange($event)"
     />
   </div>
   <a class="col-sm-2" href="#">An example file.</a>
