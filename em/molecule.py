@@ -52,19 +52,5 @@ class Molecule():
     def origin(self):
         return (self.zorigin, self.yorigin, self.xorigin)
 
-    def mean(self):
-        return np.mean(self.array)
-    
-    def std(self):
-        return np.std(self.array)
-
-    def min(self):
-        return np.min(self.array)
-    
-    def max(self):
-        return np.max(self.array)
-
-    def rms(self):
-        return np.sqrt(np.mean(np.square(self.array)))
 
 
