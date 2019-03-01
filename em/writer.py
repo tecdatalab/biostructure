@@ -26,10 +26,11 @@ class Writer():
 
 
 
-
+'''
 import reader
 filename = "tests/EMD-2677.map"
 myreader = reader.Reader(filename)
 D = myreader.read()
 w = Writer()
 w.write("emd_2677_2.map", D)
+'''
