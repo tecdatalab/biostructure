@@ -21,6 +21,8 @@ export class UploadEmMapComponent {
         });
         this.cd.markForCheck();
       };
+    } else {
+      this.parentForm.get('file').setValue(null);
     }
   }
 }

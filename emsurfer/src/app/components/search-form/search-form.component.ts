@@ -59,36 +59,6 @@ export class SearchFormComponent implements OnInit {
     this.router.navigateByUrl(params);
   }
 
-  cbEmdbChange() {
-    this.cbEmdb = !this.cbEmdb;
-    if (this.cbEmdb) {
-      this.searchForm
-        .get('query')
-        .get('emdb_id')
-        .setValidators([
-          Validators.required,
-          Validators.minLength(4),
-          Validators.pattern('^[0-9]*$')
-        ]);
-      this.searchForm.patchValue({
-        query: {
-          em_map: {
-            file: null
-          }
-        }
-      });
-    } else {
-      this.searchForm
-        .get('query')
-        .get('emdb_id')
-        .setValidators(null);
-    }
-    this.searchForm
-      .get('query')
-      .get('emdb_id')
-      .updateValueAndValidity();
-  }
-
   reset() {
     this.searchForm.reset(this.defaultFormState);
     this.cbEmdb = true;
