@@ -25,3 +25,19 @@ class TestReader(unittest.TestCase):
     def test_littleEndienness(self):
         readerLittle = rd.Reader('tests/EMD-2627_little.map')
         self.assertTrue(~readerLittle.is_endianness_reversed)
+
+    '''TODO: Test correct read for each mode
+    def test_mode0(self):
+        return
+
+    
+    def test_mode1(self):
+        return
+
+    def test_mode2(self):
+        return
+
+
+    '''
+
+        
