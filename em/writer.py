@@ -15,18 +15,11 @@ class Writer():
             data+=struct.pack('f',voxel)        
         try:
             with open(filename, 'wb') as output:
-                header = bytearray(self.HEADER_SIZE)
-                header[0:12] = struct.pack('<III', *molecule.shape())
-                header[12:16] = struct.pack('<I', 2)
-                header[16:28] = struct.pack('<III', *molecule.start_point())
-                header[28:40] = struct.pack('<III', *molecule.grid_size())
-                header[40:52] = struct.pack('<fff', *molecule.cell_dim())
-                header[64:76] = struct.pack('<III', 1, 2, 3)
+                header = molecule.rawHeader
                 header[76:88] = struct.pack('<fff', *molecule.density_range())
                 header[196:208] = struct.pack('<fff', *molecule.origin())
-                header[208:212] = struct.pack('<s', bytes("MAP ", 'ascii'))
 
-                output.write(molecule.rawHeader)
+                output.write(header)
                 output.write(data)
         except IOError as err:
             print("Could not write file, error ", err)
