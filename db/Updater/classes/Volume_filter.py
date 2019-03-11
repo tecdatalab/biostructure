@@ -3,6 +3,7 @@ Created on 22 feb. 2019
 
 @author: luis98
 '''
+from psycopg2 import sql
 
 class Volume_filter(object):
     '''
@@ -14,6 +15,17 @@ class Volume_filter(object):
     def __init__(self, id, name):
         self.__id = id
         self.__name = name
+        
+        
+    def insert_db(self, cur):
+        cur.execute(sql.SQL("INSERT INTO volume_filter(id,name) VALUES (%s,%s);")
+        ,[self.__id,self.__name])
+        
+
+    def update_db(self, cur):
+        cur.execute(sql.SQL("UPDATE volume_filter SET name = %s WHERE id = %s;")
+        ,[self.__name,self.__id])
+
 
     def get_id(self):
         return self.__id
@@ -37,6 +49,11 @@ class Volume_filter(object):
 
     def del_name(self):
         del self.__name
+    
+        
+    def __eq__(self, descriptor):        
+        return self.id == descriptor.id \
+           and self.name == descriptor.name
 
     id = property(get_id, set_id, del_id, "id's docstring")
     name = property(get_name, set_name, del_name, "name's docstring")
