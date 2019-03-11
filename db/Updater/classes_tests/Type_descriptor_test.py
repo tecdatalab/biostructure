@@ -37,8 +37,7 @@ def test_3_insert_db(postgresql):
     types_descriptors = create_type_descriptors()
     insert_type_descriptors(postgresql,types_descriptors)
     result = get_type_descriptors(postgresql)
-    for i in range(len(result)):
-        assert result[i] == types_descriptors[i]
+    assert result[0] == Type_descriptor(1,"Name 1" ,"Descripcion 1")
         
 def test_4_update_db(postgresql):
     
@@ -46,14 +45,12 @@ def test_4_update_db(postgresql):
     types_descriptors = create_type_descriptors()
     insert_type_descriptors(postgresql,types_descriptors)
     
-    for i in types_descriptors:
-        i.name = i.name + " update"
-        i.description = i.description + " update"
+    types_descriptors[0].name = "Name 1 update"
+    types_descriptors[0].name = "Descripcion 1 update"
     
     update_type_descriptors(postgresql, types_descriptors)
     result = get_type_descriptors(postgresql)
-    for i in range(len(result)):
-        assert result[i] == types_descriptors[i]
+    assert result[0] == Type_descriptor(1,"Name 1 update" ,"Descripcion 1 update")
     
         
 def create_type_descriptor_table(connection):
@@ -69,8 +66,7 @@ def create_type_descriptor_table(connection):
     
 def create_type_descriptors():
     resultado = []
-    for i in range(5):
-        resultado.append(Type_descriptor(i+1,"Name "+str(i) ,"Descripcion "+str(i)))
+    resultado.append(Type_descriptor(1,"Name 1" ,"Descripcion 1"))
     return resultado
 
 def insert_type_descriptors(connection, type_descriptors):
