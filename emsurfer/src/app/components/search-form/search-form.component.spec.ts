@@ -59,23 +59,16 @@ describe('SearchFormComponent', () => {
     fixture.detectChanges();
   });
 
-  it('check validators of searchform', async(() => {
-    component.searchForm.get('query').get('emdb_id').setValue(null);
-    expect(component.searchForm.valid).toBeFalsy();
-    component.searchForm.get('query').get('emdb_id').setValue('188');
-    expect(component.searchForm.valid).toBeFalsy();
-    component.searchForm.get('query').get('emdb_id').setValue('188A');
-    expect(component.searchForm.valid).toBeFalsy();
-  }));
-
   it('simulate button click: should redirect to query url on submit', async(
     inject([Router, Location], (router: Router, location: Location) => {
       fixture.debugElement.query(By.css('button')).nativeElement.click();
       fixture.whenStable().then(() => {
         const query = component.searchForm.get('query').get('emdb_id').value;
         const filter = component.searchForm.get('volume_filter').value;
-        expect(location.path()).toEqual('/query/' + query + '/' + filter + '/' + null + '/' + null);
+        expect(location.path()).toEqual(
+          '/query/' + query + '/' + filter + '/' + null + '/' + null
+        );
       });
     })
   ));
-})
+});
