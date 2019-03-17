@@ -33,7 +33,12 @@ class Update(object):
 
 
     def set_last_update(self, value):
-        self.__last_update = date(value[0],value[1],value[2])
+        if isinstance(value, datetime.date):
+            self.__last_update = value
+        elif value == None:
+            self.__last_update = None
+        else:
+            self.__last_update = date(value[0],value[1],value[2])
 
 
     def del_last_update(self):

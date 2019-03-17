@@ -46,7 +46,7 @@ def test_4_update_db(postgresql):
     insert_type_descriptors(postgresql,types_descriptors)
     
     types_descriptors[0].name = "Name 1 update"
-    types_descriptors[0].name = "Descripcion 1 update"
+    types_descriptors[0].description = "Descripcion 1 update"
     
     update_type_descriptors(postgresql, types_descriptors)
     result = get_type_descriptors(postgresql)
