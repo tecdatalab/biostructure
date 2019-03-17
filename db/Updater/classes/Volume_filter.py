@@ -51,9 +51,9 @@ class Volume_filter(object):
         del self.__name
     
         
-    def __eq__(self, descriptor):        
-        return self.id == descriptor.id \
-           and self.name == descriptor.name
+    def __eq__(self, volume_filter):        
+        return self.id == volume_filter.id \
+           and self.name == volume_filter.name
 
     id = property(get_id, set_id, del_id, "id's docstring")
     name = property(get_name, set_name, del_name, "name's docstring")
