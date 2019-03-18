@@ -7,7 +7,7 @@ from classes.Representation import Representation
 import pytest
 from pytest_postgresql import factories # importa la habilidad de usar postgresql
 
-representation= Representation(None,None)
+representation = Representation(None,None)
 
 def test_0_set_get_id():
     
