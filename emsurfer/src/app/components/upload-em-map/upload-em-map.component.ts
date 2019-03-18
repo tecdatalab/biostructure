@@ -17,11 +17,13 @@ export class UploadEmMapComponent {
       reader.readAsDataURL(file);
       reader.onload = () => {
         this.parentForm.patchValue({
+          filename: file.name,
           file: reader.result
         });
         this.cd.markForCheck();
       };
     } else {
+      this.parentForm.get('filename').setValue(null);
       this.parentForm.get('file').setValue(null);
     }
   }

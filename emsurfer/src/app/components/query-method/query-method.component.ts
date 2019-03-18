@@ -6,14 +6,13 @@ import { FormGroup, Validators } from '@angular/forms';
   templateUrl: './query-method.component.html'
 })
 export class QueryMethodComponent {
-
   @Input() parentForm: FormGroup;
   cbEmdb: boolean;
   constructor() {
     this.cbEmdb = true;
   }
 
-  cbEmdbChange(){
+  cbEmdbChange() {
     this.cbEmdb = !this.cbEmdb;
     if (this.cbEmdb) {
       this.parentForm
@@ -28,20 +27,20 @@ export class QueryMethodComponent {
         .get('file')
         .setValidators(null);
     } else {
-      this.parentForm
-        .get('emdb_id')
-        .setValidators(null);
+      this.parentForm.get('emdb_id').setValidators(null);
       this.parentForm
         .get('em_map')
         .get('file')
         .setValidators(Validators.required);
     }
-    this.parentForm
-      .get('emdb_id')
-      .updateValueAndValidity();
+    this.parentForm.get('emdb_id').updateValueAndValidity();
     this.parentForm
       .get('em_map')
       .get('file')
       .updateValueAndValidity();
+
+    this.parentForm.patchValue({
+      search_by_emdb_id: this.cbEmdb
+    });
   }
 }

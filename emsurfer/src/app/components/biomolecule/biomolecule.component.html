@@ -1,0 +1,16 @@
+<a class="text-warning" href="#"
+  ><strong
+    ><u>EMD-{{ biomoleculeComparison.biomolecule.emdb_id }}</u></strong
+  ></a
+>
+<p>{{ biomoleculeComparison.biomolecule.name }}</p>
+<img class="img-fluid" [src]="biomoleculeComparison.biomolecule.img_url" />
+<p class="text-primary">
+  <strong>Euc. Distance: {{ biomoleculeComparison.euc_distance }} </strong>
+</p>
+<p class="text-primary">
+  <strong>Ratio of Volume: {{ biomoleculeComparison.ratio_of_volume }}</strong>
+</p>
+<p class="text-primary">
+  <strong>Resolution: {{ biomoleculeComparison.resolution }}</strong>
+</p>
