@@ -1,8 +1,6 @@
 import { ModuleWithProviders } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { SearchFormComponent } from './components/search-form/search-form.component';
-import { HomeComponent } from './components/home/home.component';
-import { BiomoleculesTableComponent } from './components/biomolecules-table/biomolecules-table.component';
 import { SearchResultComponent } from './components/search-result/search-result.component';
 
 export const router: Routes = [
@@ -16,11 +14,11 @@ export const router: Routes = [
     component: SearchFormComponent
   },
   {
-    path: 'query/:id/:volume/:min/:max',
-    component: HomeComponent
+    path: 'result/:emdb_id/:countour_representation/:volume_filter/:min_res/:max_res',
+    component: SearchResultComponent
   },
   {
-    path: 'view',
+    path: 'result/:filename/:countour_level/:countour_representation/:volume_filter/:min_res/:max_res',
     component: SearchResultComponent
   }
 ];
