@@ -5,7 +5,7 @@ Created on 3 mar. 2019
 '''
 from classes.Type_descriptor import Type_descriptor
 import pytest
-from pytest_postgresql import factories # importa la habilidad de usar postgresql
+from pytest_postgresql import factories # Import the ability to use postgresql
 
 type_descriptor = Type_descriptor(None,None,None)
 

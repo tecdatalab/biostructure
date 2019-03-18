@@ -5,7 +5,7 @@ Created on 10 mar. 2019
 '''
 from classes.Volume_filter import Volume_filter
 import pytest
-from pytest_postgresql import factories # importa la habilidad de usar postgresql
+from pytest_postgresql import factories # Import the ability to use postgresql
 
 volume_filter = Volume_filter(None,None)
 

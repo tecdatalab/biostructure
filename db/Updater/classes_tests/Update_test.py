@@ -5,7 +5,7 @@ Created on 17 mar. 2019
 '''
 from classes.Update import Update
 import pytest
-from pytest_postgresql import factories # importa la habilidad de usar postgresql
+from pytest_postgresql import factories # Import the ability to use postgresql
 import time
 from datetime import date
 

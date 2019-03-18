@@ -5,7 +5,7 @@ Created on 18 mar. 2019
 '''
 from classes.Pdb_entry import Pdb_entry
 import pytest
-from pytest_postgresql import factories # importa la habilidad de usar postgresql
+from pytest_postgresql import factories # Import the ability to use postgresql
 
 pdb_entry = Pdb_entry(None,None)
 

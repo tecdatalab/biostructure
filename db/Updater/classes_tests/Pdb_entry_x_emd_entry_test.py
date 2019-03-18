@@ -6,7 +6,7 @@ Created on 18 mar. 2019
 
 from classes.Pdb_entry_x_emd_entry import Pdb_entry_x_emd_entry
 import pytest
-from pytest_postgresql import factories # importa la habilidad de usar postgresql
+from pytest_postgresql import factories # Import the ability to use postgresql
 
 pdb_entry_x_emd_entry = Pdb_entry_x_emd_entry(None,None)
 

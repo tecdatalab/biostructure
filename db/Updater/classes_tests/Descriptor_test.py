@@ -6,7 +6,7 @@ Created on 10 mar. 2019
 
 from classes.Descriptor import Descriptor
 import pytest
-from pytest_postgresql import factories # importa la habilidad de usar postgresql
+from pytest_postgresql import factories # Import the ability to use postgresql
 
 descriptor = Descriptor(None,None,None)
 
