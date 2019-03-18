@@ -1,0 +1,36 @@
+<h5 class="text-primary">
+  Query entry (<a class="text-warning" href="#"
+    ><u>Download text results here</u></a
+  >)
+</h5>
+<br />
+<div class="row">
+  <div class="col-3 border border-dark">
+    <a class="text-warning" href="#"
+      ><strong
+        ><u>EMD-{{ biomolecule.emdb_id }}</u></strong
+      ></a
+    >
+    <p>{{ biomolecule.name }}</p>
+    <img class="img-fluid" [src]="biomolecule.img_url" />
+  </div>
+  <div class="col-6 border border-dark">
+    <div class="align-self-end">
+      <br />
+      <canvas #canvas>{{ chart }}</canvas>
+    </div>
+  </div>
+  <div class="col-3 border border-dark overflow-auto">
+    <label><strong>Descriptors</strong></label>
+    <app-zernike-descriptors-list
+      [values]="values"
+      [descriptors]="descriptors"
+    ></app-zernike-descriptors-list>
+  </div>
+</div>
+<br />
+<h5 class="text-primary">
+  Retrieval results with similar 3D surface (Volume Filter: on)
+</h5>
+<br />
+<app-biomolecules-table [results]="results"></app-biomolecules-table>

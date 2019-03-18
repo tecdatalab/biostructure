@@ -1,0 +1,19 @@
+<div class="table-wrapper-scroll-y my-custom-scrollbar">
+  <table class="table table-bordered mb-0">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let value of values; let i = index">
+        <th>{{ descriptors[i] }}</th>
+        <td>{{ value }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<button type="button" class="btn btn-dark btn-block" (click)="cpyToClipboard()">
+  Copy to clipboard
+</button>
