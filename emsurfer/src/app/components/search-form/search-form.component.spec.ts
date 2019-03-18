@@ -14,7 +14,6 @@ import { EmdbIdInputComponent } from '../emdb-id-input/emdb-id-input.component';
 import { UploadEmMapComponent } from '../upload-em-map/upload-em-map.component';
 import { QueryMethodComponent } from '../query-method/query-method.component';
 import { ResolutionFilterComponent } from '../resolution-filter/resolution-filter.component';
-import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { Location, CommonModule } from '@angular/common';
 import { Component } from '@angular/core';

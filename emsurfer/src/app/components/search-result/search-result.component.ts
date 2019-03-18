@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Chart } from 'chart.js';
 import { BiomoleculeSearchService } from '../../services/biomolecule-search.service';
 import { Biomolecule } from 'src/app/models/biomolecule';
@@ -14,21 +15,31 @@ export class SearchResultComponent implements OnInit {
   chart: Chart;
   biomolecule: Biomolecule;
   results: BiomoleculeComparison[];
+  volumeFilter: string;
   descriptors = [];
   values = [];
 
-  constructor(private biomoleculeSearchService: BiomoleculeSearchService) { }
+  constructor(
+    private biomoleculeSearchService: BiomoleculeSearchService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
-    this.biomolecule = this.biomoleculeSearchService.getBiomolecule(1413);
-    this.values = this.biomoleculeSearchService.getZernikeDescriptors(1413);
+    const emdbId = +this.route.snapshot.paramMap.get('emdb_id');
+    const contourRepresentation = +this.route.snapshot.paramMap.get('contour_representation');
+    const minRes = +this.route.snapshot.paramMap.get('min_res');
+    const maxRes = +this.route.snapshot.paramMap.get('max_res');
+    this.volumeFilter = this.route.snapshot.paramMap.get('volume_filter');
+    this.biomolecule = this.biomoleculeSearchService.getBiomolecule(emdbId);
+    this.values = this.biomoleculeSearchService.getZernikeDescriptors(emdbId, contourRepresentation);
     this.descriptors = Array.from(
       new Array(this.values.length),
       (val, index) => index + 1
     ); // [1,2,3...N]
     const context = this.canvasElementRef.nativeElement;
     this.initChart(context);
-    this.results = this.biomoleculeSearchService.getSimilarBioMolecules(1413);
+    this.results = this.biomoleculeSearchService.getSimilarBioMolecules(emdbId, (this.volumeFilter === 'On'), minRes, maxRes);
   }
 
   private initChart(context: ElementRef) {
