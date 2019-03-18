@@ -18,8 +18,8 @@ class Representation(object):
        
         
     def insert_db(self, cur):
-        cur.execute(sql.SQL("INSERT INTO representation(id,name) VALUES (%s,%s);")
-        ,[self.__id,self.__name])
+        cur.execute(sql.SQL("INSERT INTO representation(id,name) VALUES (DEFAULT,%s);")
+        ,[self.__name])
         
 
     def update_db(self, cur):
