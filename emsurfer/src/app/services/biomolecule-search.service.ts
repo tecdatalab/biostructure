@@ -16,11 +16,16 @@ export class BiomoleculeSearchService {
     return newBiomolecule;
   }
 
-  getZernikeDescriptors(emdbId: number) {
+  getZernikeDescriptors(emdbId: number, contourRepresentation: number) {
     return [1, 2, 3, 4, 3, 10, 0];
   }
 
-  getSimilarBioMolecules(emdbId: number) {
+  getSimilarBioMolecules(
+    emdbId: number,
+    isVolumeFilterOn: boolean,
+    minRes: number,
+    maxRes: number
+  ) {
     const results = [];
     for (let i = 0; i < 5; i++) {
       const newBiomolecule = new BiomoleculeComparison();
