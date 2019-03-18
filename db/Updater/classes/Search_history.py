@@ -4,6 +4,9 @@ Created on 22 feb. 2019
 @author: luis98
 '''
 
+from datetime import datetime
+from psycopg2 import sql
+
 class Search_history(object):
     '''
     classdocs
@@ -22,6 +25,10 @@ class Search_history(object):
     def __init__(self, id, date_time, ip, emd_entry_id, name_file, counter_level, representation_id, volume_filter_id, resolution_filter_min, resolution_filter_max):
         self.__id = id
         self.__date_time = date_time
+        if isinstance(date_time, datetime):
+            self.__date_time = date_time
+        else:
+            self.__date_time = None
         self.__ip = ip
         self.__emd_entry_id = emd_entry_id
         self.__name_file = name_file
@@ -30,6 +37,17 @@ class Search_history(object):
         self.__volume_filter_id = volume_filter_id
         self.__resolution_filter_min = resolution_filter_min
         self.__resolution_filter_max = resolution_filter_max
+    
+    
+    def insert_db(self, cur):
+        cur.execute(sql.SQL("INSERT INTO search_history(id,date_time,ip,emd_entry_id,name_file,counter_level,representation_id,volume_filter_id,resolution_filter_min,resolution_filter_max) VALUES (DEFAULT,%s,%s,%s,%s,%s,%s,%s,%s,%s);")
+        ,[self.__date_time,self.__ip,self.__emd_entry_id,self.__name_file,self.__counter_level,self.__representation_id,self.__volume_filter_id,self.__resolution_filter_min,self.__resolution_filter_max])
+        
+        
+    def update_db(self, cur):
+        cur.execute(sql.SQL("UPDATE search_history SET date_time = %s, ip = %s, emd_entry_id = %s, name_file = %s, counter_level = %s, representation_id = %s, volume_filter_id = %s, resolution_filter_min = %s, resolution_filter_max = %s WHERE id  = %s;")
+        ,[self.__date_time,self.__ip,self.__emd_entry_id,self.__name_file,self.__counter_level,self.__representation_id,self.__volume_filter_id,self.__resolution_filter_min,self.__resolution_filter_max,self.__id])
+        
 
     def get_id(self):
         return self.__id
@@ -76,7 +94,8 @@ class Search_history(object):
 
 
     def set_date_time(self, value):
-        self.__date_time = value
+        if isinstance(value, datetime):
+            self.__date_time = value
 
 
     def set_ip(self, value):
@@ -149,6 +168,19 @@ class Search_history(object):
 
     def del_resolution_filter_max(self):
         del self.__resolution_filter_max
+    
+    
+    def __eq__(self, search_history):        
+        return self.id == search_history.id \
+           and self.date_time == search_history.date_time \
+           and self.ip == search_history.ip \
+           and self.emd_entry_id == search_history.emd_entry_id \
+           and self.name_file == search_history.name_file \
+           and self.counter_level == search_history.counter_level \
+           and self.representation_id == search_history.representation_id \
+           and self.volume_filter_id == search_history.volume_filter_id \
+           and self.resolution_filter_min == search_history.resolution_filter_min \
+           and self.resolution_filter_max == search_history.resolution_filter_max
 
     id = property(get_id, set_id, del_id, "id's docstring")
     date_time = property(get_date_time, set_date_time, del_date_time, "date_time's docstring")
