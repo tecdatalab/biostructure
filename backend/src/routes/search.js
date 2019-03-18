@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 router.get('/', (req, res, next) => {
-    res.send('connection to the server');
+    res.send('search');
 });
 
 module.exports = router
