@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationExtras } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -49,26 +49,31 @@ export class SearchFormComponent implements OnInit {
   }
 
   submitHandler() {
-
     if (this.searchForm.get('query').get('search_by_emdb_id').value) {
-    const url =
-      'result/' +
-      this.searchForm.get('query').get('emdb_id').value +
-      '/' +
-      this.searchForm.get('contour_representation').value +
-      '/' +
-      this.searchForm.get('volume_filter').value +
-      '/' +
-      this.searchForm.get('resolution_filter').get('min').value +
-      '/' +
-      this.searchForm.get('resolution_filter').get('max').value;
-    this.router.navigateByUrl(url);
+      const url =
+        'result/' +
+        this.searchForm.get('query').get('emdb_id').value +
+        '/' +
+        this.searchForm.get('contour_representation').value +
+        '/' +
+        this.searchForm.get('volume_filter').value +
+        '/' +
+        this.searchForm.get('resolution_filter').get('min').value +
+        '/' +
+        this.searchForm.get('resolution_filter').get('max').value;
+      this.router.navigateByUrl(url);
     } else {
       const url =
         'result/' +
-        this.searchForm.get('query').get('em_map').get('filename').value +
+        this.searchForm
+          .get('query')
+          .get('em_map')
+          .get('filename').value +
         '/' +
-        this.searchForm.get('query').get('em_map').get('contour_level').value +
+        this.searchForm
+          .get('query')
+          .get('em_map')
+          .get('contour_level').value +
         '/' +
         this.searchForm.get('contour_representation').value +
         '/' +
