@@ -21,17 +21,17 @@ def test_1_insert_db(postgresql):
     create_update_table(postgresql)
     updates = create_updates()
     insert_updates(postgresql,updates)
-    result = get_volume_filters(postgresql)
+    result = get_updates(postgresql)
     assert result[0] == Update((2018,2,14))
 
-def get_volume_filters(connection):
+def get_updates(connection):
     
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM update")
-    type_descriptors = [Update(record[0]) for record in cursor]
+    updates = [Update(record[0]) for record in cursor]
     cursor.close()
 
-    return type_descriptors
+    return updates
 
 def insert_updates(connection, updates):
     cursor = connection.cursor()

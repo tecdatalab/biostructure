@@ -46,10 +46,10 @@ def get_pdb_entrys(connection):
     
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM pdb_entry")
-    type_descriptors = [Pdb_entry(record[0],record[1]) for record in cursor]
+    pdb_entrys = [Pdb_entry(record[0],record[1]) for record in cursor]
     cursor.close()
 
-    return type_descriptors
+    return pdb_entrys
 
 def update_pdb_entrys(connection, pdb_entrys):
     cursor = connection.cursor()

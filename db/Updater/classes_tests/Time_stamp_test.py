@@ -64,10 +64,10 @@ def get_time_stamps(connection):
     
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM time_stamp")
-    type_descriptors = [Time_stamp(record[0],record[1],record[2],record[3],record[4]) for record in cursor]
+    time_stamps = [Time_stamp(record[0],record[1],record[2],record[3],record[4]) for record in cursor]
     cursor.close()
 
-    return type_descriptors
+    return time_stamps
 
 def update_time_stamps(connection, time_stamps):
     cursor = connection.cursor()

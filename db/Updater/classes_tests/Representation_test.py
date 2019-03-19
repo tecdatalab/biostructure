@@ -46,10 +46,10 @@ def get_representations(connection):
     
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM representation")
-    type_descriptors = [Representation(record[0],record[1]) for record in cursor]
+    representations = [Representation(record[0],record[1]) for record in cursor]
     cursor.close()
 
-    return type_descriptors
+    return representations
 
 def update_representations(connection, representations):
     cursor = connection.cursor()

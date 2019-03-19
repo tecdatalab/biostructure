@@ -333,7 +333,7 @@ def get_emd_entrys(connection):
     
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM emd_entry em INNER JOIN map_information map ON (em.map_information_id = map.id)")
-    descriptors = [Emd_entry(record[0],record[1],record[2],record[3],record[4],
+    emd_entrys = [Emd_entry(record[0],record[1],record[2],record[3],record[4],
                              record[5],record[6],record[7],record[8],record[10],
                              record[11],record[12],record[13],record[14],record[15],
                              record[16],record[17],record[18],record[19],record[20],
@@ -344,7 +344,7 @@ def get_emd_entrys(connection):
                              record[41],record[42],record[43]) for record in cursor]
     cursor.close()
 
-    return descriptors
+    return emd_entrys
     
 def insert_emd_entrys(connection, emd_entrys):
     cursor = connection.cursor()

@@ -92,10 +92,10 @@ def get_search_historys(connection):
     
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM search_history")
-    type_descriptors = [Search_history(record[0],record[1],record[2],record[3],record[4],record[5],record[6],record[7],record[8],record[9]) for record in cursor]
+    search_historys = [Search_history(record[0],record[1],record[2],record[3],record[4],record[5],record[6],record[7],record[8],record[9]) for record in cursor]
     cursor.close()
 
-    return type_descriptors
+    return search_historys
 
 def update_search_historys(connection, search_historys):
     cursor = connection.cursor()

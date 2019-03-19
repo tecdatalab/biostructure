@@ -47,10 +47,10 @@ def get_volume_filters(connection):
     
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM volume_filter")
-    type_descriptors = [Volume_filter(record[0],record[1]) for record in cursor]
+    volume_filters = [Volume_filter(record[0],record[1]) for record in cursor]
     cursor.close()
 
-    return type_descriptors
+    return volume_filters
 
 def update_volume_filters(connection, volume_filters):
     cursor = connection.cursor()
