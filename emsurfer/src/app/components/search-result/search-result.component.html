@@ -5,7 +5,7 @@
 </h5>
 <br />
 <div class="row">
-  <div class="col-3 border border-dark">
+  <div *ngIf="isSearchById" class="col-3 border border-dark">
     <a class="text-warning" href="#"
       ><strong
         ><u>EMD-{{ biomolecule.emdb_id }}</u></strong
@@ -14,6 +14,12 @@
     <p>{{ biomolecule.name }}</p>
     <img class="img-fluid" [src]="biomolecule.img_url" />
   </div>
+  <div class="col-3 border border-dark" [hidden]="isSearchById">
+    <p class="text-primary" href="#"><strong>User uploaded query</strong></p>
+    <p><strong>File uploaded:</strong></p>
+    <p>{{ filename }}</p>
+  </div>
+
   <div class="col-6 border border-dark">
     <div class="align-self-end">
       <br />
@@ -30,7 +36,7 @@
 </div>
 <br />
 <h5 class="text-primary">
-  Retrieval results with similar 3D surface (Volume Filter: {{volumeFilter}})
+  Retrieval results with similar 3D surface (Volume Filter: {{ volumeFilter }})
 </h5>
 <br />
 <app-biomolecules-table [results]="results"></app-biomolecules-table>

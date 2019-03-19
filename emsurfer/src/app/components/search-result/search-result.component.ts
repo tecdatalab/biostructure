@@ -14,8 +14,10 @@ export class SearchResultComponent implements OnInit {
   @ViewChild('canvas') canvasElementRef: ElementRef;
   chart: Chart;
   biomolecule: Biomolecule;
+  filename: string;
   results: BiomoleculeComparison[];
   volumeFilter: string;
+  isSearchById: boolean;
   descriptors = [];
   values = [];
 
@@ -27,19 +29,38 @@ export class SearchResultComponent implements OnInit {
 
   ngOnInit() {
     const emdbId = +this.route.snapshot.paramMap.get('emdb_id');
-    const contourRepresentation = +this.route.snapshot.paramMap.get('contour_representation');
+    const contourRepresentation = +this.route.snapshot.paramMap.get(
+      'contour_representation'
+    );
     const minRes = +this.route.snapshot.paramMap.get('min_res');
     const maxRes = +this.route.snapshot.paramMap.get('max_res');
     this.volumeFilter = this.route.snapshot.paramMap.get('volume_filter');
-    this.biomolecule = this.biomoleculeSearchService.getBiomolecule(emdbId);
-    this.values = this.biomoleculeSearchService.getZernikeDescriptors(emdbId, contourRepresentation);
+    if (emdbId) {
+      this.biomolecule = this.biomoleculeSearchService.getBiomolecule(emdbId);
+      this.values = this.biomoleculeSearchService.getZernikeDescriptors(
+        emdbId,
+        contourRepresentation
+      );
+      this.isSearchById = true;
+    } else {
+      this.filename = this.route.snapshot.paramMap.get('filename');
+      this.values = this.biomoleculeSearchService.getZernikeDescriptors(
+        emdbId,
+        contourRepresentation
+      );
+    }
     this.descriptors = Array.from(
       new Array(this.values.length),
       (val, index) => index + 1
     ); // [1,2,3...N]
     const context = this.canvasElementRef.nativeElement;
     this.initChart(context);
-    this.results = this.biomoleculeSearchService.getSimilarBioMolecules(emdbId, (this.volumeFilter === 'On'), minRes, maxRes);
+    this.results = this.biomoleculeSearchService.getSimilarBioMolecules(
+      emdbId,
+      this.volumeFilter === 'On',
+      minRes,
+      maxRes
+    );
   }
 
   private initChart(context: ElementRef) {
