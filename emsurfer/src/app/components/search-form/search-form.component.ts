@@ -8,11 +8,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class SearchFormComponent implements OnInit {
   searchForm: FormGroup;
-  defaultFormState: any;
-  cbEmdb: boolean;
+  defaultFormState: string;
 
   constructor(private fb: FormBuilder, private router: Router) {
-    this.cbEmdb = true;
   }
 
   ngOnInit() {
@@ -88,6 +86,5 @@ export class SearchFormComponent implements OnInit {
 
   reset() {
     this.searchForm.reset(this.defaultFormState);
-    this.cbEmdb = true;
   }
 }
