@@ -12,6 +12,7 @@ export class BiomoleculeSearchService {
     const newBiomolecule = new Biomolecule();
     newBiomolecule.emdb_id = emdbId;
     newBiomolecule.img_url = '../../../assets/img/test_img.gif';
+    newBiomolecule.pdb_url = 'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-1413'
     newBiomolecule.name = 'Lorem ipsum et doloren';
     return newBiomolecule;
   }
@@ -32,6 +33,7 @@ export class BiomoleculeSearchService {
       newBiomolecule.biomolecule = new Biomolecule();
       newBiomolecule.biomolecule.emdb_id = emdbId;
       newBiomolecule.biomolecule.img_url = '../../../assets/img/test_img.gif';
+      newBiomolecule.biomolecule.pdb_url = 'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-1413'
       newBiomolecule.biomolecule.name = 'Lorem ipsum et doloren';
       newBiomolecule.euc_distance = 1;
       newBiomolecule.ratio_of_volume = 0.5;
