@@ -36,9 +36,9 @@ CREATE TABLE map_information(
 	std FLOAT8 NOT NULL,
 	space_group_number INT NOT NULL,
 	details TEXT NOT NULL,
-	pixel_x FLOAT8 NOT NULL,
-	pixel_y FLOAT8 NOT NULL,
-	pixel_z FLOAT8 NOT NULL,
+	pixel_x JSON NOT NULL,
+	pixel_y JSON NOT NULL,
+	pixel_z JSON NOT NULL,
 	countour_level FLOAT8 NOT NULL,
 	annotation_details TEXT
 );

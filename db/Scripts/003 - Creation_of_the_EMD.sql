@@ -15,7 +15,7 @@ CREATE TABLE type_descriptor(
 COMMENT ON TABLE type_descriptor IS 'Stores the different types of existing descriptors.';
 
 CREATE TABLE emd_entry(
-	id INT PRIMARY KEY,
+	id INT PRIMARY KEY, /* The id corresponds to the 4 digits of EMDB */
 	full_name TEXT NOT NULL,
 	acronym TEXT NOT NULL,
 	volume FLOAT8 NOT NULL,
