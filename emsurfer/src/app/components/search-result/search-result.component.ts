@@ -62,6 +62,7 @@ export class SearchResultComponent implements OnInit {
     ); // [1,2,3...N]
     this.results = this.biomoleculeSearchService.getSimilarBioMolecules(
       5555,
+      contourRepresentation,
       this.volumeFilter === 'On',
       minRes,
       maxRes
