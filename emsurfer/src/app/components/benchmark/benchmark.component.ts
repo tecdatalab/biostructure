@@ -46,12 +46,18 @@ export class BenchmarkComponent implements OnInit {
   submitHandler() {
     const url = 'benchmark/results';
     const params = {
-      // don't foget to include the file id after the post
+      emdbIdList: null,
+      emdbIdListFile: null,
       contourRepresentation: this.benchmarkForm.get('contour_representation')
         .value,
       volumeFilter: this.benchmarkForm.get('volume_filter').value,
       topResults: this.benchmarkForm.get('top_results').value
     };
+    if (this.cbEmdbList) {
+      params.emdbIdList = 5555;
+    } else {
+      params.emdbIdListFile = 1223;
+    }
     this.router.navigate([url], {
       queryParams: params
     });
