@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { SearchFormComponent } from './components/search-form/search-form.component';
 import { SearchResultComponent } from './components/search-result/search-result.component';
 import { BenchmarkComponent } from './components/benchmark/benchmark.component';
+import { BenchmarkResultsComponent } from './components/benchmark-results/benchmark-results.component';
 
 export const router: Routes = [
   {
@@ -27,6 +28,10 @@ export const router: Routes = [
   {
     path: 'benchmark',
     component: BenchmarkComponent
+  },
+  {
+    path: 'benchmark/results',
+    component: BenchmarkResultsComponent
   }
 ];
 
