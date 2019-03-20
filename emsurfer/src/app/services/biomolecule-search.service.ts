@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
-import { Biomolecule } from '../models/biomolecule';
-import { BiomoleculeComparison } from '../models/biomolecule-comparison';
+import { Injectable } from "@angular/core";
+import { Biomolecule } from "../models/biomolecule";
+import { BiomoleculeComparison } from "../models/biomolecule-comparison";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root"
 })
 export class BiomoleculeSearchService {
   constructor() {}
@@ -11,13 +11,16 @@ export class BiomoleculeSearchService {
   getBiomolecule(emdbId: number) {
     const newBiomolecule = new Biomolecule();
     newBiomolecule.emdb_id = emdbId;
-    newBiomolecule.img_url = '../../../assets/img/test_img.gif';
-    newBiomolecule.pdb_url = 'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-1413'
-    newBiomolecule.name = 'Lorem ipsum et doloren';
+    newBiomolecule.img_url = "../../../assets/img/test_img.gif";
+    newBiomolecule.pdb_url = "http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-1413";
+    newBiomolecule.name = "Lorem ipsum et doloren";
     return newBiomolecule;
   }
 
   getZernikeDescriptors(emdbId: number, contourRepresentation: number) {
+    if (emdbId === 5555) {
+      return [10, 11, 0, 3, 2, 4, 5, 15];
+    }
     return [1, 2, 3, 4, 3, 10, 0];
   }
 
@@ -32,9 +35,10 @@ export class BiomoleculeSearchService {
       const newBiomolecule = new BiomoleculeComparison();
       newBiomolecule.biomolecule = new Biomolecule();
       newBiomolecule.biomolecule.emdb_id = emdbId;
-      newBiomolecule.biomolecule.img_url = '../../../assets/img/test_img.gif';
-      newBiomolecule.biomolecule.pdb_url = 'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-1413'
-      newBiomolecule.biomolecule.name = 'Lorem ipsum et doloren';
+      newBiomolecule.biomolecule.img_url = "../../../assets/img/test_img.gif";
+      newBiomolecule.biomolecule.pdb_url =
+        "http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-1413";
+      newBiomolecule.biomolecule.name = "Lorem ipsum et doloren";
       newBiomolecule.euc_distance = 1;
       newBiomolecule.ratio_of_volume = 0.5;
       newBiomolecule.resolution = 10.1;

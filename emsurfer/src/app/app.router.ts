@@ -14,13 +14,13 @@ export const router: Routes = [
     component: SearchFormComponent
   },
   {
-    path: 'result/:emdb_id/:countour_representation/:volume_filter/:min_res/:max_res',
+    path: 'result/:emdbId',
     component: SearchResultComponent
   },
   {
-    path: 'result/:filename/:countour_level/:countour_representation/:volume_filter/:min_res/:max_res',
+    path: 'result/emMap',
     component: SearchResultComponent
   }
 ];
 
-export const routes: ModuleWithProviders = RouterModule.forRoot(router);
+export const routes: ModuleWithProviders = RouterModule.forRoot(router, {onSameUrlNavigation: 'reload'});
