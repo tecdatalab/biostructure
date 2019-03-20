@@ -43,7 +43,17 @@ export class BenchmarkComponent implements OnInit {
     this.cbEmdbList = true;
   }
 
-  submitHandler(){
-    console.log(this.benchmarkForm.getRawValue());
+  submitHandler() {
+    const url = 'benchmark/results';
+    const params = {
+      // don't foget to include the file id after the post
+      contourRepresentation: this.benchmarkForm.get('contour_representation')
+        .value,
+      volumeFilter: this.benchmarkForm.get('volume_filter').value,
+      topResults: this.benchmarkForm.get('top_results').value
+    };
+    this.router.navigate([url], {
+      queryParams: params
+    });
   }
 }
