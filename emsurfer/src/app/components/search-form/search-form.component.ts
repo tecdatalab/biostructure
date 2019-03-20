@@ -74,6 +74,8 @@ export class SearchFormComponent implements OnInit {
           .get('query')
           .get('em_map')
           .get('contour_level').value,
+        contourRepresentation: this.searchForm.get('contour_representation')
+          .value,
         volumeFilter: this.searchForm.get('volume_filter').value,
         minResolution: this.searchForm.get('resolution_filter').get('min')
           .value,
