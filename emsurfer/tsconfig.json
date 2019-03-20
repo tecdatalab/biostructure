@@ -16,7 +16,10 @@
     ],
     "lib": [
       "es2018",
+      "es2018.promise",
       "dom"
-    ]
+    ],
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   }
 }

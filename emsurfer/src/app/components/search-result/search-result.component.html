@@ -8,11 +8,11 @@
   <div *ngIf="isSearchById" class="col-3 border border-dark">
     <a class="text-warning" href="#"
       ><strong
-        ><u>EMD-{{ biomolecule.emdb_id }}</u></strong
+        ><u>EMD-{{ biomolecule.id }}</u></strong
       ></a
     >
-    <p>{{ biomolecule.name }}</p>
-    <img class="img-fluid" [src]="biomolecule.img_url" />
+    <p>{{ biomolecule.full_name }}</p>
+    <img class="img-fluid" [src]="biomolecule.image_url" />
   </div>
   <div class="col-3 border border-dark" [hidden]="isSearchById">
     <p class="text-primary" href="#"><strong>User uploaded query</strong></p>

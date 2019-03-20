@@ -3,23 +3,17 @@ const biomolecule = require('../models/biomolecule')
 exports.searchByID = async (req, res, next) => {
     emdbid = req.params.emdbID
     try{
-        let biomolecules = await biomolecule.findAll({
-            attributes: ['id'],
+        let biomolecules = await biomolecule.findOne({
             where: {
                 id: parseInt(emdbid)
             }
         })
-        res.json({
-            result: 'OK',
-            data: biomolecules,
-            message: 'Biomolecule found'
-        });
+        res.status(200).json(biomolecules);
     } catch (error) {
         console.log(error)
-        res.json({
-            result: 'Failed',
-            data: [],
-            message: 'Biomolecule not found'
+        res.status(500).json({
+            msg: 'Biomolecule not found',
+            details: err
         })
     }
   }

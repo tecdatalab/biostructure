@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
+import {HttpClientModule} from '@angular/common/http';
 
 import { routes } from './app.router';
 
@@ -34,7 +35,7 @@ import { ZernikeDescriptorsListComponent } from './components/zernike-descriptor
     SearchResultComponent,
     ZernikeDescriptorsListComponent
   ],
-  imports: [BrowserModule, ReactiveFormsModule, routes],
+  imports: [BrowserModule, HttpClientModule, ReactiveFormsModule, routes],
   providers: [],
   bootstrap: [AppComponent]
 })

@@ -36,7 +36,12 @@ export class SearchResultComponent implements OnInit {
     const maxRes = +this.route.snapshot.paramMap.get('max_res');
     this.volumeFilter = this.route.snapshot.paramMap.get('volume_filter');
     if (emdbId) {
-      this.biomolecule = this.biomoleculeSearchService.getBiomolecule(emdbId);
+      this.biomoleculeSearchService
+        .getBiomolecule(emdbId)
+        .then((response: Biomolecule) => {
+          this.biomolecule = response;
+          console.log(this.biomolecule.full_name)
+        });
       this.values = this.biomoleculeSearchService.getZernikeDescriptors(
         emdbId,
         contourRepresentation

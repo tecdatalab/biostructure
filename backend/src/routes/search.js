@@ -6,7 +6,7 @@ router.get("/", (req, res, next) => {
 });
 
 router.get(
-  '/:emdbID/:isVolumeFilterOn/:minRes/:maxRes',
+  '/:emdbID',
   searchController.searchByID
 );
 
