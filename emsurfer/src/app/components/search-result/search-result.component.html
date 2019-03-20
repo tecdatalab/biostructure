@@ -6,7 +6,7 @@
 <br />
 <div class="row">
   <div *ngIf="isSearchById" class="col-3 border border-dark">
-    <a class="text-warning" href="#"
+    <a class="text-warning" [href]="biomolecule.pdb_url"
       ><strong
         ><u>EMD-{{ biomolecule.id }}</u></strong
       ></a
@@ -15,7 +15,7 @@
     <img class="img-fluid" [src]="biomolecule.image_url" />
   </div>
   <div class="col-3 border border-dark" [hidden]="isSearchById">
-    <p class="text-primary" href="#"><strong>User uploaded query</strong></p>
+    <p class="text-primary"><strong>User uploaded query</strong></p>
     <p><strong>File uploaded:</strong></p>
     <p>{{ filename }}</p>
   </div>

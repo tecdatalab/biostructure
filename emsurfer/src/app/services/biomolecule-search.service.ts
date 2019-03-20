@@ -5,7 +5,7 @@ import { BiomoleculeComparison } from '../models/biomolecule-comparison';
 import config from '../../config.json';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root"
 })
 export class BiomoleculeSearchService {
   constructor(private httpClient: HttpClient) {}
@@ -13,12 +13,6 @@ export class BiomoleculeSearchService {
   readonly API_URL = config.api_url;
 
   getBiomolecule(emdbId: number): Promise<void | Biomolecule> {
-    /*
-    const newBiomolecule = new Biomolecule();
-    newBiomolecule.emdb_id = emdbId;
-    newBiomolecule.img_url = '../../../assets/img/test_img.gif';
-    newBiomolecule.name = 'Lorem ipsum et doloren';
-    */
     return this.httpClient
       .get(this.API_URL + '/search/' + emdbId)
       .toPromise()
@@ -31,6 +25,9 @@ export class BiomoleculeSearchService {
   }
 
   getZernikeDescriptors(emdbId: number, contourRepresentation: number) {
+    if (emdbId === 5555) {
+      return [10, 11, 0, 3, 2, 4, 5, 15];
+    }
     return [1, 2, 3, 4, 3, 10, 0];
   }
 
@@ -45,8 +42,10 @@ export class BiomoleculeSearchService {
       const newBiomolecule = new BiomoleculeComparison();
       newBiomolecule.biomolecule = new Biomolecule();
       newBiomolecule.biomolecule.id = emdbId;
-      newBiomolecule.biomolecule.image_url = '../../../assets/img/test_img.gif';
-      newBiomolecule.biomolecule.acronym = 'Lorem ipsum et doloren';
+      newBiomolecule.biomolecule.image_url = "../../../assets/img/test_img.gif";
+      newBiomolecule.biomolecule.map_url =
+        "http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-1413";
+      newBiomolecule.biomolecule.full_name = "Lorem ipsum et doloren";
       newBiomolecule.euc_distance = 1;
       newBiomolecule.ratio_of_volume = 0.5;
       newBiomolecule.resolution = 10.1;
