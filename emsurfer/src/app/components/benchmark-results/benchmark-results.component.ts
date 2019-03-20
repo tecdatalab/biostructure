@@ -21,11 +21,22 @@ export class BenchmarkResultsComponent implements OnInit {
     const volumeFilter =
       this.route.snapshot.queryParamMap.get('volumeFilter') === 'On';
     const topResults = +this.route.snapshot.queryParamMap.get('topResults');
-    this.files = this.biomoleculeSearchService.getBatchBiomolecules(
-      1,
-      contourRepresentationId,
-      volumeFilter,
-      topResults
-    );
+    const emdbIdList = +this.route.snapshot.queryParamMap.get('emdbIdList');
+    const emdbIdListFile = +this.route.snapshot.queryParamMap.get('emdbIdListFile');
+    if (emdbIdList){
+      this.files = this.biomoleculeSearchService.getBatchBiomolecules(
+        emdbIdList,
+        contourRepresentationId,
+        volumeFilter,
+        topResults
+      );
+    } else if(emdbIdListFile) {
+      this.files = this.biomoleculeSearchService.getBatchBiomoleculesByFileId(
+        emdbIdListFile,
+        contourRepresentationId,
+        volumeFilter,
+        topResults
+      );
+    }
   }
 }

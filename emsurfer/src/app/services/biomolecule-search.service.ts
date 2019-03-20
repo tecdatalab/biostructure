@@ -25,6 +25,13 @@ export class BiomoleculeSearchService {
     return [1, 2, 3, 4, 3, 10, 0];
   }
 
+  getZernikeDescriptorsByMapId(
+    emMapId: number,
+    contourLevel: number,
+    contourRepresentationId: number){
+      return [1, 2, 1, 2, 1, 2, 3];
+  }
+
   getSimilarBioMolecules(
     emdbId: number,
     contourRepresentationId: number,
@@ -55,10 +62,26 @@ export class BiomoleculeSearchService {
     isVolumeFilterOn: boolean,
     topResults: number
   ) {
-    const f = new CustomFile();
     const files = [];
     for (let i = 0; i < 5; i++) {
+      const f = new CustomFile();
       f.filename = 'EMDB-' + i + i + i + i + '.hit';
+      f.path = 'path';
+      files.push(f);
+    }
+    return files;
+  }
+
+  getBatchBiomoleculesByFileId(
+    fileId: number,
+    contourRepresentationId: number,
+    isVolumeFilterOn: boolean,
+    topResults: number
+  ){
+    const files = [];
+    for (let i = 0; i < 5; i++) {
+      const f = new CustomFile();
+      f.filename = 'EMDBF-' + i + i + i + i + '.hit';
       f.path = 'path';
       files.push(f);
     }

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { FileUploadService } from 'src/app/services/file-upload.service';
 
 @Component({
   selector: 'app-benchmark',
@@ -10,7 +11,11 @@ export class BenchmarkComponent implements OnInit {
   benchmarkForm: FormGroup;
   defaultFormState: string;
   cbEmdbList: boolean;
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private fileUploadService: FileUploadService
+  ) {
     this.cbEmdbList = true;
   }
 
@@ -54,9 +59,11 @@ export class BenchmarkComponent implements OnInit {
       topResults: this.benchmarkForm.get('top_results').value
     };
     if (this.cbEmdbList) {
-      params.emdbIdList = 5555;
+      const idListString = this.benchmarkForm.get('emdb_id_list').value;
+      params.emdbIdList = this.fileUploadService.uploadIdListString(idListString);
     } else {
-      params.emdbIdListFile = 1223;
+      const idListFile = this.benchmarkForm.get('file').value;
+      params.emdbIdListFile = this.fileUploadService.uploadIdListFile(idListFile);
     }
     this.router.navigate([url], {
       queryParams: params

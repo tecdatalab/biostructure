@@ -51,8 +51,11 @@ export class SearchResultComponent implements OnInit {
       this.isSearchById = true;
     } else {
       this.filename = this.route.snapshot.queryParamMap.get('filename');
-      this.values = this.biomoleculeSearchService.getZernikeDescriptors(
-        emdbId,
+      const emMapId = +this.route.snapshot.queryParamMap.get('mapId');
+      const contourLevel = +this.route.snapshot.queryParamMap.get('contourLevel');
+      this.values = this.biomoleculeSearchService.getZernikeDescriptorsByMapId(
+        emMapId,
+        contourLevel,
         contourRepresentation
       );
     }
