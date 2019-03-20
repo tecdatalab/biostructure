@@ -11,6 +11,7 @@ export class QueryMethodComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
+    this.cbEmdb = true;
     this.parentForm.get('search_by_emdb_id').valueChanges.subscribe(value => {
       this.cbEmdb = value;
     });
