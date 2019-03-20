@@ -15,6 +15,7 @@ export const router: Routes = [
     component: SearchFormComponent
   },
   {
+<<<<<<< HEAD
     path:
       'result/:emdb_id/:countour_representation/:volume_filter/:min_res/:max_res',
     component: SearchResultComponent
@@ -22,6 +23,13 @@ export const router: Routes = [
   {
     path:
       'result/:filename/:countour_level/:countour_representation/:volume_filter/:min_res/:max_res',
+=======
+    path: 'result/:emdbId',
+    component: SearchResultComponent
+  },
+  {
+    path: 'result/emMap',
+>>>>>>> result-endpoint
     component: SearchResultComponent
   },
   {
@@ -30,4 +38,4 @@ export const router: Routes = [
   }
 ];
 
-export const routes: ModuleWithProviders = RouterModule.forRoot(router);
+export const routes: ModuleWithProviders = RouterModule.forRoot(router, {onSameUrlNavigation: 'reload'});

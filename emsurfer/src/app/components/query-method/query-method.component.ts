@@ -30,19 +30,32 @@ export class QueryMethodComponent implements OnInit {
         .get('em_map')
         .get('file')
         .setValidators(null);
+      this.parentForm
+        .get('em_map')
+        .get('contour_level')
+        .setValidators(null);
     } else {
       this.parentForm.get('emdb_id').setValidators(null);
       this.parentForm
         .get('em_map')
         .get('file')
         .setValidators(Validators.required);
+      this.parentForm
+        .get('em_map')
+        .get('contour_level')
+        .setValidators([
+          Validators.required,
+          Validators.pattern('^[0-9]+(\.[0-9]+)?$')
+        ]);
     }
+    this.parentForm.get('em_map').get('file').patchValue(null);
+    this.parentForm.get('em_map').get('filename').patchValue(null);
     this.parentForm.get('emdb_id').updateValueAndValidity();
+    this.parentForm.get('em_map').get('contour_level').updateValueAndValidity();
     this.parentForm
       .get('em_map')
       .get('file')
       .updateValueAndValidity();
-
     this.parentForm.patchValue({
       search_by_emdb_id: this.cbEmdb
     });
