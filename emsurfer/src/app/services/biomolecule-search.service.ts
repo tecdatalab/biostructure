@@ -66,7 +66,7 @@ export class BiomoleculeSearchService {
     for (let i = 0; i < 5; i++) {
       const f = new CustomFile();
       f.filename = 'EMDB-' + i + i + i + i + '.hit';
-      f.path = 'path';
+      f.path = 'assets/test_files/test_result.hit';
       files.push(f);
     }
     return files;
@@ -82,7 +82,7 @@ export class BiomoleculeSearchService {
     for (let i = 0; i < 5; i++) {
       const f = new CustomFile();
       f.filename = 'EMDBF-' + i + i + i + i + '.hit';
-      f.path = 'path';
+      f.path = 'assets/test_files/test_result.hit';
       files.push(f);
     }
     return files;
