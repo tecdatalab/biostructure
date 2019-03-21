@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
-import { Biomolecule } from '../models/biomolecule';
-import { BiomoleculeComparison } from '../models/biomolecule-comparison';
-import { CustomFile } from '../models/custom-file';
+import { Injectable } from "@angular/core";
+import { Biomolecule } from "../models/biomolecule";
+import { BiomoleculeComparison } from "../models/biomolecule-comparison";
+import { CustomFile } from "../models/custom-file";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root"
 })
 export class BiomoleculeSearchService {
   constructor() {}
@@ -12,9 +12,9 @@ export class BiomoleculeSearchService {
   getBiomolecule(emdbId: number) {
     const newBiomolecule = new Biomolecule();
     newBiomolecule.emdb_id = emdbId;
-    newBiomolecule.img_url = '../../../assets/img/test_img.gif';
-    newBiomolecule.pdb_url = 'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-1413';
-    newBiomolecule.name = 'Lorem ipsum et doloren';
+    newBiomolecule.img_url = "../../../assets/img/test_img.gif";
+    newBiomolecule.pdb_url = "http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-1413";
+    newBiomolecule.name = "Lorem ipsum et doloren";
     return newBiomolecule;
   }
 
@@ -28,8 +28,9 @@ export class BiomoleculeSearchService {
   getZernikeDescriptorsByMapId(
     emMapId: number,
     contourLevel: number,
-    contourRepresentationId: number){
-      return [1, 2, 1, 2, 1, 2, 3];
+    contourRepresentationId: number
+  ) {
+    return [1, 2, 1, 2, 1, 2, 3];
   }
 
   getSimilarBioMolecules(
@@ -44,10 +45,10 @@ export class BiomoleculeSearchService {
       const newBiomolecule = new BiomoleculeComparison();
       newBiomolecule.biomolecule = new Biomolecule();
       newBiomolecule.biomolecule.emdb_id = emdbId;
-      newBiomolecule.biomolecule.img_url = '../../../assets/img/test_img.gif';
+      newBiomolecule.biomolecule.img_url = "../../../assets/img/test_img.gif";
       newBiomolecule.biomolecule.pdb_url =
-        'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-1413';
-      newBiomolecule.biomolecule.name = 'Lorem ipsum et doloren';
+        "http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-1413";
+      newBiomolecule.biomolecule.name = "Lorem ipsum et doloren";
       newBiomolecule.euc_distance = 1;
       newBiomolecule.ratio_of_volume = 0.5;
       newBiomolecule.resolution = 10.1;
@@ -65,8 +66,8 @@ export class BiomoleculeSearchService {
     const files = [];
     for (let i = 0; i < 5; i++) {
       const f = new CustomFile();
-      f.filename = 'EMDB-' + i + i + i + i + '.hit';
-      f.path = 'assets/test_files/test_result.hit';
+      f.filename = "EMDB-" + i + i + i + i + ".hit";
+      f.path = "assets/test_files/test_result.hit";
       files.push(f);
     }
     return files;
@@ -77,12 +78,12 @@ export class BiomoleculeSearchService {
     contourRepresentationId: number,
     isVolumeFilterOn: boolean,
     topResults: number
-  ){
+  ) {
     const files = [];
     for (let i = 0; i < 5; i++) {
       const f = new CustomFile();
-      f.filename = 'EMDBF-' + i + i + i + i + '.hit';
-      f.path = 'assets/test_files/test_result.hit';
+      f.filename = "EMDBF-" + i + i + i + i + ".hit";
+      f.path = "assets/test_files/test_result.hit";
       files.push(f);
     }
     return files;

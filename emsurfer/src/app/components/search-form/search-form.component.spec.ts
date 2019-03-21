@@ -14,15 +14,13 @@ import { EmdbIdInputComponent } from '../emdb-id-input/emdb-id-input.component';
 import { UploadEmMapComponent } from '../upload-em-map/upload-em-map.component';
 import { QueryMethodComponent } from '../query-method/query-method.component';
 import { ResolutionFilterComponent } from '../resolution-filter/resolution-filter.component';
-import { By } from '@angular/platform-browser';
-import { Location, CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
-@Component({
-  template: ''
-})
-class DummyComponent {}
+class MockRouter {
+  navigate(urls: string[], extras: string) {
+    return urls + extras;
+  }
+}
 
 describe('SearchFormComponent', () => {
   let component: SearchFormComponent;
@@ -32,11 +30,7 @@ describe('SearchFormComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ReactiveFormsModule,
-        RouterTestingModule,
-        CommonModule,
-        RouterTestingModule.withRoutes([
-          { path: 'query/:id/:volume/:min/:max', component: DummyComponent }
-        ])
+        RouterTestingModule
       ],
       declarations: [
         SearchFormComponent,
@@ -47,7 +41,9 @@ describe('SearchFormComponent', () => {
         UploadEmMapComponent,
         QueryMethodComponent,
         ResolutionFilterComponent,
-        DummyComponent
+      ],
+      providers: [
+        { provide: Router, useClass: MockRouter }
       ]
     }).compileComponents();
   }));
@@ -58,16 +54,68 @@ describe('SearchFormComponent', () => {
     fixture.detectChanges();
   });
 
-  it('simulate button click: should redirect to query url on submit', async(
-    inject([Router, Location], (router: Router, location: Location) => {
-      fixture.debugElement.query(By.css('button')).nativeElement.click();
-      fixture.whenStable().then(() => {
-        const query = component.searchForm.get('query').get('emdb_id').value;
-        const filter = component.searchForm.get('volume_filter').value;
-        expect(location.path()).toEqual(
-          '/query/' + query + '/' + filter + '/' + null + '/' + null
-        );
-      });
-    })
-  ));
+  it('submit button should call submitHandler()', async(() => {
+    spyOn(component, 'submitHandler');
+    const button = fixture.debugElement.nativeElement.querySelector('#submitButton');
+    button.click();
+    fixture.whenStable().then(() => {
+      expect(component.submitHandler).toHaveBeenCalled();
+    });
+  }));
+
+  it('reset button should call reset', async(() => {
+    spyOn(component, 'reset');
+    const button = fixture.debugElement.nativeElement.querySelector('#resetButton');
+    button.click();
+    fixture.whenStable().then(() => {
+      expect(component.reset).toHaveBeenCalled();
+    });
+  }));
+
+  it('reset function should call this.searchForm.reset(expectedParameter)', async(() => {
+    spyOn(component.searchForm, 'reset');
+    component.reset();
+    const expectedParameter = component.defaultFormState;
+    const expectedUrl = 'result/1884';
+    expect(component.searchForm.reset).toHaveBeenCalledWith(expectedParameter);
+  }));
+
+
+  it('submitHandler should call router navigate with expected query params', inject([Router], ( router: Router ) => {
+    spyOn(router, 'navigate');
+    component.submitHandler();
+    const expectedQueryParams = {
+      contourRepresentation: 0,
+      volumeFilter: 'On',
+      minResolution: null,
+      maxResolution: null
+    };
+    const expectedUrl = 'result/1884';
+    expect(router.navigate).toHaveBeenCalledWith([expectedUrl], {queryParams: expectedQueryParams} );
+  }));
+
+  it('submitHandler should call router navigate with expected query params if the user wants to do a query with a file', 
+  inject([Router], ( router: Router ) => {
+    spyOn(router, 'navigate');
+    component.searchForm.patchValue({
+      query:{
+        search_by_emdb_id: false,
+        em_map:{
+          filename: 'test_file.map',
+        }
+      }
+    });
+    component.submitHandler();
+    const expectedQueryParams = {
+      filename: 'test_file.map',
+      mapId: 4444,
+      contourLevel: 3.14,
+      contourRepresentation: 0,
+      volumeFilter: 'On',
+      minResolution: null,
+      maxResolution: null
+    };
+    const expectedUrl = 'result/emMap';
+    expect(router.navigate).toHaveBeenCalledWith([expectedUrl], {queryParams: expectedQueryParams} );
+  }));
 });
