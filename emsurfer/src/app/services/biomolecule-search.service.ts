@@ -3,6 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { Biomolecule } from "../models/biomolecule";
 import { BiomoleculeComparison } from "../models/biomolecule-comparison";
 import config from "../../config.json";
+import { CustomFile } from "../models/custom-file";
 
 @Injectable({
   providedIn: "root"
@@ -37,8 +38,17 @@ export class BiomoleculeSearchService {
       .catch(this.handleError);
   }
 
+  getZernikeDescriptorsByMapId(
+    emMapId: number,
+    contourLevel: number,
+    contourRepresentationId: number
+  ) {
+    return [1, 2, 1, 2, 1, 2, 3];
+  }
+
   getSimilarBioMolecules(
     emdbId: number,
+    contourRepresentationId: number,
     isVolumeFilterOn: boolean,
     minRes: number,
     maxRes: number
@@ -73,5 +83,37 @@ export class BiomoleculeSearchService {
       : error.status
       ? `${error.status} - ${error.statusText}`
       : "Server error";
+  }
+
+  getBatchBiomolecules(
+    fileId: number,
+    contourRepresentationId: number,
+    isVolumeFilterOn: boolean,
+    topResults: number
+  ) {
+    const files = [];
+    for (let i = 0; i < 5; i++) {
+      const f = new CustomFile();
+      f.filename = "EMDB-" + i + i + i + i + ".hit";
+      f.path = "assets/test_files/test_result.hit";
+      files.push(f);
+    }
+    return files;
+  }
+
+  getBatchBiomoleculesByFileId(
+    fileId: number,
+    contourRepresentationId: number,
+    isVolumeFilterOn: boolean,
+    topResults: number
+  ) {
+    const files = [];
+    for (let i = 0; i < 5; i++) {
+      const f = new CustomFile();
+      f.filename = "EMDBF-" + i + i + i + i + ".hit";
+      f.path = "assets/test_files/test_result.hit";
+      files.push(f);
+    }
+    return files;
   }
 }

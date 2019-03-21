@@ -1,0 +1,21 @@
+<div class="form-group row" [formGroup]="parentForm">
+  <label for="emdb" class="col-sm-4 col-form-label"
+    >Upload a file of the EMDB id list:</label
+  >
+  <div class="col-sm-6">
+    <input
+      id="file"
+      placeholder="file"
+      type="file"
+      class="from-control-file border"
+      accept=".dat"
+      (change)="onFileChange($event)"
+    />
+    <div *ngIf="parentForm.controls['file'].invalid">
+      <div *ngIf="parentForm.controls['file'].errors?.required">
+        <p class="text-danger">File required</p>
+      </div>
+    </div>
+  </div>
+  <a class="col-sm-2 text-warning" href="assets/example-files/idlist.dat"><u>An example file.</u></a>
+</div>

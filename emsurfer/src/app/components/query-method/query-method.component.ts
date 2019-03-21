@@ -1,15 +1,20 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-query-method',
   templateUrl: './query-method.component.html'
 })
-export class QueryMethodComponent {
+export class QueryMethodComponent implements OnInit {
   @Input() parentForm: FormGroup;
   cbEmdb: boolean;
-  constructor() {
+  constructor() {}
+
+  ngOnInit() {
     this.cbEmdb = true;
+    this.parentForm.get('search_by_emdb_id').valueChanges.subscribe(value => {
+      this.cbEmdb = value;
+    });
   }
 
   cbEmdbChange() {

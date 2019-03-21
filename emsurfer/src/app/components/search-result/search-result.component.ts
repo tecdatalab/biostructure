@@ -4,6 +4,7 @@ import { Chart } from "chart.js";
 import { BiomoleculeSearchService } from "../../services/biomolecule-search.service";
 import { Biomolecule } from "src/app/models/biomolecule";
 import { BiomoleculeComparison } from "src/app/models/biomolecule-comparison";
+import { FileDownloadService } from "src/app/services/file-download.service";
 
 @Component({
   selector: "app-search-result",
@@ -19,11 +20,13 @@ export class SearchResultComponent implements OnInit {
   results: BiomoleculeComparison[];
   volumeFilter: string;
   isSearchById: boolean;
+  downloadResultFile: string;
   descriptors = [];
   values = [];
 
   constructor(
     private biomoleculeSearchService: BiomoleculeSearchService,
+    private fileDownloadService: FileDownloadService,
     private route: ActivatedRoute
   ) {}
 
@@ -64,12 +67,22 @@ export class SearchResultComponent implements OnInit {
         });
     }
     this.biomoleculeSearchService
-      .getSimilarBioMolecules(5555, this.volumeFilter === "On", minRes, maxRes)
+      .getSimilarBioMolecules(
+        5555,
+        5,
+        this.volumeFilter === "On",
+        minRes,
+        maxRes
+      )
       .then(response => {
         this.results = response.results;
         this.filename_result = response.path;
       });
     const context = this.canvasElementRef.nativeElement;
+    // dont forget to include the results file id
+    this.downloadResultFile = this.fileDownloadService.getSearchResultFilePath(
+      144
+    );
     this.initChart(context);
   }
 

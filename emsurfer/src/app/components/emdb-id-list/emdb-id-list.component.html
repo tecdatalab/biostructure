@@ -1,0 +1,25 @@
+<div class="form-group row" [formGroup]="parentForm">
+  <label for="emdbIdList" class="col-4 col-form-label">ID list:</label>
+  <div class="col-8">
+    <textarea
+      id="emdbIdList"
+      placeholder="EMDB ID list"
+      formControlName="emdb_id_list"
+      type="text"
+      class="form-control"
+      rows="6"
+      [ngClass]="{
+        'is-invalid':
+          parentForm.controls['emdb_id_list'].invalid &&
+          parentForm.controls['emdb_id_list'].touched
+      }"
+    >
+    </textarea>
+    <div
+      *ngIf="parentForm.controls['emdb_id_list'].invalid"
+      class="invalid-feedback"
+    >
+      EMDB ID list required
+    </div>
+  </div>
+</div>

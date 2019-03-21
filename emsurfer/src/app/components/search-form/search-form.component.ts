@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, NavigationExtras } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FileUploadService } from 'src/app/services/file-upload.service';
 
 @Component({
   selector: 'app-search-form',
@@ -8,12 +9,13 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class SearchFormComponent implements OnInit {
   searchForm: FormGroup;
-  defaultFormState: any;
-  cbEmdb: boolean;
+  defaultFormState: string;
 
-  constructor(private fb: FormBuilder, private router: Router) {
-    this.cbEmdb = true;
-  }
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private fileUploadService: FileUploadService
+  ) {}
 
   ngOnInit() {
     const queryGroup = this.fb.group({
@@ -50,7 +52,7 @@ export class SearchFormComponent implements OnInit {
 
   submitHandler() {
     if (this.searchForm.get('query').get('search_by_emdb_id').value) {
-      const url = 'result/' +  this.searchForm.get('query').get('emdb_id').value;
+      const url = 'result/' + this.searchForm.get('query').get('emdb_id').value;
       const params = {
         contourRepresentation: this.searchForm.get('contour_representation')
           .value,
@@ -63,22 +65,27 @@ export class SearchFormComponent implements OnInit {
         queryParams: params
       });
     } else {
-      const url =
-        'result/emMap';
+      const url = 'result/emMap';
       const params = {
         filename: this.searchForm
           .get('query')
           .get('em_map')
           .get('filename').value,
+        mapId: null,
         contourLevel: this.searchForm
           .get('query')
           .get('em_map')
           .get('contour_level').value,
+        contourRepresentation: this.searchForm.get('contour_representation')
+          .value,
         volumeFilter: this.searchForm.get('volume_filter').value,
         minResolution: this.searchForm.get('resolution_filter').get('min')
           .value,
         maxResolution: this.searchForm.get('resolution_filter').get('max').value
       };
+      const mapFile = this.searchForm.get('query').get('em_map').get('file').value;
+      const mapId = this.fileUploadService.uploadEmMap(mapFile);
+      params.mapId = mapId;
       this.router.navigate([url], {
         queryParams: params
       });
@@ -87,6 +94,5 @@ export class SearchFormComponent implements OnInit {
 
   reset() {
     this.searchForm.reset(this.defaultFormState);
-    this.cbEmdb = true;
   }
 }

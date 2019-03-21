@@ -14,6 +14,7 @@ export class BiomoleculeComponent {
   searchBiomolecule() {
     const url = 'result/' + this.biomoleculeComparison.biomolecule.id;
     this.router.navigate([url], {
+      queryParams: { filename: null, mapId: null, contourLevel: null },
       queryParamsHandling: 'merge',
       replaceUrl: true
     });

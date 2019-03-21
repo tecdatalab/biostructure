@@ -18,6 +18,10 @@ import { BiomoleculeComponent } from './components/biomolecule/biomolecule.compo
 import { BiomoleculesTableComponent } from './components/biomolecules-table/biomolecules-table.component';
 import { SearchResultComponent } from './components/search-result/search-result.component';
 import { ZernikeDescriptorsListComponent } from './components/zernike-descriptors-list/zernike-descriptors-list.component';
+import { BenchmarkComponent } from './components/benchmark/benchmark.component';
+import { EmdbIdListComponent } from './components/emdb-id-list/emdb-id-list.component';
+import { UploadEmdbIdListFileComponent } from './components/upload-emdb-id-list-file/upload-emdb-id-list-file.component';
+import { BenchmarkResultsComponent } from './components/benchmark-results/benchmark-results.component';
 
 @NgModule({
   declarations: [
@@ -33,7 +37,11 @@ import { ZernikeDescriptorsListComponent } from './components/zernike-descriptor
     BiomoleculeComponent,
     BiomoleculesTableComponent,
     SearchResultComponent,
-    ZernikeDescriptorsListComponent
+    ZernikeDescriptorsListComponent,
+    BenchmarkComponent,
+    EmdbIdListComponent,
+    UploadEmdbIdListFileComponent,
+    BenchmarkResultsComponent
   ],
   imports: [BrowserModule, HttpClientModule, ReactiveFormsModule, routes],
   providers: [],
