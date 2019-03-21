@@ -18,7 +18,7 @@ import { Router } from '@angular/router';
 
 class MockRouter {
   navigate(urls: string[], extras: string) {
-    return urls + extras;
+    return true;
   }
 }
 
