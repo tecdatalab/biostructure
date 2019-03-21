@@ -84,7 +84,8 @@ export class SearchFormComponent implements OnInit {
         maxResolution: this.searchForm.get('resolution_filter').get('max').value
       };
       const mapFile = this.searchForm.get('query').get('em_map').get('file').value;
-      const mapId = this.fileUploadService.uploadEmMap(mapFile);
+      let mapId;
+      this.fileUploadService.uploadEmMap(mapFile).then((data: number) => console.log(data));
       params.mapId = mapId;
       this.router.navigate([url], {
         queryParams: params

@@ -4,6 +4,7 @@ const app = express();
 const expressValidator = require('express-validator');
 const indexRoutes = require('./routes/index');
 const searchRoutes = require('./routes/search');
+const uploadFileRoutes = require("./routes/uploadFile");
 
 //settings 
 app.set('port', process.env.PORT || 3001)
@@ -19,6 +20,7 @@ app.use(indexRoutes);
 app.use('/img', express.static('public/img'));
 app.use('/results', express.static('public/results'));
 app.use('/search', searchRoutes);
+app.use('/upload', uploadFileRoutes);
 
 app.listen(app.get('port'), () => {
     console.log('Server on port ', app.get('port'))

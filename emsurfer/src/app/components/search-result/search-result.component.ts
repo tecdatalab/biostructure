@@ -78,12 +78,10 @@ export class SearchResultComponent implements OnInit {
         this.results = response.results;
         this.filename_result = response.path;
       });
-    const context = this.canvasElementRef.nativeElement;
     // dont forget to include the results file id
     this.downloadResultFile = this.fileDownloadService.getSearchResultFilePath(
       144
     );
-    this.initChart(context);
   }
 
   private initChart(context: ElementRef) {
@@ -135,5 +133,7 @@ export class SearchResultComponent implements OnInit {
       new Array(this.values.length),
       (val, index) => index + 1
     );
+    const context = this.canvasElementRef.nativeElement;
+    this.initChart(context);
   }
 }
