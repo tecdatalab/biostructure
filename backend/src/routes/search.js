@@ -10,4 +10,14 @@ router.get(
   searchController.searchByID
 );
 
+router.get(
+  '/:emdbID/:isVolumeFilterOn/:minRes/:maxRes',
+  searchController.searchResult
+);
+
+router.get(
+  '/zernike/:emdbID/:contourRepresentation',
+  searchController.zernike
+);
+
 module.exports = router;

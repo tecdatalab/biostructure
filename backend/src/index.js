@@ -6,7 +6,7 @@ const indexRoutes = require('./routes/index');
 const searchRoutes = require('./routes/search');
 
 //settings 
-app.set('port', process.env.PORT || 3000)
+app.set('port', process.env.PORT || 3001)
 
 //middlewares
 app.use(express.json());
@@ -17,6 +17,7 @@ app.use(expressValidator())
 //routes
 app.use(indexRoutes);
 app.use('/img', express.static('public/img'));
+app.use('/results', express.static('public/results'));
 app.use('/search', searchRoutes);
 
 app.listen(app.get('port'), () => {
