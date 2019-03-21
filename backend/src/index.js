@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
+const bodyParser = require('body-parser')
 const expressValidator = require('express-validator');
 const indexRoutes = require('./routes/index');
 const searchRoutes = require('./routes/search');
@@ -10,9 +11,11 @@ const uploadFileRoutes = require("./routes/uploadFile");
 app.set('port', process.env.PORT || 3001)
 
 //middlewares
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true }))
+app.use(bodyParser.json({ limit: '50mb', extended: true }))
 app.use(express.json());
 app.use(cors())
-app.use(express.urlencoded({extended: false}));
+//app.use(express.urlencoded({extended: false}));
 app.use(expressValidator())
 
 //routes

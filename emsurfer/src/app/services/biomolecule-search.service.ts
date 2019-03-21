@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Biomolecule } from '../models/biomolecule';
-import { BiomoleculeComparison } from '../models/biomolecule-comparison';
-import config from '../../config.json';
-import { CustomFile } from '../models/custom-file';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Biomolecule } from "../models/biomolecule";
+import { BiomoleculeComparison } from "../models/biomolecule-comparison";
+import config from "../../config.json";
+import { CustomFile } from "../models/custom-file";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root"
 })
 export class BiomoleculeSearchService {
   constructor(private httpClient: HttpClient) {}
@@ -15,7 +15,7 @@ export class BiomoleculeSearchService {
 
   getBiomolecule(emdbId: number): Promise<void | Biomolecule> {
     return this.httpClient
-      .get(this.API_URL + '/search/' + emdbId)
+      .get(this.API_URL + "/search/" + emdbId)
       .toPromise()
       .then(response => {
         const object = response as Biomolecule;
@@ -31,7 +31,7 @@ export class BiomoleculeSearchService {
   ): Promise<any> {
     return this.httpClient
       .get(
-        this.API_URL + '/search/zernike/' + emdbId + '/' + contourRepresentation
+        this.API_URL + "/search/zernike/" + emdbId + "/" + contourRepresentation
       )
       .toPromise()
       .then()
@@ -56,13 +56,13 @@ export class BiomoleculeSearchService {
     return this.httpClient
       .get(
         this.API_URL +
-          '/search/' +
+          "/search/" +
           emdbId +
-          '/' +
+          "/" +
           isVolumeFilterOn +
-          '/' +
+          "/" +
           minRes +
-          '/' +
+          "/" +
           maxRes
       )
       .toPromise()
@@ -71,7 +71,6 @@ export class BiomoleculeSearchService {
           item.biomolecule.image_url =
             this.API_URL + item.biomolecule.image_url;
         }
-        console.log(data);
         return data;
       })
       .catch(this.handleError);
@@ -82,7 +81,7 @@ export class BiomoleculeSearchService {
       ? error.message
       : error.status
       ? `${error.status} - ${error.statusText}`
-      : 'Server error';
+      : "Server error";
   }
 
   getBatchBiomolecules(
@@ -94,8 +93,8 @@ export class BiomoleculeSearchService {
     const files = [];
     for (let i = 0; i < 5; i++) {
       const f = new CustomFile();
-      f.filename = 'EMDB-' + i + i + i + i + '.hit';
-      f.path = 'assets/test_files/test_result.hit';
+      f.filename = "EMDB-" + i + i + i + i + ".hit";
+      f.path = "assets/test_files/test_result.hit";
       files.push(f);
     }
     return files;
@@ -110,8 +109,8 @@ export class BiomoleculeSearchService {
     const files = [];
     for (let i = 0; i < 5; i++) {
       const f = new CustomFile();
-      f.filename = 'EMDBF-' + i + i + i + i + '.hit';
-      f.path = 'assets/test_files/test_result.hit';
+      f.filename = "EMDBF-" + i + i + i + i + ".hit";
+      f.path = "assets/test_files/test_result.hit";
       files.push(f);
     }
     return files;

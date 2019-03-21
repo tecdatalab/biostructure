@@ -18,10 +18,13 @@ export class FileUploadService {
     return 1234;
   }
 
-  uploadEmMap(base64File: string): Promise<void | number> {
-    console.log("amigos")
+  uploadEmMap(base64File: string, filename: string): Promise<void | number> {
+    let body = {
+      file: base64File,
+      filename: filename
+    };
     return this.http
-      .post(this.API_URL + "/upload/EmMap", base64File)
+      .post(this.API_URL + "/upload/EmMap", body)
       .toPromise()
       .then((data: number) => data)
       .catch();
