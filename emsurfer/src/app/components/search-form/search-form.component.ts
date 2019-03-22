@@ -96,6 +96,7 @@ export class SearchFormComponent implements OnInit {
             .get("filename").value
         )
         .then((data: number) => {
+          console.log(data);
           params.mapId = data;
           this.router.navigate([url], {
             queryParams: params
