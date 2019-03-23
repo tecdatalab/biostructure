@@ -18,10 +18,10 @@ export class FileUploadService {
     return 1234;
   }
 
-  uploadEmMap(base64File: string, filename: string): Promise<void | number> {
-    let body = {
+  uploadEmMap(base64File: string, file_name: string): Promise<void | number> {
+    const body = {
       file: base64File,
-      filename: filename
+      filename: file_name
     };
     return this.http
       .post(this.API_URL + "/upload/EmMap", body)

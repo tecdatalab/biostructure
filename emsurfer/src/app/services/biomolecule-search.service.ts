@@ -1,13 +1,13 @@
-import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { Biomolecule } from "../models/biomolecule";
-import { BiomoleculeComparison } from "../models/biomolecule-comparison";
-import { CustomFile } from "../models/custom-file";
-import { BenchmarkResult } from "../models/benchmark-result";
-import config from "../../config.json";
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Biomolecule } from '../models/biomolecule';
+import { BiomoleculeComparison } from '../models/biomolecule-comparison';
+import { CustomFile } from '../models/custom-file';
+import { BenchmarkResult } from '../models/benchmark-result';
+import config from '../../config.json';
 
 @Injectable({
-  providedIn: "root"
+  providedIn: 'root'
 })
 export class BiomoleculeSearchService {
   constructor(private httpClient: HttpClient) {}
@@ -16,7 +16,7 @@ export class BiomoleculeSearchService {
 
   getBiomolecule(emdbId: number): Promise<void | Biomolecule> {
     return this.httpClient
-      .get(this.API_URL + "/search/" + emdbId)
+      .get(this.API_URL + '/search/' + emdbId)
       .toPromise()
       .then(response => {
         const object = response as Biomolecule;
@@ -32,7 +32,7 @@ export class BiomoleculeSearchService {
   ): Promise<any> {
     return this.httpClient
       .get(
-        this.API_URL + "/search/zernike/" + emdbId + "/" + contourRepresentation
+        this.API_URL + '/search/zernike/' + emdbId + '/' + contourRepresentation
       )
       .toPromise()
       .then()
@@ -57,13 +57,13 @@ export class BiomoleculeSearchService {
     return this.httpClient
       .get(
         this.API_URL +
-          "/search/" +
+          '/search/' +
           emdbId +
-          "/" +
+          '/' +
           isVolumeFilterOn +
-          "/" +
+          '/' +
           minRes +
-          "/" +
+          '/' +
           maxRes
       )
       .toPromise()
@@ -78,34 +78,28 @@ export class BiomoleculeSearchService {
   }
 
   getBatchBiomolecules(
-    fileId: number,
+    fileId: string,
     contourRepresentationId: number,
     isVolumeFilterOn: boolean,
     topResults: number
-  ): Promise<void | CustomFile[]> {
+  ): Promise<void | BenchmarkResult> {
     return this.httpClient
-      .post(this.API_URL + "/benchmark/query", [1234, 5880, 2372, 3900])
+      .get(
+        this.API_URL +
+          '/benchmark/query/' +
+          fileId +
+          '/' +
+          contourRepresentationId +
+          '/' +
+          isVolumeFilterOn +
+          '/' +
+          topResults
+      )
       .toPromise()
       .then((data: BenchmarkResult) => {
-        return data.results;
+        return data;
       })
       .catch(this.handleError);
-  }
-
-  getBatchBiomoleculesByFileId(
-    fileId: number,
-    contourRepresentationId: number,
-    isVolumeFilterOn: boolean,
-    topResults: number
-  ) {
-    const files = [];
-    for (let i = 0; i < 5; i++) {
-      const f = new CustomFile();
-      f.filename = "EMDBF-" + i + i + i + i + ".hit";
-      f.path = "assets/test_files/test_result.hit";
-      files.push(f);
-    }
-    return files;
   }
 
   private handleError(error: any) {
@@ -113,6 +107,6 @@ export class BiomoleculeSearchService {
       ? error.message
       : error.status
       ? `${error.status} - ${error.statusText}`
-      : "Server error";
+      : 'Server error';
   }
 }

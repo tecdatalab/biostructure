@@ -30,6 +30,7 @@ export class BenchmarkComponent implements OnInit {
 
     this.defaultFormState = this.benchmarkForm.getRawValue();
   }
+
   cbEmdbListChange() {
     this.cbEmdbList = !this.cbEmdbList;
     if (this.cbEmdbList) {
@@ -51,20 +52,20 @@ export class BenchmarkComponent implements OnInit {
   submitHandler() {
     const url = 'benchmark/results';
     const params = {
-      emdbIdList: null,
-      emdbIdListFile: null,
+      emdbIdList: '',
       contourRepresentation: this.benchmarkForm.get('contour_representation')
         .value,
       volumeFilter: this.benchmarkForm.get('volume_filter').value,
       topResults: this.benchmarkForm.get('top_results').value
     };
+    let idList = '';
     if (this.cbEmdbList) {
-      const idListString = this.benchmarkForm.get('emdb_id_list').value;
-      params.emdbIdList = this.fileUploadService.uploadIdListString(idListString);
+      idList = this.benchmarkForm.get('emdb_id_list').value;
     } else {
-      const idListFile = this.benchmarkForm.get('file').value;
-      params.emdbIdListFile = this.fileUploadService.uploadIdListFile(idListFile);
+      idList = this.benchmarkForm.get('file').value;
     }
+    idList = idList.replace(/\r?\n/g, ',');
+    params.emdbIdList = idList;
     this.router.navigate([url], {
       queryParams: params
     });
