@@ -1,13 +1,13 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Biomolecule } from '../models/biomolecule';
-import { BiomoleculeComparison } from '../models/biomolecule-comparison';
-import { CustomFile } from '../models/custom-file';
-import { BenchmarkResult } from '../models/benchmark-result';
-import config from '../../config.json';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Biomolecule } from "../models/biomolecule";
+import { BiomoleculeComparison } from "../models/biomolecule-comparison";
+import { CustomFile } from "../models/custom-file";
+import { BenchmarkResult } from "../models/benchmark-result";
+import config from "../../config.json";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root"
 })
 export class BiomoleculeSearchService {
   constructor(private httpClient: HttpClient) {}
@@ -16,7 +16,7 @@ export class BiomoleculeSearchService {
 
   getBiomolecule(emdbId: number): Promise<void | Biomolecule> {
     return this.httpClient
-      .get(this.API_URL + '/search/' + emdbId)
+      .get(this.API_URL + "/search/" + emdbId)
       .toPromise()
       .then(response => {
         const object = response as Biomolecule;
@@ -32,7 +32,7 @@ export class BiomoleculeSearchService {
   ): Promise<any> {
     return this.httpClient
       .get(
-        this.API_URL + '/search/zernike/' + emdbId + '/' + contourRepresentation
+        this.API_URL + "/search/zernike/" + emdbId + "/" + contourRepresentation
       )
       .toPromise()
       .then()
@@ -57,13 +57,13 @@ export class BiomoleculeSearchService {
     return this.httpClient
       .get(
         this.API_URL +
-          '/search/' +
+          "/search/results/" +
           emdbId +
-          '/' +
+          "/" +
           isVolumeFilterOn +
-          '/' +
+          "/" +
           minRes +
-          '/' +
+          "/" +
           maxRes
       )
       .toPromise()
@@ -86,13 +86,13 @@ export class BiomoleculeSearchService {
     return this.httpClient
       .get(
         this.API_URL +
-          '/benchmark/query/' +
+          "/benchmark/query/" +
           fileId +
-          '/' +
+          "/" +
           contourRepresentationId +
-          '/' +
+          "/" +
           isVolumeFilterOn +
-          '/' +
+          "/" +
           topResults
       )
       .toPromise()
@@ -107,6 +107,6 @@ export class BiomoleculeSearchService {
       ? error.message
       : error.status
       ? `${error.status} - ${error.statusText}`
-      : 'Server error';
+      : "Server error";
   }
 }

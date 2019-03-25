@@ -17,7 +17,7 @@ exports.searchByID = async (req, res, next) => {
     }
   } catch (err) {
     res.status(204).json({
-      msg: "Biomolecule not found",
+      msg: "Backend error",
       details: err
     });
   }

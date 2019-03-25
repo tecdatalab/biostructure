@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ɵConsole } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Chart } from 'chart.js';
 import { BiomoleculeSearchService } from '../../services/biomolecule-search.service';
@@ -46,6 +46,7 @@ export class SearchResultComponent implements OnInit {
     const minRes = +this.route.snapshot.queryParamMap.get('minRes');
     const maxRes = +this.route.snapshot.queryParamMap.get('maxRes');
     this.volumeFilter = this.route.snapshot.queryParamMap.get('volumeFilter');
+    const mapID = this.route.snapshot.paramMap.get('mapId');
     if (emdbId) {
       this.biomoleculeSearchService
         .getBiomolecule(emdbId)
@@ -68,7 +69,7 @@ export class SearchResultComponent implements OnInit {
     }
     this.biomoleculeSearchService
       .getSimilarBioMolecules(
-        5555,
+        559,
         5,
         this.volumeFilter === 'On',
         minRes,
