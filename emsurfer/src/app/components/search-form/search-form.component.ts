@@ -15,7 +15,7 @@ export class SearchFormComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private fileUploadService: FileUploadService
-  ) {}
+  ) { }
 
   ngOnInit() {
     const queryGroup = this.fb.group({
@@ -31,7 +31,7 @@ export class SearchFormComponent implements OnInit {
       em_map: this.fb.group({
         filename: null,
         file: null,
-        contour_level: '3.14'
+        contour_level: 3.14
       })
     });
 
@@ -48,6 +48,8 @@ export class SearchFormComponent implements OnInit {
     });
 
     this.defaultFormState = this.searchForm.getRawValue();
+    console.log(this.defaultFormState);
+
   }
 
   submitHandler() {
