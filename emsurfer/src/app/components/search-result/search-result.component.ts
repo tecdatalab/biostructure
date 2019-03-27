@@ -73,8 +73,10 @@ export class SearchResultComponent implements OnInit {
           maxRes
         )
         .then(response => {
+          console.log("123");
+          console.log(response);
           this.results = response.results;
-          this.filename_result = response.path;
+          this.downloadResultFile = response.path;
         });
       this.isSearchById = true;
     } else {
@@ -94,7 +96,7 @@ export class SearchResultComponent implements OnInit {
         )
         .then(response => {
           this.results = response.results;
-          this.filename_result = response.path;
+          this.downloadResultFile = response.path;
         });
     }
   }

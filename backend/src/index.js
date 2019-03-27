@@ -9,7 +9,7 @@ const uploadFileRoutes = require("./routes/uploadFile");
 const benchmarkRoutes = require("./routes/benchmark");
 
 //settings
-app.set("port", process.env.PORT || 3001);
+app.set("port", process.env.PORT || 3000);
 
 //middlewares
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));

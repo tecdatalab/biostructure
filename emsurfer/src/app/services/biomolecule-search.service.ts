@@ -1,8 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Biomolecule } from "../models/biomolecule";
-import { BiomoleculeComparison } from "../models/biomolecule-comparison";
-import { CustomFile } from "../models/custom-file";
 import { BenchmarkResult } from "../models/benchmark-result";
 import config from "../../config.json";
 
@@ -80,6 +78,7 @@ export class BiomoleculeSearchService {
           item.biomolecule.image_url =
             this.API_URL + item.biomolecule.image_url;
         }
+        data.path = this.API_URL + data.path;
         return data;
       })
       .catch(this.handleError);
