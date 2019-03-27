@@ -11,7 +11,10 @@ exports.searchByID = async (req, res, next) => {
     });
     if (!biomolecules) {
       console.log("Biomolecule " + emdbid + " not found.");
-      res.status(500);
+      res.status(500).json({
+        msg: "Biomolecule " + emdbid + " not found.",
+        details: err
+      });
     } else {
       res.status(200).json(biomolecules);
     }

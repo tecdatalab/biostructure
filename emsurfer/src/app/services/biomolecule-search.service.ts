@@ -18,10 +18,11 @@ export class BiomoleculeSearchService {
     return this.httpClient
       .get(this.API_URL + "/search/" + emdbId)
       .toPromise()
-      .then(response => {
-        const object = response as Biomolecule;
-        object.image_url = this.API_URL + object.image_url;
-        return object;
+      .then((response: Biomolecule) => {
+        //const object = response as Biomolecule;
+        console.log(response);
+        response.image_url = this.API_URL + response.image_url;
+        return response;
       })
       .catch(this.handleError);
   }
@@ -146,6 +147,7 @@ export class BiomoleculeSearchService {
   }
 
   private handleError(error: any) {
+    console.log("ERROR");
     let errMsg = error.message
       ? error.message
       : error.status
