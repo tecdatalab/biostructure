@@ -13,6 +13,7 @@ export class ZernikeDescriptorsListComponent {
   cpyToClipboard() {
     const el = document.createElement("input");
     el.value = this.values.toString();
+    el.value.replace(",", "\n");
     el.setAttribute("readonly", "");
     document.body.appendChild(el);
     el.select();
