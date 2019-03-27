@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { FileUploadService } from 'src/app/services/file-upload.service';
+import { Component, OnInit } from "@angular/core";
+import { Router } from "@angular/router";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { FileUploadService } from "src/app/services/file-upload.service";
 
 @Component({
-  selector: 'app-search-form',
-  templateUrl: './search-form.component.html'
+  selector: "app-search-form",
+  templateUrl: "./search-form.component.html"
 })
 export class SearchFormComponent implements OnInit {
   searchForm: FormGroup;
@@ -15,17 +15,17 @@ export class SearchFormComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private fileUploadService: FileUploadService
-  ) { }
+  ) {}
 
   ngOnInit() {
     const queryGroup = this.fb.group({
       search_by_emdb_id: true,
       emdb_id: [
-        '1884',
+        "1884",
         [
           Validators.required,
           Validators.minLength(4),
-          Validators.pattern('^[0-9]*$')
+          Validators.pattern("^[0-9]*$")
         ]
       ],
       em_map: this.fb.group({
@@ -43,59 +43,58 @@ export class SearchFormComponent implements OnInit {
     this.searchForm = this.fb.group({
       contour_representation: 0,
       query: queryGroup,
-      volume_filter: 'On',
+      volume_filter: "On",
       resolution_filter: rfGroup
     });
 
     this.defaultFormState = this.searchForm.getRawValue();
     console.log(this.defaultFormState);
-
   }
 
   submitHandler() {
-    if (this.searchForm.get('query').get('search_by_emdb_id').value) {
-      const url = 'result/' + this.searchForm.get('query').get('emdb_id').value;
+    if (this.searchForm.get("query").get("search_by_emdb_id").value) {
+      const url = "result/" + this.searchForm.get("query").get("emdb_id").value;
       const params = {
-        contourRepresentation: this.searchForm.get('contour_representation')
+        contourRepresentation: this.searchForm.get("contour_representation")
           .value,
-        volumeFilter: this.searchForm.get('volume_filter').value,
-        minResolution: this.searchForm.get('resolution_filter').get('min')
+        volumeFilter: this.searchForm.get("volume_filter").value,
+        minResolution: this.searchForm.get("resolution_filter").get("min")
           .value,
-        maxResolution: this.searchForm.get('resolution_filter').get('max').value
+        maxResolution: this.searchForm.get("resolution_filter").get("max").value
       };
       this.router.navigate([url], {
         queryParams: params
       });
     } else {
-      const url = 'result/emMap';
+      const url = "result/emMap";
       const params = {
         filename: this.searchForm
-          .get('query')
-          .get('em_map')
-          .get('filename').value,
+          .get("query")
+          .get("em_map")
+          .get("filename").value,
         mapId: null,
         contourLevel: this.searchForm
-          .get('query')
-          .get('em_map')
-          .get('contour_level').value,
-        contourRepresentation: this.searchForm.get('contour_representation')
+          .get("query")
+          .get("em_map")
+          .get("contour_level").value,
+        contourRepresentation: this.searchForm.get("contour_representation")
           .value,
-        volumeFilter: this.searchForm.get('volume_filter').value,
-        minResolution: this.searchForm.get('resolution_filter').get('min')
+        volumeFilter: this.searchForm.get("volume_filter").value,
+        minResolution: this.searchForm.get("resolution_filter").get("min")
           .value,
-        maxResolution: this.searchForm.get('resolution_filter').get('max').value
+        maxResolution: this.searchForm.get("resolution_filter").get("max").value
       };
       const mapFile = this.searchForm
-        .get('query')
-        .get('em_map')
-        .get('file').value;
+        .get("query")
+        .get("em_map")
+        .get("file").value;
       this.fileUploadService
         .uploadEmMap(
           mapFile,
           this.searchForm
-            .get('query')
-            .get('em_map')
-            .get('filename').value
+            .get("query")
+            .get("em_map")
+            .get("filename").value
         )
         .then((data: number) => {
           console.log(data);

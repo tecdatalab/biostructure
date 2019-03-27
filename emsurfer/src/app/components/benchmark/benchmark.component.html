@@ -13,9 +13,9 @@
       <input
         type="radio"
         class="custom-control-input"
-        id="emdb"
+        id="emdb-list"
         [checked]="cbEmdbList"
-        (change)="cbEmdbListChange()"
+        (click)="cbEmdbListChange()"
       />
       <label class="custom-control-label" for="emdb">EMDB ID list</label>
     </div>
@@ -25,7 +25,7 @@
         class="custom-control-input"
         id="fileupload"
         [checked]="!cbEmdbList"
-        (change)="cbEmdbListChange()"
+        (click)="cbEmdbListChange()"
       />
       <label class="custom-control-label" for="fileupload"
         >Upload an ID list</label

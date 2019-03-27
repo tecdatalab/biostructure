@@ -47,7 +47,6 @@ describe("ContourShapeInputComponent", () => {
       spyOn(crService, "getContourShapes");
       component.dummyFunc();
       expect(crService.getContourShapes).toHaveBeenCalled();
-
     }
   ));
 });
