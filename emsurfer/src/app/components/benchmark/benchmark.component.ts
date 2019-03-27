@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { FileUploadService } from 'src/app/services/file-upload.service';
 
 @Component({
   selector: 'app-benchmark',
@@ -14,7 +13,6 @@ export class BenchmarkComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private fileUploadService: FileUploadService
   ) {
     this.cbEmdbList = true;
   }

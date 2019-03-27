@@ -25,6 +25,28 @@ exports.searchByID = async (req, res, next) => {
 
 exports.searchResult = async (req, res, next) => {
   emdbid = req.params.emdbID;
+  contourRepresentation = req.params.contourRepresentation;
+  isVolumeFilterOn = req.params.isVolumeFilterOn;
+  minRes = req.params.minRes;
+  maxRes = req.params.maxRes;
+  try {
+    let array_results = await getBiomolecules();
+    let result = {
+      path: "/results/result.hit",
+      results: array_results
+    };
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({
+      msg: "Biomolecule not found",
+      details: err
+    });
+  }
+};
+
+exports.searchResultMap = async (req, res, next) => {
+  emdbid = req.params.emdbID;
+  contourRepresentation = req.params.contourRepresentation;
   isVolumeFilterOn = req.params.isVolumeFilterOn;
   minRes = req.params.minRes;
   maxRes = req.params.maxRes;
@@ -44,6 +66,14 @@ exports.searchResult = async (req, res, next) => {
 };
 
 exports.zernike = async (req, res, next) => {
+  response = [];
+  for (let i = 0; i < 120; i++) {
+    response.push(Math.random() * 20);
+  }
+  res.status(200).json(response);
+};
+
+exports.zernikeMap = async (req, res, next) => {
   response = [];
   for (let i = 0; i < 120; i++) {
     response.push(Math.random() * 20);
