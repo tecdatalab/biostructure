@@ -147,7 +147,6 @@ export class BiomoleculeSearchService {
   }
 
   private handleError(error: any) {
-    console.log("ERROR");
     let errMsg = error.message
       ? error.message
       : error.status

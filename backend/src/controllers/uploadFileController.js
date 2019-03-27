@@ -37,11 +37,24 @@ exports.uploadListFile = async (req, res, next) => {
   try {
     await files
       .build({
-        file_name: "string.dat",
+        file_name: "list.dat",
         file_type: 1
       })
       .save()
-      .then(fileObject => {});
+      .then(fileObject => {
+        saveFile(req.body.file, fileObject.id + ".dat", fileObject.id, function(
+          response
+        ) {
+          if (response > 0) {
+            res.status(200).json(response);
+          } else {
+            res.status(204).json({
+              msg: "ERROR: I/O error.",
+              details: err
+            });
+          }
+        });
+      });
   } catch (err) {}
 };
 
