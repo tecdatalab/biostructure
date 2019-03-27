@@ -52,7 +52,7 @@ export class SearchResultComponent implements OnInit {
     const minRes = +this.route.snapshot.queryParamMap.get("minRes");
     const maxRes = +this.route.snapshot.queryParamMap.get("maxRes");
     this.volumeFilter = this.route.snapshot.queryParamMap.get("volumeFilter");
-    const mapID = this.route.snapshot.paramMap.get("mapId");
+    const mapID = +this.route.snapshot.paramMap.get("mapId");
     if (emdbId) {
       this.biomoleculeSearchService
         .getBiomolecule(emdbId)
@@ -64,6 +64,18 @@ export class SearchResultComponent implements OnInit {
         .then(response => {
           this.setValues(response);
         });
+      this.biomoleculeSearchService
+        .getSimilarBioMolecules(
+          emdbId,
+          contourRepresentation,
+          this.volumeFilter === "On",
+          minRes,
+          maxRes
+        )
+        .then(response => {
+          this.results = response.results;
+          this.filename_result = response.path;
+        });
       this.isSearchById = true;
     } else {
       this.filename = this.route.snapshot.queryParamMap.get("filename");
@@ -72,23 +84,19 @@ export class SearchResultComponent implements OnInit {
         .then(response => {
           this.setValues(response);
         });
+      this.biomoleculeSearchService
+        .getSimilarBioMoleculesByMap(
+          mapID,
+          contourRepresentation,
+          this.volumeFilter === "On",
+          minRes,
+          maxRes
+        )
+        .then(response => {
+          this.results = response.results;
+          this.filename_result = response.path;
+        });
     }
-    this.biomoleculeSearchService
-      .getSimilarBioMolecules(
-        559,
-        5,
-        this.volumeFilter === "On",
-        minRes,
-        maxRes
-      )
-      .then(response => {
-        this.results = response.results;
-        this.filename_result = response.path;
-      });
-    // dont forget to include the results file id
-    this.downloadResultFile = this.fileDownloadService.getSearchResultFilePath(
-      144
-    );
   }
 
   private initChart(context: ElementRef) {
