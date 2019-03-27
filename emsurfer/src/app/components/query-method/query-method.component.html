@@ -6,7 +6,7 @@
       class="custom-control-input"
       id="emdb"
       [checked]="cbEmdb"
-      (change)="cbEmdbChange()"
+      (click)="cbEmdbChange()"
     />
     <label class="custom-control-label" for="emdb">EMDB ID entry</label>
   </div>
@@ -16,7 +16,7 @@
       class="custom-control-input"
       id="fileupload"
       [checked]="!cbEmdb"
-      (change)="cbEmdbChange()"
+      (click)="cbEmdbChange()"
     />
     <label class="custom-control-label" for="fileupload"
       >Upload an EM map</label
