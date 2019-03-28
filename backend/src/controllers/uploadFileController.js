@@ -1,6 +1,5 @@
 const fs = require("fs");
-const files = require("../models/files");
-const sequelize = require("../database").sequelize;
+const files = require("../models/filesModel");
 var mkdirp = require("mkdirp");
 
 exports.uploadFileEmMap = async (req, res, next) => {

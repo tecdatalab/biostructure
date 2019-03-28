@@ -1,6 +1,5 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../database').sequelize;
-const Op = require('../database').Op;
 
 const files = sequelize.define('files', {
   id: {

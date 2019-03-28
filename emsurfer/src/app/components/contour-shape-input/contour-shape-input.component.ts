@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ContourRepresentationService } from '../../services/contour-representation.service';
+import { ContourRepresentation } from '../../models/contour-representation';
 
 @Component({
   selector: 'app-contour-shape-input',
@@ -8,16 +9,24 @@ import { ContourRepresentationService } from '../../services/contour-representat
 })
 export class ContourShapeInputComponent implements OnInit {
   @Input() parentForm: FormGroup;
-  countourRepresentations: Array<string>;
+  contourRepresentations: ContourRepresentation[];
   constructor(
     private contourRepresentationService: ContourRepresentationService
   ) {}
 
   ngOnInit() {
-    this.countourRepresentations = this.contourRepresentationService.getContourShapes();
+    this.contourRepresentationService
+      .getContourShapes()
+      .then((data: ContourRepresentation[]) => {
+        this.contourRepresentations = data;
+      });
   }
 
   dummyFunc() {
-    this.countourRepresentations = this.contourRepresentationService.getContourShapes();
+    this.contourRepresentationService
+      .getContourShapes()
+      .then((data: ContourRepresentation[]) => {
+        this.contourRepresentations = data;
+      });
   }
 }

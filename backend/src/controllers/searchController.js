@@ -1,4 +1,4 @@
-const biomolecule = require("../models/biomolecule");
+const biomolecule = require("../models/biomoleculeModel");
 const sequelize = require("../database").sequelize;
 
 exports.searchByID = async (req, res, next) => {

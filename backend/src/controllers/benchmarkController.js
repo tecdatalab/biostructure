@@ -1,5 +1,4 @@
-const benchmark = require("../models/benchmark");
-const sequelize = require("../database").sequelize;
+const benchmark = require("../models/benchmarkModel");
 const fs = require("fs");
 var mkdirp = require("mkdirp");
 const zipFolder = require("zip-a-folder");
