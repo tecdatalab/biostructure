@@ -14,6 +14,7 @@ import { QueryMethodComponent } from "../query-method/query-method.component";
 import { ResolutionFilterComponent } from "../resolution-filter/resolution-filter.component";
 import { FileUploadService } from "../../services/file-upload.service";
 import { Router } from "@angular/router";
+import { HttpClientModule } from "@angular/common/http";
 
 class MockRouter {
   navigate(urls: string[], extras: string) {
@@ -39,7 +40,7 @@ describe("SearchFormComponent", () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule],
+      imports: [ReactiveFormsModule, HttpClientModule],
       declarations: [
         SearchFormComponent,
         ContourShapeInputComponent,

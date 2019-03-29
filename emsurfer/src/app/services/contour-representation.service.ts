@@ -16,7 +16,6 @@ export class ContourRepresentationService {
       .get(this.API_URL + "/contour")
       .toPromise()
       .then((response: ContourRepresentation[]) => {
-        console.log(response);
         return response;
       })
       .catch(this.handleError);
