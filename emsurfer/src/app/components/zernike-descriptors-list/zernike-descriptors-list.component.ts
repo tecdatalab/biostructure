@@ -1,9 +1,9 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: "app-zernike-descriptors-list",
-  templateUrl: "./zernike-descriptors-list.component.html",
-  styleUrls: ["zernike-descriptors-list.component.css"]
+  selector: 'app-zernike-descriptors-list',
+  templateUrl: './zernike-descriptors-list.component.html',
+  styleUrls: ['zernike-descriptors-list.component.css']
 })
 export class ZernikeDescriptorsListComponent {
   @Input() descriptors: number[];
@@ -11,13 +11,14 @@ export class ZernikeDescriptorsListComponent {
   constructor() {}
 
   cpyToClipboard() {
-    const el = document.createElement("input");
+    const el = document.createElement('textarea');
     el.value = this.values.toString();
-    el.value.replace(",", "\n");
-    el.setAttribute("readonly", "");
+    el.value = el.value.replace(/,/g, '\n');
+    console.log(el.value);
+    el.setAttribute('readonly', '');
     document.body.appendChild(el);
     el.select();
-    document.execCommand("copy");
+    document.execCommand('copy');
     document.body.removeChild(el);
   }
 }
