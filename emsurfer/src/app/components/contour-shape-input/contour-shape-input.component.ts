@@ -1,11 +1,11 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
-import { ContourRepresentationService } from '../../services/contour-representation.service';
-import { ContourRepresentation } from '../../models/contour-representation';
+import { Component, OnInit, Input } from "@angular/core";
+import { FormGroup } from "@angular/forms";
+import { ContourRepresentationService } from "../../services/contour-representation.service";
+import { ContourRepresentation } from "../../models/contour-representation";
 
 @Component({
-  selector: 'app-contour-shape-input',
-  templateUrl: './contour-shape-input.component.html'
+  selector: "app-contour-shape-input",
+  templateUrl: "./contour-shape-input.component.html"
 })
 export class ContourShapeInputComponent implements OnInit {
   @Input() parentForm: FormGroup;
@@ -15,14 +15,6 @@ export class ContourShapeInputComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.contourRepresentationService
-      .getContourShapes()
-      .then((data: ContourRepresentation[]) => {
-        this.contourRepresentations = data;
-      });
-  }
-
-  dummyFunc() {
     this.contourRepresentationService
       .getContourShapes()
       .then((data: ContourRepresentation[]) => {
