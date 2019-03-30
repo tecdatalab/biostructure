@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { FileUploadService } from "src/app/services/file-upload.service";
+import { CheckerService } from "src/app/services/checker.service";
 
 @Component({
   selector: "app-search-form",
@@ -14,14 +15,15 @@ export class SearchFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private fileUploadService: FileUploadService
+    private fileUploadService: FileUploadService,
+    private checkerService: CheckerService
   ) {}
 
   ngOnInit() {
     const queryGroup = this.fb.group({
       search_by_emdb_id: true,
       emdb_id: [
-        "1884",
+        "1882",
         [
           Validators.required,
           Validators.minLength(4),
@@ -51,17 +53,23 @@ export class SearchFormComponent implements OnInit {
 
   submitHandler() {
     if (this.searchForm.get("query").get("search_by_emdb_id").value) {
-      const url = "result/" + this.searchForm.get("query").get("emdb_id").value;
-      const params = {
-        contourRepresentation: this.searchForm.get("contour_representation")
-          .value,
-        volumeFilter: this.searchForm.get("volume_filter").value,
-        minResolution: this.searchForm.get("resolution_filter").get("min")
-          .value,
-        maxResolution: this.searchForm.get("resolution_filter").get("max").value
-      };
-      this.router.navigate([url], {
-        queryParams: params
+      const emdbID = this.searchForm.get("query").get("emdb_id").value;
+      this.checkerService.checkBiomolecule(emdbID).then((response: number) => {
+        if (response) {
+          const url = "result/" + emdbID;
+          const params = {
+            contourRepresentation: this.searchForm.get("contour_representation")
+              .value,
+            volumeFilter: this.searchForm.get("volume_filter").value,
+            minResolution: this.searchForm.get("resolution_filter").get("min")
+              .value,
+            maxResolution: this.searchForm.get("resolution_filter").get("max")
+              .value
+          };
+          this.router.navigate([url], {
+            queryParams: params
+          });
+        }
       });
     } else {
       const url = "result/emMap";

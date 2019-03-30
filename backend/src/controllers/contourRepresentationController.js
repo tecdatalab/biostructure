@@ -6,17 +6,15 @@ exports.getContourRepresentation = async (req, res, next) => {
     let contours = await contourRepresentation.findAll({});
     if (!contours) {
       console.log("Contours Representation not found.");
-      res.status(500).json({
-        msg: "Contours Representation not found.",
-        details: err
+      res.status(400).send({
+        message: "Contours Representation not found."
       });
     } else {
       res.status(200).json(contours);
     }
   } catch (err) {
-    res.status(204).json({
-      msg: "Backend error",
-      details: err
+    res.status(500).send({
+      message: "Backend error"
     });
   }
 };

@@ -26,19 +26,17 @@ exports.batchQuery = async (req, res, next) => {
               };
               res.status(200).json(resJSON);
             } else {
-              console.log("Error");
-              res.status(204).json({
-                msg: "ERROR: I/O error.",
-                details: response
+              console.log("I/O Error");
+              res.status(500).send({
+                message: "I/O Server error"
               });
             }
           });
         });
       });
   } catch (err) {
-    res.status(204).json({
-      msg: "ERROR",
-      details: err
+    res.status(500).send({
+      message: "Backend error"
     });
   }
 };

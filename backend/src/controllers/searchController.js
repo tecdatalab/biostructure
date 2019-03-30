@@ -11,17 +11,15 @@ exports.searchByID = async (req, res, next) => {
     });
     if (!biomolecules) {
       console.log("Biomolecule " + emdbid + " not found.");
-      res.status(500).json({
-        msg: "Biomolecule " + emdbid + " not found.",
-        details: err
+      res.status(400).send({
+        message: "Biomolecule " + emdbid + " not found."
       });
     } else {
       res.status(200).json(biomolecules);
     }
   } catch (err) {
-    res.status(204).json({
-      msg: "Backend error",
-      details: err
+    res.status(500).send({
+      message: "Backend error"
     });
   }
 };
@@ -40,9 +38,8 @@ exports.searchResult = async (req, res, next) => {
     };
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({
-      msg: "Biomolecule not found",
-      details: err
+    res.status(500).send({
+      message: "Backend error"
     });
   }
 };
@@ -61,9 +58,8 @@ exports.searchResultMap = async (req, res, next) => {
     };
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({
-      msg: "Biomolecule not found",
-      details: err
+    res.status(500).send({
+      message: "Backend error"
     });
   }
 };

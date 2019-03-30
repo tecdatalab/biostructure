@@ -1,12 +1,16 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { ErrorHandlerService } from "./error-handler.service";
 import config from "../../config.json";
 
 @Injectable({
   providedIn: "root"
 })
 export class FileUploadService {
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private errorHandlerService: ErrorHandlerService
+  ) {}
 
   API_URL = config.api_url;
 
@@ -19,6 +23,6 @@ export class FileUploadService {
       .post(this.API_URL + "/upload/EmMap", body)
       .toPromise()
       .then((data: number) => data)
-      .catch();
+      .catch(this.errorHandlerService.handleError);
   }
 }

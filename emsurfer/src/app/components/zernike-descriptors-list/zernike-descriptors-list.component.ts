@@ -14,7 +14,6 @@ export class ZernikeDescriptorsListComponent {
     const el = document.createElement('textarea');
     el.value = this.values.toString();
     el.value = el.value.replace(/,/g, '\n');
-    console.log(el.value);
     el.setAttribute('readonly', '');
     document.body.appendChild(el);
     el.select();

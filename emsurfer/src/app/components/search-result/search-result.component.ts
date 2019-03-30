@@ -1,17 +1,17 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Chart } from 'chart.js';
-import { BiomoleculeSearchService } from '../../services/biomolecule-search.service';
-import { Biomolecule } from 'src/app/models/biomolecule';
-import { BiomoleculeComparison } from 'src/app/models/biomolecule-comparison';
+import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { Chart } from "chart.js";
+import { BiomoleculeSearchService } from "../../services/biomolecule-search.service";
+import { Biomolecule } from "src/app/models/biomolecule";
+import { BiomoleculeComparison } from "src/app/models/biomolecule-comparison";
 
 @Component({
-  selector: 'app-search-result',
-  templateUrl: './search-result.component.html',
+  selector: "app-search-result",
+  templateUrl: "./search-result.component.html",
   providers: [BiomoleculeSearchService]
 })
 export class SearchResultComponent implements OnInit {
-  @ViewChild('canvas') canvasElementRef: ElementRef;
+  @ViewChild("canvas") canvasElementRef: ElementRef;
   chart: Chart;
   biomolecule: Biomolecule;
   filename: string;
@@ -36,14 +36,14 @@ export class SearchResultComponent implements OnInit {
   }
 
   private load() {
-    const emdbId = +this.route.snapshot.paramMap.get('emdbId') || null;
+    const emdbId = +this.route.snapshot.paramMap.get("emdbId") || null;
     const contourRepresentation = +this.route.snapshot.queryParamMap.get(
-      'contourRepresentation'
+      "contourRepresentation"
     );
-    const minRes = +this.route.snapshot.queryParamMap.get('minRes');
-    const maxRes = +this.route.snapshot.queryParamMap.get('maxRes');
-    this.volumeFilter = this.route.snapshot.queryParamMap.get('volumeFilter');
-    const mapID = +this.route.snapshot.paramMap.get('mapId');
+    const minRes = +this.route.snapshot.queryParamMap.get("minRes");
+    const maxRes = +this.route.snapshot.queryParamMap.get("maxRes");
+    this.volumeFilter = this.route.snapshot.queryParamMap.get("volumeFilter");
+    const mapID = +this.route.snapshot.paramMap.get("mapId");
     if (emdbId) {
       this.biomoleculeSearchService
         .getBiomolecule(emdbId)
@@ -59,7 +59,7 @@ export class SearchResultComponent implements OnInit {
         .getSimilarBioMolecules(
           emdbId,
           contourRepresentation,
-          this.volumeFilter === 'On',
+          this.volumeFilter === "On",
           minRes,
           maxRes
         )
@@ -69,7 +69,7 @@ export class SearchResultComponent implements OnInit {
         });
       this.isSearchById = true;
     } else {
-      this.filename = this.route.snapshot.queryParamMap.get('filename');
+      this.filename = this.route.snapshot.queryParamMap.get("filename");
       this.biomoleculeSearchService
         .getZernikeDescriptors(emdbId, contourRepresentation)
         .then(response => {
@@ -79,7 +79,7 @@ export class SearchResultComponent implements OnInit {
         .getSimilarBioMoleculesByMap(
           mapID,
           contourRepresentation,
-          this.volumeFilter === 'On',
+          this.volumeFilter === "On",
           minRes,
           maxRes
         )
@@ -92,13 +92,13 @@ export class SearchResultComponent implements OnInit {
 
   private initChart(context: ElementRef) {
     this.chart = new Chart(context, {
-      type: 'line',
+      type: "line",
       data: {
         labels: this.descriptors,
         datasets: [
           {
             data: this.values,
-            borderColor: 'black',
+            borderColor: "black",
             fill: false
           }
         ]
@@ -113,7 +113,7 @@ export class SearchResultComponent implements OnInit {
               display: true,
               scaleLabel: {
                 display: true,
-                labelString: 'Zernike Descriptor Number',
+                labelString: "Zernike Descriptor Number",
                 fontSize: 24
               }
             }
@@ -123,7 +123,7 @@ export class SearchResultComponent implements OnInit {
               display: true,
               scaleLabel: {
                 display: true,
-                labelString: 'Value',
+                labelString: "Value",
                 fontSize: 24
               }
             }
