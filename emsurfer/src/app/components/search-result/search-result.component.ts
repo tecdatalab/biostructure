@@ -40,8 +40,8 @@ export class SearchResultComponent implements OnInit {
     const contourRepresentation = +this.route.snapshot.queryParamMap.get(
       "contourRepresentation"
     );
-    const minRes = +this.route.snapshot.queryParamMap.get("minRes");
-    const maxRes = +this.route.snapshot.queryParamMap.get("maxRes");
+    const minRes = +this.route.snapshot.queryParamMap.get("minResolution");
+    const maxRes = +this.route.snapshot.queryParamMap.get("maxResolution");
     this.volumeFilter = this.route.snapshot.queryParamMap.get("volumeFilter");
     const mapID = +this.route.snapshot.paramMap.get("mapId");
     if (emdbId) {

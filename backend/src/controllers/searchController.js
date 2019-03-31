@@ -1,5 +1,6 @@
 const biomolecule = require("../models/biomoleculeModel");
 const sequelize = require("../database").sequelize;
+const Op = require("../database").Op;
 
 exports.searchByID = async (req, res, next) => {
   emdbid = req.params.emdbID;
@@ -31,7 +32,7 @@ exports.searchResult = async (req, res, next) => {
   minRes = req.params.minRes;
   maxRes = req.params.maxRes;
   try {
-    let array_results = await getBiomolecules();
+    let array_results = await getBiomolecules(minRes, maxRes);
     let result = {
       path: "/results/result.hit",
       results: array_results
@@ -51,7 +52,7 @@ exports.searchResultMap = async (req, res, next) => {
   minRes = req.params.minRes;
   maxRes = req.params.maxRes;
   try {
-    let array_results = await getBiomolecules();
+    let array_results = await getBiomolecules(minRes, maxRes);
     let result = {
       path: "/results/result.hit",
       results: array_results
@@ -80,11 +81,17 @@ exports.zernikeMap = async (req, res, next) => {
   res.status(200).json(response);
 };
 
-async function getBiomolecules() {
+async function getBiomolecules(minRes, maxRes) {
+  console.log("Min res: " + minRes);
+  console.log("Max res: " + maxRes);
   try {
     let biomolecules = await biomolecule.findAll({
-      limit: 8,
-      order: [sequelize.random()]
+      where: {
+        volume: {
+          [Op.gte]: minRes,
+          [Op.lte]: maxRes
+        }
+      }
     });
     let resultArray = [];
     biomolecules.forEach(biomoleculeItem => {

@@ -22,6 +22,8 @@ export class ContourRepresentationService {
       .then((response: ContourRepresentation[]) => {
         return response;
       })
-      .catch(this.errorHandlerService.handleError);
+      .catch(err => {
+        this.errorHandlerService.handleError(err);
+      });
   }
 }
