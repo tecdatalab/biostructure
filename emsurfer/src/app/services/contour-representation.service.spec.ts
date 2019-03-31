@@ -5,6 +5,11 @@ import {
   HttpTestingController
 } from "@angular/common/http/testing";
 import { ContourRepresentation } from "../models/contour-representation";
+import { ErrorHandlerService } from "./error-handler.service";
+
+class MockErrorHandlerService {
+  handleError(error: any) {}
+}
 
 describe("ContourRepresentationService", () => {
   let injector: TestBed;
@@ -14,7 +19,10 @@ describe("ContourRepresentationService", () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [ContourRepresentationService]
+      providers: [
+        ContourRepresentationService,
+        { provide: ErrorHandlerService, useClass: MockErrorHandlerService }
+      ]
     });
     injector = getTestBed();
     service = injector.get(ContourRepresentationService);

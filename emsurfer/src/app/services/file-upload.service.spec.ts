@@ -5,6 +5,11 @@ import {
   HttpTestingController
 } from "@angular/common/http/testing";
 import { FileUploadService } from "./file-upload.service";
+import { ErrorHandlerService } from "./error-handler.service";
+
+class MockErrorHandlerService {
+  handleError(error: any) {}
+}
 
 describe("FileUploadService", () => {
   let injector: TestBed;
@@ -14,7 +19,10 @@ describe("FileUploadService", () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [FileUploadService]
+      providers: [
+        FileUploadService,
+        { provide: ErrorHandlerService, useClass: MockErrorHandlerService }
+      ]
     });
     injector = getTestBed();
     service = injector.get(FileUploadService);

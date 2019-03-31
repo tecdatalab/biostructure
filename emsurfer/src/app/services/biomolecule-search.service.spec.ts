@@ -7,6 +7,11 @@ import { BiomoleculeSearchService } from "./biomolecule-search.service";
 import { Biomolecule } from "../models/biomolecule";
 import { SearchResult } from "../models/search-result";
 import { BenchmarkResult } from "../models/benchmark-result";
+import { ErrorHandlerService } from "./error-handler.service";
+
+class MockErrorHandlerService {
+  handleError(error: any) {}
+}
 
 describe("BiomoleculeSearchService", () => {
   let injector: TestBed;
@@ -16,7 +21,10 @@ describe("BiomoleculeSearchService", () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [BiomoleculeSearchService]
+      providers: [
+        BiomoleculeSearchService,
+        { provide: ErrorHandlerService, useClass: MockErrorHandlerService }
+      ]
     });
     injector = getTestBed();
     service = injector.get(BiomoleculeSearchService);
