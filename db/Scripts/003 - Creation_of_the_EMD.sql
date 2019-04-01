@@ -20,7 +20,7 @@ CREATE TABLE emd_entry(
 	acronym TEXT NOT NULL,
 	volume FLOAT8 NOT NULL,
 	resolution FLOAT8 NOT NULL,
-	image_url TEXT NOT NULL,
+	image_url TEXT,
 	xml_url TEXT NOT NULL,
 	map_url TEXT NOT NULL,
 	map_information_id INT REFERENCES map_information(id) NOT NULL
