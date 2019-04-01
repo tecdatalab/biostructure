@@ -4,7 +4,10 @@ Created on 22 feb. 2019
 @author: luis98
 '''
 from psycopg2 import sql
+import requests
 import json
+from os import remove
+from xml.dom import minidom
 
 class Map_information(object):
     '''
@@ -83,8 +86,226 @@ class Map_information(object):
         self.__map_pixel_z = map_pixel_z
         self.__map_countour_level = map_countour_level
         self.__map_annotation_details = map_annotation_details
-
-
+        
+    def create_map_by_file(self, file):
+        doc = minidom.parse(file)
+    
+        try:
+            fileInformationElement = doc.getElementsByTagName("file")[0]
+            self.__map_file_information = {'format':fileInformationElement.getAttribute("format"),
+                                'sizeKb':int(fileInformationElement.getAttribute("sizeKb")),
+                                'type':fileInformationElement.getAttribute("type"),
+                                'file':fileInformationElement.firstChild.data}
+        except:
+            self.__map_file_information = None
+        
+        try:
+            dataTypeElement = doc.getElementsByTagName("dataType")[0]
+            self.__map_data_type = dataTypeElement.firstChild.data
+        except:
+            self.__map_data_type = None
+        
+        try:
+            numColumnsElement = doc.getElementsByTagName("numColumns")[0]
+            self.__map_num_columns = int(numColumnsElement.firstChild.data)
+        except:
+            self.__map_num_columns = None
+        
+        try:
+            numRowsElement = doc.getElementsByTagName("numRows")[0]
+            self.__map_num_rows = int(numRowsElement.firstChild.data)
+        except:
+            self.__map_num_rows = None
+    
+        try:
+            numSectionsElement = doc.getElementsByTagName("numSections")[0]
+            self.__map_num_sections = int(numSectionsElement.firstChild.data)
+        except:
+            self.__map_num_sections = None
+        
+        try:
+            originColElement = doc.getElementsByTagName("originCol")[0]
+            self.__map_origin_col = float(originColElement.firstChild.data)
+        except:
+            self.__map_origin_col = None    
+        
+        try:
+            originRowElement = doc.getElementsByTagName("originRow")[0]
+            self.__map_origin_row = float(originRowElement.firstChild.data)
+        except:
+            self.__map_origin_row = None
+        
+        try:
+            originSecElement = doc.getElementsByTagName("originSec")[0]
+            self.__map_origin_sec = float(originSecElement.firstChild.data)
+        except:
+            self.__map_origin_sec = None
+            
+        try:
+            limitColElement = doc.getElementsByTagName("limitCol")[0]
+            self.__map_limit_col = float(limitColElement.firstChild.data)
+        except:
+            self.__map_limit_col = None
+        
+        try:
+            limitRowElement = doc.getElementsByTagName("limitRow")[0]
+            self.__map_limit_row = float(limitRowElement.firstChild.data)
+        except:
+            self.__map_limit_row = None
+        
+        try:
+            limitSecElement = doc.getElementsByTagName("limitSec")[0]
+            self.__map_limit_sec = float(limitSecElement.firstChild.data)
+        except:
+            self.__map_limit_sec = None
+        
+        try:
+            spacingColElement = doc.getElementsByTagName("spacingCol")[0]
+            self.__map_spacing_col = int(spacingColElement.firstChild.data)
+        except:
+            self.__map_spacing_col = None
+        
+        try:
+            spacingRowElement = doc.getElementsByTagName("spacingRow")[0]
+            self.__map_spacing_row = int(spacingRowElement.firstChild.data)
+        except:
+            self.__map_spacing_row = None
+        
+        try:
+            spacingSecElement = doc.getElementsByTagName("spacingSec")[0]
+            self.__map_spacing_sec = int(spacingSecElement.firstChild.data)
+        except:
+            self.__map_spacing_sec = None
+        
+        try:
+            cellAElement = doc.getElementsByTagName("cellA")[0]
+            self.__map_cell_a = {'units':cellAElement.getAttribute("units"),
+                      'value':float(cellAElement.firstChild.data)}
+        except:
+            self.__map_cell_a = None
+        
+        try:
+            cellBElement = doc.getElementsByTagName("cellB")[0]
+            self.__map_cell_b = {'units':cellBElement.getAttribute("units"),
+                      'value':float(cellBElement.firstChild.data)}
+        except:
+            self.__map_cell_b = None
+        
+        try:
+            cellCElement = doc.getElementsByTagName("cellC")[0]
+            self.__map_cell_c = {'units':cellCElement.getAttribute("units"),
+                      'value':float(cellCElement.firstChild.data)}
+        except:
+            self.__map_cell_c = None
+        
+        try:
+            cellAlphaElement = doc.getElementsByTagName("cellAlpha")[0]
+            self.__map_cell_alpha = {'units':cellAlphaElement.getAttribute("units"),
+                          'value':float(cellAlphaElement.firstChild.data)}
+        except:
+            self.__map_cell_alpha = None
+        
+        try:
+            cellBetaElement = doc.getElementsByTagName("cellBeta")[0]
+            self.__map_cell_beta = {'units':cellBetaElement.getAttribute("units"),
+                         'value':float(cellBetaElement.firstChild.data)}
+        except:
+            self.__map_cell_beta = None
+        
+        try:
+            cellGammaElement = doc.getElementsByTagName("cellGamma")[0]
+            self.__map_cell_gamma = {'units':cellGammaElement.getAttribute("units"),
+                          'value':float(cellGammaElement.firstChild.data)}
+        except:
+            self.__map_cell_gamma = None
+        
+        try:
+            axisOrderFastElement = doc.getElementsByTagName("axisOrderFast")[0]
+            self.__map_axis_order_fast = axisOrderFastElement.firstChild.data
+        except:
+            self.__map_axis_order_fast = None
+        
+        try:
+            axisOrderMediumElement = doc.getElementsByTagName("axisOrderMedium")[0]
+            self.__map_axis_order_medium = axisOrderMediumElement.firstChild.data
+        except:
+            self.__map_axis_order_medium = None
+        
+        try:
+            axisOrderSlowElement = doc.getElementsByTagName("axisOrderSlow")[0]
+            self.__map_axis_order_slow = axisOrderSlowElement.firstChild.data
+        except:
+            self.__map_axis_order_slow = None
+        
+        try:
+            minimuElement = doc.getElementsByTagName("minimum")[0]
+            self.__map_minimum = float(minimuElement.firstChild.data)
+        except:
+            self.__map_minimum = None
+        
+        try:
+            maximumElement = doc.getElementsByTagName("maximum")[0]
+            self.__map_maximum = float(maximumElement.firstChild.data)
+        except:
+            self.__map_maximum = None
+        
+        try:
+            averageElement = doc.getElementsByTagName("average")[0]
+            self.__map_average = float(averageElement.firstChild.data)
+        except:
+            self.__map_average = None
+        
+        try:
+            stdElement = doc.getElementsByTagName("std")[0]
+            self.__map_std = float(stdElement.firstChild.data)
+        except:
+            self.__map_std = None
+        
+        try:
+            spaceGroupNumberElement = doc.getElementsByTagName("spaceGroupNumber")[0]
+            self.__map_space_group_number = int(spaceGroupNumberElement.firstChild.data)
+        except:
+            self.__map_space_group_number = None
+        
+        try:
+            detailsElement = doc.getElementsByTagName("details")[0]
+            self.__map_details = detailsElement.firstChild.data
+        except:
+            self.__map_details = None
+        
+        try:
+            pixelXElement = doc.getElementsByTagName("pixelX")[0]
+            self.__map_pixel_x = {'units':pixelXElement.getAttribute("units"),
+                       'value':float(pixelXElement.firstChild.data)}
+        except:
+            self.__map_pixel_x = None
+        
+        try:
+            pixelYElement = doc.getElementsByTagName("pixelY")[0]
+            self.__map_pixel_y = {'units':pixelYElement.getAttribute("units"),
+                       'value':float(pixelYElement.firstChild.data)}
+        except:
+            self.__map_pixel_y = None
+        
+        try:
+            pixelZElement = doc.getElementsByTagName("pixelZ")[0]
+            self.__map_pixel_z = {'units':pixelZElement.getAttribute("units"),
+                       'value':float(pixelZElement.firstChild.data)}
+        except:
+            self.__map_pixel_z = None
+        
+        try:
+            countourLevelElement = doc.getElementsByTagName("contourLevel")[0]
+            self.__map_countour_level = float(countourLevelElement.firstChild.data)
+        except:
+            self.__map_countour_level = None
+        
+        try:
+            annotationDetailsElement = doc.getElementsByTagName("annotationDetails")[0]
+            self.__map_annotation_details = annotationDetailsElement.firstChild.data
+        except:
+            self.__map_annotation_details = None
+    
     def get_map_id(self):
         return self.__map_id
 
@@ -554,7 +775,7 @@ class Emd_entry(Map_information):
     __xml_url = None
     __map_url = None
 
-    def __init__(self, id, full_name, acronym, volume, resolution, image_url, xml_url, map_url, map_id, map_file_information, map_data_type, map_num_columns, map_num_rows, map_num_sections, map_origin_col, map_origin_row, map_origin_sec, map_limit_col, map_limit_row, map_limit_sec, map_spacing_col, map_spacing_row, map_spacing_sec, map_cell_a, map_cell_b, map_cell_c, map_cell_alpha, map_cell_beta, map_cell_gamma, map_axis_order_fast, map_axis_order_medium, map_axis_order_slow, map_minimum, map_maximum, map_average, map_std, map_space_group_number, map_details, map_pixel_x, map_pixel_y, map_pixel_z, map_countour_level, map_annotation_details):
+    def __init__(self, id=None, full_name=None, acronym=None, volume=None, resolution=None, image_url=None, xml_url=None, map_url=None, map_id=None, map_file_information=None, map_data_type=None, map_num_columns=None, map_num_rows=None, map_num_sections=None, map_origin_col=None, map_origin_row=None, map_origin_sec=None, map_limit_col=None, map_limit_row=None, map_limit_sec=None, map_spacing_col=None, map_spacing_row=None, map_spacing_sec=None, map_cell_a=None, map_cell_b=None, map_cell_c=None, map_cell_alpha=None, map_cell_beta=None, map_cell_gamma=None, map_axis_order_fast=None, map_axis_order_medium=None, map_axis_order_slow=None, map_minimum=None, map_maximum=None, map_average=None, map_std=None, map_space_group_number=None, map_details=None, map_pixel_x=None, map_pixel_y=None, map_pixel_z=None, map_countour_level=None, map_annotation_details=None):
         Map_information.__init__(self, 
             map_id, map_file_information, map_data_type, map_num_columns, map_num_rows, map_num_sections, map_origin_col, map_origin_row, map_origin_sec, map_limit_col, map_limit_row, map_limit_sec, map_spacing_col, map_spacing_row, map_spacing_sec, map_cell_a, map_cell_b, map_cell_c, map_cell_alpha, map_cell_beta, map_cell_gamma, map_axis_order_fast, map_axis_order_medium, map_axis_order_slow, map_minimum, map_maximum, map_average, map_std, map_space_group_number, map_details, map_pixel_x, map_pixel_y, map_pixel_z, map_countour_level, map_annotation_details)
         self.__id = id
@@ -566,7 +787,56 @@ class Emd_entry(Map_information):
         self.__xml_url = xml_url
         self.__map_url = map_url
         
+    
+    def create_by_ftp(self,emd_id,ftp_connection):
+        URL = "http://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/header/emd-{0}.xml".format(emd_id)
+        response = requests.get(URL)
+        with open('{0}.xml'.format(emd_id), 'wb') as file:
+            file.write(response.content)
+        have_image = True
         
+        try:
+            ftp_connection.voidcmd("MDTM EMD-{0}/images/emd_{0}.png".format(emd_id))
+        except:
+            have_image = False
+        
+        self.create_emd_by_file("{0}.xml".format(emd_id), emd_id, have_image)
+        remove("{0}.xml".format(emd_id))
+        
+    def create_emd_by_file(self, file, emd_id, have_image):
+        self.create_map_by_file(file)
+        self.__id = emd_id
+        
+        doc = minidom.parse(file)
+        
+        try:
+            nameInformationElement = doc.getElementsByTagName("title")[0]
+            self.__full_name = nameInformationElement.firstChild.data
+            self.__acronym = nameInformationElement.firstChild.data[::10]
+        except:
+            self.__full_name = None
+            self.__acronym = None
+        
+        try:
+            volumeInformationElement = doc.getElementsByTagName("volume")[0]
+            self.__volume = volumeInformationElement.firstChild.data
+        except:
+            self.__volume = None
+        
+        try:
+            volumeInformationElement = doc.getElementsByTagName("resolutionByAuthor")[0]
+            self.__resolution = volumeInformationElement.firstChild.data
+        except:
+            self.__resolution = None
+            
+        if have_image == True:
+            self.__image_url = "http://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/images/emd_{0}.png".format(emd_id)
+        else:
+            self.__image_url = None
+        self.__xml_url = "http://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/header/emd-{0}.xml".format(emd_id)
+        self.__map_url = "http://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/map/emd_{0}.map.gz".format(emd_id)
+        
+    
     def __insert_map_db(self, cur):
         cur.execute(sql.SQL("INSERT INTO map_information (id,file_information,data_type,num_columns,num_rows,num_sections,origin_col,origin_row,origin_sec,limit_col,limit_row,limit_sec,spacing_col,spacing_row,spacing_sec,cell_a,cell_b,cell_c,cell_alpha,cell_beta,cell_gamma,axis_order_fast,axis_order_medium,axis_order_slow,minimum,maximum,average,std,space_group_number,details,pixel_x,pixel_y,pixel_z,countour_level,annotation_details) VALUES (DEFAULT,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id;")
         ,[json.dumps(self.map_file_information),self.map_data_type,

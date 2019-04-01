@@ -37,10 +37,16 @@ class FTP_connection(object):
         
     def get_all_emds_id(self):
         files = []
+        result = []
         self.__ftp.retrlines("NLST",files.append)
         for i in range(len(files)):
-            files[i] = files[i].replace("EMD-", "")
-        return files
+            try:
+                self.__ftp.voidcmd("MDTM EMD-{0}/map/emd_{0}.map.gz".format(files[i].replace("EMD-", "")))
+                result.append(files[i].replace("EMD-", ""))
+            except:
+                pass
+            
+            return result
     
     
     def get_emds_higher_than_date(self,date):
