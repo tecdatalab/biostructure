@@ -113,5 +113,47 @@ export class SearchFormComponent implements OnInit {
 
   reset() {
     this.searchForm.reset(this.defaultFormState);
+    this.searchForm
+      .get("query")
+      .get("emdb_id")
+      .setValidators([
+        Validators.required,
+        Validators.minLength(4),
+        Validators.pattern("^[0-9]*$")
+      ]);
+    this.searchForm
+      .get("query")
+      .get("em_map")
+      .get("file")
+      .setValidators(null);
+    this.searchForm
+      .get("query")
+      .get("em_map")
+      .get("contour_level")
+      .setValidators(null);
+    this.searchForm
+      .get("query")
+      .get("em_map")
+      .get("file")
+      .patchValue(null);
+    this.searchForm
+      .get("query")
+      .get("em_map")
+      .get("filename")
+      .patchValue(null);
+    this.searchForm
+      .get("query")
+      .get("emdb_id")
+      .updateValueAndValidity();
+    this.searchForm
+      .get("query")
+      .get("em_map")
+      .get("contour_level")
+      .updateValueAndValidity();
+    this.searchForm
+      .get("query")
+      .get("em_map")
+      .get("file")
+      .updateValueAndValidity();
   }
 }
