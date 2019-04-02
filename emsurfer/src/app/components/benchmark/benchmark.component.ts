@@ -41,7 +41,8 @@ export class BenchmarkComponent implements OnInit {
 
   reset() {
     this.benchmarkForm.reset(this.defaultFormState);
-    this.cbEmdbList = true;
+    this.cbEmdbList = false;
+    this.cbEmdbListChange();
   }
 
   submitHandler() {
