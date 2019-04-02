@@ -23,7 +23,7 @@ export class SearchFormComponent implements OnInit {
     const queryGroup = this.fb.group({
       search_by_emdb_id: true,
       emdb_id: [
-        "1882",
+        "1884",
         [
           Validators.required,
           Validators.minLength(4),

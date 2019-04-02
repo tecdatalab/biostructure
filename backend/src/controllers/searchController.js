@@ -1,5 +1,4 @@
 const biomolecule = require("../models/biomoleculeModel");
-const sequelize = require("../database").sequelize;
 const Op = require("../database").Op;
 
 exports.searchByID = async (req, res, next) => {
@@ -32,6 +31,8 @@ exports.searchResult = async (req, res, next) => {
   minRes = req.params.minRes;
   maxRes = req.params.maxRes;
   try {
+    minRes = checkMinResolutionFilter(minRes);
+    maxRes = checkMaxResolutionFilter(maxRes);
     let array_results = await getBiomolecules(minRes, maxRes);
     let result = {
       path: "/results/result.hit",
@@ -52,6 +53,8 @@ exports.searchResultMap = async (req, res, next) => {
   minRes = req.params.minRes;
   maxRes = req.params.maxRes;
   try {
+    minRes = checkMinResolutionFilter(minRes);
+    maxRes = checkMaxResolutionFilter(maxRes);
     let array_results = await getBiomolecules(minRes, maxRes);
     let result = {
       path: "/results/result.hit",
@@ -81,9 +84,29 @@ exports.zernikeMap = async (req, res, next) => {
   res.status(200).json(response);
 };
 
+function checkMinResolutionFilter(minRes){
+  if (isNaN(minRes)){
+    /*
+    Search in the database to set the default value of min resolution.
+    */
+    return 2;
+  } else {
+    return parseFloat(minRes);
+  }
+}
+
+function checkMaxResolutionFilter(maxRes){
+  if (isNaN(maxRes)){
+    /*
+    Search in the database to set the default value of max resolution.
+    */
+    return 10;
+  } else {
+    return parseFloat(maxRes);
+  }
+}
+
 async function getBiomolecules(minRes, maxRes) {
-  console.log("Min res: " + minRes);
-  console.log("Max res: " + maxRes);
   try {
     let biomolecules = await biomolecule.findAll({
       where: {
@@ -91,7 +114,8 @@ async function getBiomolecules(minRes, maxRes) {
           [Op.gte]: minRes,
           [Op.lte]: maxRes
         }
-      }
+      },
+      order: [["xml_url", "ASC"]]
     });
     let resultArray = [];
     biomolecules.forEach(biomoleculeItem => {

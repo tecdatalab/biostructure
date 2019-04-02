@@ -68,8 +68,8 @@ export class BiomoleculeSearchService {
     emdbId: number,
     contourRepresentationId: number,
     isVolumeFilterOn: boolean,
-    minRes: number,
-    maxRes: number
+    minRes: string,
+    maxRes: string
   ): Promise<any> {
     return this.httpClient
       .get(
@@ -103,8 +103,8 @@ export class BiomoleculeSearchService {
     emdbId: number,
     contourRepresentationId: number,
     isVolumeFilterOn: boolean,
-    minRes: number,
-    maxRes: number
+    minRes: string,
+    maxRes: string
   ): Promise<any> {
     return this.httpClient
       .get(
