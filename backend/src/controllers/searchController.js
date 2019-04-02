@@ -82,8 +82,6 @@ exports.zernikeMap = async (req, res, next) => {
 };
 
 async function getBiomolecules(minRes, maxRes) {
-  console.log("Min res: " + minRes);
-  console.log("Max res: " + maxRes);
   try {
     let biomolecules = await biomolecule.findAll({
       where: {
@@ -91,7 +89,8 @@ async function getBiomolecules(minRes, maxRes) {
           [Op.gte]: minRes,
           [Op.lte]: maxRes
         }
-      }
+      },
+      order: [["xml_url", "ASC"]]
     });
     let resultArray = [];
     biomolecules.forEach(biomoleculeItem => {
