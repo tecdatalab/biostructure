@@ -118,7 +118,7 @@ describe("SearchFormComponent", () => {
         minResolution: null,
         maxResolution: null
       };
-      const expectedUrl = "result/1882";
+      const expectedUrl = "result/1884";
       expect(router.navigate).toHaveBeenCalledWith([expectedUrl], {
         queryParams: expectedQueryParams
       });

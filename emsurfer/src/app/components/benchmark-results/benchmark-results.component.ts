@@ -33,6 +33,7 @@ export class BenchmarkResultsComponent implements OnInit {
       )
       .then((data: BenchmarkResult) => {
         this.files = data.results;
+        this.files.splice(topResults);
         this.compressedFilePath = data.zipFile;
       });
   }
