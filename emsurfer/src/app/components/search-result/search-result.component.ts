@@ -99,7 +99,8 @@ export class SearchResultComponent implements OnInit {
           {
             data: this.values,
             borderColor: "black",
-            fill: false
+            fill: false,
+            pointRadius: 0
           }
         ]
       },
