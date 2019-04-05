@@ -17,7 +17,7 @@ export class FileUploadService {
   uploadIdListString(idList: string) {
     return 1234;
   }
-
+  
   uploadEmMap(base64File: string, file_name: string): Promise<void | number> {
     const body = {
       file: base64File,
