@@ -1,0 +1,75 @@
+<form [formGroup]="benchmarkForm" (ngSubmit)="submitHandler()"> 
+  <h4 class="text-primary">Submit your EMDB id list in a batch mode</h4>
+  <br />
+  <p><strong class="text-primary">Step 1 (Representation)</strong></p>
+  <app-contour-shape-input
+    [parentForm]="benchmarkForm"
+  ></app-contour-shape-input>
+  <br />
+  <p><strong class="text-primary">Step 2 (Query EMDB ID list)</strong></p>
+  <div class="form-group row">
+    <label class="col-sm-4 col-form-label ">Query method:</label>
+    <div class="custom-control custom-radio col-sm-2 offset-sm-1">
+      <input
+        type="radio"
+        class="custom-control-input"
+        id="emdb"
+        [checked]="cbEmdbList"
+        (change)="cbEmdbListChange()"
+      />
+      <label class="custom-control-label" for="emdb">EMDB ID list</label>
+    </div>
+    <div class="custom-control custom-radio col-sm-3">
+      <input
+        type="radio"
+        class="custom-control-input"
+        id="fileupload"
+        [checked]="!cbEmdbList"
+        (change)="cbEmdbListChange()"
+      />
+      <label class="custom-control-label" for="fileupload"
+        >Upload an ID list</label
+      >
+    </div>
+  </div>
+  <div *ngIf="cbEmdbList">
+    <app-emdb-id-list [parentForm]="benchmarkForm"> </app-emdb-id-list>
+  </div>
+  <div *ngIf="!cbEmdbList">
+    <app-upload-emdb-id-list-file
+      [parentForm]="benchmarkForm"
+    ></app-upload-emdb-id-list-file>
+  </div>
+  <br />
+  <p><strong class="text-primary">Step 3 (Filter)</strong></p>
+  <app-volume-filter-input
+    [parentForm]="benchmarkForm"
+  ></app-volume-filter-input>
+  <br />
+  <p><strong class="text-primary">Step 4 (Results)</strong></p>
+  <div class="form-group row">
+    <label for="contour" class="col-sm-4 col-form-label">Top Results:</label>
+    <div class="col-sm-8">
+      <select
+        formControlName="top_results"
+        class="custom-select mr-sm-2"
+        id="contour"
+      >
+        <option>10</option>
+        <option>20</option>
+        <option>30</option>
+      </select>
+    </div>
+  </div>
+  <br />
+  <div class="form-group row">
+    <div class="col-2 offset-5">
+      <button id="submitButton" type="submit" [disabled]="!benchmarkForm.valid">
+        Submit
+      </button>
+    </div>
+    <div class="col-2">
+      <button id="resetButton" type="button" (click)="reset()">Reset</button>
+    </div>
+  </div>
+</form>
