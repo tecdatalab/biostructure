@@ -5,19 +5,23 @@ router.get("/", (req, res, next) => {
   res.send("search");
 });
 
-router.get(
-  '/:emdbID',
-  searchController.searchByID
-);
+router.get("/:emdbID", searchController.searchByID);
 
 router.get(
-  '/results/:emdbID/:isVolumeFilterOn/:minRes/:maxRes',
+  "/results/:emdbID/:contourShape/:isVolumeFilterOn/:minRes/:maxRes",
   searchController.searchResult
 );
 
 router.get(
-  '/zernike/:emdbID/:contourRepresentation',
-  searchController.zernike
+  "/resultsmap/:emdbID/:contourShape/:isVolumeFilterOn/:minRes/:maxRes",
+  searchController.searchResultMap
+);
+
+router.get("/zernike/:emdbID/:contourRepresentation", searchController.zernike);
+
+router.get(
+  "/zernikemap/:emdbID/:contourRepresentation",
+  searchController.zernikeMap
 );
 
 module.exports = router;

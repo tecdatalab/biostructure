@@ -18,10 +18,11 @@ export class BiomoleculeSearchService {
     return this.httpClient
       .get(this.API_URL + "/search/" + emdbId)
       .toPromise()
-      .then(response => {
-        const object = response as Biomolecule;
-        object.image_url = this.API_URL + object.image_url;
-        return object;
+      .then((response: Biomolecule) => {
+        //const object = response as Biomolecule;
+        console.log(response);
+        response.image_url = this.API_URL + response.image_url;
+        return response;
       })
       .catch(this.handleError);
   }
@@ -40,11 +41,16 @@ export class BiomoleculeSearchService {
   }
 
   getZernikeDescriptorsByMapId(
-    emMapId: number,
-    contourLevel: number,
-    contourRepresentationId: number
-  ) {
-    return [1, 2, 1, 2, 1, 2, 3];
+    mapId: number,
+    contourRepresentation: number
+  ): Promise<any> {
+    return this.httpClient
+      .get(
+        this.API_URL + "/search/zernike/" + mapId + "/" + contourRepresentation
+      )
+      .toPromise()
+      .then()
+      .catch(this.handleError);
   }
 
   getSimilarBioMolecules(
@@ -59,6 +65,40 @@ export class BiomoleculeSearchService {
         this.API_URL +
           "/search/results/" +
           emdbId +
+          "/" +
+          contourRepresentationId +
+          "/" +
+          isVolumeFilterOn +
+          "/" +
+          minRes +
+          "/" +
+          maxRes
+      )
+      .toPromise()
+      .then((data: any) => {
+        for (let item of data.results) {
+          item.biomolecule.image_url =
+            this.API_URL + item.biomolecule.image_url;
+        }
+        return data;
+      })
+      .catch(this.handleError);
+  }
+
+  getSimilarBioMoleculesByMap(
+    emdbId: number,
+    contourRepresentationId: number,
+    isVolumeFilterOn: boolean,
+    minRes: number,
+    maxRes: number
+  ): Promise<any> {
+    return this.httpClient
+      .get(
+        this.API_URL +
+          "/search/resultsmap/" +
+          emdbId +
+          "/" +
+          contourRepresentationId +
           "/" +
           isVolumeFilterOn +
           "/" +
@@ -97,6 +137,10 @@ export class BiomoleculeSearchService {
       )
       .toPromise()
       .then((data: BenchmarkResult) => {
+        for (let i = 0; i < data.results.length; i++) {
+          data.results[i].path = this.API_URL + data.results[i].path;
+        }
+        data.zipFile = this.API_URL + data.zipFile;
         return data;
       })
       .catch(this.handleError);

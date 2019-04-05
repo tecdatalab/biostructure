@@ -22,7 +22,7 @@ exports.batchQuery = async (req, res, next) => {
             if (Array.isArray(response)) {
               const resJSON = {
                 path: benchmarkPath,
-                zipFile: benchmarkPath + "/results.zip",
+                zipFile: "/benchmarks/" + newBenchmark.id + "/results.zip",
                 results: response
               };
               res.status(200).json(resJSON);
