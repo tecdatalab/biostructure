@@ -6,6 +6,7 @@ import { FormGroup, Validators } from '@angular/forms';
   templateUrl: './query-method.component.html'
 })
 export class QueryMethodComponent {
+
   @Input() parentForm: FormGroup;
   cbEmdb: boolean;
   constructor() {
