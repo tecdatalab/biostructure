@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationExtras } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -17,6 +17,7 @@ export class SearchFormComponent implements OnInit {
 
   ngOnInit() {
     const queryGroup = this.fb.group({
+      search_by_emdb_id: true,
       emdb_id: [
         '1884',
         [
@@ -26,6 +27,7 @@ export class SearchFormComponent implements OnInit {
         ]
       ],
       em_map: this.fb.group({
+        filename: null,
         file: null,
         contour_level: '3.14'
       })
@@ -47,16 +49,41 @@ export class SearchFormComponent implements OnInit {
   }
 
   submitHandler() {
-    const params =
-      'query/' +
-      this.searchForm.get('query').get('emdb_id').value +
-      '/' +
-      this.searchForm.get('volume_filter').value +
-      '/' +
-      this.searchForm.get('resolution_filter').get('min').value +
-      '/' +
-      this.searchForm.get('resolution_filter').get('max').value;
-    this.router.navigateByUrl(params);
+    if (this.searchForm.get('query').get('search_by_emdb_id').value) {
+      const url =
+        'result/' +
+        this.searchForm.get('query').get('emdb_id').value +
+        '/' +
+        this.searchForm.get('contour_representation').value +
+        '/' +
+        this.searchForm.get('volume_filter').value +
+        '/' +
+        this.searchForm.get('resolution_filter').get('min').value +
+        '/' +
+        this.searchForm.get('resolution_filter').get('max').value;
+      this.router.navigateByUrl(url);
+    } else {
+      const url =
+        'result/' +
+        this.searchForm
+          .get('query')
+          .get('em_map')
+          .get('filename').value +
+        '/' +
+        this.searchForm
+          .get('query')
+          .get('em_map')
+          .get('contour_level').value +
+        '/' +
+        this.searchForm.get('contour_representation').value +
+        '/' +
+        this.searchForm.get('volume_filter').value +
+        '/' +
+        this.searchForm.get('resolution_filter').get('min').value +
+        '/' +
+        this.searchForm.get('resolution_filter').get('max').value;
+      this.router.navigateByUrl(url);
+    }
   }
 
   reset() {
