@@ -6,11 +6,16 @@
     <input
       id="file"
       placeholder="file"
-      formControlName="file"
       type="file"
       class="from-control-file border"
       accept=".map,.mrc"
+      (change)="onFileChange($event)"
     />
+  </div>
+  <div *ngIf="parentForm.controls['file'].invalid" class="invalid-feedback">
+    <div *ngIf="parentForm.controls['file'].errors?.required">
+      File required
+    </div>
   </div>
   <a class="col-sm-2" href="#">An example file.</a>
 </div>

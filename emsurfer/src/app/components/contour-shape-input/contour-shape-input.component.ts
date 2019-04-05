@@ -1,22 +1,16 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-
+import { ContourRepresentationService } from '../../services/contour-representation.service'
 @Component({
   selector: 'app-contour-shape-input',
-  templateUrl: './contour-shape-input.component.html'
+  templateUrl: './contour-shape-input.component.html',
+  providers: [ContourRepresentationService]
 })
 export class ContourShapeInputComponent implements OnInit {
   @Input() parentForm: FormGroup;
   countourRepresentations: Array<string>;
-  constructor() {}
-
+  constructor(private contourRepresentationService: ContourRepresentationService) {}
   ngOnInit() {
-    this.countourRepresentations = [
-      'EMDB contour',
-      'EMDB contour + 1/3 core',
-      'EMDB contour + 2/3 core',
-      'EMDB contour + 1/3 + 2/3 core',
-      'EMDB contour + 1 std dev'
-    ];
+    this.countourRepresentations = this.contourRepresentationService.getContourShapes();
   }
 }

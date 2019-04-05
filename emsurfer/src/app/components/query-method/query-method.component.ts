@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-query-method',
@@ -15,5 +15,33 @@ export class QueryMethodComponent {
 
   cbEmdbChange(){
     this.cbEmdb = !this.cbEmdb;
+    if (this.cbEmdb) {
+      this.parentForm
+        .get('emdb_id')
+        .setValidators([
+          Validators.required,
+          Validators.minLength(4),
+          Validators.pattern('^[0-9]*$')
+        ]);
+      this.parentForm
+        .get('em_map')
+        .get('file')
+        .setValidators(null);
+    } else {
+      this.parentForm
+        .get('emdb_id')
+        .setValidators(null);
+      this.parentForm
+        .get('em_map')
+        .get('file')
+        .setValidators(Validators.required);
+    }
+    this.parentForm
+      .get('emdb_id')
+      .updateValueAndValidity();
+    this.parentForm
+      .get('em_map')
+      .get('file')
+      .updateValueAndValidity();
   }
 }
