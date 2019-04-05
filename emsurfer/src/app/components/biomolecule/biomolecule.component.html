@@ -1,11 +1,11 @@
 <a class="text-warning" [href]="biomoleculeComparison.biomolecule.pdb_url"
   ><strong
-    ><u>EMD-{{ biomoleculeComparison.biomolecule.emdb_id }}</u></strong
+    ><u>EMD-{{ biomoleculeComparison.biomolecule.id }}</u></strong
   ></a
 >
-<p>{{ biomoleculeComparison.biomolecule.name }}</p>
+<p>{{ biomoleculeComparison.biomolecule.full_name }}</p>
 <a class="clickable" (click)="this.searchBiomolecule()">
-  <img class="img-fluid" [src]="biomoleculeComparison.biomolecule.img_url"  />
+  <img class="img-fluid" [src]="biomoleculeComparison.biomolecule.image_url"  />
 </a>
 <p class="text-primary">
   <strong>Euc. Distance: {{ biomoleculeComparison.euc_distance }} </strong>

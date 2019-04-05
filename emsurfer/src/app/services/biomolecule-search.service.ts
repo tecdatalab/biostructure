@@ -1,28 +1,49 @@
-import { Injectable } from '@angular/core';
-import { Biomolecule } from '../models/biomolecule';
-import { BiomoleculeComparison } from '../models/biomolecule-comparison';
-import { CustomFile } from '../models/custom-file';
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Biomolecule } from "../models/biomolecule";
+import { BiomoleculeComparison } from "../models/biomolecule-comparison";
+import config from "../../config.json";
+import { CustomFile } from "../models/custom-file";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root"
 })
 export class BiomoleculeSearchService {
-  constructor() {}
+  constructor(private httpClient: HttpClient) {}
 
-  getBiomolecule(emdbId: number) {
-    const newBiomolecule = new Biomolecule();
-    newBiomolecule.emdb_id = emdbId;
-    newBiomolecule.img_url = '../../../assets/img/test_img.gif';
-    newBiomolecule.pdb_url = 'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-1413';
-    newBiomolecule.name = 'Lorem ipsum et doloren';
-    return newBiomolecule;
+  readonly API_URL = config.api_url;
+
+  getBiomolecule(emdbId: number): Promise<void | Biomolecule> {
+    return this.httpClient
+      .get(this.API_URL + "/search/" + emdbId)
+      .toPromise()
+      .then(response => {
+        const object = response as Biomolecule;
+        object.image_url = this.API_URL + object.image_url;
+        return object;
+      })
+      .catch(this.handleError);
   }
 
-  getZernikeDescriptors(emdbId: number, contourRepresentationId: number) {
-    if (emdbId === 5555) {
-      return [10, 11, 0, 3, 2, 4, 5, 15];
-    }
-    return [1, 2, 3, 4, 3, 10, 0];
+  getZernikeDescriptors(
+    emdbId: number,
+    contourRepresentation: number
+  ): Promise<any> {
+    return this.httpClient
+      .get(
+        this.API_URL + "/search/zernike/" + emdbId + "/" + contourRepresentation
+      )
+      .toPromise()
+      .then()
+      .catch(this.handleError);
+  }
+
+  getZernikeDescriptorsByMapId(
+    emMapId: number,
+    contourLevel: number,
+    contourRepresentationId: number
+  ) {
+    return [1, 2, 1, 2, 1, 2, 3];
   }
 
   getSimilarBioMolecules(
@@ -31,34 +52,66 @@ export class BiomoleculeSearchService {
     isVolumeFilterOn: boolean,
     minRes: number,
     maxRes: number
-  ) {
-    const results = [];
-    for (let i = 0; i < 5; i++) {
-      const newBiomolecule = new BiomoleculeComparison();
-      newBiomolecule.biomolecule = new Biomolecule();
-      newBiomolecule.biomolecule.emdb_id = emdbId;
-      newBiomolecule.biomolecule.img_url = '../../../assets/img/test_img.gif';
-      newBiomolecule.biomolecule.pdb_url =
-        'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-1413';
-      newBiomolecule.biomolecule.name = 'Lorem ipsum et doloren';
-      newBiomolecule.euc_distance = 1;
-      newBiomolecule.ratio_of_volume = 0.5;
-      newBiomolecule.resolution = 10.1;
-      results.push(newBiomolecule);
-    }
-    return results;
+  ): Promise<any> {
+    return this.httpClient
+      .get(
+        this.API_URL +
+          "/search/" +
+          emdbId +
+          "/" +
+          isVolumeFilterOn +
+          "/" +
+          minRes +
+          "/" +
+          maxRes
+      )
+      .toPromise()
+      .then((data: any) => {
+        for (let item of data.results) {
+          item.biomolecule.image_url =
+            this.API_URL + item.biomolecule.image_url;
+        }
+        console.log(data);
+        return data;
+      })
+      .catch(this.handleError);
   }
+
+  private handleError(error: any) {
+    let errMsg = error.message
+      ? error.message
+      : error.status
+      ? `${error.status} - ${error.statusText}`
+      : "Server error";
+  }
+
   getBatchBiomolecules(
     fileId: number,
     contourRepresentationId: number,
     isVolumeFilterOn: boolean,
     topResults: number
   ) {
-    const f = new CustomFile();
     const files = [];
     for (let i = 0; i < 5; i++) {
-      f.filename = 'EMDB-' + i + i + i + i + '.hit';
-      f.path = 'path';
+      const f = new CustomFile();
+      f.filename = "EMDB-" + i + i + i + i + ".hit";
+      f.path = "assets/test_files/test_result.hit";
+      files.push(f);
+    }
+    return files;
+  }
+
+  getBatchBiomoleculesByFileId(
+    fileId: number,
+    contourRepresentationId: number,
+    isVolumeFilterOn: boolean,
+    topResults: number
+  ) {
+    const files = [];
+    for (let i = 0; i < 5; i++) {
+      const f = new CustomFile();
+      f.filename = "EMDBF-" + i + i + i + i + ".hit";
+      f.path = "assets/test_files/test_result.hit";
       files.push(f);
     }
     return files;

@@ -1,4 +1,4 @@
-import { Biomolecule } from './biomolecule';
+import { Biomolecule } from "./biomolecule";
 
 export class BiomoleculeComparison {
   biomolecule: Biomolecule;
