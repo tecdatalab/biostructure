@@ -107,7 +107,7 @@ export class BiomoleculeSearchService {
     }
     return files;
   }
-
+  
   private handleError(error: any) {
     let errMsg = error.message
       ? error.message
