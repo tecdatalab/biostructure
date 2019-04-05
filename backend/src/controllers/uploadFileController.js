@@ -4,7 +4,6 @@ const sequelize = require("../database").sequelize;
 var mkdirp = require("mkdirp");
 
 exports.uploadFileEmMap = async (req, res, next) => {
-  let fileId;
   try {
     await files
       .build({
@@ -13,36 +12,61 @@ exports.uploadFileEmMap = async (req, res, next) => {
       })
       .save()
       .then(fileObject => {
-        const filePath = "./files/" + fileObject.dataValues.id;
-        fileId = fileObject.dataValues.id;
-        mkdirp(filePath, function(err) {
-          if (err) {
+        saveFile(req.body.file, fileObject.file_name, fileObject.id, function(
+          response
+        ) {
+          if (response > 0) {
+            res.status(200).json(response);
+          } else {
             res.status(204).json({
-              msg: "Path already exits.",
+              msg: "ERROR: I/O error",
               details: err
             });
-          } else {
-            console.log(fileObject.dataValues.id);
-            var base64Data = req.body.file.replace(
-              "data:application/octet-stream;base64,",
-              ""
-            );
-            fs.writeFile(
-              filePath + "/" + req.body.filename,
-              base64Data,
-              { encoding: "base64" },
-              function(err) {
-                console.log("File created");
-              }
-            );
           }
         });
       });
-    return res.status(200).json(fileId);
   } catch (err) {
     res.status(204).json({
-      msg: "Can not upload the file",
+      msg: "ERROR: Can not upload the file",
       details: err
     });
   }
 };
+
+exports.uploadListFile = async (req, res, next) => {
+  try {
+    await files
+      .build({
+        file_name: "string.dat",
+        file_type: 1
+      })
+      .save()
+      .then(fileObject => {});
+  } catch (err) {}
+};
+
+function saveFile(file, filename, id, callback) {
+  const filePath = "./files/" + id;
+  mkdirp(filePath, function(err) {
+    if (err) {
+      callback(-1);
+    } else {
+      var base64Data = file.replace(
+        "data:application/octet-stream;base64,",
+        ""
+      );
+      fs.writeFile(
+        filePath + "/" + filename,
+        base64Data,
+        { encoding: "base64" },
+        function(err) {
+          if (err) {
+            callback(-2);
+          } else {
+            callback(id);
+          }
+        }
+      );
+    }
+  });
+}

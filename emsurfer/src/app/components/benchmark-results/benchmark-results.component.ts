@@ -29,12 +29,16 @@ export class BenchmarkResultsComponent implements OnInit {
       "emdbIdListFile"
     );
     if (emdbIdList) {
-      this.files = this.biomoleculeSearchService.getBatchBiomolecules(
-        emdbIdList,
-        contourRepresentationId,
-        volumeFilter,
-        topResults
-      );
+      this.biomoleculeSearchService
+        .getBatchBiomolecules(
+          emdbIdList,
+          contourRepresentationId,
+          volumeFilter,
+          topResults
+        )
+        .then((data: CustomFile[]) => {
+          this.files = data;
+        });
     } else if (emdbIdListFile) {
       this.files = this.biomoleculeSearchService.getBatchBiomoleculesByFileId(
         emdbIdListFile,

@@ -2,8 +2,9 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Biomolecule } from "../models/biomolecule";
 import { BiomoleculeComparison } from "../models/biomolecule-comparison";
-import config from "../../config.json";
 import { CustomFile } from "../models/custom-file";
+import { BenchmarkResult } from "../models/benchmark-result";
+import config from "../../config.json";
 
 @Injectable({
   providedIn: "root"
@@ -76,28 +77,19 @@ export class BiomoleculeSearchService {
       .catch(this.handleError);
   }
 
-  private handleError(error: any) {
-    let errMsg = error.message
-      ? error.message
-      : error.status
-      ? `${error.status} - ${error.statusText}`
-      : "Server error";
-  }
-
   getBatchBiomolecules(
     fileId: number,
     contourRepresentationId: number,
     isVolumeFilterOn: boolean,
     topResults: number
-  ) {
-    const files = [];
-    for (let i = 0; i < 5; i++) {
-      const f = new CustomFile();
-      f.filename = "EMDB-" + i + i + i + i + ".hit";
-      f.path = "assets/test_files/test_result.hit";
-      files.push(f);
-    }
-    return files;
+  ): Promise<void | CustomFile[]> {
+    return this.httpClient
+      .post(this.API_URL + "/benchmark/query", [1234, 5880, 2372, 3900])
+      .toPromise()
+      .then((data: BenchmarkResult) => {
+        return data.results;
+      })
+      .catch(this.handleError);
   }
 
   getBatchBiomoleculesByFileId(
@@ -114,5 +106,13 @@ export class BiomoleculeSearchService {
       files.push(f);
     }
     return files;
+  }
+  
+  private handleError(error: any) {
+    let errMsg = error.message
+      ? error.message
+      : error.status
+      ? `${error.status} - ${error.statusText}`
+      : "Server error";
   }
 }
