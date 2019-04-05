@@ -48,7 +48,6 @@ export class BiomoleculeSearchService {
     }
     return results;
   }
-
   getBatchBiomolecules(
     fileId: number,
     contourRepresentationId: number,
