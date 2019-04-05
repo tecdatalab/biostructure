@@ -79,6 +79,7 @@ export class SearchFormComponent implements OnInit {
           .value,
         maxResolution: this.searchForm.get('resolution_filter').get('max').value
       };
+      //include file post
       this.router.navigate([url], {
         queryParams: params
       });

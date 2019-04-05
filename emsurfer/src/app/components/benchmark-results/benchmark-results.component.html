@@ -1,0 +1,17 @@
+<h5 class="text-primary">
+  Result shown
+</h5>
+<br />
+<h3>
+  <a class="text-warning" href=""
+    ><u>Please download all result files in a compressed package</u></a
+  >
+</h3>
+<br />
+<ul class="list-group list-group-flush">
+  <li *ngFor="let file of files" class="list-group-item">
+    <h6>
+      <a class="text-dark" [href]="file.path">{{ file.filename }}</a>
+    </h6>
+  </li>
+</ul>

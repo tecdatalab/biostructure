@@ -43,7 +43,23 @@ export class BenchmarkComponent implements OnInit {
     this.cbEmdbList = true;
   }
 
-  submitHandler(){
-    console.log(this.benchmarkForm.getRawValue());
+  submitHandler() {
+    const url = 'benchmark/results';
+    const params = {
+      emdbIdList: null,
+      emdbIdListFile: null,
+      contourRepresentation: this.benchmarkForm.get('contour_representation')
+        .value,
+      volumeFilter: this.benchmarkForm.get('volume_filter').value,
+      topResults: this.benchmarkForm.get('top_results').value
+    };
+    if (this.cbEmdbList) {
+      params.emdbIdList = 5555;
+    } else {
+      params.emdbIdListFile = 1223;
+    }
+    this.router.navigate([url], {
+      queryParams: params
+    });
   }
 }
