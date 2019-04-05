@@ -1,17 +1,16 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from "@angular/core";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root"
 })
 export class FileDownloadService {
+  constructor() {}
 
-  constructor() { }
-
-  getSearchResultFilePath(fileId : number) {
-    return 'assets/test_files/test_result.hit';
+  getSearchResultFilePath(fileId: number) {
+    return "http://localhost:3001/results/result.hit";
   }
 
-  getBenchmarkResultCompressedFilePath(fileId: number){
-    return 'assets/test_files/test_result.hit';
+  getBenchmarkResultCompressedFilePath(fileId: number) {
+    return "assets/test_files/test_result.hit";
   }
 }

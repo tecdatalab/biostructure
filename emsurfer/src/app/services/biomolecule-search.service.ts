@@ -71,7 +71,6 @@ export class BiomoleculeSearchService {
           item.biomolecule.image_url =
             this.API_URL + item.biomolecule.image_url;
         }
-        console.log(data);
         return data;
       })
       .catch(this.handleError);

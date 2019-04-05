@@ -46,7 +46,7 @@ exports.searchResult = async (req, res, next) => {
 exports.zernike = async (req, res, next) => {
   response = [];
   for (let i = 0; i < 120; i++) {
-    response.push(Math.floor(Math.random() * 6));
+    response.push(Math.random() * 20);
   }
   res.status(200).json(response);
 };
