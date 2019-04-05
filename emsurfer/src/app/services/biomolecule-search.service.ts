@@ -57,7 +57,7 @@ export class BiomoleculeSearchService {
     return this.httpClient
       .get(
         this.API_URL +
-          "/search/" +
+          "/search/results/" +
           emdbId +
           "/" +
           isVolumeFilterOn +
@@ -78,36 +78,30 @@ export class BiomoleculeSearchService {
   }
 
   getBatchBiomolecules(
-    fileId: number,
+    fileId: string,
     contourRepresentationId: number,
     isVolumeFilterOn: boolean,
     topResults: number
-  ): Promise<void | CustomFile[]> {
+  ): Promise<void | BenchmarkResult> {
     return this.httpClient
-      .post(this.API_URL + "/benchmark/query", [1234, 5880, 2372, 3900])
+      .get(
+        this.API_URL +
+          "/benchmark/query/" +
+          fileId +
+          "/" +
+          contourRepresentationId +
+          "/" +
+          isVolumeFilterOn +
+          "/" +
+          topResults
+      )
       .toPromise()
       .then((data: BenchmarkResult) => {
-        return data.results;
+        return data;
       })
       .catch(this.handleError);
   }
 
-  getBatchBiomoleculesByFileId(
-    fileId: number,
-    contourRepresentationId: number,
-    isVolumeFilterOn: boolean,
-    topResults: number
-  ) {
-    const files = [];
-    for (let i = 0; i < 5; i++) {
-      const f = new CustomFile();
-      f.filename = "EMDBF-" + i + i + i + i + ".hit";
-      f.path = "assets/test_files/test_result.hit";
-      files.push(f);
-    }
-    return files;
-  }
-  
   private handleError(error: any) {
     let errMsg = error.message
       ? error.message

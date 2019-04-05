@@ -1,6 +1,9 @@
 const router = require("express").Router();
 const benchmarkController = require("../controllers/benchmarkController");
 
-router.post("/query", benchmarkController.batchQuery);
+router.get(
+  "/query/:emdblist/:contour/:filter/:top",
+  benchmarkController.batchQuery
+);
 
 module.exports = router;

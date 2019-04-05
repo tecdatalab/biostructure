@@ -11,7 +11,7 @@ router.get(
 );
 
 router.get(
-  '/:emdbID/:isVolumeFilterOn/:minRes/:maxRes',
+  '/results/:emdbID/:isVolumeFilterOn/:minRes/:maxRes',
   searchController.searchResult
 );
 

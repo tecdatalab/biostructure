@@ -14,7 +14,7 @@ export class UploadEmdbIdListFileComponent {
     const reader = new FileReader();
     if (event.target.files && event.target.files.length) {
       const [file] = event.target.files;
-      reader.readAsDataURL(file);
+      reader.readAsText(file);
       reader.onload = () => {
         this.parentForm.patchValue({
           file: reader.result
