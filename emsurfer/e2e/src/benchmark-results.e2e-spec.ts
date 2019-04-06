@@ -1,17 +1,17 @@
 import { Page } from './page.po';
 const path = require('path');
-const downloadsPath = path.resolve(__dirname, '../downloads/result.hit');
+const downloadsPath = path.resolve(__dirname, '../downloads/results.zip');
 const fs = require('fs');
 
-describe('Download test', () => {
+describe('Download benchmark test', () => {
   let page: Page;
 
   beforeEach(() => {
     page = new Page();
   });
 
-  it('check if the search result file was downloaded and the file format (hit)', function() {
-    page.navigateTo('/result/1884?contourRepresentation=0&volumeFilter=On&minResolution=0&maxResolution=12');
+  it('check if the benchmark result file was downloaded and the file format (zip)', function() {
+    page.navigateTo('/benchmark/results?emdbIdList=1010,1884,5502&contourRepresentation=0&volumeFilter=On&topResults=20');
     page.wait(4000);
     const downloadLink =  page.getDownloadLink();
     downloadLink.click();
