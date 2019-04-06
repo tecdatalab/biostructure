@@ -46,9 +46,7 @@ export class SearchFormComponent implements OnInit {
       volume_filter: "On",
       resolution_filter: rfGroup
     });
-
     this.defaultFormState = this.searchForm.getRawValue();
-    console.log(this.defaultFormState);
   }
 
   submitHandler() {
@@ -97,7 +95,6 @@ export class SearchFormComponent implements OnInit {
             .get("filename").value
         )
         .then((data: number) => {
-          console.log(data);
           params.mapId = data;
           this.router.navigate([url], {
             queryParams: params

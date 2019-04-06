@@ -1,10 +1,9 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Biomolecule } from "../models/biomolecule";
-import { BiomoleculeComparison } from "../models/biomolecule-comparison";
-import { CustomFile } from "../models/custom-file";
 import { BenchmarkResult } from "../models/benchmark-result";
 import config from "../../config.json";
+import { SearchResult } from "../models/search-result";
 
 @Injectable({
   providedIn: "root"
@@ -19,8 +18,6 @@ export class BiomoleculeSearchService {
       .get(this.API_URL + "/search/" + emdbId)
       .toPromise()
       .then((response: Biomolecule) => {
-        //const object = response as Biomolecule;
-        console.log(response);
         response.image_url = this.API_URL + response.image_url;
         return response;
       })
@@ -30,26 +27,30 @@ export class BiomoleculeSearchService {
   getZernikeDescriptors(
     emdbId: number,
     contourRepresentation: number
-  ): Promise<any> {
+  ): Promise<void | number[]> {
     return this.httpClient
       .get(
         this.API_URL + "/search/zernike/" + emdbId + "/" + contourRepresentation
       )
       .toPromise()
-      .then()
+      .then((response: number[]) => {
+        return response;
+      })
       .catch(this.handleError);
   }
 
   getZernikeDescriptorsByMapId(
     mapId: number,
     contourRepresentation: number
-  ): Promise<any> {
+  ): Promise<void | number[]> {
     return this.httpClient
       .get(
         this.API_URL + "/search/zernike/" + mapId + "/" + contourRepresentation
       )
       .toPromise()
-      .then()
+      .then((response: number[]) => {
+        return response;
+      })
       .catch(this.handleError);
   }
 
@@ -75,11 +76,12 @@ export class BiomoleculeSearchService {
           maxRes
       )
       .toPromise()
-      .then((data: any) => {
-        for (let item of data.results) {
+      .then((data: SearchResult) => {
+        for (const item of data.results) {
           item.biomolecule.image_url =
             this.API_URL + item.biomolecule.image_url;
         }
+        data.path = this.API_URL + data.path;
         return data;
       })
       .catch(this.handleError);
@@ -107,8 +109,8 @@ export class BiomoleculeSearchService {
           maxRes
       )
       .toPromise()
-      .then((data: any) => {
-        for (let item of data.results) {
+      .then((data: SearchResult) => {
+        for (const item of data.results) {
           item.biomolecule.image_url =
             this.API_URL + item.biomolecule.image_url;
         }
@@ -118,7 +120,7 @@ export class BiomoleculeSearchService {
   }
 
   getBatchBiomolecules(
-    fileId: string,
+    emdbIdList: string,
     contourRepresentationId: number,
     isVolumeFilterOn: boolean,
     topResults: number
@@ -127,7 +129,7 @@ export class BiomoleculeSearchService {
       .get(
         this.API_URL +
           "/benchmark/query/" +
-          fileId +
+          emdbIdList +
           "/" +
           contourRepresentationId +
           "/" +

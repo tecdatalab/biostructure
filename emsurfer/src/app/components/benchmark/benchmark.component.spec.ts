@@ -11,22 +11,11 @@ import { BenchmarkComponent } from "./benchmark.component";
 import { EmdbIdListComponent } from "../emdb-id-list/emdb-id-list.component";
 import { UploadEmdbIdListFileComponent } from "../upload-emdb-id-list-file/upload-emdb-id-list-file.component";
 import { Router } from "@angular/router";
+import { HttpClientModule } from "@angular/common/http";
 
 class MockRouter {
   navigate(urls: string[], extras: string) {
     return true;
-  }
-}
-
-class MockUploadFilePromise {
-  then(func) {
-    func(4444);
-  }
-}
-
-class MockFileUploadService {
-  uploadEmMap(urls: string, extras: string) {
-    return new MockUploadFilePromise();
   }
 }
 
@@ -36,7 +25,7 @@ describe("BenchmarkComponent", () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule],
+      imports: [ReactiveFormsModule, HttpClientModule],
       declarations: [
         ContourShapeInputComponent,
         VolumeFilterInputComponent,

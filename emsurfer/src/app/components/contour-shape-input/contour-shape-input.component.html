@@ -9,9 +9,9 @@
       id="contour"
     >
       <option
-        *ngFor="let contour of countourRepresentations; let i = index"
-        [ngValue]="i"
-        >{{ contour }}</option
+        *ngFor="let contour of contourRepresentations"
+        [ngValue]="contour.id"
+        >{{ contour.name }}</option
       >
     </select>
   </div>

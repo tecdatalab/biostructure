@@ -1,4 +1,4 @@
-const biomolecule = require("../models/biomolecule");
+const biomolecule = require("../models/biomoleculeModel");
 const sequelize = require("../database").sequelize;
 
 exports.searchByID = async (req, res, next) => {
@@ -71,7 +71,7 @@ exports.searchResultMap = async (req, res, next) => {
 exports.zernike = async (req, res, next) => {
   response = [];
   for (let i = 0; i < 120; i++) {
-    response.push(Math.random() * 20);
+    response.push((Math.random() * 20).toFixed(3));
   }
   res.status(200).json(response);
 };
