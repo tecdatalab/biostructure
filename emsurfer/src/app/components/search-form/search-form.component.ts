@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { FileUploadService } from "src/app/services/file-upload.service";
+import { CheckerService } from "src/app/services/checker.service";
 
 @Component({
   selector: "app-search-form",
@@ -14,7 +15,8 @@ export class SearchFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private fileUploadService: FileUploadService
+    private fileUploadService: FileUploadService,
+    private checkerService: CheckerService
   ) {}
 
   ngOnInit() {
@@ -51,17 +53,23 @@ export class SearchFormComponent implements OnInit {
 
   submitHandler() {
     if (this.searchForm.get("query").get("search_by_emdb_id").value) {
-      const url = "result/" + this.searchForm.get("query").get("emdb_id").value;
-      const params = {
-        contourRepresentation: this.searchForm.get("contour_representation")
-          .value,
-        volumeFilter: this.searchForm.get("volume_filter").value,
-        minResolution: this.searchForm.get("resolution_filter").get("min")
-          .value,
-        maxResolution: this.searchForm.get("resolution_filter").get("max").value
-      };
-      this.router.navigate([url], {
-        queryParams: params
+      const emdbID = this.searchForm.get("query").get("emdb_id").value;
+      this.checkerService.checkBiomolecule(emdbID).then((response: number) => {
+        if (response) {
+          const url = "result/" + emdbID;
+          const params = {
+            contourRepresentation: this.searchForm.get("contour_representation")
+              .value,
+            volumeFilter: this.searchForm.get("volume_filter").value,
+            minResolution: this.searchForm.get("resolution_filter").get("min")
+              .value,
+            maxResolution: this.searchForm.get("resolution_filter").get("max")
+              .value
+          };
+          this.router.navigate([url], {
+            queryParams: params
+          });
+        }
       });
     } else {
       const url = "result/emMap";
@@ -105,5 +113,47 @@ export class SearchFormComponent implements OnInit {
 
   reset() {
     this.searchForm.reset(this.defaultFormState);
+    this.searchForm
+      .get("query")
+      .get("emdb_id")
+      .setValidators([
+        Validators.required,
+        Validators.minLength(4),
+        Validators.pattern("^[0-9]*$")
+      ]);
+    this.searchForm
+      .get("query")
+      .get("em_map")
+      .get("file")
+      .setValidators(null);
+    this.searchForm
+      .get("query")
+      .get("em_map")
+      .get("contour_level")
+      .setValidators(null);
+    this.searchForm
+      .get("query")
+      .get("em_map")
+      .get("file")
+      .patchValue(null);
+    this.searchForm
+      .get("query")
+      .get("em_map")
+      .get("filename")
+      .patchValue(null);
+    this.searchForm
+      .get("query")
+      .get("emdb_id")
+      .updateValueAndValidity();
+    this.searchForm
+      .get("query")
+      .get("em_map")
+      .get("contour_level")
+      .updateValueAndValidity();
+    this.searchForm
+      .get("query")
+      .get("em_map")
+      .get("file")
+      .updateValueAndValidity();
   }
 }

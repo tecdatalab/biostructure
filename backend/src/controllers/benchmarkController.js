@@ -26,25 +26,24 @@ exports.batchQuery = async (req, res, next) => {
               };
               res.status(200).json(resJSON);
             } else {
-              console.log("Error");
-              res.status(204).json({
-                msg: "ERROR: I/O error.",
-                details: response
+              console.log("I/O Error");
+              res.status(500).send({
+                message: "I/O Server error"
               });
             }
           });
         });
       });
   } catch (err) {
-    res.status(204).json({
-      msg: "ERROR",
-      details: err
+    res.status(500).send({
+      message: "Backend error"
     });
   }
 };
 
 function generateFiles(IDList, benchmarkPath, idFolder, callback) {
-  const text = "Rank	EMDB_ID	EUC_D	RESOLUTION";
+  const text =
+    "Rank	EMDB_ID	EUC_D	RESOLUTION \r\n 1	6409	12.851	22 \r\n 2	4804	12.945	14 \r\n 3	6478	15.250	35 \r\n 4	9618	19.548	10.6 \r\n";
   let filesPaths = [];
   let file;
   IDList.forEach(function(ID, index, array) {

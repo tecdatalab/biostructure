@@ -1,27 +1,23 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { ContourRepresentation } from "../models/contour-representation";
 import { ErrorHandlerService } from "./error-handler.service";
 import config from "../../config.json";
 
 @Injectable({
   providedIn: "root"
 })
-export class ContourRepresentationService {
+export class CheckerService {
   constructor(
     private httpClient: HttpClient,
     private errorHandlerService: ErrorHandlerService
   ) {}
-
   readonly API_URL = config.api_url;
 
-  getContourShapes(): Promise<void | ContourRepresentation[]> {
+  checkBiomolecule(emdbId: number): Promise<void | number> {
     return this.httpClient
-      .get(this.API_URL + "/contour")
+      .get(this.API_URL + "/checker/emdbID/" + emdbId)
       .toPromise()
-      .then((response: ContourRepresentation[]) => {
-        return response;
-      })
+      .then((response: number) => response)
       .catch(err => {
         this.errorHandlerService.handleError(err);
       });

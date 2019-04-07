@@ -17,7 +17,7 @@ exports.uploadFileEmMap = async (req, res, next) => {
           if (response > 0) {
             res.status(200).json(response);
           } else {
-            res.status(204).json({
+            res.status(500).json({
               msg: "ERROR: I/O error",
               details: err
             });
@@ -25,9 +25,8 @@ exports.uploadFileEmMap = async (req, res, next) => {
         });
       });
   } catch (err) {
-    res.status(204).json({
-      msg: "ERROR: Can not upload the file",
-      details: err
+    res.status(500).send({
+      message: "Backend error"
     });
   }
 };
@@ -47,14 +46,17 @@ exports.uploadListFile = async (req, res, next) => {
           if (response > 0) {
             res.status(200).json(response);
           } else {
-            res.status(204).json({
-              msg: "ERROR: I/O error.",
-              details: err
+            res.status(500).send({
+              message: "ERROR: I/O error."
             });
           }
         });
       });
-  } catch (err) {}
+  } catch (err) {
+    res.status(500).send({
+      message: "Backend error"
+    });
+  }
 };
 
 function saveFile(file, filename, id, callback) {

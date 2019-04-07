@@ -2,14 +2,18 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Biomolecule } from "../models/biomolecule";
 import { BenchmarkResult } from "../models/benchmark-result";
-import config from "../../config.json";
 import { SearchResult } from "../models/search-result";
+import { ErrorHandlerService } from "./error-handler.service";
+import config from "../../config.json";
 
 @Injectable({
   providedIn: "root"
 })
 export class BiomoleculeSearchService {
-  constructor(private httpClient: HttpClient) {}
+  constructor(
+    private httpClient: HttpClient,
+    private errorHandlerService: ErrorHandlerService
+  ) {}
 
   readonly API_URL = config.api_url;
 
@@ -21,7 +25,9 @@ export class BiomoleculeSearchService {
         response.image_url = this.API_URL + response.image_url;
         return response;
       })
-      .catch(this.handleError);
+      .catch(err => {
+        this.errorHandlerService.handleError(err);
+      });
   }
 
   getZernikeDescriptors(
@@ -36,7 +42,9 @@ export class BiomoleculeSearchService {
       .then((response: number[]) => {
         return response;
       })
-      .catch(this.handleError);
+      .catch(err => {
+        this.errorHandlerService.handleError(err);
+      });
   }
 
   getZernikeDescriptorsByMapId(
@@ -51,15 +59,17 @@ export class BiomoleculeSearchService {
       .then((response: number[]) => {
         return response;
       })
-      .catch(this.handleError);
+      .catch(err => {
+        this.errorHandlerService.handleError(err);
+      });
   }
 
   getSimilarBioMolecules(
     emdbId: number,
     contourRepresentationId: number,
     isVolumeFilterOn: boolean,
-    minRes: number,
-    maxRes: number
+    minRes: string,
+    maxRes: string
   ): Promise<any> {
     return this.httpClient
       .get(
@@ -84,15 +94,17 @@ export class BiomoleculeSearchService {
         data.path = this.API_URL + data.path;
         return data;
       })
-      .catch(this.handleError);
+      .catch(err => {
+        this.errorHandlerService.handleError(err);
+      });
   }
 
   getSimilarBioMoleculesByMap(
     emdbId: number,
     contourRepresentationId: number,
     isVolumeFilterOn: boolean,
-    minRes: number,
-    maxRes: number
+    minRes: string,
+    maxRes: string
   ): Promise<any> {
     return this.httpClient
       .get(
@@ -116,7 +128,9 @@ export class BiomoleculeSearchService {
         }
         return data;
       })
-      .catch(this.handleError);
+      .catch(err => {
+        this.errorHandlerService.handleError(err);
+      });
   }
 
   getBatchBiomolecules(
@@ -145,14 +159,8 @@ export class BiomoleculeSearchService {
         data.zipFile = this.API_URL + data.zipFile;
         return data;
       })
-      .catch(this.handleError);
-  }
-
-  private handleError(error: any) {
-    let errMsg = error.message
-      ? error.message
-      : error.status
-      ? `${error.status} - ${error.statusText}`
-      : "Server error";
+      .catch(err => {
+        this.errorHandlerService.handleError(err);
+      });
   }
 }

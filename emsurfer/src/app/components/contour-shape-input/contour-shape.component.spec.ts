@@ -19,6 +19,12 @@ class MockPromise {
   }
 }
 
+class MockContourRepresentationService {
+  getContourShapes() {
+    return new MockPromise();
+  }
+}
+
 describe("ContourShapeInputComponent", () => {
   let component: ContourShapeInputComponent;
   let fixture: ComponentFixture<ContourShapeInputComponent>;
@@ -27,7 +33,12 @@ describe("ContourShapeInputComponent", () => {
     TestBed.configureTestingModule({
       imports: [ReactiveFormsModule, HttpClientModule],
       declarations: [ContourShapeInputComponent],
-      providers: [ContourRepresentationService]
+      providers: [
+        {
+          provide: ContourRepresentationService,
+          useClass: MockContourRepresentationService
+        }
+      ]
     }).compileComponents();
   }));
 

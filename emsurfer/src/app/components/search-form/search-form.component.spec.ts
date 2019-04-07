@@ -15,6 +15,7 @@ import { ResolutionFilterComponent } from "../resolution-filter/resolution-filte
 import { FileUploadService } from "../../services/file-upload.service";
 import { Router } from "@angular/router";
 import { HttpClientModule } from "@angular/common/http";
+import { CheckerService } from "src/app/services/checker.service";
 
 class MockRouter {
   navigate(urls: string[], extras: string) {
@@ -31,6 +32,18 @@ class MockUploadFilePromise {
 class MockFileUploadService {
   uploadEmMap(urls: string, extras: string) {
     return new MockUploadFilePromise();
+  }
+}
+
+class MockCheckBiomoleculePromise {
+  then(func) {
+    return func(5555);
+  }
+}
+
+class MockCheckerService {
+  checkBiomolecule(emdbId) {
+    return new MockCheckBiomoleculePromise();
   }
 }
 
@@ -52,7 +65,8 @@ describe("SearchFormComponent", () => {
       ],
       providers: [
         { provide: Router, useClass: MockRouter },
-        { provide: FileUploadService, useClass: MockFileUploadService }
+        { provide: FileUploadService, useClass: MockFileUploadService },
+        { provide: CheckerService, useClass: MockCheckerService }
       ]
     }).compileComponents();
   }));

@@ -1,5 +1,5 @@
 const biomolecule = require("../models/biomoleculeModel");
-const sequelize = require("../database").sequelize;
+const Op = require("../database").Op;
 
 exports.searchByID = async (req, res, next) => {
   emdbid = req.params.emdbID;
@@ -11,17 +11,15 @@ exports.searchByID = async (req, res, next) => {
     });
     if (!biomolecules) {
       console.log("Biomolecule " + emdbid + " not found.");
-      res.status(500).json({
-        msg: "Biomolecule " + emdbid + " not found.",
-        details: err
+      res.status(400).send({
+        message: "Biomolecule " + emdbid + " not found."
       });
     } else {
       res.status(200).json(biomolecules);
     }
   } catch (err) {
-    res.status(204).json({
-      msg: "Backend error",
-      details: err
+    res.status(500).send({
+      message: "Backend error"
     });
   }
 };
@@ -33,16 +31,17 @@ exports.searchResult = async (req, res, next) => {
   minRes = req.params.minRes;
   maxRes = req.params.maxRes;
   try {
-    let array_results = await getBiomolecules();
+    minRes = checkMinResolutionFilter(minRes);
+    maxRes = checkMaxResolutionFilter(maxRes);
+    let array_results = await getBiomolecules(minRes, maxRes);
     let result = {
       path: "/results/result.hit",
       results: array_results
     };
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({
-      msg: "Biomolecule not found",
-      details: err
+    res.status(500).send({
+      message: "Backend error"
     });
   }
 };
@@ -54,16 +53,17 @@ exports.searchResultMap = async (req, res, next) => {
   minRes = req.params.minRes;
   maxRes = req.params.maxRes;
   try {
-    let array_results = await getBiomolecules();
+    minRes = checkMinResolutionFilter(minRes);
+    maxRes = checkMaxResolutionFilter(maxRes);
+    let array_results = await getBiomolecules(minRes, maxRes);
     let result = {
       path: "/results/result.hit",
       results: array_results
     };
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({
-      msg: "Biomolecule not found",
-      details: err
+    res.status(500).send({
+      message: "Backend error"
     });
   }
 };
@@ -84,11 +84,38 @@ exports.zernikeMap = async (req, res, next) => {
   res.status(200).json(response);
 };
 
-async function getBiomolecules() {
+function checkMinResolutionFilter(minRes) {
+  if (isNaN(minRes)) {
+    /*
+    Search in the database to set the default value of min resolution.
+    */
+    return 2;
+  } else {
+    return parseFloat(minRes);
+  }
+}
+
+function checkMaxResolutionFilter(maxRes) {
+  if (isNaN(maxRes)) {
+    /*
+    Search in the database to set the default value of max resolution.
+    */
+    return 10;
+  } else {
+    return parseFloat(maxRes);
+  }
+}
+
+async function getBiomolecules(minRes, maxRes) {
   try {
     let biomolecules = await biomolecule.findAll({
-      limit: 8,
-      order: [sequelize.random()]
+      where: {
+        volume: {
+          [Op.gte]: minRes,
+          [Op.lte]: maxRes
+        }
+      },
+      order: [["xml_url", "ASC"]]
     });
     let resultArray = [];
     biomolecules.forEach(biomoleculeItem => {

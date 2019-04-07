@@ -8,6 +8,7 @@ const searchRoutes = require("./routes/search");
 const uploadFileRoutes = require("./routes/uploadFile");
 const benchmarkRoutes = require("./routes/benchmark");
 const contourRepresentationRoutes = require("./routes/contourRepresentation");
+const checkerRoutes = require("./routes/checker");
 
 //settings
 app.set("port", process.env.PORT || 3000);
@@ -25,6 +26,7 @@ app.use("/search", searchRoutes);
 app.use("/upload", uploadFileRoutes);
 app.use("/benchmark", benchmarkRoutes);
 app.use("/contour", contourRepresentationRoutes);
+app.use("/checker", checkerRoutes);
 
 //public routes
 app.use("/img", express.static("public/img"));
