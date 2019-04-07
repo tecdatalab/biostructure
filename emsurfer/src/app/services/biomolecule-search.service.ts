@@ -126,6 +126,7 @@ export class BiomoleculeSearchService {
           item.biomolecule.image_url =
             this.API_URL + item.biomolecule.image_url;
         }
+        data.path = this.API_URL + data.path;
         return data;
       })
       .catch(err => {

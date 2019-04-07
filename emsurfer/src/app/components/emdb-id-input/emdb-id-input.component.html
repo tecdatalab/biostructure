@@ -20,13 +20,13 @@
       *ngIf="parentForm.controls['emdb_id'].invalid"
       class="invalid-feedback"
     >
-      <div *ngIf="parentForm.controls['emdb_id'].errors?.required">
+      <div id="required_alert" *ngIf="parentForm.controls['emdb_id'].errors?.required">
         ID required
       </div>
-      <div *ngIf="parentForm.controls['emdb_id'].errors?.minlength">
+      <div id="4_digits_alert" *ngIf="parentForm.controls['emdb_id'].errors?.minlength">
         Enter a 4-digit ID
       </div>
-      <div *ngIf="parentForm.controls['emdb_id'].errors?.pattern">
+      <div id="digits_alert" *ngIf="parentForm.controls['emdb_id'].errors?.pattern">
         Only digits (0-9) allowed
       </div>
     </div>
