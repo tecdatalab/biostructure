@@ -810,11 +810,16 @@ class Emd_entry(Map_information):
         doc = minidom.parse(file)
         
         try:
-            nameInformationElement = doc.getElementsByTagName("title")[0]
+            nameInformationElement = doc.getElementsByTagName("name")[0]
             self.__full_name = nameInformationElement.firstChild.data
-            self.__acronym = nameInformationElement.firstChild.data[::10]
         except:
             self.__full_name = None
+            
+                
+        try:
+            nameInformationElement = doc.getElementsByTagName("sciName")[0]
+            self.__acronym = nameInformationElement.firstChild.data
+        except:
             self.__acronym = None
         
         try:

@@ -40,9 +40,9 @@ class Search_history(object):
     
     
     def insert_db(self, cur):
-        cur.execute(sql.SQL("INSERT INTO search_history(id,date_time,ip,emd_entry_id,name_file,counter_level,representation_id,volume_filter_id,resolution_filter_min,resolution_filter_max) VALUES (DEFAULT,%s,%s,%s,%s,%s,%s,%s,%s,%s);")
+        cur.execute(sql.SQL("INSERT INTO search_history(id,date_time,ip,emd_entry_id,name_file,counter_level,representation_id,volume_filter_id,resolution_filter_min,resolution_filter_max) VALUES (DEFAULT,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id;")
         ,[self.__date_time,self.__ip,self.__emd_entry_id,self.__name_file,self.__counter_level,self.__representation_id,self.__volume_filter_id,self.__resolution_filter_min,self.__resolution_filter_max])
-        
+        self.id = [record for record in cur][0]
         
     def update_db(self, cur):
         cur.execute(sql.SQL("UPDATE search_history SET date_time = %s, ip = %s, emd_entry_id = %s, name_file = %s, counter_level = %s, representation_id = %s, volume_filter_id = %s, resolution_filter_min = %s, resolution_filter_max = %s WHERE id  = %s;")

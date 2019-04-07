@@ -18,8 +18,9 @@ class Pdb_entry(object):
         
         
     def insert_db(self, cur):
-        cur.execute(sql.SQL("INSERT INTO pdb_entry(id,pdb) VALUES (DEFAULT,%s);")
+        cur.execute(sql.SQL("INSERT INTO pdb_entry(id,pdb) VALUES (DEFAULT,%s) RETURNING id;")
         ,[self.__pdb])
+        self.id = [record for record in cur][0]
         
         
     def update_db(self, cur):

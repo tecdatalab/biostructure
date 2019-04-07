@@ -18,9 +18,9 @@ class Volume_filter(object):
         
         
     def insert_db(self, cur):
-        cur.execute(sql.SQL("INSERT INTO volume_filter(id,name) VALUES (DEFAULT,%s);")
+        cur.execute(sql.SQL("INSERT INTO volume_filter(id,name) VALUES (DEFAULT,%s) RETURNING id;")
         ,[self.__name])
-        
+        self.id = [record for record in cur][0]
 
     def update_db(self, cur):
         cur.execute(sql.SQL("UPDATE volume_filter SET name = %s WHERE id = %s;")

@@ -4,6 +4,10 @@ Created on 30 mar. 2019
 @author: luis98
 '''
 import psycopg2
+from classes.Update import Update
+import datetime
+from datetime import date
+from datetime import datetime
 
 class SQL_connection(object):
     '''
@@ -26,19 +30,35 @@ class SQL_connection(object):
         
     def init_connection(self):
         connstr = "host=%s port=%s user=%s password=%s dbname=%s" % (self.__PSQL_HOST, self.__PSQL_PORT, self.__PSQL_USER, self.__PSQL_PASS, self.__PSQL_DB)
-        self.__conn = psycopg2.connect(connstr)
+        self.__con = psycopg2.connect(connstr)
         
         
     def commit(self):
-        self.__conn.commit()
+        self.__con.commit()
+        
+        
+    def is_first_time(self):
+        cursor = self.__con.cursor()
+        cursor.execute("SELECT * FROM update")
+        updates = [Update(record[0]) for record in cursor]
+        cursor.close()
+        return len(updates)==0
+    
+    
+    def last_update(self):
+        cursor = self.__con.cursor()
+        cursor.execute("SELECT * FROM update ORDER BY last_update DESC")
+        updates = [record[0] for record in cursor]
+        cursor.close()
+        return datetime.combine(updates[0], datetime.min.time())
         
         
     def close_connection(self):
-        self.__conn.close()
+        self.__con.close()
         
         
     def get_cursor(self):
-        return self.__conn.cursor()
+        return self.__con.cursor()
 
 
     def get_psql_host(self):

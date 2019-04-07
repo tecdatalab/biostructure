@@ -20,9 +20,9 @@ class Type_descriptor(object):
         
         
     def insert_db(self, cur):
-        cur.execute(sql.SQL("INSERT INTO type_descriptor(id,name,description) VALUES (DEFAULT,%s,%s);")
+        cur.execute(sql.SQL("INSERT INTO type_descriptor(id,name,description) VALUES (DEFAULT,%s,%s) RETURNING id;")
         ,[self.__name,self.__description])
-        
+        self.id = [record for record in cur][0]
         
     def update_db(self, cur):
         cur.execute(sql.SQL("UPDATE type_descriptor SET name = %s , description = %s WHERE id = %s;")

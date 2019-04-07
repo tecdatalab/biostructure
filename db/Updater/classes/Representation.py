@@ -18,9 +18,9 @@ class Representation(object):
        
         
     def insert_db(self, cur):
-        cur.execute(sql.SQL("INSERT INTO representation(id,name) VALUES (DEFAULT,%s);")
+        cur.execute(sql.SQL("INSERT INTO representation(id,name) VALUES (DEFAULT,%s) RETURNING id;")
         ,[self.__name])
-        
+        self.id = [record for record in cur][0]
 
     def update_db(self, cur):
         cur.execute(sql.SQL("UPDATE representation SET name = %s WHERE id = %s;")

@@ -74,7 +74,7 @@ class FTP_connection(object):
                 
             max_value = max_datetime(max_datetime(time_xml,time_image),time_map)
             
-            if max_value < date:
+            if max_value > date:
                 result.append(emd)
         
         return result
