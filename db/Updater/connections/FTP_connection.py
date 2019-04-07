@@ -22,13 +22,18 @@ class FTP_connection(object):
     '''
     __ftp = None
 
-    def __init__(self,ftp_server = 'ftp.ebi.ac.uk'):
-        self.__ftp = FTP(ftp_server)  # connect to host, default port
-        
+    def __init__(self,ftp_server = 'ftp.ebi.ac.uk', port = None):
+        if port == None:
+            self.__ftp = FTP()  
+            self.__ftp.connect(ftp_server)
+        else:
+            self.__ftp = FTP()  
+            self.__ftp.connect(ftp_server, port)
     
     def init_connection(self,initial_directory='/pub/databases/emdb/structures/'):
         self.__ftp.login()
-        self.__ftp.cwd(initial_directory)  # change into "structures" directory     
+        if initial_directory != None:
+            self.__ftp.cwd(initial_directory)  # change into "structures" directory     
     
     
     def close_connection(self):
