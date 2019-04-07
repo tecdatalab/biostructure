@@ -92,8 +92,8 @@ describe("BiomoleculeSearchService", () => {
       const emdbId = 5555;
       const contourRepresentationId = 0;
       const isVolumeFilterOn = true;
-      const minRes = "0";
-      const maxRes = "0";
+      const minRes = '0';
+      const maxRes = '0';
       service
         .getSimilarBioMolecules(
           emdbId,
@@ -123,8 +123,8 @@ describe("BiomoleculeSearchService", () => {
       const mapId = 5555;
       const contourRepresentationId = 0;
       const isVolumeFilterOn = true;
-      const minRes = "0";
-      const maxRes = "0";
+      const minRes = '0';
+      const maxRes = '0';
       service
         .getSimilarBioMoleculesByMap(
           mapId,

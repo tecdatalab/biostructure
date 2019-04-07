@@ -84,8 +84,8 @@ exports.zernikeMap = async (req, res, next) => {
   res.status(200).json(response);
 };
 
-function checkMinResolutionFilter(minRes) {
-  if (isNaN(minRes)) {
+function checkMinResolutionFilter(minRes){
+  if (isNaN(minRes)){
     /*
     Search in the database to set the default value of min resolution.
     */
@@ -95,8 +95,8 @@ function checkMinResolutionFilter(minRes) {
   }
 }
 
-function checkMaxResolutionFilter(maxRes) {
-  if (isNaN(maxRes)) {
+function checkMaxResolutionFilter(maxRes){
+  if (isNaN(maxRes)){
     /*
     Search in the database to set the default value of max resolution.
     */
