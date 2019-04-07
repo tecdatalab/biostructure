@@ -817,8 +817,8 @@ class Emd_entry(Map_information):
             
                 
         try:
-            nameInformationElement = doc.getElementsByTagName("sciName")[0]
-            self.__acronym = nameInformationElement.firstChild.data
+            acronymacronyInformationElement = doc.getElementsByTagName("sciName")[0]
+            self.__acronym = acronymacronyInformationElement.firstChild.data
         except:
             self.__acronym = None
         
