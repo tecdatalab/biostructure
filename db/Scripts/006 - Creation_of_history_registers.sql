@@ -9,7 +9,7 @@ CREATE TABLE time_stamp(
 	modification DATE NOT NULL,
 	map_file TEXT NOT NULL,
 	xml_file TEXT NOT NULL,
-	image_file TEXT NOT NULL
+	image_file
 );
 
 COMMENT ON TABLE time_stamp IS 'Table to know the date of the last EMD update of the database.';
