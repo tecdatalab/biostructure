@@ -36,19 +36,22 @@ def update_emd(conec_ftp,conec_sql):
     for i in emds:
         temp_emd_entry = Emd_entry()
         temp_emd_entry.create_by_ftp(i,conec_ftp.ftp)
+        temp_time_stamp = Time_stamp (i,date.today(),temp_emd_entry.map_url,temp_emd_entry.xml_url,temp_emd_entry.image_url )
+        
         cursor_sql.execute(sql.SQL("SELECT map_information_id FROM emd_entry WHERE id = %s")
         ,[temp_emd_entry.id])
-        temp_emd_entry.map_id = [record[0] for record in cursor_sql][0]
-        temp_emd_entry.update_db(cursor_sql)
-        
-        temp_time_stamp = Time_stamp (i,date.today(),temp_emd_entry.map_url,temp_emd_entry.xml_url,temp_emd_entry.image_url )
-        temp_time_stamp.update_db(cursor_sql)
-    
+        map_result = [record[0] for record in cursor_sql]
+        if len(map_result)==1:
+            temp_emd_entry.map_id = map_result[0]
+            temp_emd_entry.update_db(cursor_sql)
+            temp_time_stamp.update_db(cursor_sql)
+        else:
+            temp_emd_entry.insert_db(cursor_sql)
+            temp_time_stamp.insert_db(cursor_sql)
     update_date = Update(date.today())
     update_date.insert_db(cursor_sql)
     conec_sql.commit()
     cursor_sql.close()
-    
     
 
 def main():
@@ -64,6 +67,7 @@ def main():
         
     conec_sql.close_connection()    
     conec_ftp.close_connection()
+    print("Finish")
   
 if __name__== "__main__":
     main()
