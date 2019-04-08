@@ -8,12 +8,12 @@ router.get("/", (req, res, next) => {
 router.get("/:emdbID", searchController.searchByID);
 
 router.get(
-  "/results/:emdbID/:contourShape/:isVolumeFilterOn/:minRes/:maxRes",
+  "/results/:emdbID/:contourRepresentation/:isVolumeFilterOn/:minRes/:maxRes",
   searchController.searchResult
 );
 
 router.get(
-  "/resultsmap/:emdbID/:contourShape/:isVolumeFilterOn/:minRes/:maxRes",
+  "/resultsmap/:emdbID/:contourRepresentation/:isVolumeFilterOn/:minRes/:maxRes",
   searchController.searchResultMap
 );
 
