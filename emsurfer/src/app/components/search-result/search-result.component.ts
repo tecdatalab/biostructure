@@ -14,9 +14,7 @@ export class SearchResultComponent implements OnInit {
   @ViewChild("canvas") canvasElementRef: ElementRef;
   chart: Chart;
   biomolecule: Biomolecule;
-  filename: string;
   results: BiomoleculeComparison[];
-  volumeFilter: string;
   isSearchById: boolean;
   downloadResultFile: string;
   descriptors = [];
@@ -42,7 +40,7 @@ export class SearchResultComponent implements OnInit {
     );
     const minRes = this.route.snapshot.queryParamMap.get("minResolution");
     const maxRes = this.route.snapshot.queryParamMap.get("maxResolution");
-    this.volumeFilter = this.route.snapshot.queryParamMap.get("volumeFilter");
+    const volumeFilter = this.route.snapshot.queryParamMap.get("volumeFilter");
     const mapID = +this.route.snapshot.paramMap.get("mapId");
     if (emdbId) {
       this.biomoleculeSearchService
@@ -59,7 +57,7 @@ export class SearchResultComponent implements OnInit {
         .getSimilarBioMolecules(
           emdbId,
           contourRepresentation,
-          this.volumeFilter === "On",
+          volumeFilter === "On",
           minRes,
           maxRes
         )
@@ -69,7 +67,10 @@ export class SearchResultComponent implements OnInit {
         });
       this.isSearchById = true;
     } else {
-      this.filename = this.route.snapshot.queryParamMap.get("filename");
+      const filename = this.route.snapshot.queryParamMap.get("filename");
+      const contourLevel = +this.route.snapshot.queryParamMap.get(
+        "contourLevel"
+      );
       this.biomoleculeSearchService
         .getZernikeDescriptors(emdbId, contourRepresentation)
         .then(response => {
@@ -77,9 +78,10 @@ export class SearchResultComponent implements OnInit {
         });
       this.biomoleculeSearchService
         .getSimilarBioMoleculesByMap(
-          mapID,
+          filename,
           contourRepresentation,
-          this.volumeFilter === "On",
+          contourLevel,
+          volumeFilter === "On",
           minRes,
           maxRes
         )

@@ -1,10 +1,6 @@
 const router = require("express").Router();
 const searchController = require("../controllers/searchController");
 
-router.get("/", (req, res, next) => {
-  res.send("search");
-});
-
 router.get("/:emdbID", searchController.searchByID);
 
 router.get(
@@ -13,7 +9,7 @@ router.get(
 );
 
 router.get(
-  "/resultsmap/:emdbID/:contourRepresentation/:isVolumeFilterOn/:minRes/:maxRes",
+  "/resultsmap/:filename/:contourRepresentation/:contourLevel/:isVolumeFilterOn/:minRes/:maxRes",
   searchController.searchResultMap
 );
 

@@ -2,6 +2,25 @@ const fs = require("fs");
 const files = require("../models/filesModel");
 var mkdirp = require("mkdirp");
 
+exports.uploadFileEmMap2 = async (req, res, next) => {
+  try {
+    saveFile(req.body.file, req.body.filename, "2", function(response) {
+      if (response > 0) {
+        res.status(200).json(response);
+      } else {
+        res.status(500).json({
+          msg: "ERROR: I/O error",
+          details: err
+        });
+      }
+    });
+  } catch (err) {
+    res.status(500).send({
+      message: "Backend error"
+    });
+  }
+};
+
 exports.uploadFileEmMap = async (req, res, next) => {
   try {
     await files

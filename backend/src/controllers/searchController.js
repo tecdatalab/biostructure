@@ -32,7 +32,6 @@ exports.searchResult = async (req, res, next) => {
   minRes = req.params.minRes;
   maxRes = req.params.maxRes;
   try {
-    console.log("Contour: " + req.connection.remoteAddress);
     minRes = checkMinResolutionFilter(minRes);
     maxRes = checkMaxResolutionFilter(maxRes);
     let array_results = await getBiomolecules(minRes, maxRes);
@@ -64,11 +63,21 @@ exports.searchResult = async (req, res, next) => {
 };
 
 exports.searchResultMap = async (req, res, next) => {
-  emdbid = req.params.emdbID;
+  filename = req.params.filename;
   contourRepresentation = req.params.contourRepresentation;
+  contourLevel = req.params.contourLevel;
   isVolumeFilterOn = req.params.isVolumeFilterOn;
   minRes = req.params.minRes;
   maxRes = req.params.maxRes;
+  console.log(
+    "Entra: " +
+      filename +
+      contourRepresentation +
+      contourLevel +
+      isVolumeFilterOn +
+      minRes +
+      maxRes
+  );
   try {
     minRes = checkMinResolutionFilter(minRes);
     maxRes = checkMaxResolutionFilter(maxRes);
@@ -77,9 +86,9 @@ exports.searchResultMap = async (req, res, next) => {
       .build({
         date_time: new Date(),
         ip: req.connection.remoteAddress,
-        emd_entry_id: emdbid,
-        name_file: "-",
-        contour_level: 0.0,
+        emd_entry_id: 1,
+        name_file: filename,
+        contour_level: parseFloat(contourLevel),
         representation_id: contourRepresentation,
         volume_filter_id: 0,
         resolution_filter_min: minRes,
@@ -92,6 +101,9 @@ exports.searchResultMap = async (req, res, next) => {
           results: array_results
         };
         res.status(200).json(result);
+      })
+      .catch(err => {
+        console.log(err);
       });
   } catch (error) {
     res.status(500).send({
@@ -146,8 +158,7 @@ async function getBiomolecules(minRes, maxRes) {
           [Op.gte]: minRes,
           [Op.lte]: maxRes
         }
-      },
-      order: [["xml_url", "ASC"]]
+      }
     });
     let resultArray = [];
     biomolecules.forEach(biomoleculeItem => {

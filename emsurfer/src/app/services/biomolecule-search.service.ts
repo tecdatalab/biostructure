@@ -22,7 +22,6 @@ export class BiomoleculeSearchService {
       .get(this.API_URL + "/search/" + emdbId)
       .toPromise()
       .then((response: Biomolecule) => {
-        response.image_url = this.API_URL + response.image_url;
         return response;
       })
       .catch(err => {
@@ -87,10 +86,6 @@ export class BiomoleculeSearchService {
       )
       .toPromise()
       .then((data: SearchResult) => {
-        for (const item of data.results) {
-          item.biomolecule.image_url =
-            this.API_URL + item.biomolecule.image_url;
-        }
         data.path = this.API_URL + data.path;
         return data;
       })
@@ -100,8 +95,9 @@ export class BiomoleculeSearchService {
   }
 
   getSimilarBioMoleculesByMap(
-    emdbId: number,
+    filename: string,
     contourRepresentationId: number,
+    contourLevel: number,
     isVolumeFilterOn: boolean,
     minRes: string,
     maxRes: string
@@ -110,9 +106,11 @@ export class BiomoleculeSearchService {
       .get(
         this.API_URL +
           "/search/resultsmap/" +
-          emdbId +
+          filename +
           "/" +
           contourRepresentationId +
+          "/" +
+          contourLevel +
           "/" +
           isVolumeFilterOn +
           "/" +
@@ -122,10 +120,6 @@ export class BiomoleculeSearchService {
       )
       .toPromise()
       .then((data: SearchResult) => {
-        for (const item of data.results) {
-          item.biomolecule.image_url =
-            this.API_URL + item.biomolecule.image_url;
-        }
         data.path = this.API_URL + data.path;
         return data;
       })
@@ -154,9 +148,6 @@ export class BiomoleculeSearchService {
       )
       .toPromise()
       .then((data: BenchmarkResult) => {
-        /*for (let i = 0; i < data.results.length; i++) {
-          data.results[i].path = this.API_URL + data.results[i].path;
-        }*/
         data.zipFile = this.API_URL + data.zipFile;
         return data;
       })
