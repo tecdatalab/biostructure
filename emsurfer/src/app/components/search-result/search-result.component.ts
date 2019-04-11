@@ -14,6 +14,7 @@ export class SearchResultComponent implements OnInit {
   @ViewChild("canvas") canvasElementRef: ElementRef;
   chart: Chart;
   biomolecule: Biomolecule;
+  filename: string;
   results: BiomoleculeComparison[];
   isSearchById: boolean;
   downloadResultFile: string;
@@ -67,7 +68,7 @@ export class SearchResultComponent implements OnInit {
         });
       this.isSearchById = true;
     } else {
-      const filename = this.route.snapshot.queryParamMap.get("filename");
+      this.filename = this.route.snapshot.queryParamMap.get("filename");
       const contourLevel = +this.route.snapshot.queryParamMap.get(
         "contourLevel"
       );
@@ -78,7 +79,7 @@ export class SearchResultComponent implements OnInit {
         });
       this.biomoleculeSearchService
         .getSimilarBioMoleculesByMap(
-          filename,
+          this.filename,
           contourRepresentation,
           contourLevel,
           volumeFilter === "On",

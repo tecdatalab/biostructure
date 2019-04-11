@@ -41,7 +41,7 @@ exports.searchResult = async (req, res, next) => {
         ip: req.connection.remoteAddress,
         emd_entry_id: emdbid,
         name_file: "-",
-        contour_level: 0.0,
+        counter_level: 0.0,
         representation_id: contourRepresentation,
         volume_filter_id: 0,
         resolution_filter_min: minRes,
@@ -69,15 +69,6 @@ exports.searchResultMap = async (req, res, next) => {
   isVolumeFilterOn = req.params.isVolumeFilterOn;
   minRes = req.params.minRes;
   maxRes = req.params.maxRes;
-  console.log(
-    "Entra: " +
-      filename +
-      contourRepresentation +
-      contourLevel +
-      isVolumeFilterOn +
-      minRes +
-      maxRes
-  );
   try {
     minRes = checkMinResolutionFilter(minRes);
     maxRes = checkMaxResolutionFilter(maxRes);
@@ -88,7 +79,7 @@ exports.searchResultMap = async (req, res, next) => {
         ip: req.connection.remoteAddress,
         emd_entry_id: 1,
         name_file: filename,
-        contour_level: parseFloat(contourLevel),
+        counter_level: contourLevel,
         representation_id: contourRepresentation,
         volume_filter_id: 0,
         resolution_filter_min: minRes,

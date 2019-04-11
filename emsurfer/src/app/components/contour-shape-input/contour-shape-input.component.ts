@@ -18,7 +18,6 @@ export class ContourShapeInputComponent implements OnInit {
     this.contourRepresentationService
       .getContourShapes()
       .then((data: ContourRepresentation[]) => {
-        console.log(data);
         this.contourRepresentations = data;
       });
   }
