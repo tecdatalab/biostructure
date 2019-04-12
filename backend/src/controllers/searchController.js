@@ -54,6 +54,11 @@ exports.searchResult = async (req, res, next) => {
           results: array_results
         };
         res.status(200).json(result);
+      })
+      .catch(error => {
+        res.status(500).send({
+          message: "Backend error: Search not registered"
+        });
       });
   } catch (error) {
     res.status(500).send({
@@ -93,8 +98,10 @@ exports.searchResultMap = async (req, res, next) => {
         };
         res.status(200).json(result);
       })
-      .catch(err => {
-        console.log(err);
+      .catch(error => {
+        res.status(500).send({
+          message: "Backend error: Search not registered"
+        });
       });
   } catch (error) {
     res.status(500).send({
