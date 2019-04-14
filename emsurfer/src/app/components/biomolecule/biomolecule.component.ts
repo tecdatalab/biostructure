@@ -1,6 +1,7 @@
 import { Component, Input } from "@angular/core";
 import { BiomoleculeComparison } from "src/app/models/biomolecule-comparison";
 import { Router } from "@angular/router";
+import { StringPadder } from 'src/app/models/string-padder';
 
 @Component({
   selector: "app-biomolecule",
@@ -9,7 +10,10 @@ import { Router } from "@angular/router";
 })
 export class BiomoleculeComponent {
   @Input() biomoleculeComparison: BiomoleculeComparison;
-  constructor(private router: Router) {}
+  stringPadder: StringPadder;
+  constructor(private router: Router) {
+    this.stringPadder = new StringPadder();
+  }
 
   searchBiomolecule() {
     const url = "result/" + this.biomoleculeComparison.biomolecule.id;

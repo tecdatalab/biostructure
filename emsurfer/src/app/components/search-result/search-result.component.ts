@@ -4,6 +4,7 @@ import { Chart } from "chart.js";
 import { BiomoleculeSearchService } from "../../services/biomolecule-search.service";
 import { Biomolecule } from "src/app/models/biomolecule";
 import { BiomoleculeComparison } from "src/app/models/biomolecule-comparison";
+import { StringPadder } from 'src/app/models/string-padder';
 
 @Component({
   selector: "app-search-result",
@@ -20,11 +21,14 @@ export class SearchResultComponent implements OnInit {
   downloadResultFile: string;
   descriptors = [];
   values = [];
+  stringPadder: StringPadder;
 
   constructor(
     private biomoleculeSearchService: BiomoleculeSearchService,
     private route: ActivatedRoute
-  ) {}
+  ) {
+    this.stringPadder = new StringPadder();
+  }
 
   ngOnInit() {
     this.biomolecule = new Biomolecule();

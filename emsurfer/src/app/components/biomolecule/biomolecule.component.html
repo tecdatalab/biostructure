@@ -1,6 +1,15 @@
-<a class="text-warning" [href]="biomoleculeComparison.biomolecule.map_url"
+<a
+  class="text-warning"
+  [href]="
+    'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-' +
+    stringPadder.padEmdbId(biomoleculeComparison.biomolecule.id.toString())
+  "
   ><strong
-    ><u>EMD-{{ biomoleculeComparison.biomolecule.id }}</u></strong
+    ><u
+      >EMD-{{
+        stringPadder.padEmdbId(biomoleculeComparison.biomolecule.id.toString())
+      }}</u
+    ></strong
   ></a
 >
 <p>{{ biomoleculeComparison.biomolecule.full_name }}</p>

@@ -1,14 +1,24 @@
 <h5 class="text-primary">
-  Query entry (<a id="download_link" class="text-warning" [href]="downloadResultFile"
+  Query entry (<a
+    id="download_link"
+    class="text-warning"
+    [href]="downloadResultFile"
     ><u id="downloads_link">Download text results here</u></a
   >)
 </h5>
 <br />
 <div class="row">
   <div *ngIf="isSearchById" class="col-3 border border-dark">
-    <a class="text-warning" [href]="biomolecule.map_url"
+    <a
+      class="text-warning"
+      [href]="
+        'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-' +
+        stringPadder.padEmdbId(biomolecule.id.toString())
+      "
       ><strong
-        ><u>EMD-{{ biomolecule.id }}</u></strong
+        ><u
+          >EMD-{{ stringPadder.padEmdbId(biomolecule.id.toString()) }}</u
+        ></strong
       ></a
     >
     <p>{{ biomolecule.full_name }}</p>
