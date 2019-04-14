@@ -16,6 +16,7 @@ export class SearchResultComponent implements OnInit {
   chart: Chart;
   biomolecule: Biomolecule;
   filename: string;
+  volumeFilter: string;
   results: BiomoleculeComparison[];
   isSearchById: boolean;
   downloadResultFile: string;
@@ -45,8 +46,7 @@ export class SearchResultComponent implements OnInit {
     );
     const minRes = this.route.snapshot.queryParamMap.get("minResolution");
     const maxRes = this.route.snapshot.queryParamMap.get("maxResolution");
-    const volumeFilter = this.route.snapshot.queryParamMap.get("volumeFilter");
-    const mapID = +this.route.snapshot.paramMap.get("mapId");
+    this.volumeFilter = this.route.snapshot.queryParamMap.get("volumeFilter");
     if (emdbId) {
       this.biomoleculeSearchService
         .getBiomolecule(emdbId)
@@ -62,7 +62,7 @@ export class SearchResultComponent implements OnInit {
         .getSimilarBioMolecules(
           emdbId,
           contourRepresentation,
-          volumeFilter === "On",
+          this.volumeFilter === "On",
           minRes,
           maxRes
         )
@@ -86,7 +86,7 @@ export class SearchResultComponent implements OnInit {
           this.filename,
           contourRepresentation,
           contourLevel,
-          volumeFilter === "On",
+          this.volumeFilter === "On",
           minRes,
           maxRes
         )
