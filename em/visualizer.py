@@ -11,25 +11,58 @@ class Visualizer():
     
     def __init__(self, myMolecule, labels=None):
         self.vertex = """
-                        uniform mat4   model;
-                        uniform mat4   view;       // View matrix
-                        uniform mat4   projection;   // Projection matrix
-                        attribute vec3 position;      // Vertex position
-                        attribute vec3 color;
-                        varying vec3 v_color;
+                        uniform mat4      u_model;
+                        uniform mat4      u_view;       // View matrix
+                        uniform mat4      u_projection;   // Projection matrix
+
+                        attribute vec3      a_position;      // Vertex position
+                        attribute vec3      a_normal;
+                        attribute vec3      u_color;
+
+                        varying vec3      v_color;
+                        varying vec3      v_normal;
+                        varying vec3      v_position;
+
+                        
                         
                         void main()
                         {
-                            v_color = color;
-                            gl_Position = projection * view * model * vec4(position,1.0);
+                            v_color = u_color;
+                            v_normal   = a_normal;
+                            v_position = a_position;
+
+                            gl_Position = u_projection * u_view * u_model * vec4(a_position,1.0);
                         } """
+
         self.fragment = """
-                        varying vec3 v_color;
+                        uniform mat4      u_model;           // Model matrix
+                        uniform mat4      u_view;            // View matrix
+                        uniform mat4      u_normal;          // Normal matrix
+                        uniform mat4      u_projection;      // Projection matrix
+                        uniform vec3      u_light_position;  // Light position
+                        uniform vec3      u_light_intensity; // Light intensity
+                        
+                        varying vec3      v_normal;          // Interpolated normal (in)
+                        varying vec3      v_position;        // Interpolated position (in)
+                        varying vec3      v_color;           // Interpolated color (in)
 
                         void main()
                         {
+                            // Calculate normal in world coordinates
+                            vec3 normal = normalize(u_normal * vec4(v_normal,1.0)).xyz;
+                            // Calculate the location of this fragment (pixel) in world coordinates
+                            vec3 position = vec3(u_view*u_model * vec4(v_position, 1.0));
+                            // Calculate the vector from this pixels surface to the light source
+                            vec3 surfaceToLight = u_light_position - position;
+                            // Calculate the cosine of the angle of incidence (brightness)
+                            float brightness = dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal));
+                            brightness = max(min(brightness,1.0),0.0);
+
+                            // Final color
+                            //gl_FragColor = vec4(v_color, 1.0) * (0.1 + 0.9*brightness * vec4(u_light_intensity, 1));
                             gl_FragColor = vec4(v_color, 1.0);
                         } """
+
         self.labels = labels
         self.molecule = myMolecule
 
@@ -53,14 +86,16 @@ class Visualizer():
 
             glm.rotate(model, theta, 1, 0, 0)
             glm.rotate(model, phi, 0, 1, 0)
-            
-            points['model'] = model
+
+            view = points['u_view'].reshape(4,4)            
+            points['u_model'] = model
+            points['u_normal'] = np.array(np.matrix(np.dot(view, model)).I.T)
 
 
         
         @window.event
         def on_resize(width, height):
-            points['projection'] = glm.perspective(45.0, width / float(height), 1.0, 256.0)
+            points['u_projection'] = glm.perspective(45.0, width / float(height), 1.0, 256.0)
 
         @window.event
         def on_mouse_drag(x, y, dx, dy, buttons):
@@ -78,13 +113,13 @@ class Visualizer():
         verts_index = verts.astype(np.int32)
 
         if self.labels.any() != None:
-            V = np.zeros(len(verts), [("position", np.float32, 3), ("color", np.float32, 3)])
+            V = np.zeros(len(verts), [("a_position", np.float32, 3), ("u_color", np.float32, 3)])
             colors = label2rgb(labels)
-            V["color"] = colors[verts_index[:,0], verts_index[:,1], verts_index[:,2]]
+            V["u_color"] = colors[verts_index[:,0], verts_index[:,1], verts_index[:,2]]
         else:
-            V = np.zeros(len(verts), [("position", np.float32, 3)])
+            V = np.zeros(len(verts), [("a_position", np.float32, 3)])
         
-        V["position"] = verts 
+        V["a_position"] = verts 
         
 
         V = V.view(gloo.VertexBuffer)
@@ -98,31 +133,35 @@ class Visualizer():
 
         model = np.eye(4, dtype=np.float32)
         model = glm.translate(model, -dim[0]/2)
-        points['model'] = model
+        points['u_model'] = model
 
         view = np.eye(4, dtype=np.float32)
-        view = glm.translate(view, 0, 0, -dim[0]*2/3)
-        points['view'] = view
+        view = glm.translate(view, 0, 0, -dim[0]*4/5)
+        points['u_view'] = view
+
+        points["u_light_position"] = -2,-2,2
+        points["u_light_intensity"] = 1,1,1
 
 
         app.run()
 
 
-filename = "../../EMD-1364.map"
+filename = "../emd_8750.map"
 myreader = reader.Reader(filename)
 myMolecule = myreader.read()
 
 from scipy import ndimage as ndi
 from skimage.morphology import watershed, local_maxima
 from skimage.feature import peak_local_max
-from skimage.filters import threshold_otsu
+from skimage.filters import threshold_otsu, gaussian
 from skimage.color import label2rgb
 
-th = threshold_otsu(myMolecule.data())
-binary = myMolecule.data() <= th
+smoothed = gaussian(myMolecule.data(), sigma=1.5)
+th = threshold_otsu(smoothed)
+binary = smoothed > th
 distance = ndi.distance_transform_edt(binary)
 #local_max = local_maxima(distance , allow_borders=False)
-local_max = peak_local_max(distance, indices=False, labels=binary, footprint=np.ones((3,3,3)), exclude_border=1)
+local_max = peak_local_max(distance, indices=False, labels=binary, footprint=np.ones((26,26,26)), exclude_border=1)
 markers = ndi.label(local_max, structure=np.ones((3,3,3)))[0] 
 labels = watershed(-distance,markers,mask=binary)
 
