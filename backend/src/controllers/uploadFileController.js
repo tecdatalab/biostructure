@@ -4,7 +4,10 @@ var mkdirp = require("mkdirp");
 
 exports.uploadFileEmMap = async (req, res, next) => {
   try {
-    saveFile(req.body.file, req.body.filename, "2", function(response) {
+    const index =
+      new Date().valueOf().toString() +
+      Math.floor(Math.random() * 100).toString();
+    saveFile(req.body.file, req.body.filename, index, function(response) {
       if (response > 0) {
         res.status(200).json(response);
       } else {
