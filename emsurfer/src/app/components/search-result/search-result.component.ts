@@ -4,7 +4,7 @@ import { Chart } from "chart.js";
 import { BiomoleculeSearchService } from "../../services/biomolecule-search.service";
 import { Biomolecule } from "src/app/models/biomolecule";
 import { BiomoleculeComparison } from "src/app/models/biomolecule-comparison";
-import { StringPadder } from 'src/app/models/string-padder';
+import { StringPadder } from "src/app/models/string-padder";
 
 @Component({
   selector: "app-search-result",
@@ -50,25 +50,27 @@ export class SearchResultComponent implements OnInit {
     if (emdbId) {
       this.biomoleculeSearchService
         .getBiomolecule(emdbId)
-        .then((response: Biomolecule) => {
-          this.biomolecule = response;
-        });
-      this.biomoleculeSearchService
-        .getZernikeDescriptors(emdbId, contourRepresentation)
-        .then(response => {
-          this.setValues(response);
-        });
-      this.biomoleculeSearchService
-        .getSimilarBioMolecules(
-          emdbId,
-          contourRepresentation,
-          this.volumeFilter === "On",
-          minRes,
-          maxRes
-        )
-        .then(response => {
-          this.results = response.results;
-          this.downloadResultFile = response.path;
+        .then((biomoleculeResponse: Biomolecule) => {
+          if (biomoleculeResponse) {
+            this.biomolecule = biomoleculeResponse;
+            this.biomoleculeSearchService
+              .getZernikeDescriptors(emdbId, contourRepresentation)
+              .then(response => {
+                this.setValues(response);
+              });
+            this.biomoleculeSearchService
+              .getSimilarBioMolecules(
+                emdbId,
+                contourRepresentation,
+                this.volumeFilter === "On",
+                minRes,
+                maxRes
+              )
+              .then(response => {
+                this.results = response.results;
+                this.downloadResultFile = response.path;
+              });
+          }
         });
       this.isSearchById = true;
     } else {
