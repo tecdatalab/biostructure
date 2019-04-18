@@ -3,6 +3,6 @@ const descriptorController = require("../controllers/descriptorController");
 
 router.get("/zernike/:emdbID", descriptorController.getZernikeDescriptors);
 
-//router.get("/zernikelist/:zernikelist", descriptorController.searchResult);
+router.get("/zernikelist/:emdblist", descriptorController.getZernikeList);
 
 module.exports = router;
