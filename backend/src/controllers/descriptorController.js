@@ -2,7 +2,7 @@ const descriptor = require("../models/descriptorModel");
 const fs = require("fs");
 var mkdirp = require("mkdirp");
 const zipFolder = require("zip-a-folder");
-const sequelize = require("../database").sequelize;
+const createIndex = require("../utilities/indexGenerator");
 
 exports.getZernikeDescriptors = async (req, res, next) => {
   try {
@@ -30,8 +30,9 @@ exports.getZernikeDescriptors = async (req, res, next) => {
 exports.getZernikeList = async (req, res, next) => {
   try {
     const list = req.params.emdblist.split(",");
-    mkdirp("./public/descriptors/results", function(err) {
-      asyncForEach(list, "./public/descriptors/results/", function(response) {
+    const pathFiles = "./public/descriptors/" + createIndex.createIndex();
+    mkdirp(pathFiles + "/results", function(err) {
+      asyncForEach(list, pathFiles, function(response) {
         res.status(200).json(response);
       });
     });
@@ -53,14 +54,26 @@ async function asyncForEach(array, path, callback) {
     });
     if (descriptorZernike) {
       fs.writeFile(
-        path + descriptorZernike.emd_entry_id + ".txt",
+        path + "/results/" + descriptorZernike.emd_entry_id + ".txt",
         descriptorZernike.numbers,
         function(err, result) {
           if (err) console.log("error", err);
         }
       );
       zernikeResults.push(descriptorZernike);
+    } else {
+      zernikeResults.push({
+        emd_entry_id: array[index],
+        type_descriptor_id: 0,
+        numbers: []
+      });
     }
   }
-  callback(zernikeResults);
+  zipFolder.zipFolder(path + "/results", path + "/results.zip", function(err) {
+    if (err) {
+      callback(err);
+    } else {
+      callback(zernikeResults);
+    }
+  });
 }
