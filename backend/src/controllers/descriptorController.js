@@ -73,7 +73,9 @@ async function asyncForEach(array, path, callback) {
     if (err) {
       callback(err);
     } else {
-      callback(zernikeResults);
+      var time = new Date();
+      time.setMinutes(time.getMinutes() + 10);
+      callback({ path: path, timeLimit: time, descriptors: zernikeResults });
     }
   });
 }
