@@ -1,5 +1,5 @@
 import { BrowserModule } from "@angular/platform-browser";
-import { NgModule, ErrorHandler } from "@angular/core";
+import { NgModule } from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
 import { HttpClientModule } from "@angular/common/http";
 
@@ -22,6 +22,7 @@ import { BenchmarkComponent } from "./components/benchmark/benchmark.component";
 import { EmdbIdListComponent } from "./components/emdb-id-list/emdb-id-list.component";
 import { UploadEmdbIdListFileComponent } from "./components/upload-emdb-id-list-file/upload-emdb-id-list-file.component";
 import { BenchmarkResultsComponent } from "./components/benchmark-results/benchmark-results.component";
+import { ZernikeDescriptorsModuleComponent } from './components/zernike-descriptors-module/zernike-descriptors-module.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { BenchmarkResultsComponent } from "./components/benchmark-results/benchm
     BenchmarkComponent,
     EmdbIdListComponent,
     UploadEmdbIdListFileComponent,
-    BenchmarkResultsComponent
+    BenchmarkResultsComponent,
+    ZernikeDescriptorsModuleComponent
   ],
   imports: [BrowserModule, HttpClientModule, ReactiveFormsModule, routes],
   providers: [],
