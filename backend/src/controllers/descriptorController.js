@@ -83,7 +83,7 @@ async function asyncForEach(array, path, callback) {
       time.setMinutes(time.getMinutes() + 10);
       callback({
         path: path.substring(8) + "/results.zip",
-        timeLimit: time,
+        expirationDate: time,
         descriptors: zernikeResults
       });
     }
