@@ -39,6 +39,23 @@ export class BenchmarkComponent implements OnInit {
     }
   }
 
+  goToZernikeModule() {
+    const url = "/zernike/";
+    let idList = "";
+    if (this.cbEmdbList) {
+      idList = this.benchmarkForm.get("emdb_id_list").value;
+    } else {
+      idList = this.benchmarkForm.get("file").value;
+    }
+    idList = idList.replace(/\r?\n/g, ",");
+    const params = {
+      emdbList: idList
+    };
+    this.router.navigate([url], {
+      queryParams: params
+    });
+  }
+
   reset() {
     this.benchmarkForm.reset(this.defaultFormState);
     this.cbEmdbList = false;

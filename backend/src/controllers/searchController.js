@@ -3,8 +3,8 @@ const search_history = require("../models/searchHistoryModel");
 const Op = require("../database").Op;
 
 exports.searchByID = async (req, res, next) => {
-  emdbid = req.params.emdbID;
   try {
+    const emdbid = req.params.emdbID;
     let biomolecules = await biomolecule.findOne({
       where: {
         id: parseInt(emdbid)
@@ -43,7 +43,7 @@ exports.searchResult = async (req, res, next) => {
         name_file: "-",
         counter_level: 0.0,
         representation_id: contourRepresentation,
-        volume_filter_id: 0,
+        volume_filter_id: isVolumeFilterOn == "true" ? 1 : 0,
         resolution_filter_min: minRes,
         resolution_filter_max: maxRes
       })
@@ -86,7 +86,7 @@ exports.searchResultMap = async (req, res, next) => {
         name_file: filename,
         counter_level: contourLevel,
         representation_id: contourRepresentation,
-        volume_filter_id: 0,
+        volume_filter_id: isVolumeFilterOn == "true" ? 1 : 0,
         resolution_filter_min: minRes,
         resolution_filter_max: maxRes
       })
@@ -164,9 +164,7 @@ async function getBiomolecules(minRes, maxRes) {
         biomolecule: biomoleculeItem.get({
           plain: true
         }),
-        euc_distance: 5,
-        ratio_of_volume: 4,
-        resolution: 3
+        euc_distance: 5
       });
     });
     return resultArray;

@@ -7,6 +7,7 @@ import { BenchmarkResultsComponent } from "./components/benchmark-results/benchm
 import { HomeComponent } from "./components/home/home.component";
 import { ReferenceComponent } from "./components/reference/reference.component";
 import { ContactComponent } from "./components/contact/contact.component";
+import { ZernikeDescriptorsModuleComponent } from "./components/zernike-descriptors-module/zernike-descriptors-module.component";
 
 export const router: Routes = [
   {
@@ -45,6 +46,10 @@ export const router: Routes = [
   {
     path: "contact",
     component: ContactComponent
+  },
+  {
+    path: "zernike",
+    component: ZernikeDescriptorsModuleComponent
   }
 ];
 

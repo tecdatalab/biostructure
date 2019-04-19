@@ -1,19 +1,24 @@
 const fs = require("fs");
-const files = require("../models/filesModel");
 var mkdirp = require("mkdirp");
+const createIndex = require("../utilities/indexGenerator");
 
 exports.uploadFileEmMap = async (req, res, next) => {
   try {
-    saveFile(req.body.file, req.body.filename, "2", function(response) {
-      if (response > 0) {
-        res.status(200).json(response);
-      } else {
-        res.status(500).json({
-          msg: "ERROR: I/O error",
-          details: err
-        });
+    saveFile(
+      req.body.file,
+      req.body.filename,
+      createIndex.createIndex(),
+      function(response) {
+        if (response > 0) {
+          res.status(200).json(response);
+        } else {
+          res.status(500).json({
+            msg: "ERROR: I/O error",
+            details: err
+          });
+        }
       }
-    });
+    );
   } catch (err) {
     res.status(500).send({
       message: "Backend error"

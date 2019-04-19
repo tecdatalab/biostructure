@@ -10,6 +10,7 @@ const benchmarkRoutes = require("./routes/benchmark");
 const contourRepresentationRoutes = require("./routes/contourRepresentation");
 const checkerRoutes = require("./routes/checker");
 const userRoutes = require("./routes/user");
+const descriptors = require("./routes/descriptor");
 
 //settings
 app.set("port", process.env.PORT || 3000);
@@ -29,11 +30,13 @@ app.use("/benchmark", benchmarkRoutes);
 app.use("/contour", contourRepresentationRoutes);
 app.use("/checker", checkerRoutes);
 app.use("/user", userRoutes);
+app.use("/descriptor", descriptors);
 
 //public routes
 app.use("/img", express.static("public/img"));
 app.use("/results", express.static("public/results"));
 app.use("/benchmarks", express.static("public/benchmarks"));
+app.use("/descriptors", express.static("public/descriptors"));
 
 app.listen(app.get("port"), () => {
   console.log("Server on port ", app.get("port"));

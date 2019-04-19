@@ -41,12 +41,20 @@
     ></app-upload-emdb-id-list-file>
   </div>
   <br />
-  <p><strong class="text-primary">Step 3 (Filter)</strong></p>
+  <p><strong class="text-primary">Step 3 (Download 3DZD)</strong></p>
+  <label for="">Do you want to download 3dzd file of your query?</label>
+  <div>
+    <button id="zernikeButton" type="button" (click)="goToZernikeModule()">
+      Get 3D Zernike Descriptor
+    </button>
+  </div>
+  <br />
+  <p><strong class="text-primary">Step 4 (Filter)</strong></p>
   <app-volume-filter-input
     [parentForm]="benchmarkForm"
   ></app-volume-filter-input>
   <br />
-  <p><strong class="text-primary">Step 4 (Results)</strong></p>
+  <p><strong class="text-primary">Step 5 (Results)</strong></p>
   <div class="form-group row">
     <label for="contour" class="col-sm-4 col-form-label">Top Results:</label>
     <div class="col-sm-8">
