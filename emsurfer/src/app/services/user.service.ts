@@ -35,4 +35,8 @@ export class UserService {
   deleteStoredAuthToken(): void {
     localStorage.removeItem("credential");
   }
+
+  isUserLoggedIn() {
+    return this.getStoredAuthToken() != null;
+  }
 }

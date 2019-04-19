@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { AuthService } from "angularx-social-login";
 import { GoogleLoginProvider } from "angularx-social-login";
 import { SocialUser } from "angularx-social-login";
@@ -9,13 +9,17 @@ import { UserService } from "src/app/services/user.service";
   templateUrl: "./sign-in.component.html",
   styleUrls: ["bootstrap-social.css"]
 })
-export class SignInComponent {
+export class SignInComponent implements OnInit {
   private loggedIn: boolean;
 
   constructor(
     private authService: AuthService,
     private userService: UserService
   ) {}
+
+  ngOnInit(): void {
+    this.loggedIn = this.userService.isUserLoggedIn();
+  }
 
   signInWithGoogle(): void {
     this.authService
