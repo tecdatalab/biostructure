@@ -34,6 +34,7 @@ app.use("/descriptor", descriptors);
 app.use("/img", express.static("public/img"));
 app.use("/results", express.static("public/results"));
 app.use("/benchmarks", express.static("public/benchmarks"));
+app.use("/descriptors", express.static("public/descriptors"));
 
 app.listen(app.get("port"), () => {
   console.log("Server on port ", app.get("port"));

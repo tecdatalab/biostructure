@@ -81,7 +81,11 @@ async function asyncForEach(array, path, callback) {
     } else {
       var time = new Date();
       time.setMinutes(time.getMinutes() + 10);
-      callback({ path: path, timeLimit: time, descriptors: zernikeResults });
+      callback({
+        path: path.substring(8) + "/results.zip",
+        timeLimit: time,
+        descriptors: zernikeResults
+      });
     }
   });
 }

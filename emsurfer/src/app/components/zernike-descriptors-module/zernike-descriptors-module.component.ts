@@ -20,6 +20,7 @@ export class ZernikeDescriptorsModuleComponent implements OnInit {
     this.descriptorService
       .getDescriptorsList(emdbList)
       .then((data: DescriptorsList) => {
+        console.log(data);
         this.results = data;
         this.showList = true;
       });

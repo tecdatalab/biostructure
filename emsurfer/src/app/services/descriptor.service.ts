@@ -33,6 +33,7 @@ export class DescriptorService {
       .get(this.API_URL + "/descriptor/zernikelist/" + emdbList)
       .toPromise()
       .then((response: DescriptorsList) => {
+        response.path = this.API_URL + response.path;
         return response;
       })
       .catch(err => {
