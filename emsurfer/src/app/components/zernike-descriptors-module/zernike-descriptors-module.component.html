@@ -6,11 +6,10 @@
       info below.
     </p>
   </div>
+  <div *ngIf="showList">
+    <div *ngFor="let result of results.descriptors">
+      <app-zernike-result [zernike]="result"></app-zernike-result>
+      <hr />
+    </div>
+  </div>
 </div>
-
-<p>
-  <app-zernike-descriptors-list
-    [values]="values"
-    [descriptors]="descriptors"
-  ></app-zernike-descriptors-list>
-</p>

@@ -1,16 +1,27 @@
 import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { DescriptorService } from "src/app/services/descriptor.service";
+import { DescriptorsList } from "src/app/models/descriptorsList";
 
 @Component({
   selector: "app-zernike-descriptors-module",
-  templateUrl: "./zernike-descriptors-module.component.html"
+  templateUrl: "./zernike-descriptors-module.component.html",
+  providers: [DescriptorService]
 })
 export class ZernikeDescriptorsModuleComponent implements OnInit {
-  constructor() {}
-
-  values;
-  descriptors;
+  constructor(
+    private descriptorService: DescriptorService,
+    private route: ActivatedRoute
+  ) {}
+  results: DescriptorsList;
+  showList = false;
   ngOnInit() {
-    this.values = [8, 9, 7, 6];
-    this.descriptors = [1, 2, 3, 4];
+    const emdbList = this.route.snapshot.paramMap.get("emdbList");
+    this.descriptorService
+      .getDescriptorsList(emdbList)
+      .then((data: DescriptorsList) => {
+        this.results = data;
+        this.showList = true;
+      });
   }
 }

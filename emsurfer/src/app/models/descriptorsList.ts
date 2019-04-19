@@ -1,6 +1,6 @@
 import { Descriptor } from "./descriptor";
 
-export class ContourRepresentation {
+export class DescriptorsList {
   path: string;
   expirationDate: Date;
   descriptors: Descriptor[];

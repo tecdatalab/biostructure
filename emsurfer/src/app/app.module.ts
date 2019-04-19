@@ -23,6 +23,7 @@ import { EmdbIdListComponent } from "./components/emdb-id-list/emdb-id-list.comp
 import { UploadEmdbIdListFileComponent } from "./components/upload-emdb-id-list-file/upload-emdb-id-list-file.component";
 import { BenchmarkResultsComponent } from "./components/benchmark-results/benchmark-results.component";
 import { ZernikeDescriptorsModuleComponent } from './components/zernike-descriptors-module/zernike-descriptors-module.component';
+import { ZernikeResultComponent } from './components/zernike-result/zernike-result.component';
 
 @NgModule({
   declarations: [
@@ -43,7 +44,8 @@ import { ZernikeDescriptorsModuleComponent } from './components/zernike-descript
     EmdbIdListComponent,
     UploadEmdbIdListFileComponent,
     BenchmarkResultsComponent,
-    ZernikeDescriptorsModuleComponent
+    ZernikeDescriptorsModuleComponent,
+    ZernikeResultComponent
   ],
   imports: [BrowserModule, HttpClientModule, ReactiveFormsModule, routes],
   providers: [],

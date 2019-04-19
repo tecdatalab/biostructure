@@ -33,7 +33,14 @@ exports.getZernikeList = async (req, res, next) => {
     const pathFiles = "./public/descriptors/" + createIndex.createIndex();
     mkdirp(pathFiles + "/results", function(err) {
       asyncForEach(list, pathFiles, function(response) {
-        res.status(200).json(response);
+        if (response instanceof Error) {
+          console.log("I/O Error");
+          res.status(500).send({
+            message: "I/O Server error"
+          });
+        } else {
+          res.status(200).json(response);
+        }
       });
     });
   } catch (err) {
@@ -64,8 +71,7 @@ async function asyncForEach(array, path, callback) {
     } else {
       zernikeResults.push({
         emd_entry_id: array[index],
-        type_descriptor_id: 0,
-        numbers: []
+        type_descriptor_id: 0
       });
     }
   }

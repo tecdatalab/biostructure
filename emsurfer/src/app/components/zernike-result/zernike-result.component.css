@@ -1,0 +1,28 @@
+.list-group {
+  max-height: 100px;
+  margin-bottom: 15px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+hr {
+  clear: both;
+  visibility: hidden;
+  height: 1px;
+}
+
+.zernike-exits {
+  max-width: 100px;
+  font: bold 16px Arial;
+  background-color: #333333;
+  color: #eeeeee;
+  padding: 4px 12px 4px 20px;
+}
+
+.zernike-fail {
+  max-width: 100px;
+  font: bold 16px Arial;
+  background-color: #b22222;
+  color: #eeeeee;
+  padding: 4px 12px 4px 20px;
+}
