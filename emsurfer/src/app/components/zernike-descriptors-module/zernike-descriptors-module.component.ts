@@ -2,7 +2,6 @@ import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { DescriptorService } from "src/app/services/descriptor.service";
 import { DescriptorsList } from "src/app/models/descriptorsList";
-import { timeout } from "q";
 
 @Component({
   selector: "app-zernike-descriptors-module",
@@ -48,11 +47,10 @@ export class ZernikeDescriptorsModuleComponent implements OnInit {
   }
 
   ngOnInit() {
-    const emdbList = this.route.snapshot.paramMap.get("emdbList");
+    const emdbIdList = this.route.snapshot.queryParamMap.get("emdbList");
     this.descriptorService
-      .getDescriptorsList(emdbList)
+      .getDescriptorsList(emdbIdList)
       .then((data: DescriptorsList) => {
-        console.log(data);
         this.results = data;
         this.showList = true;
         this.startTimer(data);

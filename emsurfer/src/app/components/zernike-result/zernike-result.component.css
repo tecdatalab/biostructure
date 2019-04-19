@@ -1,14 +1,8 @@
 .list-group {
-  max-height: 100px;
+  max-height: 200px;
   margin-bottom: 15px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-}
-
-hr {
-  clear: both;
-  visibility: hidden;
-  height: 1px;
 }
 
 .zernike-exits {

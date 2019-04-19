@@ -14,7 +14,6 @@ export class ZernikeResultComponent implements OnInit {
   ngOnInit() {
     if (!this.zernike.numbers) {
       this.validZernike = false;
-      console.log(this.zernike.numbers);
     }
   }
 }

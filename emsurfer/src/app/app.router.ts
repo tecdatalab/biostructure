@@ -33,7 +33,7 @@ export const router: Routes = [
     component: BenchmarkResultsComponent
   },
   {
-    path: "zernike/:emdbList",
+    path: "zernike",
     component: ZernikeDescriptorsModuleComponent
   }
 ];
