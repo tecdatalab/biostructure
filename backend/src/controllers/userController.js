@@ -2,7 +2,7 @@ const googleAuth = require("../security/googleAuth");
 const jwt = require("../security/jwt");
 
 const getCredentials = login => {
-  return googleAuth.getGoogleUser(login.code).then(googleUser => {
+  return googleAuth.getGoogleUser(login.tokenId).then(googleUser => {
     const content = {
       token: jwt.generateToken(googleUser),
       user: googleUser
@@ -14,7 +14,7 @@ const getCredentials = login => {
 exports.sendAuthToken = async (req, res, next) => {
   try {
     const login = req.body;
-    getCredentials
+    getCredentials(login)
       .then(credentials => {
         res.json(credentials).end();
       })

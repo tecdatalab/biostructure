@@ -25,8 +25,8 @@ module.exports.getGoogleUser = code => {
       }
       //promise the creation of a user
       return {
-        name: payload["name"], //profile name
         id: payload["sub"], //google id
+        name: payload["name"], //profile name
         email: payload["email"]
       };
     })
