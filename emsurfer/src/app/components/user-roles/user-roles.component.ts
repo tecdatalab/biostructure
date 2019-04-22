@@ -1,6 +1,5 @@
 import { Component, OnInit } from "@angular/core";
 import { User } from "src/app/models/user";
-import { isEmbeddedView } from "@angular/core/src/view/util";
 
 @Component({
   selector: "app-user-roles",
@@ -10,11 +9,11 @@ import { isEmbeddedView } from "@angular/core/src/view/util";
 export class UserRolesComponent implements OnInit {
   constructor() {}
   users = [];
-  valor;
+  filter;
   roles = [2, 0, 1];
   verify(user) {
-    if (this.valor) {
-      if (user.id == this.valor) {
+    if (this.filter) {
+      if (user.id == this.filter) {
         return true;
       } else {
         return false;

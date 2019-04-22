@@ -1,13 +1,39 @@
 <div class="container">
   <div>
-    <label class="radio-inline">
-      <input type="radio" name="filterType" /> Name
-    </label>
-    <label class="radio-inline">
-      <input type="radio" name="filterType" /> Email
-    </label>
+    <input [(ngModel)]="valor" />
   </div>
-  <input [(ngModel)]="valor" />
+  <br />
+  <p><strong class="text-primary">Filter:</strong></p>
+  <div class="form-group row">
+    <div class="custom-control custom-radio col-sm-2 offset-sm-1">
+      <input
+        type="radio"
+        class="custom-control-input"
+        id="name"
+        name="filterType"
+        checked
+      />
+      <label class="custom-control-label" for="name">Name</label>
+    </div>
+    <div class="custom-control custom-radio col-sm-2">
+      <input
+        type="radio"
+        class="custom-control-input"
+        id="email"
+        name="filterType"
+      />
+      <label class="custom-control-label" for="email">Email</label>
+    </div>
+    <div class="custom-control custom-radio col-sm-2">
+      <input
+        type="radio"
+        class="custom-control-input"
+        id="role"
+        name="filterType"
+      />
+      <label class="custom-control-label" for="role">Role</label>
+    </div>
+  </div>
   <br />
   <div
     style="
