@@ -1,0 +1,42 @@
+<div class="container">
+  <div>
+    <label class="radio-inline">
+      <input type="radio" name="filterType" /> Name
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="filterType" /> Email
+    </label>
+  </div>
+  <input [(ngModel)]="valor" />
+  <br />
+  <div
+    style="
+    overflow-y: scroll;
+    max-height:500px;"
+  >
+    <table class="table table-borderless" style="max-height: 200px">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">Id</th>
+          <th scope="col">Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Role</th>
+        </tr>
+      </thead>
+      <tbody *ngFor="let user of users; let a = index">
+        <tr *ngIf="verify(user) && a < 100">
+          <th>{{ user.id }}</th>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <select name="roleSelect" id="roleSelect" [(ngModel)]="user.role">
+              <option *ngFor="let role of roles" [ngValue]="role">{{
+                role
+              }}</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

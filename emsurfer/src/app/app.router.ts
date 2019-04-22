@@ -8,6 +8,7 @@ import { HomeComponent } from "./components/home/home.component";
 import { ReferenceComponent } from "./components/reference/reference.component";
 import { ContactComponent } from "./components/contact/contact.component";
 import { ZernikeDescriptorsModuleComponent } from "./components/zernike-descriptors-module/zernike-descriptors-module.component";
+import { UserRolesComponent } from "./components/user-roles/user-roles.component";
 
 export const router: Routes = [
   {
@@ -50,6 +51,10 @@ export const router: Routes = [
   {
     path: "zernike",
     component: ZernikeDescriptorsModuleComponent
+  },
+  {
+    path: "poc",
+    component: UserRolesComponent
   }
 ];
 
