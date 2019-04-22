@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "env TZ=UTC node src/index.js"
+    "start": "node src/index.js"
   },
   "keywords": [],
   "author": "",
