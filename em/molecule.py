@@ -34,6 +34,9 @@ class Molecule():
     def data(self):
         return self.array
 
+    def set_data(self, newData):
+        self.array = newData
+
     def shape(self):
         return (self.nz, self.ny, self.nx)
 
