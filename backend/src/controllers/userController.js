@@ -37,12 +37,13 @@ exports.sendAuthToken = async (req, res) => {
                 .catch(e => {
                   throw new Error(e);
                 });
+            } else {
+              const response = {
+                token: jwt.generateToken(dbUser),
+                user: dbUser
+              };
+              res.json(response).end();
             }
-            const response = {
-              token: jwt.generateToken(dbUser),
-              user: dbUser
-            };
-            res.json(response).end();
           });
       })
       .catch(e => {
