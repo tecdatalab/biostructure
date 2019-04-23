@@ -4,6 +4,10 @@
     <input [(ngModel)]="value" />
   </div>
   <br />
+  <select [(ngModel)]="selectedRoleFilter">
+    <option value="-1">Any</option>
+    <option *ngFor="let role of roles" [ngValue]="role">{{ role }}</option>
+  </select>
   <p><strong class="text-primary">Filter:</strong></p>
   <div class="form-group row">
     <div class="custom-control custom-radio col-sm-2 offset-sm-1">

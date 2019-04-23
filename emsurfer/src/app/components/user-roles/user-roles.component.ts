@@ -10,16 +10,25 @@ import { UserService } from "src/app/services/user.service";
 export class UserRolesComponent implements OnInit {
   constructor() {}
   users = [];
-  checkedOption;
+  checkedOption = "name";
+  selectedRoleFilter = -1;
   currentPage = -1;
   value;
-  result = [];
   roles = [2, 0, 1];
+
+  onChangeRoleFilter(obj) {
+    this.selectedRoleFilter = obj;
+    this.value = "0";
+  }
 
   filterFunction(collection) {
     return collection.filter(user => {
       if (this.value) {
-        if (user[this.checkedOption].includes(this.value)) {
+        if (
+          user[this.checkedOption].includes(this.value) &&
+          (user["role"] == this.selectedRoleFilter ||
+            this.selectedRoleFilter == -1)
+        ) {
           return true;
         } else {
           return false;
