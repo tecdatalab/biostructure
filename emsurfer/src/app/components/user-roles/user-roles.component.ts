@@ -11,15 +11,10 @@ export class UserRolesComponent implements OnInit {
   constructor() {}
   users = [];
   checkedOption = "name";
-  selectedRoleFilter = -1;
+  selectedRoleFilter: number;
   currentPage = -1;
   value;
   roles = [2, 0, 1];
-
-  onChangeRoleFilter(obj) {
-    this.selectedRoleFilter = obj;
-    this.value = "0";
-  }
 
   filterFunction(collection) {
     return collection.filter(user => {
@@ -30,9 +25,13 @@ export class UserRolesComponent implements OnInit {
             this.selectedRoleFilter == -1)
         ) {
           return true;
-        } else {
-          return false;
         }
+        return false;
+      } else if (
+        user["role"] != this.selectedRoleFilter &&
+        this.selectedRoleFilter != -1
+      ) {
+        return false;
       }
       return true;
     });
@@ -62,6 +61,7 @@ export class UserRolesComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.selectedRoleFilter = -1;
     this.createValues();
   }
 }

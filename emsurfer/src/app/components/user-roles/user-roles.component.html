@@ -1,13 +1,9 @@
 <div class="container">
-  <div>
-    <label class="col-sm-2">Keyword: </label>
+  <div class=" form-group row col-sm-8">
+    <label>Keyword: </label>
     <input [(ngModel)]="value" />
   </div>
   <br />
-  <select [(ngModel)]="selectedRoleFilter">
-    <option value="-1">Any</option>
-    <option *ngFor="let role of roles" [ngValue]="role">{{ role }}</option>
-  </select>
   <p><strong class="text-primary">Filter:</strong></p>
   <div class="form-group row">
     <div class="custom-control custom-radio col-sm-2 offset-sm-1">
@@ -33,17 +29,13 @@
       />
       <label class="custom-control-label" for="email">Email</label>
     </div>
-    <div class="custom-control custom-radio col-sm-2">
-      <input
-        type="radio"
-        class="custom-control-input"
-        id="role"
-        name="filterType"
-        value="role"
-        [(ngModel)]="checkedOption"
-      />
-      <label class="custom-control-label" for="role">Role</label>
-    </div>
+  </div>
+  <div class="row col-sm-2 ">
+    <p>Role filter:</p>
+    <select [(ngModel)]="selectedRoleFilter">
+      <option value="-1">Any</option>
+      <option *ngFor="let role of roles" [ngValue]="role">{{ role }}</option>
+    </select>
   </div>
   <br />
   <button
