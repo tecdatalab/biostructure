@@ -101,7 +101,6 @@ exports.grantAdminRole = (req, res, next) => {
   user
     .update({ role: 2 }, { where: { id: userId }, returning: true })
     .then(result => {
-      console.log(result);
       if (result[0] != 0) {
         res.status(200).send(result[1][0]);
       } else {
