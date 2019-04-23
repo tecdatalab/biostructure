@@ -1,6 +1,7 @@
 import numpy as np
 from glumpy import app, gloo, gl, glm
 from skimage import measure
+from skimage.color import label2rgb
 
 
 import molecule
@@ -87,6 +88,9 @@ class Visualizer():
             glm.rotate(model, theta, 1, 0, 0)
             glm.rotate(model, phi, 0, 1, 0)
 
+            phi = 0
+            theta = 0
+
             view = points['u_view'].reshape(4,4)            
             points['u_model'] = model
             points['u_normal'] = np.array(np.matrix(np.dot(view, model)).I.T)
@@ -100,7 +104,6 @@ class Visualizer():
         @window.event
         def on_mouse_drag(x, y, dx, dy, buttons):
             nonlocal phi, theta
-            print(dx," ",dy)
             phi += dx
             theta += dy
         
@@ -114,7 +117,7 @@ class Visualizer():
 
         if self.labels.any() != None:
             V = np.zeros(len(verts), [("a_position", np.float32, 3), ("u_color", np.float32, 3)])
-            colors = label2rgb(labels)
+            colors = label2rgb(self.labels)
             V["u_color"] = colors[verts_index[:,0], verts_index[:,1], verts_index[:,2]]
         else:
             V = np.zeros(len(verts), [("a_position", np.float32, 3)])
@@ -145,29 +148,6 @@ class Visualizer():
 
         app.run()
 
-
-filename = "../emd_8750.map"
-myreader = reader.Reader(filename)
-myMolecule = myreader.read()
-
-from scipy import ndimage as ndi
-from skimage.morphology import watershed, local_maxima
-from skimage.feature import peak_local_max
-from skimage.filters import threshold_otsu, gaussian
-from skimage.color import label2rgb
-
-smoothed = gaussian(myMolecule.data(), sigma=1.5)
-th = threshold_otsu(smoothed)
-binary = smoothed > th
-distance = ndi.distance_transform_edt(binary)
-#local_max = local_maxima(distance , allow_borders=False)
-local_max = peak_local_max(distance, indices=False, labels=binary, footprint=np.ones((26,26,26)), exclude_border=1)
-markers = ndi.label(local_max, structure=np.ones((3,3,3)))[0] 
-labels = watershed(-distance,markers,mask=binary)
-
-
-v = Visualizer(myMolecule, labels)
-v.show()
 
 
 
