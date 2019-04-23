@@ -12,23 +12,25 @@ export class UserRolesComponent implements OnInit {
   users = [];
   checkedOption;
   currentPage = -1;
-  filter;
+  value;
+  result = [];
   roles = [2, 0, 1];
 
-  verify(user) {
-    if (this.filter) {
-      if (user[this.checkedOption].includes(this.filter)) {
-        this.currentPage = -1;
-        return true;
-      } else {
-        return false;
+  filterFunction(collection) {
+    return collection.filter(user => {
+      if (this.value) {
+        if (user[this.checkedOption].includes(this.value)) {
+          return true;
+        } else {
+          return false;
+        }
       }
-    }
-    return true;
+      return true;
+    });
   }
 
   createValues() {
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < 300; i++) {
       this.users.push({
         id: i,
         name: "Name" + i,

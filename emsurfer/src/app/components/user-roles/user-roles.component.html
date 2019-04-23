@@ -1,7 +1,7 @@
 <div class="container">
   <div>
     <label class="col-sm-2">Keyword: </label>
-    <input [(ngModel)]="filter" />
+    <input [(ngModel)]="value" />
   </div>
   <br />
   <p><strong class="text-primary">Filter:</strong></p>
@@ -74,8 +74,8 @@
           <th scope="col">Role</th>
         </tr>
       </thead>
-      <tbody *ngFor="let user of users; let a = index">
-        <tr *ngIf="verify(user) && currentPage < a && a < currentPage + 101">
+      <tbody *ngFor="let user of filterFunction(users); let a = index">
+        <tr *ngIf="currentPage < a && a < currentPage + 101">
           <th>{{ user.id }}</th>
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
