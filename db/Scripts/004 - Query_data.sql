@@ -34,3 +34,16 @@ CREATE TABLE search_history(
 );
 
 COMMENT ON TABLE search_history IS 'Stores the significant data of the queries.';
+
+CREATE TABLE benchmark_history(
+    id SERIAL PRIMARY KEY,
+    date_time TIMESTAMP NOT NULL,
+    ip TEXT NOT NULL,
+    user_id INT,
+    representation_id INT REFERENCES representation(id) NOT NULL,
+    volume_filter_id INT REFERENCES volume_filter(id) NOT NULL,
+    top_results INT NOT NULL,
+    emd_list JSON NOT NULL
+);
+
+COMMENT ON TABLE benchmark_history IS 'Stores the significant data of the benchmark queries.';
