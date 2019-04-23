@@ -1,5 +1,4 @@
 const contourRepresentation = require("../models/contourRepresentationModel");
-const sequelize = require("../database").sequelize;
 
 exports.getContourRepresentation = async (req, res, next) => {
   try {

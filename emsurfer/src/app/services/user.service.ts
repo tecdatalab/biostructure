@@ -39,4 +39,18 @@ export class UserService {
   isUserLoggedIn() {
     return this.getStoredAuthToken() != null;
   }
+
+  grantAdminRole(userId) {
+    const body = {
+      token: this.getStoredAuthToken().token,
+      userId: userId
+    };
+    return this.http
+      .put(this.API_URL + "/user/admin/grantAdminRole", body)
+      .toPromise()
+      .then((result: any) => {
+        return result;
+      })
+      .catch(this.errorHandlerService.handleError);
+  }
 }
