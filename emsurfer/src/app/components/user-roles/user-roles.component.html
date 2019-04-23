@@ -1,6 +1,7 @@
 <div class="container">
   <div>
-    <input [(ngModel)]="valor" />
+    <label class="col-sm-2">Keyword: </label>
+    <input [(ngModel)]="filter" />
   </div>
   <br />
   <p><strong class="text-primary">Filter:</strong></p>
@@ -11,6 +12,8 @@
         class="custom-control-input"
         id="name"
         name="filterType"
+        value="name"
+        [(ngModel)]="checkedOption"
         checked
       />
       <label class="custom-control-label" for="name">Name</label>
@@ -21,6 +24,8 @@
         class="custom-control-input"
         id="email"
         name="filterType"
+        value="email"
+        [(ngModel)]="checkedOption"
       />
       <label class="custom-control-label" for="email">Email</label>
     </div>
@@ -30,11 +35,31 @@
         class="custom-control-input"
         id="role"
         name="filterType"
+        value="role"
+        [(ngModel)]="checkedOption"
       />
       <label class="custom-control-label" for="role">Role</label>
     </div>
   </div>
   <br />
+  <button
+    type="button"
+    class="btn btn-secondary"
+    [disabled]="currentPage == -1"
+    (click)="previousPage()"
+  >
+    <<
+  </button>
+  <label class="col-sm-10"></label>
+  <label></label>
+  <button
+    type="button"
+    class="btn btn-secondary"
+    [disabled]="currentPage + 100 > users.length"
+    (click)="nextPage()"
+  >
+    >>
+  </button>
   <div
     style="
     overflow-y: scroll;
@@ -50,7 +75,7 @@
         </tr>
       </thead>
       <tbody *ngFor="let user of users; let a = index">
-        <tr *ngIf="verify(user) && a < 100">
+        <tr *ngIf="verify(user) && currentPage < a && a < currentPage + 101">
           <th>{{ user.id }}</th>
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
