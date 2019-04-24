@@ -137,6 +137,11 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-exports.sendTrueResponse = (req, res) => {
-  res.status(200).send(true);
+exports.isUserAdmin = (req, res) => {
+  const reqUser = req.authenticatedUser;
+  if (reqUser.role == 2) {
+    res.status(200).send(true);
+  } else {
+    res.status(200).send(false);
+  }
 };

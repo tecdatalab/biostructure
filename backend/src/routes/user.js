@@ -23,8 +23,7 @@ router.get(
 router.get(
   "/checkAdminRole",
   userController.verifyUserToken,
-  userController.verifyAdminUser,
-  userController.sendTrueResponse
+  userController.isUserAdmin
 );
 
 module.exports = router;
