@@ -1,5 +1,4 @@
 import { TestBed, getTestBed } from "@angular/core/testing";
-import { ContourRepresentationService } from "src/app/services/contour-representation.service";
 import {
   HttpClientTestingModule,
   HttpTestingController
