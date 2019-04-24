@@ -97,10 +97,11 @@ exports.verifyAdminUser = (req, res, next) => {
   }
 };
 
-exports.grantAdminRole = (req, res, next) => {
+exports.changeUserRole = (req, res) => {
   const userId = req.body.userId;
+  const newUserRole = req.body.role;
   user
-    .update({ role: 2 }, { where: { id: userId }, returning: true })
+    .update({ role: newUserRole }, { where: { id: userId }, returning: true })
     .then(result => {
       if (result[0] != 0) {
         res.status(200).send(result[1][0]);
@@ -134,4 +135,8 @@ exports.getUsers = async (req, res, next) => {
       message: "Internal server error"
     });
   }
+};
+
+exports.sendTrueResponse = (req, res) => {
+  res.satus(200).send(true);
 };

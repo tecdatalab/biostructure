@@ -42,13 +42,14 @@ export class UserService {
     return this.getStoredAuthToken() != null;
   }
 
-  grantAdminRole(userId) {
+  changeUserRole(userId: number, role: number) {
     const body = {
       token: this.getStoredAuthToken().token,
-      userId: userId
+      userId: userId,
+      role: role
     };
     return this.http
-      .put(this.API_URL + "/user/admin/grantAdminRole", body)
+      .put(this.API_URL + "/user/admin/changeUserRole", body)
       .toPromise()
       .then((result: any) => {
         return result;
