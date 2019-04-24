@@ -52,7 +52,7 @@ exports.sendAuthToken = async (req, res) => {
         throw new Error(e);
       });
   } catch (error) {
-    res.status(500).send({ Error: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
     return console.error(error);
   }
 };
@@ -61,7 +61,7 @@ exports.verifyUserToken = (req, res, next) => {
   const token = req.body.token;
   jwt.verify(token, (err, decodedToken) => {
     if (err) {
-      res.status(401).send({ Error: "user is not authenticated" });
+      res.status(401).send({ message: "user is not authenticated" });
     } else {
       user
         .findOne({
@@ -74,12 +74,12 @@ exports.verifyUserToken = (req, res, next) => {
             req.authenticatedUser = result;
             next();
           } else {
-            res.status(401).send({ Error: "user is not authenticated" });
+            res.status(401).send({ message: "user is not authenticated" });
           }
         })
         .catch(error => {
           res.status(403).send({
-            Error: "user is not authorized or does not exists"
+            message: "user is not authorized or does not exists"
           });
         });
     }
@@ -93,7 +93,7 @@ exports.verifyAdminUser = (req, res, next) => {
   } else {
     res
       .status(403)
-      .send({ Error: "user is not authorized or does not exists" });
+      .send({ message: "user is not authorized or does not exists" });
   }
 };
 
@@ -110,7 +110,7 @@ exports.changeUserRole = (req, res) => {
       }
     })
     .catch(error => {
-      res.status(400).send({ Error: error });
+      res.status(400).send({ message: error });
       return console.error(error);
     });
 };
@@ -138,5 +138,5 @@ exports.getUsers = async (req, res, next) => {
 };
 
 exports.sendTrueResponse = (req, res) => {
-  res.satus(200).send(true);
+  res.status(200).send(true);
 };

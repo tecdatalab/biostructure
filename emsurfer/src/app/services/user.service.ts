@@ -39,6 +39,9 @@ export class UserService {
   }
 
   isUserLoggedIn() {
+    console.log(this.getStoredAuthToken());
+    let respuesta = this.getStoredAuthToken() != null;
+    console.log(respuesta);
     return this.getStoredAuthToken() != null;
   }
 
@@ -74,6 +77,21 @@ export class UserService {
       .get(this.API_URL + "/user/users")
       .toPromise()
       .then((response: User[]) => {
+        return response;
+      })
+      .catch(err => {
+        this.errorHandlerService.handleError(err);
+      });
+  }
+
+  checkAdminRole(): Promise<void | boolean> {
+    const body = {
+      token: this.getStoredAuthToken().token
+    };
+    return this.http
+      .post(this.API_URL + "/user/checkAdminRole", body)
+      .toPromise()
+      .then((response: boolean) => {
         return response;
       })
       .catch(err => {

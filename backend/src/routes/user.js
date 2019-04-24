@@ -6,11 +6,11 @@ router.put(
   "/admin/changeUserRole",
   userController.verifyUserToken,
   userController.verifyAdminUser,
-  userController.grantAdminRole
+  userController.changeUserRole
 );
 router.get("/roles", userController.getUsersRoles);
 router.get("/users", userController.getUsers);
-router.get(
+router.post(
   "/checkAdminRole",
   userController.verifyUserToken,
   userController.verifyAdminUser,

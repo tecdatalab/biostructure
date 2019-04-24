@@ -1,11 +1,12 @@
 <div class="container">
-  <div class=" form-group row col-sm-8">
-    <label>Keyword: </label>
+  <h3 class="text-primary">Role dashboard</h3>
+  <div class="row col-sm-8">
+    <p class="col-sm-3"><strong>Keyword:</strong></p>
     <input [(ngModel)]="value" />
   </div>
   <br />
-  <p><strong class="text-primary">Filter:</strong></p>
-  <div class="form-group row">
+  <p><strong class="col-sm-2">Filter:</strong></p>
+  <div class="row">
     <div class="custom-control custom-radio col-sm-2 offset-sm-1">
       <input
         type="radio"
@@ -30,8 +31,9 @@
       <label class="custom-control-label" for="email">Email</label>
     </div>
   </div>
-  <div class="row col-sm-2 ">
-    <p>Role filter:</p>
+  <br />
+  <div class="row col-sm-8">
+    <p class="col-sm-3"><strong>Role filter:</strong></p>
     <select [(ngModel)]="selectedRoleFilter">
       <option value="-1">Any</option>
       <option *ngFor="let role of roles" [ngValue]="role.id">{{
@@ -66,7 +68,6 @@
     <table class="table table-borderless" style="max-height: 200px">
       <thead class="thead-dark">
         <tr>
-          <th scope="col">Id</th>
           <th scope="col">Name</th>
           <th scope="col">Email</th>
           <th scope="col">Role</th>
@@ -74,7 +75,6 @@
       </thead>
       <tbody *ngFor="let user of filterFunction(users); let a = index">
         <tr *ngIf="currentPage < a && a < currentPage + 101">
-          <th>{{ user.id }}</th>
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
           <td>
