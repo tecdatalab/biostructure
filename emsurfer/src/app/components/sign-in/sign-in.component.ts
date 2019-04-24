@@ -11,6 +11,7 @@ import { UserService } from "src/app/services/user.service";
 })
 export class SignInComponent implements OnInit {
   private loggedIn: boolean;
+  private isAdminUser: boolean;
 
   constructor(
     private authService: AuthService,
@@ -19,6 +20,11 @@ export class SignInComponent implements OnInit {
 
   ngOnInit(): void {
     this.loggedIn = this.userService.isUserLoggedIn();
+    if (this.loggedIn) {
+      this.userService.checkAdminRole().then((isAdmin: boolean) => {
+        this.isAdminUser = isAdmin;
+      });
+    }
   }
 
   signInWithGoogle(): void {
@@ -28,6 +34,9 @@ export class SignInComponent implements OnInit {
         this.userService.getAuthToken(user.idToken).then(() => {
           const credential = this.userService.getStoredAuthToken();
           this.loggedIn = credential != null;
+          this.userService.checkAdminRole().then((isAdmin: boolean) => {
+            this.isAdminUser = isAdmin;
+          });
         });
       });
   }
