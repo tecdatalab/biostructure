@@ -61,7 +61,6 @@ export class UserRolesComponent implements OnInit {
     if (this.userService.isUserLoggedIn()) {
       this.userService.checkAdminRole().then((data: boolean) => {
         if (data) {
-          console.log("DATA " + data);
           this.selectedRoleFilter = -1;
           this.userService.getUsers().then((data: User[]) => {
             this.users = data;
