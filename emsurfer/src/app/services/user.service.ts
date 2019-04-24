@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import config from "../../config.json";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { ErrorHandlerService } from "./error-handler.service.js";
 import { Credential } from "../models/credential.js";
 import { UserRole } from "../models/userRole";
@@ -39,20 +39,21 @@ export class UserService {
   }
 
   isUserLoggedIn() {
-    console.log(this.getStoredAuthToken());
-    let respuesta = this.getStoredAuthToken() != null;
-    console.log(respuesta);
     return this.getStoredAuthToken() != null;
   }
 
   changeUserRole(userId: number, role: number) {
     const body = {
-      token: this.getStoredAuthToken().token,
       userId: userId,
       role: role
     };
+    const httpHeaders = new HttpHeaders({
+      authorization: this.getStoredAuthToken().token
+    });
     return this.http
-      .put(this.API_URL + "/user/admin/changeUserRole", body)
+      .put(this.API_URL + "/user/admin/changeUserRole", body, {
+        headers: httpHeaders
+      })
       .toPromise()
       .then((result: any) => {
         return result;
@@ -61,8 +62,11 @@ export class UserService {
   }
 
   getUserRoles(): Promise<void | UserRole[]> {
+    const httpHeaders = new HttpHeaders({
+      authorization: this.getStoredAuthToken().token
+    });
     return this.http
-      .get(this.API_URL + "/user/roles")
+      .get(this.API_URL + "/user/roles", { headers: httpHeaders })
       .toPromise()
       .then((response: UserRole[]) => {
         return response;
@@ -73,8 +77,11 @@ export class UserService {
   }
 
   getUsers(): Promise<void | User[]> {
+    const httpHeaders = new HttpHeaders({
+      authorization: this.getStoredAuthToken().token
+    });
     return this.http
-      .get(this.API_URL + "/user/users")
+      .get(this.API_URL + "/user/users", { headers: httpHeaders })
       .toPromise()
       .then((response: User[]) => {
         return response;
@@ -85,11 +92,11 @@ export class UserService {
   }
 
   checkAdminRole(): Promise<void | boolean> {
-    const body = {
-      token: this.getStoredAuthToken().token
-    };
+    const httpHeaders = new HttpHeaders({
+      authorization: this.getStoredAuthToken().token
+    });
     return this.http
-      .post(this.API_URL + "/user/checkAdminRole", body)
+      .get(this.API_URL + "/user/checkAdminRole", { headers: httpHeaders })
       .toPromise()
       .then((response: boolean) => {
         return response;

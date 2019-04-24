@@ -8,9 +8,19 @@ router.put(
   userController.verifyAdminUser,
   userController.changeUserRole
 );
-router.get("/roles", userController.getUsersRoles);
-router.get("/users", userController.getUsers);
-router.post(
+router.get(
+  "/roles",
+  userController.verifyUserToken,
+  userController.verifyAdminUser,
+  userController.getUsersRoles
+);
+router.get(
+  "/users",
+  userController.verifyUserToken,
+  userController.verifyAdminUser,
+  userController.getUsers
+);
+router.get(
   "/checkAdminRole",
   userController.verifyUserToken,
   userController.verifyAdminUser,

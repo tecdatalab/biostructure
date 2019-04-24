@@ -58,7 +58,7 @@ exports.sendAuthToken = async (req, res) => {
 };
 
 exports.verifyUserToken = (req, res, next) => {
-  const token = req.body.token;
+  const token = req.header("authorization");
   jwt.verify(token, (err, decodedToken) => {
     if (err) {
       res.status(401).send({ message: "user is not authenticated" });
@@ -115,7 +115,7 @@ exports.changeUserRole = (req, res) => {
     });
 };
 
-exports.getUsersRoles = async (req, res, next) => {
+exports.getUsersRoles = async (req, res) => {
   try {
     let userRoles = await userRole.findAll({});
     res.status(200).json(userRoles);
@@ -126,7 +126,7 @@ exports.getUsersRoles = async (req, res, next) => {
   }
 };
 
-exports.getUsers = async (req, res, next) => {
+exports.getUsers = async (req, res) => {
   try {
     let users = await user.findAll({});
     res.status(200).json(users);
