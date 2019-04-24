@@ -53,7 +53,7 @@ export const router: Routes = [
     component: ZernikeDescriptorsModuleComponent
   },
   {
-    path: "poc",
+    path: "admin/changeUserRole",
     component: UserRolesComponent
   }
 ];
