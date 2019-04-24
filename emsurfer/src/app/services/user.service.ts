@@ -3,6 +3,8 @@ import config from "../../config.json";
 import { HttpClient } from "@angular/common/http";
 import { ErrorHandlerService } from "./error-handler.service.js";
 import { Credential } from "../models/credential.js";
+import { UserRole } from "../models/userRole";
+import { User } from "../models/user";
 
 @Injectable({
   providedIn: "root"
@@ -52,5 +54,29 @@ export class UserService {
         return result;
       })
       .catch(this.errorHandlerService.handleError);
+  }
+
+  getUserRoles(): Promise<void | UserRole[]> {
+    return this.http
+      .get(this.API_URL + "/user/roles")
+      .toPromise()
+      .then((response: UserRole[]) => {
+        return response;
+      })
+      .catch(err => {
+        this.errorHandlerService.handleError(err);
+      });
+  }
+
+  getUsers(): Promise<void | User[]> {
+    return this.http
+      .get(this.API_URL + "/user/users")
+      .toPromise()
+      .then((response: User[]) => {
+        return response;
+      })
+      .catch(err => {
+        this.errorHandlerService.handleError(err);
+      });
   }
 }

@@ -1,20 +1,20 @@
 import { Component, OnInit } from "@angular/core";
 import { User } from "src/app/models/user";
+import { UserRole } from "src/app/models/userRole";
 import { UserService } from "src/app/services/user.service";
 
 @Component({
   selector: "app-user-roles",
-  templateUrl: "./user-roles.component.html",
-  styleUrls: ["./user-roles.component.css"]
+  templateUrl: "./user-roles.component.html"
 })
 export class UserRolesComponent implements OnInit {
-  constructor() {}
-  users = [];
+  constructor(private userService: UserService) {}
+  users: User[];
   checkedOption = "name";
   selectedRoleFilter: number;
   currentPage = -1;
   value;
-  roles = [2, 0, 1];
+  roles: UserRole[];
 
   filterFunction(collection) {
     return collection.filter(user => {
@@ -37,14 +37,11 @@ export class UserRolesComponent implements OnInit {
     });
   }
 
-  createValues() {
-    for (let i = 0; i < 300; i++) {
-      this.users.push({
-        id: i,
-        name: "Name" + i,
-        email: i + "@asdf.com",
-        role: i % 2
-      });
+  onChangeRole(value, user) {
+    console.log(this.roles[parseInt(value)]);
+    if (this.roles[parseInt(value)].role == "Admin") {
+      console.log("grant admin");
+      this.userService.grantAdminRole(user.id);
     }
   }
 
@@ -62,6 +59,11 @@ export class UserRolesComponent implements OnInit {
 
   ngOnInit() {
     this.selectedRoleFilter = -1;
-    this.createValues();
+    this.userService.getUsers().then((data: User[]) => {
+      this.users = data;
+    });
+    this.userService.getUserRoles().then((data: UserRole[]) => {
+      this.roles = data;
+    });
   }
 }

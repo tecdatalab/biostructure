@@ -1,6 +1,7 @@
 const googleAuth = require("../security/googleAuth");
 const jwt = require("../security/jwt");
 const user = require("../models/userModel");
+const userRole = require("../models/userRoleModel");
 
 const getGoogleUser = login => {
   return googleAuth.getGoogleUser(login.tokenId).then(googleUser => {
@@ -111,4 +112,26 @@ exports.grantAdminRole = (req, res, next) => {
       res.status(400).send({ Error: error });
       return console.error(error);
     });
+};
+
+exports.getUsersRoles = async (req, res, next) => {
+  try {
+    let userRoles = await userRole.findAll({});
+    res.status(200).json(userRoles);
+  } catch (err) {
+    res.status(500).send({
+      message: "Internal server error"
+    });
+  }
+};
+
+exports.getUsers = async (req, res, next) => {
+  try {
+    let users = await user.findAll({});
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).send({
+      message: "Internal server error"
+    });
+  }
 };

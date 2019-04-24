@@ -8,5 +8,7 @@ router.put(
   userController.verifyAdminUser,
   userController.grantAdminRole
 );
+router.get("/roles", userController.getUsersRoles);
+router.get("/users", userController.getUsers);
 
 module.exports = router;

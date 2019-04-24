@@ -34,7 +34,9 @@
     <p>Role filter:</p>
     <select [(ngModel)]="selectedRoleFilter">
       <option value="-1">Any</option>
-      <option *ngFor="let role of roles" [ngValue]="role">{{ role }}</option>
+      <option *ngFor="let role of roles" [ngValue]="role.id">{{
+        role.role
+      }}</option>
     </select>
   </div>
   <br />
@@ -76,9 +78,14 @@
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
           <td>
-            <select name="roleSelect" id="roleSelect" [(ngModel)]="user.role">
-              <option *ngFor="let role of roles" [ngValue]="role">{{
-                role
+            <select
+              name="roleSelect"
+              id="roleSelect"
+              [(ngModel)]="user.role"
+              (change)="onChangeRole($event.target.value, user)"
+            >
+              <option *ngFor="let role of roles" [ngValue]="role.id">{{
+                role.role
               }}</option>
             </select>
           </td>
