@@ -11,9 +11,10 @@ import { User } from "../models/user";
 })
 export class UserService {
   API_URL = config.api_url;
+
   constructor(
     private http: HttpClient,
-    private errorHandlerService: ErrorHandlerService
+    public errorHandlerService: ErrorHandlerService //TODO: service should not be public
   ) {}
 
   getAuthToken(googleIdToken: string): Promise<void | void> {
