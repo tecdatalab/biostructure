@@ -12,7 +12,7 @@ exports.generateToken = user => {
   return jwt.sign(
     {
       user: user,
-      exp: expDate.getTime() // expiration date given in milliseconds
+      exp: expDate.getTime() / 1000 // expiration date given in seconds
     },
     secret
   );
