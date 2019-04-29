@@ -24,7 +24,7 @@ dummyCredential.token = "token";
 dummyCredential.user = new User();
 dummyCredential.user.id = "id";
 
-fdescribe("UserService", () => {
+describe("UserService", () => {
   let injector: TestBed;
   let service: UserService;
   let httpMock: HttpTestingController;
