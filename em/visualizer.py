@@ -2,6 +2,7 @@ import numpy as np
 from glumpy import app, gloo, gl, glm
 from skimage import measure
 from skimage.color import label2rgb
+from biopandas.pdb import PandasPdb 
 
 
 import molecule
@@ -66,6 +67,7 @@ class Visualizer():
 
         self.labels = labels
         self.molecule = myMolecule
+        self.atoms = None
 
 
 
@@ -148,7 +150,19 @@ class Visualizer():
 
         app.run()
 
+    def add_structure(self, filename):
+        ppdb =PandasPdb()
+        ppdb.read_pdb(filename)
+        atoms = ppdb.df["ATOM"][ppdb.df['ATOM']['atom_name'] == 'CA']
+        self.atoms = atoms[["x_coord", "y_coord", "z_coord"]].values
+        print(self.atoms.shape)
 
 
 
-
+r = reader.Reader("../../EMD-1010.map")
+m = r.read()
+import processing
+l = processing.watershed_segmentation(m)
+v = Visualizer(m,l)
+v.add_structure("../../pdb1mi6.ent")
+v.show()
