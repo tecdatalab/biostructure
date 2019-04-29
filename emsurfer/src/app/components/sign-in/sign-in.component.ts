@@ -27,6 +27,7 @@ export class SignInComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // TO DO: check if the user sign out from google externaly
     this.errorSubscription = this.errorHandlerService.errorCodeObs.subscribe(
       (errorCode: number) => {
         if (errorCode === 401) {
