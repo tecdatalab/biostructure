@@ -63,10 +63,11 @@ export class SignInComponent implements OnInit {
   }
 
   signOut(): void {
-    this.authService.signOut().then(() => {
+    this.authService.signOut().finally(() => {
       this.userService.deleteStoredAuthToken();
       const credential = this.userService.getStoredAuthToken();
       this.loggedIn = credential != null;
+      this.router.navigate(["/home"]);
     });
   }
 }
