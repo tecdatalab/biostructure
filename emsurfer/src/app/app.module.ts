@@ -24,6 +24,7 @@ import { UploadEmdbIdListFileComponent } from "./components/upload-emdb-id-list-
 import { BenchmarkResultsComponent } from "./components/benchmark-results/benchmark-results.component";
 import { HomeComponent } from './components/home/home.component';
 import { ReferenceComponent } from './components/reference/reference.component';
+import { ContactComponent } from './components/contact/contact.component';
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import { ReferenceComponent } from './components/reference/reference.component';
     UploadEmdbIdListFileComponent,
     BenchmarkResultsComponent,
     HomeComponent,
-    ReferenceComponent
+    ReferenceComponent,
+    ContactComponent
   ],
   imports: [BrowserModule, HttpClientModule, ReactiveFormsModule, routes],
   providers: [],

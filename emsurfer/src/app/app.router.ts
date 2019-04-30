@@ -6,6 +6,7 @@ import { BenchmarkComponent } from "./components/benchmark/benchmark.component";
 import { BenchmarkResultsComponent } from "./components/benchmark-results/benchmark-results.component";
 import { HomeComponent } from "./components/home/home.component";
 import { ReferenceComponent } from "./components/reference/reference.component";
+import { ContactComponent } from "./components/contact/contact.component";
 
 export const router: Routes = [
   {
@@ -40,6 +41,10 @@ export const router: Routes = [
   {
     path: "reference",
     component: ReferenceComponent
+  },
+  {
+    path: "contact",
+    component: ContactComponent
   }
 ];
 
