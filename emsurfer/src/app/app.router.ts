@@ -5,6 +5,7 @@ import { SearchResultComponent } from "./components/search-result/search-result.
 import { BenchmarkComponent } from "./components/benchmark/benchmark.component";
 import { BenchmarkResultsComponent } from "./components/benchmark-results/benchmark-results.component";
 import { HomeComponent } from "./components/home/home.component";
+import { ReferenceComponent } from "./components/reference/reference.component";
 
 export const router: Routes = [
   {
@@ -35,6 +36,10 @@ export const router: Routes = [
   {
     path: "home",
     component: HomeComponent
+  },
+  {
+    path: "reference",
+    component: ReferenceComponent
   }
 ];
 
