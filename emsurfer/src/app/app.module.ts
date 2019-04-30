@@ -22,6 +22,7 @@ import { BenchmarkComponent } from "./components/benchmark/benchmark.component";
 import { EmdbIdListComponent } from "./components/emdb-id-list/emdb-id-list.component";
 import { UploadEmdbIdListFileComponent } from "./components/upload-emdb-id-list-file/upload-emdb-id-list-file.component";
 import { BenchmarkResultsComponent } from "./components/benchmark-results/benchmark-results.component";
+import { HomeComponent } from './components/home/home.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { BenchmarkResultsComponent } from "./components/benchmark-results/benchm
     BenchmarkComponent,
     EmdbIdListComponent,
     UploadEmdbIdListFileComponent,
-    BenchmarkResultsComponent
+    BenchmarkResultsComponent,
+    HomeComponent
   ],
   imports: [BrowserModule, HttpClientModule, ReactiveFormsModule, routes],
   providers: [],
