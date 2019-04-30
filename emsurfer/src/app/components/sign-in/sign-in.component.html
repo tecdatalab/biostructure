@@ -3,6 +3,7 @@
     <ul *ngIf="!loggedIn; else logged" class="navbar-nav ml-auto">
       <li class="nav-item">
         <a
+          id="sign_in"
           class="btn btn-block btn-social btn-google btn-sm "
           (click)="signInWithGoogle()"
           ><div class="left">

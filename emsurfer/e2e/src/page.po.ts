@@ -5,32 +5,32 @@ export class Page {
     return browser.get(path);
   }
 
-  wait(seconds){
+  navigateToDriver(path) {
+    return browser.driver.get(path);
+  }
+
+  wait(seconds) {
     browser.driver.sleep(seconds);
     browser.waitForAngular();
   }
 
-  getButton(){
-    return element(
-      by.buttonText('Submit')
-    );
+  getButton() {
+    return element(by.buttonText("Submit"));
   }
 
-  getAlert(idAlert){
-    return element(
-      by.id(idAlert)
-    );
+  getAlert(idAlert) {
+    return element(by.id(idAlert));
   }
 
-  getInput() {
-    return element(
-      by.xpath("//input[@id='emdb_id']")
-    );
+  getEmdbIDInput() {
+    return element(by.xpath("//input[@id='emdb_id']"));
   }
 
-  getDownloadLink(){
-    return element(
-      by.id("download_link")
-    );
+  getDownloadLink() {
+    return element(by.id("download_link"));
+  }
+
+  getSignIn() {
+    return element(by.id("sign_in"));
   }
 }
