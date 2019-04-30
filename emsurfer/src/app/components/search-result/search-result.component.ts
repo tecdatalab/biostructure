@@ -50,25 +50,27 @@ export class SearchResultComponent implements OnInit {
     if (emdbId) {
       this.biomoleculeSearchService
         .getBiomolecule(emdbId)
-        .then((response: Biomolecule) => {
-          this.biomolecule = response;
-        });
-      this.biomoleculeSearchService
-        .getZernikeDescriptors(emdbId, contourRepresentation)
-        .then(response => {
-          this.setValues(response);
-        });
-      this.biomoleculeSearchService
-        .getSimilarBioMolecules(
-          emdbId,
-          contourRepresentation,
-          this.volumeFilter === "On",
-          minRes,
-          maxRes
-        )
-        .then(response => {
-          this.results = response.results;
-          this.downloadResultFile = response.path;
+        .then((biomoleculeResponse: Biomolecule) => {
+          if (biomoleculeResponse) {
+            this.biomolecule = biomoleculeResponse;
+            this.biomoleculeSearchService
+              .getZernikeDescriptors(emdbId, contourRepresentation)
+              .then(response => {
+                this.setValues(response);
+              });
+            this.biomoleculeSearchService
+              .getSimilarBioMolecules(
+                emdbId,
+                contourRepresentation,
+                this.volumeFilter === "On",
+                minRes,
+                maxRes
+              )
+              .then(response => {
+                this.results = response.results;
+                this.downloadResultFile = response.path;
+              });
+          }
         });
       this.isSearchById = true;
     } else {

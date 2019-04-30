@@ -1,4 +1,5 @@
-const benchmark = require("../models/benchmarkModel");
+
+const benchmark_history = require("../models/benchmarkModel");
 const fs = require("fs");
 var mkdirp = require("mkdirp");
 const zipFolder = require("zip-a-folder");
@@ -6,24 +7,40 @@ const zipFolder = require("zip-a-folder");
 exports.batchQuery = async (req, res, next) => {
   try {
     const list = req.params.emdblist.split(",");
-    const benchmarkPath = "./public/benchmarks/" + 2;
-    mkdirp(benchmarkPath + "/results", function(err) {
-      generateFiles(list, benchmarkPath, 2, function(response) {
-        if (Array.isArray(response)) {
-          const resJSON = {
-            path: benchmarkPath,
-            zipFile: "/benchmarks/" + 2 + "/results.zip",
-            results: response
-          };
-          res.status(200).json(resJSON);
-        } else {
-          console.log("I/O Error");
-          res.status(500).send({
-            message: "I/O Server error"
+
+    await benchmark_history
+      .build({
+        date_time: new Date(),
+        ip: req.connection.remoteAddress,
+        user_id: 0,
+        representation_id: req.params.contour,
+        volume_filter_id: req.params.filter == "true" ? 1 : 0,
+        top_results: req.params.top,
+        emd_list: list
+      })
+      .save()
+      .then(newBenchmark => {
+        const benchmarkPath = "./public/benchmarks/" + newBenchmark.id;
+        mkdirp(benchmarkPath + "/results", function(err) {
+          generateFiles(list, benchmarkPath, newBenchmark.id, function(
+            response
+          ) {
+            if (Array.isArray(response)) {
+              const resJSON = {
+                path: benchmarkPath,
+                zipFile: "/benchmarks/" + newBenchmark.id + "/results.zip",
+                results: response
+              };
+              res.status(200).json(resJSON);
+            } else {
+              console.log("I/O Error");
+              res.status(500).send({
+                message: "I/O Server error"
+              });
+            }
           });
-        }
+        });
       });
-    });
   } catch (err) {
     res.status(500).send({
       message: "Backend error"

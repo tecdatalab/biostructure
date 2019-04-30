@@ -60,6 +60,7 @@ import { SocialLoginModule } from "angularx-social-login";
     AngularFontAwesomeModule,
     SocialLoginModule.initialize(config)
   ],
+  imports: [BrowserModule, HttpClientModule, ReactiveFormsModule, routes],
   providers: [],
   bootstrap: [AppComponent]
 })
