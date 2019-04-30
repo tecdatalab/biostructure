@@ -4,6 +4,7 @@ import { Chart } from "chart.js";
 import { BiomoleculeSearchService } from "../../services/biomolecule-search.service";
 import { Biomolecule } from "src/app/models/biomolecule";
 import { BiomoleculeComparison } from "src/app/models/biomolecule-comparison";
+import { StringPadder } from "src/app/models/string-padder";
 
 @Component({
   selector: "app-search-result",
@@ -15,17 +16,20 @@ export class SearchResultComponent implements OnInit {
   chart: Chart;
   biomolecule: Biomolecule;
   filename: string;
-  results: BiomoleculeComparison[];
   volumeFilter: string;
+  results: BiomoleculeComparison[];
   isSearchById: boolean;
   downloadResultFile: string;
   descriptors = [];
   values = [];
+  stringPadder: StringPadder;
 
   constructor(
     private biomoleculeSearchService: BiomoleculeSearchService,
     private route: ActivatedRoute
-  ) {}
+  ) {
+    this.stringPadder = new StringPadder();
+  }
 
   ngOnInit() {
     this.biomolecule = new Biomolecule();
@@ -43,33 +47,37 @@ export class SearchResultComponent implements OnInit {
     const minRes = this.route.snapshot.queryParamMap.get("minResolution");
     const maxRes = this.route.snapshot.queryParamMap.get("maxResolution");
     this.volumeFilter = this.route.snapshot.queryParamMap.get("volumeFilter");
-    const mapID = +this.route.snapshot.paramMap.get("mapId");
     if (emdbId) {
       this.biomoleculeSearchService
         .getBiomolecule(emdbId)
-        .then((response: Biomolecule) => {
-          this.biomolecule = response;
-        });
-      this.biomoleculeSearchService
-        .getZernikeDescriptors(emdbId, contourRepresentation)
-        .then(response => {
-          this.setValues(response);
-        });
-      this.biomoleculeSearchService
-        .getSimilarBioMolecules(
-          emdbId,
-          contourRepresentation,
-          this.volumeFilter === "On",
-          minRes,
-          maxRes
-        )
-        .then(response => {
-          this.results = response.results;
-          this.downloadResultFile = response.path;
+        .then((biomoleculeResponse: Biomolecule) => {
+          if (biomoleculeResponse) {
+            this.biomolecule = biomoleculeResponse;
+            this.biomoleculeSearchService
+              .getZernikeDescriptors(emdbId, contourRepresentation)
+              .then(response => {
+                this.setValues(response);
+              });
+            this.biomoleculeSearchService
+              .getSimilarBioMolecules(
+                emdbId,
+                contourRepresentation,
+                this.volumeFilter === "On",
+                minRes,
+                maxRes
+              )
+              .then(response => {
+                this.results = response.results;
+                this.downloadResultFile = response.path;
+              });
+          }
         });
       this.isSearchById = true;
     } else {
       this.filename = this.route.snapshot.queryParamMap.get("filename");
+      const contourLevel = +this.route.snapshot.queryParamMap.get(
+        "contourLevel"
+      );
       this.biomoleculeSearchService
         .getZernikeDescriptors(emdbId, contourRepresentation)
         .then(response => {
@@ -77,8 +85,9 @@ export class SearchResultComponent implements OnInit {
         });
       this.biomoleculeSearchService
         .getSimilarBioMoleculesByMap(
-          mapID,
+          this.filename,
           contourRepresentation,
+          contourLevel,
           this.volumeFilter === "On",
           minRes,
           maxRes

@@ -1,4 +1,5 @@
 const biomolecule = require("../models/biomoleculeModel");
+const search_history = require("../models/searchHistoryModel");
 const Op = require("../database").Op;
 
 exports.searchByID = async (req, res, next) => {
@@ -34,11 +35,31 @@ exports.searchResult = async (req, res, next) => {
     minRes = checkMinResolutionFilter(minRes);
     maxRes = checkMaxResolutionFilter(maxRes);
     let array_results = await getBiomolecules(minRes, maxRes);
-    let result = {
-      path: "/results/result.hit",
-      results: array_results
-    };
-    res.status(200).json(result);
+    await search_history
+      .build({
+        date_time: new Date(),
+        ip: req.connection.remoteAddress,
+        emd_entry_id: emdbid,
+        name_file: "-",
+        counter_level: 0.0,
+        representation_id: contourRepresentation,
+        volume_filter_id: isVolumeFilterOn == "true" ? 1 : 0,
+        resolution_filter_min: minRes,
+        resolution_filter_max: maxRes
+      })
+      .save()
+      .then(newSearch => {
+        let result = {
+          path: "/results/result.hit",
+          results: array_results
+        };
+        res.status(200).json(result);
+      })
+      .catch(error => {
+        res.status(500).send({
+          message: "Backend error: Search not registered"
+        });
+      });
   } catch (error) {
     res.status(500).send({
       message: "Backend error"
@@ -47,8 +68,9 @@ exports.searchResult = async (req, res, next) => {
 };
 
 exports.searchResultMap = async (req, res, next) => {
-  emdbid = req.params.emdbID;
+  filename = req.params.filename;
   contourRepresentation = req.params.contourRepresentation;
+  contourLevel = req.params.contourLevel;
   isVolumeFilterOn = req.params.isVolumeFilterOn;
   minRes = req.params.minRes;
   maxRes = req.params.maxRes;
@@ -56,11 +78,31 @@ exports.searchResultMap = async (req, res, next) => {
     minRes = checkMinResolutionFilter(minRes);
     maxRes = checkMaxResolutionFilter(maxRes);
     let array_results = await getBiomolecules(minRes, maxRes);
-    let result = {
-      path: "/results/result.hit",
-      results: array_results
-    };
-    res.status(200).json(result);
+    await search_history
+      .build({
+        date_time: new Date(),
+        ip: req.connection.remoteAddress,
+        emd_entry_id: 1,
+        name_file: filename,
+        counter_level: contourLevel,
+        representation_id: contourRepresentation,
+        volume_filter_id: isVolumeFilterOn == "true" ? 1 : 0,
+        resolution_filter_min: minRes,
+        resolution_filter_max: maxRes
+      })
+      .save()
+      .then(newSearch => {
+        let result = {
+          path: "/results/result.hit",
+          results: array_results
+        };
+        res.status(200).json(result);
+      })
+      .catch(error => {
+        res.status(500).send({
+          message: "Backend error: Search not registered"
+        });
+      });
   } catch (error) {
     res.status(500).send({
       message: "Backend error"
@@ -84,8 +126,8 @@ exports.zernikeMap = async (req, res, next) => {
   res.status(200).json(response);
 };
 
-function checkMinResolutionFilter(minRes){
-  if (isNaN(minRes)){
+function checkMinResolutionFilter(minRes) {
+  if (isNaN(minRes)) {
     /*
     Search in the database to set the default value of min resolution.
     */
@@ -95,8 +137,8 @@ function checkMinResolutionFilter(minRes){
   }
 }
 
-function checkMaxResolutionFilter(maxRes){
-  if (isNaN(maxRes)){
+function checkMaxResolutionFilter(maxRes) {
+  if (isNaN(maxRes)) {
     /*
     Search in the database to set the default value of max resolution.
     */
@@ -114,8 +156,7 @@ async function getBiomolecules(minRes, maxRes) {
           [Op.gte]: minRes,
           [Op.lte]: maxRes
         }
-      },
-      order: [["xml_url", "ASC"]]
+      }
     });
     let resultArray = [];
     biomolecules.forEach(biomoleculeItem => {
@@ -123,9 +164,7 @@ async function getBiomolecules(minRes, maxRes) {
         biomolecule: biomoleculeItem.get({
           plain: true
         }),
-        euc_distance: 5,
-        ratio_of_volume: 4,
-        resolution: 3
+        euc_distance: 5
       });
     });
     return resultArray;

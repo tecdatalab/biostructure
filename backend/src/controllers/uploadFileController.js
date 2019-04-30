@@ -4,54 +4,19 @@ var mkdirp = require("mkdirp");
 
 exports.uploadFileEmMap = async (req, res, next) => {
   try {
-    await files
-      .build({
-        file_name: req.body.filename,
-        file_type: 0
-      })
-      .save()
-      .then(fileObject => {
-        saveFile(req.body.file, fileObject.file_name, fileObject.id, function(
-          response
-        ) {
-          if (response > 0) {
-            res.status(200).json(response);
-          } else {
-            res.status(500).json({
-              msg: "ERROR: I/O error",
-              details: err
-            });
-          }
+    const index =
+      new Date().valueOf().toString() +
+      Math.floor(Math.random() * 100).toString();
+    saveFile(req.body.file, req.body.filename, index, function(response) {
+      if (response > 0) {
+        res.status(200).json(response);
+      } else {
+        res.status(500).json({
+          msg: "ERROR: I/O error",
+          details: err
         });
-      });
-  } catch (err) {
-    res.status(500).send({
-      message: "Backend error"
+      }
     });
-  }
-};
-
-exports.uploadListFile = async (req, res, next) => {
-  try {
-    await files
-      .build({
-        file_name: "list.dat",
-        file_type: 1
-      })
-      .save()
-      .then(fileObject => {
-        saveFile(req.body.file, fileObject.id + ".dat", fileObject.id, function(
-          response
-        ) {
-          if (response > 0) {
-            res.status(200).json(response);
-          } else {
-            res.status(500).send({
-              message: "ERROR: I/O error."
-            });
-          }
-        });
-      });
   } catch (err) {
     res.status(500).send({
       message: "Backend error"

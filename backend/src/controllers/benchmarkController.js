@@ -1,18 +1,23 @@
-const benchmark = require("../models/benchmarkModel");
+const benchmark_history = require("../models/benchmarkModel");
 const fs = require("fs");
 var mkdirp = require("mkdirp");
 const zipFolder = require("zip-a-folder");
 
 exports.batchQuery = async (req, res, next) => {
   try {
-    await benchmark
+    const list = req.params.emdblist.split(",");
+    await benchmark_history
       .build({
-        date: new Date(),
-        fk_user: 0
+        date_time: new Date(),
+        ip: req.connection.remoteAddress,
+        user_id: 0,
+        representation_id: req.params.contour,
+        volume_filter_id: req.params.filter == "true" ? 1 : 0,
+        top_results: req.params.top,
+        emd_list: list
       })
       .save()
       .then(newBenchmark => {
-        const list = req.params.emdblist.split(",");
         const benchmarkPath = "./public/benchmarks/" + newBenchmark.id;
         mkdirp(benchmarkPath + "/results", function(err) {
           generateFiles(list, benchmarkPath, newBenchmark.id, function(
@@ -42,7 +47,8 @@ exports.batchQuery = async (req, res, next) => {
 };
 
 function generateFiles(IDList, benchmarkPath, idFolder, callback) {
-  const text = "Rank	EMDB_ID	EUC_D	RESOLUTION \r\n 1	6409	12.851	22 \r\n 2	4804	12.945	14 \r\n 3	6478	15.250	35 \r\n 4	9618	19.548	10.6 \r\n";
+  const text =
+    "Rank	EMDB_ID	EUC_D	RESOLUTION \r\n 1	6409	12.851	22 \r\n 2	4804	12.945	14 \r\n 3	6478	15.250	35 \r\n 4	9618	19.548	10.6 \r\n";
   let filesPaths = [];
   let file;
   IDList.forEach(function(ID, index, array) {
