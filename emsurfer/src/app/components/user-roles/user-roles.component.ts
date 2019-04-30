@@ -11,6 +11,8 @@ import { Router } from "@angular/router";
 export class UserRolesComponent implements OnInit {
   constructor(private userService: UserService, private router: Router) {}
   users: User[];
+  adminFilter = true;
+  userFilter = true;
   checkedOption = "name";
   selectedRoleFilter: number;
   currentPage = -1;
@@ -19,22 +21,22 @@ export class UserRolesComponent implements OnInit {
 
   filterFunction(collection) {
     return collection.filter(user => {
-      if (this.value) {
-        if (
-          user[this.checkedOption].includes(this.value) &&
-          (user["role"] == this.selectedRoleFilter ||
-            this.selectedRoleFilter == -1)
-        ) {
-          return true;
-        }
-        return false;
-      } else if (
-        user["role"] != this.selectedRoleFilter &&
-        this.selectedRoleFilter != -1
+      if (
+        (this.adminFilter && user["role"] == 2) ||
+        (this.userFilter && user["role"] == 1)
       ) {
-        return false;
+        if (this.value) {
+          if (user[this.checkedOption].includes(this.value)) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+        return true;
       }
-      return true;
+      console.log(this.adminFilter);
+      console.log(user["name"]);
+      return false;
     });
   }
 
