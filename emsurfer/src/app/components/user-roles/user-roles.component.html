@@ -35,12 +35,12 @@
   <br />
   <div class="row col-sm-8">
     <p class="col-sm-3"><strong>Role filter:</strong></p>
-    <select [(ngModel)]="selectedRoleFilter">
-      <option value="-1">Any</option>
-      <option *ngFor="let role of roles" [ngValue]="role.id">{{
-        role.role
-      }}</option>
-    </select>
+    <label class="col-sm-3"
+      ><input type="checkbox" id="cbox1" value=true [(ngModel)]="adminFilter"/>Admin</label
+    >
+    <label class="col-sm-3"
+      ><input type="checkbox" id="cbox2" value=true [(ngModel)]="userFilter"/>User</label
+    >
   </div>
   <br />
   <button
