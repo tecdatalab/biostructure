@@ -15,7 +15,7 @@ exports.generateToken = user => {
   expDate.setDate(expDate.getDate() + 8); //TO DO: define the expiration time in a config file
   return jwt.sign(
     {
-      sub: user.id,
+      user: user,
       exp: expDate.getTime() // expiration date given in milliseconds
     },
     secret

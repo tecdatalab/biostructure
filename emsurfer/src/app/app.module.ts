@@ -31,7 +31,6 @@ import { SocialLoginModule } from "angularx-social-login";
 import { ZernikeDescriptorsModuleComponent } from "./components/zernike-descriptors-module/zernike-descriptors-module.component";
 import { ZernikeResultComponent } from "./components/zernike-result/zernike-result.component";
 import { UserRolesComponent } from "./components/user-roles/user-roles.component";
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -68,6 +67,7 @@ import { UserRolesComponent } from "./components/user-roles/user-roles.component
     SocialLoginModule.initialize(config),
     FormsModule
   ],
+  imports: [BrowserModule, HttpClientModule, ReactiveFormsModule, routes],
   providers: [],
   bootstrap: [AppComponent]
 })
