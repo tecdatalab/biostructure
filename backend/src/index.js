@@ -10,7 +10,7 @@ const benchmarkRoutes = require("./routes/benchmark");
 const contourRepresentationRoutes = require("./routes/contourRepresentation");
 const checkerRoutes = require("./routes/checker");
 const descriptors = require("./routes/descriptor");
-
+const userRoutes = require("./routes/user");
 //settings
 app.set("port", process.env.PORT || 3000);
 
@@ -29,6 +29,7 @@ app.use("/benchmark", benchmarkRoutes);
 app.use("/contour", contourRepresentationRoutes);
 app.use("/checker", checkerRoutes);
 app.use("/descriptor", descriptors);
+app.use("/user", userRoutes);
 
 //public routes
 app.use("/img", express.static("public/img"));
