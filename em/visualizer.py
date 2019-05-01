@@ -125,7 +125,8 @@ class Visualizer():
             V = np.zeros(len(verts), [("a_position", np.float32, 3)])
         
         V["a_position"] = verts 
-        
+
+   
 
         V = V.view(gloo.VertexBuffer)
         I = (faces).astype(np.uint32)
@@ -155,14 +156,29 @@ class Visualizer():
         ppdb.read_pdb(filename)
         atoms = ppdb.df["ATOM"][ppdb.df['ATOM']['atom_name'] == 'CA']
         self.atoms = atoms[["x_coord", "y_coord", "z_coord"]].values
-        print(self.atoms.shape)
+        return self.atoms
 
 
 
 r = reader.Reader("../../EMD-1010.map")
 m = r.read()
 import processing
+from skimage.measure import regionprops
+
 l = processing.watershed_segmentation(m)
 v = Visualizer(m,l)
-v.add_structure("../../pdb1mi6.ent")
+atoms_coords = v.add_structure("../../pdb1mi6.ent")
+zlen,ylen,xlen = m.cell_dim()
+mz, my, mx = m.grid_size()
+cell_dim = np.array([xlen,ylen,zlen])
+pixel_spacing = np.array([xlen/mx, ylen/my, zlen/mz]) 
+translation = np.array(m.shape())*pixel_spacing
+print(pixel_spacing)
+print(cell_dim)
+
+for coord in atoms_coords:
+    for region in regionprops(l):
+        if coord in region.coords:
+            print("Found atom with coords (%f, %f, %f) in region %d " % (coord[0], coord[1], coord[2], region.label))
+
 v.show()
