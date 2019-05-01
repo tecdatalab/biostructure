@@ -36,6 +36,10 @@ export const router: Routes = [
     component: BenchmarkResultsComponent
   },
   {
+    path: "zernike",
+    component: ZernikeDescriptorsModuleComponent
+  },
+  {
     path: "home",
     component: HomeComponent
   },

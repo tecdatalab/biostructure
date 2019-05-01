@@ -64,6 +64,7 @@ import { ZernikeResultComponent } from "./components/zernike-result/zernike-resu
     AngularFontAwesomeModule,
     SocialLoginModule.initialize(config)
   ],
+  imports: [BrowserModule, HttpClientModule, ReactiveFormsModule, routes],
   providers: [],
   bootstrap: [AppComponent]
 })
