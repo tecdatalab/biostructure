@@ -61,7 +61,7 @@ export class UserService {
       })
       .catch(this.errorHandlerService.handleError);
   }
-
+  
   getUserRoles(): Promise<void | UserRole[]> {
     const httpHeaders = new HttpHeaders({
       authorization: this.getStoredAuthToken().token
