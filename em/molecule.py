@@ -9,7 +9,7 @@ class Molecule():
         (self.nystart, self.nxstart, self.nzstart) = start
         (self.my, self.mx, self.mz) = grid_size
         (self.ylen, self.xlen, self.zlen) = cell_dim
-        (self.zorigin, self.yorigin, self.xorigin) = origin
+        (self.yorigin, self.xorigin, self.zorigin) = origin
         # Assert volume info match header values
         d_mean = np.mean(self.array)
         d_min = np.min(self.array)
@@ -38,22 +38,22 @@ class Molecule():
         self.array = newData
 
     def shape(self):
-        return (self.nz, self.ny, self.nx)
+        return (self.ny, self.nx, self.nz)
 
     def start_point(self):
-        return (self.nzstart, self.nystart, self.nxstart)
+        return (self.nystart, self.nxstart, self.nzstart)
 
     def grid_size(self):
-        return (self.mz, self.my, self.mx)
+        return (self.my, self.mx, self.mz)
 
     def cell_dim(self):
-        return (self.zlen, self.ylen, self.xlen)
+        return (self.ylen, self.xlen, self.zlen)
 
     def density_range(self):
         return (self.dmin, self.dmax, self.dmean)
 
     def origin(self):
-        return (self.zorigin, self.yorigin, self.xorigin)
+        return (self.yorigin, self.xorigin, self.zorigin)
 
 
 
