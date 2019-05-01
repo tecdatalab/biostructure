@@ -1,5 +1,6 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
+import { FormsModule } from "@angular/forms";
 import { ReactiveFormsModule } from "@angular/forms";
 import { HttpClientModule } from "@angular/common/http";
 import { routes } from "./app.router";
@@ -29,7 +30,7 @@ import { AngularFontAwesomeModule } from "angular-font-awesome";
 import { SocialLoginModule } from "angularx-social-login";
 import { ZernikeDescriptorsModuleComponent } from "./components/zernike-descriptors-module/zernike-descriptors-module.component";
 import { ZernikeResultComponent } from "./components/zernike-result/zernike-result.component";
-
+import { UserRolesComponent } from "./components/user-roles/user-roles.component";
 @NgModule({
   declarations: [
     AppComponent,
@@ -54,7 +55,8 @@ import { ZernikeResultComponent } from "./components/zernike-result/zernike-resu
     ContactComponent,
     SignInComponent,
     ZernikeDescriptorsModuleComponent,
-    ZernikeResultComponent
+    ZernikeResultComponent,
+    UserRolesComponent
   ],
   imports: [
     BrowserModule,
@@ -62,7 +64,8 @@ import { ZernikeResultComponent } from "./components/zernike-result/zernike-resu
     ReactiveFormsModule,
     routes,
     AngularFontAwesomeModule,
-    SocialLoginModule.initialize(config)
+    SocialLoginModule.initialize(config),
+    FormsModule
   ],
   imports: [BrowserModule, HttpClientModule, ReactiveFormsModule, routes],
   providers: [],

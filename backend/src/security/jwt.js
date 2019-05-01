@@ -2,8 +2,12 @@ const jwt = require("jsonwebtoken");
 
 const secret = require("./credentials.json").jwt.secret; // TO DO: create an ENV variable to contain the secret
 
-exports.verify = (token, errFunc) => {
-  return jwt.verify(token, secret, errFunc);
+exports.verify = token => {
+  try {
+    return jwt.verify(token, secret);
+  } catch (e) {
+    throw new Error("jwt token not verified");
+  }
 };
 
 exports.generateToken = user => {
