@@ -14,8 +14,12 @@ export class Page {
     browser.waitForAngular();
   }
 
-  getButton() {
+  getSubmitButton() {
     return element(by.buttonText("Submit"));
+  }
+
+  getButton(buttonId) {
+    return element(by.id(buttonId));
   }
 
   getAlert(idAlert) {
@@ -24,6 +28,10 @@ export class Page {
 
   getEmdbIDInput() {
     return element(by.xpath("//input[@id='emdb_id']"));
+  }
+
+  getEmdbIDList() {
+    return element(by.id("emdbIdList"));
   }
 
   getDownloadLink() {

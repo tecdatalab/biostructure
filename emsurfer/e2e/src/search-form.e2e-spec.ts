@@ -28,6 +28,6 @@ describe("Search form e2e tests", () => {
     inputText.click();
     inputText.clear();
     inputText.sendKeys("222");
-    expect(page.getButton().isEnabled()).toBe(false);
+    expect(page.getSubmitButton().isEnabled()).toBe(false);
   });
 });
