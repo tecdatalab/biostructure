@@ -24,7 +24,7 @@ export class ZernikeDescriptorsModuleComponent implements OnInit {
   startTimer(descriptor: DescriptorsList) {
     const diffTime =
       Math.abs(
-        new Date(descriptor.timeLimit).getTime() - new Date().getTime()
+        new Date(descriptor.expirationDate).getTime() - new Date().getTime()
       ) / 1000;
     this.minutesLeft = Math.floor(diffTime / 60);
     this.secondsLeft = Math.floor(diffTime - this.minutesLeft * 60);

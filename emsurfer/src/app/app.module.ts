@@ -1,5 +1,5 @@
 import { BrowserModule } from "@angular/platform-browser";
-import { NgModule, ErrorHandler } from "@angular/core";
+import { NgModule } from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
 import { HttpClientModule } from "@angular/common/http";
 import { routes } from "./app.router";
@@ -21,14 +21,14 @@ import { BenchmarkComponent } from "./components/benchmark/benchmark.component";
 import { EmdbIdListComponent } from "./components/emdb-id-list/emdb-id-list.component";
 import { UploadEmdbIdListFileComponent } from "./components/upload-emdb-id-list-file/upload-emdb-id-list-file.component";
 import { BenchmarkResultsComponent } from "./components/benchmark-results/benchmark-results.component";
-import { ZernikeDescriptorsModuleComponent } from './components/zernike-descriptors-module/zernike-descriptors-module.component';
-import { ZernikeResultComponent } from './components/zernike-result/zernike-result.component';
 import { HomeComponent } from "./components/home/home.component";
 import { ReferenceComponent } from "./components/reference/reference.component";
 import { ContactComponent } from "./components/contact/contact.component";
 import { SignInComponent } from "./components/sign-in/sign-in.component";
 import { AngularFontAwesomeModule } from "angular-font-awesome";
 import { SocialLoginModule } from "angularx-social-login";
+import { ZernikeDescriptorsModuleComponent } from "./components/zernike-descriptors-module/zernike-descriptors-module.component";
+import { ZernikeResultComponent } from "./components/zernike-result/zernike-result.component";
 
 @NgModule({
   declarations: [
@@ -49,12 +49,12 @@ import { SocialLoginModule } from "angularx-social-login";
     EmdbIdListComponent,
     UploadEmdbIdListFileComponent,
     BenchmarkResultsComponent,
-    ZernikeDescriptorsModuleComponent,
-    ZernikeResultComponent
     HomeComponent,
     ReferenceComponent,
     ContactComponent,
-    SignInComponent
+    SignInComponent,
+    ZernikeDescriptorsModuleComponent,
+    ZernikeResultComponent
   ],
   imports: [
     BrowserModule,
