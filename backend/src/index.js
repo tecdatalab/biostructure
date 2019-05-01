@@ -9,6 +9,7 @@ const uploadFileRoutes = require("./routes/uploadFile");
 const benchmarkRoutes = require("./routes/benchmark");
 const contourRepresentationRoutes = require("./routes/contourRepresentation");
 const checkerRoutes = require("./routes/checker");
+const descriptors = require("./routes/descriptor");
 const userRoutes = require("./routes/user");
 //settings
 app.set("port", process.env.PORT || 3000);
@@ -27,12 +28,14 @@ app.use("/upload", uploadFileRoutes);
 app.use("/benchmark", benchmarkRoutes);
 app.use("/contour", contourRepresentationRoutes);
 app.use("/checker", checkerRoutes);
+app.use("/descriptor", descriptors);
 app.use("/user", userRoutes);
 
 //public routes
 app.use("/img", express.static("public/img"));
 app.use("/results", express.static("public/results"));
 app.use("/benchmarks", express.static("public/benchmarks"));
+app.use("/descriptors", express.static("public/descriptors"));
 
 app.listen(app.get("port"), () => {
   console.log("Server on port ", app.get("port"));

@@ -1,0 +1,24 @@
+<div class="container">
+  <div *ngIf="validZernike; else zernike_not_found" class="panel-body">
+    <div class="row">
+      <div class="col-sm-4 zernike-exits">{{ zernike.emd_entry_id }}</div>
+      <div class="col-sm-6">3D Zernike Descriptors</div>
+    </div>
+    <br />
+    <div class="row"></div>
+    <ul class="list-group">
+      <li
+        *ngFor="let value of zernike.numbers; let i = index"
+        class="list-group-item border-0 py-2"
+      >
+        <strong>({{ i }})</strong> {{ value }}
+      </li>
+    </ul>
+  </div>
+  <ng-template #zernike_not_found>
+    <div class="row">
+      <div class="col-sm-4 zernike-fail">{{ zernike.emd_entry_id }}</div>
+      <div class="col-sm-6">This structure does not exist</div>
+    </div>
+  </ng-template>
+</div>

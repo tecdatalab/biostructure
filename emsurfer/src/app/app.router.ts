@@ -4,6 +4,7 @@ import { SearchFormComponent } from "./components/search-form/search-form.compon
 import { SearchResultComponent } from "./components/search-result/search-result.component";
 import { BenchmarkComponent } from "./components/benchmark/benchmark.component";
 import { BenchmarkResultsComponent } from "./components/benchmark-results/benchmark-results.component";
+import { ZernikeDescriptorsModuleComponent } from "./components/zernike-descriptors-module/zernike-descriptors-module.component";
 import { HomeComponent } from "./components/home/home.component";
 import { ReferenceComponent } from "./components/reference/reference.component";
 import { ContactComponent } from "./components/contact/contact.component";
@@ -33,6 +34,10 @@ export const router: Routes = [
   {
     path: "benchmark/results",
     component: BenchmarkResultsComponent
+  },
+  {
+    path: "zernike",
+    component: ZernikeDescriptorsModuleComponent
   },
   {
     path: "home",

@@ -21,6 +21,8 @@ import { BenchmarkComponent } from "./components/benchmark/benchmark.component";
 import { EmdbIdListComponent } from "./components/emdb-id-list/emdb-id-list.component";
 import { UploadEmdbIdListFileComponent } from "./components/upload-emdb-id-list-file/upload-emdb-id-list-file.component";
 import { BenchmarkResultsComponent } from "./components/benchmark-results/benchmark-results.component";
+import { ZernikeDescriptorsModuleComponent } from './components/zernike-descriptors-module/zernike-descriptors-module.component';
+import { ZernikeResultComponent } from './components/zernike-result/zernike-result.component';
 import { HomeComponent } from "./components/home/home.component";
 import { ReferenceComponent } from "./components/reference/reference.component";
 import { ContactComponent } from "./components/contact/contact.component";
@@ -47,6 +49,8 @@ import { SocialLoginModule } from "angularx-social-login";
     EmdbIdListComponent,
     UploadEmdbIdListFileComponent,
     BenchmarkResultsComponent,
+    ZernikeDescriptorsModuleComponent,
+    ZernikeResultComponent
     HomeComponent,
     ReferenceComponent,
     ContactComponent,

@@ -3,8 +3,8 @@ const search_history = require("../models/searchHistoryModel");
 const Op = require("../database").Op;
 
 exports.searchByID = async (req, res, next) => {
-  emdbid = req.params.emdbID;
   try {
+    const emdbid = req.params.emdbID;
     let biomolecules = await biomolecule.findOne({
       where: {
         id: parseInt(emdbid)
