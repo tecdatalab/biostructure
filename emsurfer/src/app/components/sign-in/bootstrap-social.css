@@ -1,0 +1,61 @@
+/*
+ * Social Buttons for Bootstrap
+ *
+ * Copyright 2013-2016 Panayiotis Lipiridis
+ * Licensed under the MIT License
+ *
+ * https://github.com/lipis/bootstrap-social
+ */
+
+.btn-social {
+  position: relative;
+  padding-left: 44px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-social > :first-child {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 32px;
+  line-height: 40px;
+  font-size: 1.6em;
+  text-align: center;
+}
+
+.btn-social.btn-sm {
+  padding-left: 38px;
+}
+.btn-social.btn-sm > :first-child {
+  line-height: 28px;
+  width: 28px;
+  font-size: 1.4em;
+}
+
+.btn-google {
+  color: #fff;
+  border-color: #4285f4;
+}
+.btn-google:focus,
+.btn-google.focus {
+  color: #fff;
+  background-color: #4285f4;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+.btn-google:hover {
+  color: #fff;
+  box-shadow: 1px 1px 1px 1px #4285f4;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.navbar {
+  height: 40px;
+}
+
+.nav-link {
+  cursor: pointer;
+}

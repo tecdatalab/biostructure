@@ -1,3 +1,4 @@
+
 const benchmark_history = require("../models/benchmarkModel");
 const fs = require("fs");
 var mkdirp = require("mkdirp");
@@ -6,6 +7,7 @@ const zipFolder = require("zip-a-folder");
 exports.batchQuery = async (req, res, next) => {
   try {
     const list = req.params.emdblist.split(",");
+
     await benchmark_history
       .build({
         date_time: new Date(),
