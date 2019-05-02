@@ -68,6 +68,7 @@ import { UserRolesComponent } from "./components/user-roles/user-roles.component
     SocialLoginModule.initialize(config),
     FormsModule
   ],
+  imports: [BrowserModule, HttpClientModule, ReactiveFormsModule, routes],
   providers: [],
   bootstrap: [AppComponent]
 })
