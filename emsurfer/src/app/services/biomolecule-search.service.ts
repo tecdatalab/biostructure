@@ -149,6 +149,9 @@ export class BiomoleculeSearchService {
       .toPromise()
       .then((data: BenchmarkResult) => {
         data.zipFile = this.API_URL + data.zipFile;
+        for (let i = 0; i < data.results.length; i++) {
+          data.results[i].path = this.API_URL + data.results[i].path;
+        }
         return data;
       })
       .catch(err => {

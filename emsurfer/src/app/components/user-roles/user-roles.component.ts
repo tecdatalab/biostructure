@@ -48,14 +48,14 @@ export class UserRolesComponent implements OnInit {
   }
 
   nextPage() {
-    if (this.currentPage + 100 < this.users.length) {
-      this.currentPage += 100;
+    if (this.currentPage + 10 < this.users.length) {
+      this.currentPage += 10;
     }
   }
 
   previousPage() {
     if (this.currentPage > 0) {
-      this.currentPage -= 100;
+      this.currentPage -= 10;
     }
   }
 

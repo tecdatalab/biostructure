@@ -36,10 +36,20 @@
   <div class="row col-sm-8">
     <p class="col-sm-3"><strong>Role filter:</strong></p>
     <label class="col-sm-3"
-      ><input type="checkbox" id="cbox1" value=true [(ngModel)]="adminFilter"/>Admin</label
+      ><input
+        type="checkbox"
+        id="cbox1"
+        value="true"
+        [(ngModel)]="adminFilter"
+      />Admin</label
     >
     <label class="col-sm-3"
-      ><input type="checkbox" id="cbox2" value=true [(ngModel)]="userFilter"/>User</label
+      ><input
+        type="checkbox"
+        id="cbox2"
+        value="true"
+        [(ngModel)]="userFilter"
+      />User</label
     >
   </div>
   <br />
@@ -55,7 +65,7 @@
   <button
     type="button"
     class="btn btn-secondary"
-    [disabled]="!users || currentPage + 100 > users.length"
+    [disabled]="!users || currentPage + 10 > users.length"
     (click)="nextPage()"
   >
     >>
@@ -78,7 +88,7 @@
       </thead>
       <ng-container *ngIf="users">
         <tbody *ngFor="let user of filterFunction(users); let a = index">
-          <tr *ngIf="currentPage < a && a < currentPage + 101">
+          <tr *ngIf="currentPage < a && a < currentPage + 11">
             <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
             <td>
@@ -99,3 +109,4 @@
     </table>
   </div>
 </div>
+<hr />
