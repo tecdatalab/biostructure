@@ -95,7 +95,6 @@ export class BiomoleculeSearchService {
   }
 
   getSimilarBioMoleculesByMap(
-    //TO DO: difference between contourLevel and ContorRepresentation
     filename: string,
     contourRepresentationId: number,
     contourLevel: number,

@@ -26,6 +26,10 @@ export class Page {
     return element(by.id(idAlert));
   }
 
+  getDownloadZernike() {
+    return element(by.linkText("Download text results here"));
+  }
+
   getEmdbIDInput() {
     return element(by.xpath("//input[@id='emdb_id']"));
   }
