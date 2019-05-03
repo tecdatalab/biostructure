@@ -1,67 +1,81 @@
 import { Component, OnInit } from "@angular/core";
 import { User } from "src/app/models/user";
+import { UserRole } from "src/app/models/userRole";
 import { UserService } from "src/app/services/user.service";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-user-roles",
-  templateUrl: "./user-roles.component.html",
-  styleUrls: ["./user-roles.component.css"]
+  templateUrl: "./user-roles.component.html"
 })
 export class UserRolesComponent implements OnInit {
-  constructor() {}
-  users = [];
+  constructor(private userService: UserService, private router: Router) {}
+  users: User[];
+  adminFilter = true;
+  userFilter = true;
   checkedOption = "name";
   selectedRoleFilter: number;
   currentPage = -1;
   value;
-  roles = [2, 0, 1];
+  roles: UserRole[];
 
   filterFunction(collection) {
     return collection.filter(user => {
-      if (this.value) {
-        if (
-          user[this.checkedOption].includes(this.value) &&
-          (user["role"] == this.selectedRoleFilter ||
-            this.selectedRoleFilter == -1)
-        ) {
-          return true;
-        }
-        return false;
-      } else if (
-        user["role"] != this.selectedRoleFilter &&
-        this.selectedRoleFilter != -1
+      if (
+        (this.adminFilter && user["role"] == 2) ||
+        (this.userFilter && user["role"] == 1)
       ) {
-        return false;
+        if (this.value) {
+          if (user[this.checkedOption].includes(this.value)) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+        return true;
       }
-      return true;
+      console.log(this.adminFilter);
+      console.log(user["name"]);
+      return false;
     });
   }
 
-  createValues() {
-    for (let i = 0; i < 300; i++) {
-      this.users.push({
-        id: i,
-        name: "Name" + i,
-        email: i + "@asdf.com",
-        role: i % 2
-      });
-    }
+  onChangeRole(value, user) {
+    this.userService.changeUserRole(
+      user.id,
+      parseInt(this.roles[parseInt(value)].id)
+    );
   }
 
   nextPage() {
-    if (this.currentPage + 100 < this.users.length) {
-      this.currentPage += 100;
+    if (this.currentPage + 10 < this.users.length) {
+      this.currentPage += 10;
     }
   }
 
   previousPage() {
     if (this.currentPage > 0) {
-      this.currentPage -= 100;
+      this.currentPage -= 10;
     }
   }
 
   ngOnInit() {
-    this.selectedRoleFilter = -1;
-    this.createValues();
+    if (this.userService.isUserLoggedIn()) {
+      this.userService.checkAdminRole().then((data: boolean) => {
+        if (data) {
+          this.selectedRoleFilter = -1;
+          this.userService.getUsers().then((data: User[]) => {
+            this.users = data;
+          });
+          this.userService.getUserRoles().then((data: UserRole[]) => {
+            this.roles = data;
+          });
+        } else {
+          this.router.navigate(["/home"]);
+        }
+      });
+    } else {
+      this.router.navigate(["/home"]);
+    }
   }
 }

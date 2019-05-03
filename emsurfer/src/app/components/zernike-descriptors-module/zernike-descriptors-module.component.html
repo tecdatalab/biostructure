@@ -17,9 +17,15 @@
         </p></strong
       >
     </div>
-    <a class="btn btn-dark" [href]="results.path" [class.disabled]="timeout"
-      >Download text results here</a
-    >
+    <div>
+      <a
+        class="btn btn-dark"
+        [href]="results.path"
+        id="download_link"
+        [class.disabled]="timeout"
+        >Download text results here</a
+      >
+    </div>
   </div>
   <div *ngIf="showList">
     <div *ngFor="let result of results.descriptors">

@@ -3,10 +3,27 @@ const userController = require("../controllers/userController");
 
 router.post("/auth/token", userController.sendAuthToken);
 router.put(
-  "/admin/grantAdminRole",
+  "/admin/changeUserRole",
   userController.verifyUserToken,
   userController.verifyAdminUser,
-  userController.grantAdminRole
+  userController.changeUserRole
+);
+router.get(
+  "/roles",
+  userController.verifyUserToken,
+  userController.verifyAdminUser,
+  userController.getUsersRoles
+);
+router.get(
+  "/users",
+  userController.verifyUserToken,
+  userController.verifyAdminUser,
+  userController.getUsers
+);
+router.get(
+  "/checkAdminRole",
+  userController.verifyUserToken,
+  userController.isUserAdmin
 );
 
 module.exports = router;

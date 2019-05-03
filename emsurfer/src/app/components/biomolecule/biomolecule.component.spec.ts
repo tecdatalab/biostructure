@@ -34,8 +34,7 @@ describe("BiomoleculeComponent", () => {
     biomoleculeComparison.biomolecule.id = 5555;
     biomoleculeComparison.biomolecule.full_name = "biomolecule";
     biomoleculeComparison.euc_distance = 5;
-    biomoleculeComparison.ratio_of_volume = 5;
-    biomoleculeComparison.resolution = 5.5;
+    biomoleculeComparison.biomolecule.resolution = 5.5;
     component.biomoleculeComparison = biomoleculeComparison;
     fixture.detectChanges();
   });

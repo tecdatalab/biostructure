@@ -120,15 +120,17 @@ describe("BiomoleculeSearchService", () => {
       const dummySearchResult = new SearchResult();
       dummySearchResult.results = [];
       dummySearchResult.path = "test";
-      const mapId = 5555;
+      const contourLevel = 0;
       const contourRepresentationId = 0;
+      const filename = "filename";
       const isVolumeFilterOn = true;
-      const minRes = '0';
-      const maxRes = '0';
+      const minRes = "0";
+      const maxRes = "0";
       service
         .getSimilarBioMoleculesByMap(
-          mapId,
+          filename,
           contourRepresentationId,
+          contourLevel,
           isVolumeFilterOn,
           minRes,
           maxRes
@@ -139,7 +141,7 @@ describe("BiomoleculeSearchService", () => {
       const req = httpMock.expectOne(
         `${
           service.API_URL
-        }/search/resultsmap/${mapId}/${contourRepresentationId}/${isVolumeFilterOn}/${minRes}/${maxRes}`
+        }/search/resultsmap/${filename}/${contourRepresentationId}/${contourLevel}/${isVolumeFilterOn}/${minRes}/${maxRes}`
       );
       expect(req.request.method).toBe("GET");
       req.flush(dummySearchResult);

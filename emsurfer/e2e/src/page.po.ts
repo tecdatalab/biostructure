@@ -5,32 +5,44 @@ export class Page {
     return browser.get(path);
   }
 
-  wait(seconds){
+  navigateToDriver(path) {
+    return browser.driver.get(path);
+  }
+
+  wait(seconds) {
     browser.driver.sleep(seconds);
     browser.waitForAngular();
   }
 
-  getButton(){
-    return element(
-      by.buttonText('Submit')
-    );
+  getSubmitButton() {
+    return element(by.buttonText("Submit"));
   }
 
-  getAlert(idAlert){
-    return element(
-      by.id(idAlert)
-    );
+  getButton(buttonId) {
+    return element(by.id(buttonId));
   }
 
-  getInput() {
-    return element(
-      by.xpath("//input[@id='emdb_id']")
-    );
+  getAlert(idAlert) {
+    return element(by.id(idAlert));
   }
 
-  getDownloadLink(){
-    return element(
-      by.id("download_link")
-    );
+  getDownloadZernike() {
+    return element(by.linkText("Download text results here"));
+  }
+
+  getEmdbIDInput() {
+    return element(by.xpath("//input[@id='emdb_id']"));
+  }
+
+  getEmdbIDList() {
+    return element(by.id("emdbIdList"));
+  }
+
+  getDownloadLink() {
+    return element(by.id("download_link"));
+  }
+
+  getSignIn() {
+    return element(by.id("sign_in"));
   }
 }

@@ -1,6 +1,7 @@
 const googleAuth = require("../security/googleAuth");
 const jwt = require("../security/jwt");
 const user = require("../models/userModel");
+const userRole = require("../models/userRoleModel");
 
 const getGoogleUser = login => {
   return googleAuth.getGoogleUser(login.tokenId).then(googleUser => {
@@ -37,12 +38,13 @@ exports.sendAuthToken = async (req, res) => {
                 .catch(e => {
                   throw new Error(e);
                 });
+            } else {
+              const response = {
+                token: jwt.generateToken(dbUser),
+                user: dbUser
+              };
+              res.json(response).end();
             }
-            const response = {
-              token: jwt.generateToken(dbUser),
-              user: dbUser
-            };
-            res.json(response).end();
           });
       })
       .catch(e => {
@@ -50,16 +52,16 @@ exports.sendAuthToken = async (req, res) => {
         throw new Error(e);
       });
   } catch (error) {
-    res.status(500).send({ Error: "Internal server error" });
+    res.status(500).send({ message: "Internal server error" });
     return console.error(error);
   }
 };
 
 exports.verifyUserToken = (req, res, next) => {
-  const token = req.body.token;
+  const token = req.header("authorization");
   jwt.verify(token, (err, decodedToken) => {
     if (err) {
-      res.status(401).send({ Error: "user is not authenticated" });
+      res.status(401).send({ message: "user is not authenticated" });
     } else {
       user
         .findOne({
@@ -72,12 +74,12 @@ exports.verifyUserToken = (req, res, next) => {
             req.authenticatedUser = result;
             next();
           } else {
-            res.status(401).send({ Error: "user is not authenticated" });
+            res.status(401).send({ message: "user is not authenticated" });
           }
         })
         .catch(error => {
           res.status(403).send({
-            Error: "user is not authorized or does not exists"
+            message: "user is not authorized or does not exists"
           });
         });
     }
@@ -91,16 +93,16 @@ exports.verifyAdminUser = (req, res, next) => {
   } else {
     res
       .status(403)
-      .send({ Error: "user is not authorized or does not exists" });
+      .send({ message: "user is not authorized or does not exists" });
   }
 };
 
-exports.grantAdminRole = (req, res, next) => {
+exports.changeUserRole = (req, res) => {
   const userId = req.body.userId;
+  const newUserRole = req.body.role;
   user
-    .update({ role: 2 }, { where: { id: userId }, returning: true })
+    .update({ role: newUserRole }, { where: { id: userId }, returning: true })
     .then(result => {
-      console.log(result);
       if (result[0] != 0) {
         res.status(200).send(result[1][0]);
       } else {
@@ -108,7 +110,38 @@ exports.grantAdminRole = (req, res, next) => {
       }
     })
     .catch(error => {
-      res.status(400).send({ Error: error });
+      res.status(400).send({ message: error });
       return console.error(error);
     });
+};
+
+exports.getUsersRoles = async (req, res) => {
+  try {
+    let userRoles = await userRole.findAll({});
+    res.status(200).json(userRoles);
+  } catch (err) {
+    res.status(500).send({
+      message: "Internal server error"
+    });
+  }
+};
+
+exports.getUsers = async (req, res) => {
+  try {
+    let users = await user.findAll({});
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).send({
+      message: "Internal server error"
+    });
+  }
+};
+
+exports.isUserAdmin = (req, res) => {
+  const reqUser = req.authenticatedUser;
+  if (reqUser.role == 2) {
+    res.status(200).send(true);
+  } else {
+    res.status(200).send(false);
+  }
 };

@@ -2,12 +2,8 @@ const jwt = require("jsonwebtoken");
 
 const secret = require("./credentials.json").jwt.secret; // TO DO: create an ENV variable to contain the secret
 
-exports.verify = token => {
-  try {
-    return jwt.verify(token, secret);
-  } catch (e) {
-    throw new Error("jwt token not verified");
-  }
+exports.verify = (token, errFunc) => {
+  return jwt.verify(token, secret, errFunc);
 };
 
 exports.generateToken = user => {
@@ -16,7 +12,7 @@ exports.generateToken = user => {
   return jwt.sign(
     {
       user: user,
-      exp: expDate.getTime() // expiration date given in milliseconds
+      exp: expDate.getTime() / 1000 // expiration date given in seconds
     },
     secret
   );

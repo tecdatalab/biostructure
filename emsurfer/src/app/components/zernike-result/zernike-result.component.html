@@ -1,7 +1,9 @@
 <div class="container">
   <div *ngIf="validZernike; else zernike_not_found" class="panel-body">
     <div class="row">
-      <div class="col-sm-4 zernike-exits">{{ zernike.emd_entry_id }}</div>
+      <div class="col-sm-4 zernike-exits" id="emd_entry">
+        {{ zernike.emd_entry_id }}
+      </div>
       <div class="col-sm-6">3D Zernike Descriptors</div>
     </div>
     <br />
@@ -17,7 +19,9 @@
   </div>
   <ng-template #zernike_not_found>
     <div class="row">
-      <div class="col-sm-4 zernike-fail">{{ zernike.emd_entry_id }}</div>
+      <div class="col-sm-4 zernike-fail" id="emd_entry_fail">
+        {{ zernike.emd_entry_id }}
+      </div>
       <div class="col-sm-6">This structure does not exist</div>
     </div>
   </ng-template>
