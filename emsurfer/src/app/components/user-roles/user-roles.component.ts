@@ -70,6 +70,8 @@ export class UserRolesComponent implements OnInit {
           this.userService.getUserRoles().then((data: UserRole[]) => {
             this.roles = data;
           });
+        } else {
+          this.router.navigate(["/home"]);
         }
       });
     } else {
