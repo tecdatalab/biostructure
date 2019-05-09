@@ -104,7 +104,7 @@ class Reader():
         #Read densities
         densities = self.read_densities((nz, ny, nx))
         #Generate Molecule object with parameters
-        return molecule.Molecule(self.mrc_header, densities,  (nx, ny, nz), (nxstart, nystart, nzstart), (mx, my, mz), (xlen, ylen, zlen), (dmin, dmax, dmean), (xorigin, yorigin, zorigin))
+        return molecule.Molecule(self.mrc_header, densities,  (nz, ny, nx), (nzstart, nystart, nxstart), (mz, my, mx), (zlen, ylen, xlen), (dmin, dmax, dmean), (zorigin, yorigin, xorigin))
             
     def test_and_set_endianness(self):
         regular_nx = struct.unpack('<I', self.mrc_header[0:4])
@@ -137,7 +137,7 @@ class Reader():
             dt = np.dtype(np.float32)
         dt = dt.newbyteorder(endianness)
         density_array =  np.frombuffer(self.mrc_data, dtype=dt)
-        data_array = density_array.reshape(shape).astype(float)
+        data_array = density_array.reshape(shape).transpose(2,1,0).astype(float)
         return data_array
 
 '''
