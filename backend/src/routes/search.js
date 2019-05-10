@@ -5,11 +5,13 @@ router.get("/:emdbID", searchController.searchByID);
 
 router.get(
   "/results/:emdbID/:contourRepresentation/:isVolumeFilterOn/:minRes/:maxRes",
+  searchController.saveSearch,
   searchController.searchResult
 );
 
 router.get(
   "/resultsmap/:filename/:contourRepresentation/:contourLevel/:isVolumeFilterOn/:minRes/:maxRes",
+  searchController.saveSearch,
   searchController.searchResultMap
 );
 

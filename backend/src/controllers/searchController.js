@@ -2,7 +2,7 @@ const biomolecule = require("../models/biomoleculeModel");
 const search_history = require("../models/searchHistoryModel");
 const Op = require("../database").Op;
 
-exports.searchByID = async (req, res, next) => {
+exports.searchByID = async (req, res) => {
   try {
     const emdbid = req.params.emdbID;
     let biomolecules = await biomolecule.findOne({
@@ -25,41 +25,40 @@ exports.searchByID = async (req, res, next) => {
   }
 };
 
-exports.searchResult = async (req, res, next) => {
-  emdbid = req.params.emdbID;
-  contourRepresentation = req.params.contourRepresentation;
-  isVolumeFilterOn = req.params.isVolumeFilterOn;
-  minRes = req.params.minRes;
-  maxRes = req.params.maxRes;
+exports.saveSearch = async (req, res, next) => {
   try {
-    minRes = checkMinResolutionFilter(minRes);
-    maxRes = checkMaxResolutionFilter(maxRes);
-    let array_results = await getBiomolecules(minRes, maxRes);
     await search_history
       .build({
         date_time: new Date(),
         ip: req.connection.remoteAddress,
         emd_entry_id: emdbid,
-        name_file: "-",
-        counter_level: 0.0,
-        representation_id: contourRepresentation,
-        volume_filter_id: isVolumeFilterOn == "true" ? 1 : 0,
-        resolution_filter_min: minRes,
-        resolution_filter_max: maxRes
+        name_file: req.params.filename,
+        counter_level: req.params.contourLevel,
+        representation_id: req.params.contourRepresentation,
+        volume_filter_id: req.params.isVolumeFilterOn == "true" ? 1 : 0,
+        resolution_filter_min: checkMinResolutionFilter(req.params.minRes),
+        resolution_filter_max: checkMaxResolutionFilter(req.params.maxRes)
       })
       .save()
-      .then(newSearch => {
-        let result = {
-          path: "/results/result.hit",
-          results: array_results
-        };
-        res.status(200).json(result);
-      })
-      .catch(error => {
-        res.status(500).send({
-          message: "Backend error: Search not registered"
-        });
-      });
+      .then(next());
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      message: "Internal server error"
+    });
+  }
+};
+
+exports.searchResult = async (req, res) => {
+  try {
+    minRes = checkMinResolutionFilter(req.params.minRes);
+    maxRes = checkMaxResolutionFilter(req.params.maxRes);
+    let query_results = await getBiomolecules(minRes, maxRes);
+    let result = {
+      path: "/results/result.hit",
+      results: query_results
+    };
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).send({
       message: "Backend error"
@@ -67,42 +66,16 @@ exports.searchResult = async (req, res, next) => {
   }
 };
 
-exports.searchResultMap = async (req, res, next) => {
-  filename = req.params.filename;
-  contourRepresentation = req.params.contourRepresentation;
-  contourLevel = req.params.contourLevel;
-  isVolumeFilterOn = req.params.isVolumeFilterOn;
-  minRes = req.params.minRes;
-  maxRes = req.params.maxRes;
+exports.searchResultMap = async (req, res) => {
   try {
-    minRes = checkMinResolutionFilter(minRes);
-    maxRes = checkMaxResolutionFilter(maxRes);
-    let array_results = await getBiomolecules(minRes, maxRes);
-    await search_history
-      .build({
-        date_time: new Date(),
-        ip: req.connection.remoteAddress,
-        emd_entry_id: 1,
-        name_file: filename,
-        counter_level: contourLevel,
-        representation_id: contourRepresentation,
-        volume_filter_id: isVolumeFilterOn == "true" ? 1 : 0,
-        resolution_filter_min: minRes,
-        resolution_filter_max: maxRes
-      })
-      .save()
-      .then(newSearch => {
-        let result = {
-          path: "/results/result.hit",
-          results: array_results
-        };
-        res.status(200).json(result);
-      })
-      .catch(error => {
-        res.status(500).send({
-          message: "Backend error: Search not registered"
-        });
-      });
+    minRes = checkMinResolutionFilter(req.params.minRes);
+    maxRes = checkMaxResolutionFilter(req.params.maxRes);
+    let query_results = await getBiomolecules(minRes, maxRes);
+    let result = {
+      path: "/results/result.hit",
+      results: query_results
+    };
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).send({
       message: "Backend error"
