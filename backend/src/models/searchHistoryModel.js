@@ -15,25 +15,28 @@ const search_history = sequelize.define(
       type: Sequelize.STRING
     },
     emd_entry_id: {
-        type: Sequelize.INTEGER
+      type: Sequelize.INTEGER
     },
     name_file: {
-        type: Sequelize.STRING
+      type: Sequelize.STRING
     },
     counter_level: {
-        type: Sequelize.DOUBLE
+      type: Sequelize.DOUBLE
+    },
+    user_id: {
+      type: Sequelize.STRING
     },
     representation_id: {
-        type: Sequelize.INTEGER
+      type: Sequelize.INTEGER
     },
     volume_filter_id: {
-        type: Sequelize.INTEGER
+      type: Sequelize.INTEGER
     },
     resolution_filter_min: {
-        type: Sequelize.DOUBLE
+      type: Sequelize.DOUBLE
     },
     resolution_filter_max: {
-        type: Sequelize.DOUBLE
+      type: Sequelize.DOUBLE
     }
   },
   {

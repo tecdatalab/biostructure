@@ -26,11 +26,13 @@ exports.searchByID = async (req, res) => {
 };
 
 exports.saveSearch = async (req, res, next) => {
+  console.log("ID usuario" + req.header("authorization").user.id);
   try {
     await search_history
       .build({
         date_time: new Date(),
         ip: req.connection.remoteAddress,
+        user_id: "0",
         emd_entry_id: emdbid,
         name_file: req.params.filename,
         counter_level: req.params.contourLevel,
