@@ -145,3 +145,12 @@ exports.isUserAdmin = (req, res) => {
     res.status(200).send(false);
   }
 };
+
+exports.isUserLogged = (req, res, next) => {
+  if (req.header("authorization")) {
+    console.log("Header");
+  } else {
+    console.log("no header");
+  }
+  next();
+};

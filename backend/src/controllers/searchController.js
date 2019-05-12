@@ -26,7 +26,6 @@ exports.searchByID = async (req, res) => {
 };
 
 exports.saveSearch = async (req, res, next) => {
-  console.log("ID usuario" + req.header("authorization").user.id);
   try {
     await search_history
       .build({
