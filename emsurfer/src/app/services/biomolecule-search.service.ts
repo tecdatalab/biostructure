@@ -1,9 +1,10 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Biomolecule } from "../models/biomolecule";
 import { BenchmarkResult } from "../models/benchmark-result";
 import { SearchResult } from "../models/search-result";
 import { ErrorHandlerService } from "./error-handler.service";
+import { UserService } from "./user.service";
 import config from "../../config.json";
 
 @Injectable({
@@ -12,7 +13,8 @@ import config from "../../config.json";
 export class BiomoleculeSearchService {
   constructor(
     private httpClient: HttpClient,
-    private errorHandlerService: ErrorHandlerService
+    private errorHandlerService: ErrorHandlerService,
+    private userService: UserService
   ) {}
 
   readonly API_URL = config.api_url;
@@ -70,6 +72,12 @@ export class BiomoleculeSearchService {
     minRes: string,
     maxRes: string
   ): Promise<any> {
+    let httpHeaders;
+    if (this.userService.isUserLoggedIn()) {
+      httpHeaders = new HttpHeaders({
+        authorization: this.userService.getStoredAuthToken().token
+      });
+    }
     return this.httpClient
       .get(
         this.API_URL +
@@ -82,7 +90,10 @@ export class BiomoleculeSearchService {
           "/" +
           minRes +
           "/" +
-          maxRes
+          maxRes,
+        {
+          headers: httpHeaders
+        }
       )
       .toPromise()
       .then((data: SearchResult) => {

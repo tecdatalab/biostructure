@@ -6,7 +6,7 @@ router.get("/:emdbID", searchController.searchByID);
 
 router.get(
   "/results/:emdbID/:contourRepresentation/:isVolumeFilterOn/:minRes/:maxRes",
-  userController.isUserLogged,
+  userController.isUserLoggedIn,
   searchController.saveSearch,
   searchController.searchResult
 );

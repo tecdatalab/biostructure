@@ -31,7 +31,8 @@ exports.saveSearch = async (req, res, next) => {
       .build({
         date_time: new Date(),
         ip: req.connection.remoteAddress,
-        user_id: "0",
+        user_id:
+          req.authenticatedUser.id == null ? "0" : req.authenticatedUser.id,
         emd_entry_id: emdbid,
         name_file: req.params.filename,
         counter_level: req.params.contourLevel,

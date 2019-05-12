@@ -57,7 +57,8 @@ exports.sendAuthToken = async (req, res) => {
   }
 };
 
-exports.verifyUserToken = (req, res, next) => {
+exports.verifyUserToken = async (req, res, next) => {
+  console.log("Verify");
   const token = req.header("authorization");
   jwt.verify(token, (err, decodedToken) => {
     if (err) {
@@ -146,11 +147,11 @@ exports.isUserAdmin = (req, res) => {
   }
 };
 
-exports.isUserLogged = (req, res, next) => {
+exports.isUserLoggedIn = (req, res, next) => {
   if (req.header("authorization")) {
-    console.log("Header");
+    exports.verifyUserToken(req, res, next);
   } else {
-    console.log("no header");
+    req.authenticatedUser = { id: null };
+    next();
   }
-  next();
 };
