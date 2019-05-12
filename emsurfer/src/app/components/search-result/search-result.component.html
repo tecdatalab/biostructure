@@ -37,7 +37,12 @@
         role="tabpanel"
         aria-labelledby="nav-3d-tab"
       >
-        <img class="img-fluid" src="http://i.stack.imgur.com/SBv4T.gif" />
+        <img
+          class="img-fluid"
+          [src]="imgSrc || 'assets/img/test-3d.png'"
+          (mouseout)="imgSrc = 'assets/img/test-3d.png'"
+          (mouseover)="imgSrc = 'assets/img/test-3d.gif'"
+        />
       </div>
     </div>
     <br />
