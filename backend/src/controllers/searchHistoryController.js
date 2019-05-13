@@ -1,18 +1,19 @@
 const search_history = require("../models/searchHistoryModel");
 const Op = require("../database").Op;
 
-exports.getSearchHistory = (req, res, next) => {
-    const reqUser = req.authenticatedUser;
-    try {
-        const emdbid = req.params.userID;
-        let searches = await search_history.findAll({
-            where: {
-                id: reqUser.id
-            }
-        })
-    } catch (err) {
-        res.status(500).send({
-            message: "Internal server error"
-        });
-    }
-}
+exports.getSearchHistory = async (req, res, next) => {
+  const reqUser = req.authenticatedUser;
+  try {
+    let searches = await search_history.findAll({
+      where: {
+        user_id: reqUser.id
+      }
+    });
+    res.status(200).json(searches);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      message: "Internal server error"
+    });
+  }
+};

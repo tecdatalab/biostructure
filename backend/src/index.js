@@ -10,7 +10,8 @@ const benchmarkRoutes = require("./routes/benchmark");
 const contourRepresentationRoutes = require("./routes/contourRepresentation");
 const checkerRoutes = require("./routes/checker");
 const userRoutes = require("./routes/user");
-const descriptors = require("./routes/descriptor");
+const descriptorsRoutes = require("./routes/descriptor");
+const searchHistoryRoutes = require("./routes/searchHistory");
 
 //settings
 app.set("port", process.env.PORT || 3000);
@@ -30,7 +31,8 @@ app.use("/benchmark", benchmarkRoutes);
 app.use("/contour", contourRepresentationRoutes);
 app.use("/checker", checkerRoutes);
 app.use("/user", userRoutes);
-app.use("/descriptor", descriptors);
+app.use("/descriptor", descriptorsRoutes);
+app.use("/history", searchHistoryRoutes);
 
 //public routes
 app.use("/img", express.static("public/img"));

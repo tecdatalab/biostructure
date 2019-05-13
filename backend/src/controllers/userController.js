@@ -58,7 +58,6 @@ exports.sendAuthToken = async (req, res) => {
 };
 
 exports.verifyUserToken = async (req, res, next) => {
-  console.log("Verify");
   const token = req.header("authorization");
   jwt.verify(token, (err, decodedToken) => {
     if (err) {
