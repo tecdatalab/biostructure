@@ -775,7 +775,7 @@ class Emd_entry(Map_information):
     __xml_url = None
     __map_url = None
 
-    def __init__(self, id=None, full_name=None, acronym=None, volume=None, resolution=None, image_url=None, xml_url=None, map_url=None, map_id=None, map_file_information=None, map_data_type=None, map_num_columns=None, map_num_rows=None, map_num_sections=None, map_origin_col=None, map_origin_row=None, map_origin_sec=None, map_limit_col=None, map_limit_row=None, map_limit_sec=None, map_spacing_col=None, map_spacing_row=None, map_spacing_sec=None, map_cell_a=None, map_cell_b=None, map_cell_c=None, map_cell_alpha=None, map_cell_beta=None, map_cell_gamma=None, map_axis_order_fast=None, map_axis_order_medium=None, map_axis_order_slow=None, map_minimum=None, map_maximum=None, map_average=None, map_std=None, map_space_group_number=None, map_details=None, map_pixel_x=None, map_pixel_y=None, map_pixel_z=None, map_countour_level=None, map_annotation_details=None):
+    def __init__(self, id=None, full_name=None, acronym=None, volume=None, resolution=None, image_url=None, xml_url=None, map_url=None, map_id=None, map_file_information=None, map_data_type=None, map_num_columns=None, map_num_rows=None, map_num_sections=None, map_origin_col=None, map_origin_row=None, map_origin_sec=None, map_limit_col=None, map_limit_row=None, map_limit_sec=None, map_spacing_col=None, map_spacing_row=None, map_spacing_sec=None, map_cell_a=None, map_cell_b=None, map_cell_c=None, map_cell_alpha=None, map_cell_beta=None, map_cell_gamma=None, map_axis_order_fast=None, map_axis_order_medium=None, map_axis_order_slow=None, map_minimum=None, map_maximum=None, map_average=None, map_std=None, map_space_group_number=None, map_details=None, map_pixel_x=None, map_pixel_y=None, map_pixel_z=None, map_countour_level=None, map_annotation_details=None, emd_url = "http://ftp.ebi.ac.uk/pub/databases/emdb"):
         Map_information.__init__(self, 
             map_id, map_file_information, map_data_type, map_num_columns, map_num_rows, map_num_sections, map_origin_col, map_origin_row, map_origin_sec, map_limit_col, map_limit_row, map_limit_sec, map_spacing_col, map_spacing_row, map_spacing_sec, map_cell_a, map_cell_b, map_cell_c, map_cell_alpha, map_cell_beta, map_cell_gamma, map_axis_order_fast, map_axis_order_medium, map_axis_order_slow, map_minimum, map_maximum, map_average, map_std, map_space_group_number, map_details, map_pixel_x, map_pixel_y, map_pixel_z, map_countour_level, map_annotation_details)
         self.__id = id
@@ -786,10 +786,11 @@ class Emd_entry(Map_information):
         self.__image_url = image_url
         self.__xml_url = xml_url
         self.__map_url = map_url
+        self.__emd_url = emd_url
         
     
     def create_by_ftp(self,emd_id,ftp_connection):
-        URL = "http://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/header/emd-{0}.xml".format(emd_id)
+        URL = "{1}/structures/EMD-{0}/header/emd-{0}.xml".format(emd_id,self.__emd_url)
         response = requests.get(URL)
         with open('{0}.xml'.format(emd_id), 'wb') as file:
             file.write(response.content)
@@ -835,11 +836,11 @@ class Emd_entry(Map_information):
             self.__resolution = None
             
         if have_image == True:
-            self.__image_url = "http://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/images/emd_{0}.png".format(emd_id)
+            self.__image_url = "{1}/structures/EMD-{0}/images/emd_{0}.png".format(emd_id,self.__emd_url)
         else:
             self.__image_url = None
-        self.__xml_url = "http://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/header/emd-{0}.xml".format(emd_id)
-        self.__map_url = "http://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/map/emd_{0}.map.gz".format(emd_id)
+        self.__xml_url = "{1}/structures/EMD-{0}/header/emd-{0}.xml".format(emd_id,self.__emd_url)
+        self.__map_url = "{1}/structures/EMD-{0}/map/emd_{0}.map.gz".format(emd_id,self.__emd_url)
         
     
     def __insert_map_db(self, cur):

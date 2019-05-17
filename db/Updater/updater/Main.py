@@ -5,23 +5,67 @@ from classes.Update import Update
 from datetime import date
 from classes.Time_stamp import Time_stamp
 from psycopg2 import sql
+from descriptors_generator.values_generator import get_emd_descriptors
+from classes.Type_descriptor import Type_descriptor
+from classes.Descriptor import Descriptor
+from descriptors_generator import values_generator as valg
+from time import time 
+ 
 '''
 Created on 31 mar. 2019
 
 @author: luis98
 '''
 
-def first_time_emd(conec_ftp,conec_sql):
-    cursor_sql = conec_sql.get_cursor()
-    emds = conec_ftp.get_all_emds_id()
+valg.dir = "../descriptors_generator/"
+
+def create_type_descriptors(cursor_sql):
     
+    type = Type_descriptor(1, "EMDB Contour", "EMDB Contour")
+    type.insert_db(cursor_sql)
+    
+    type = Type_descriptor(2, "EMDB Contour + 1/3 core", "EMDB Contour + 1/3 core")
+    type.insert_db(cursor_sql)
+    
+    type = Type_descriptor(3, "EMDB Contour + 2/3 core", "EMDB Contour + 2/3 core")
+    type.insert_db(cursor_sql)
+    
+    type = Type_descriptor(4, "EMDB Contour + 1/3 + 2/3 core", "EMDB Contour + 1/3 + 2/3 core")
+    type.insert_db(cursor_sql)
+    
+    type = Type_descriptor(5, "EMDB Contour + 1 std dev", "EMDB Contour + 1 std dev")
+    type.insert_db(cursor_sql)
+    
+def insert_descriptor(emd_entry_p,cursor_sql):
+    result = get_emd_descriptors(emd_entry_p.id,emd_entry_p.map_countour_level,emd_entry_p.map_std)
+    
+    for i in range(len(result)):
+        des_temp = Descriptor(emd_entry_p.id,i+1,result[i])
+        des_temp.insert_db(cursor_sql)
+
+def update_descriptor(emd_entry_p,cursor_sql):
+    result = get_emd_descriptors(emd_entry_p.id,emd_entry_p.map_countour_level,emd_entry_p.map_std)
+    
+    for i in range(len(result)):
+        des_temp = Descriptor(emd_entry_p.id,i+1,result[i])
+        des_temp.update_db(cursor_sql)
+
+
+def first_time_emd(emds,conec_ftp,conec_sql,emd_url, emd_url_directory):
+    cursor_sql = conec_sql.get_cursor()
+    
+    create_type_descriptors(cursor_sql)
+    print("Total inserts",len(emds))
     for i in emds:
         temp_emd_entry = Emd_entry()
         temp_emd_entry.create_by_ftp(i,conec_ftp.ftp)
         temp_emd_entry.insert_db(cursor_sql)
+        insert_descriptor(temp_emd_entry,cursor_sql)
         
         temp_time_stamp = Time_stamp (i,date.today(),temp_emd_entry.map_url,temp_emd_entry.xml_url,temp_emd_entry.image_url )
         temp_time_stamp.insert_db(cursor_sql)
+        conec_sql.commit()
+        print(i)
     
     update_date = Update(date.today())
     update_date.insert_db(cursor_sql)
@@ -32,7 +76,7 @@ def update_emd(conec_ftp,conec_sql):
     cursor_sql = conec_sql.get_cursor()
     
     emds = conec_ftp.get_emds_higher_than_date(conec_sql.last_update())
-    
+    print("Total changes",len(emds))
     for i in emds:
         temp_emd_entry = Emd_entry()
         temp_emd_entry.create_by_ftp(i,conec_ftp.ftp)
@@ -45,30 +89,46 @@ def update_emd(conec_ftp,conec_sql):
             temp_emd_entry.map_id = map_result[0]
             temp_emd_entry.update_db(cursor_sql)
             temp_time_stamp.update_db(cursor_sql)
+            update_descriptor(temp_emd_entry,cursor_sql)
         else:
             temp_emd_entry.insert_db(cursor_sql)
             temp_time_stamp.insert_db(cursor_sql)
-    update_date = Update(date.today())
-    update_date.insert_db(cursor_sql)
+            insert_descriptor(temp_emd_entry,cursor_sql)
+        
+        conec_sql.commit()
+        print(i)
+    
+    if(conec_sql.last_update().date()!=date.today()):
+        update_date = Update(date.today())
+        update_date.insert_db(cursor_sql)
+    
     conec_sql.commit()
     cursor_sql.close()
     
 
-def main():
+def main(emd_url, emd_url_directory, num_of_nucles):
     conec_ftp = FTP_connection()
     conec_ftp.init_connection()
     conec_sql = SQL_connection()
     conec_sql.init_connection()
     
     if conec_sql.is_first_time():
-        first_time_emd(conec_ftp, conec_sql)
+        emds = conec_ftp.get_all_emds_id()
+        total_emd = len(emds)
+        
+        first_time_emd(emds, conec_ftp,conec_sql,emd_url, emd_url_directory)
     else:
-        update_emd(conec_ftp,conec_sql)
+        update_emd(emds, conec_ftp,conec_sql,emd_url, emd_url_directory)
         
     conec_sql.close_connection()    
     conec_ftp.close_connection()
     print("Finish")
   
 if __name__== "__main__":
+    ini = time() 
     main()
+    final = time() 
+    ejec = final - ini
+    print ('Execution time:', ejec)
+
 
