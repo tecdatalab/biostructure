@@ -59,7 +59,7 @@ class Visualizer():
                                             lambertian * diffuse_color +
                                             specular * specular_color;
                         vec3 color_gamma = pow(color_linear, vec3(1.0/gamma));
-                        gl_FragColor = vec4(color_gamma, 0.7);
+                        gl_FragColor = vec4(color_gamma, 0.75);
                     }
                     """
         self.labels = labels
@@ -67,9 +67,9 @@ class Visualizer():
         self.atoms = None
 
 
-    def show(self):
+    def show(self, level=None):
         data = self.molecule.data()
-        verts, faces, _,_ = measure.marching_cubes_lewiner(data)
+        verts, faces, _,_ = measure.marching_cubes_lewiner(data,level, allow_degenerate=True)
 
         verts_index = verts.astype(np.int32)
 
@@ -99,7 +99,7 @@ class Visualizer():
         V["normal"] = normals / np.linalg.norm(normals, axis=1)[:,None]
 
         ###ATOMS CODE
-        atoms_coords = self.add_structure("../../pdb1mi6.ent")
+        atoms_coords = self.add_structure("../../maps/1010/pdb1mi6.ent")
         amin, amax =  atoms_coords.min(), atoms_coords.max()
         atoms_norm = 2*(atoms_coords-amin)/(amax-amin) - 1
         ####Generalte atoms vertices
@@ -131,10 +131,10 @@ class Visualizer():
         vamin, vamax =  V_atoms["position"].min(), V_atoms["position"].max()
         V_atoms["position"] = 2*(V_atoms["position"]-vamin)/(vamax-vamin) - 1
         
-        V = np.concatenate((V, V_atoms), axis=0)
+        V = np.concatenate((V_atoms, V), axis=0)
 
         indices = []
-        initial_offset = len(verts)
+        initial_offset = 0
         for atom in range(len(atoms_coords)):
             for i in range(stacks-1):
                 for j in range(slices-1):
@@ -147,7 +147,7 @@ class Visualizer():
             initial_offset+=n
         indices = np.array(indices, dtype=np.uint32).reshape(-1,3)
 
-        I = np.concatenate(((faces).astype(np.uint32),indices), axis=0)
+        I = np.concatenate((indices,(faces).astype(np.uint32)+len(V_atoms)), axis=0)
         
         
         V = V.view(gloo.VertexBuffer)
@@ -181,6 +181,7 @@ class Visualizer():
         @window.event
         def on_init():
             gl.glEnable(gl.GL_DEPTH_TEST)
+            gl.glEnable(gl.GL_BLEND)
             update()
 
         window.attach(points['transform'])
@@ -196,7 +197,7 @@ class Visualizer():
 
 
 
-r = reader.Reader("../../EMD-1010.map")
+r = reader.Reader("../../maps/1010/EMD-1010.map")
 m = r.read()
 #cube = np.zeros((130,130,130))
 #cube[50:80,50:80,50:80] = 1
@@ -206,8 +207,12 @@ from skimage.measure import regionprops
 s = processing.gaussian_smooth(m,1.5)
 l = processing.watershed_segmentation(s)
 v = Visualizer(m,l)
-v.show()
-'''
+max_v = np.max(m.data())
+mean_v = np.mean(m.data())
+level_frac = 0.1
+level = (max_v-mean_v)*level_frac + mean_v
+verts =v.show(level)
+
 atoms_coords = v.add_structure("../../pdb1mi6.ent")
 zlen,ylen,xlen = m.cell_dim()
 mz, my, mx = m.grid_size()
@@ -218,7 +223,7 @@ print(voxel_len)
 print(cell_dim)
 
 
-verts =v.show()
+#verts =v.show()
 map_min = np.min(verts, axis=0)
 map_max = np.max(verts, axis=0)
 voxel_padding = map_size - (map_max-map_min)
@@ -237,5 +242,5 @@ for coord in atoms_coords:
         if np.all(coord <= max_box) and np.all(coord >= min_box):
             print("Found atom %d with coords (%f, %f, %f) in region %d " % (atoms_found, coord[0], coord[1], coord[2], region.label))
             atoms_found+=1
-'''
+
 
