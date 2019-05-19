@@ -6,16 +6,11 @@ from skimage.color import label2rgb
 from copy import copy
 import numpy as np
 
-import matplotlib
-matplotlib.use('Qt4Agg')
-import matplotlib.pyplot as plt
 
 
-
-def watershed_segmentation(myMolecule):
+def watershed_segmentation(myMolecule, level):
     imageData = myMolecule.data()
-    th = threshold_otsu(imageData)
-    thresholded = imageData > th
+    thresholded = imageData > level
     kernel = np.ones((3,3,3))
     eroded = erosion(thresholded, kernel)
     dilated = dilation(eroded, kernel)   
