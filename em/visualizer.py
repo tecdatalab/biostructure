@@ -4,13 +4,17 @@ from glumpy.transforms import Trackball, Position
 from skimage import measure
 from skimage.color import label2rgb
 from biopandas.pdb import PandasPdb 
+from skimage.filters import threshold_otsu
+from skimage.measure import regionprops
+
 
 
 import reader
+import processing
 
 class Visualizer():
     
-    def __init__(self, myMolecule, labels=None):
+    def __init__(self, myMolecule, level=None):
         self.vertex = """
                     uniform mat4 m_model;
                     uniform mat4 m_view;
@@ -62,20 +66,26 @@ class Visualizer():
                         gl_FragColor = vec4(color_gamma, 0.75);
                     }
                     """
-        self.labels = labels
         self.molecule = myMolecule
-        self.atoms = None
-
-
-    def show(self, level=None):
         data = self.molecule.data()
-        verts, faces, _,_ = measure.marching_cubes_lewiner(data,level, allow_degenerate=True)
 
+        self.th_level = np.min(data) + level * (np.max(data) - np.min(data)) if level is not None else threshold_otsu(data)
+        verts, faces, _,_ = measure.marching_cubes_lewiner(data, self.th_level)
+
+        self.verts = verts
+        self.faces = faces        
+        self.atoms = None
+        self.labels = None
+
+
+    def show(self):
+
+        faces = self.faces
+        verts = self.verts
         verts_index = verts.astype(np.int32)
 
         if self.labels.any() != None:
             V = np.zeros(len(verts), [("position", np.float32, 3),  ("normal", np.float32, 3), ("color", np.float32, 3)])
-            print(self.labels)
             colors = label2rgb(self.labels[verts_index[:,0], verts_index[:,1], verts_index[:,2]])
             V["color"] = colors * 0.5
         else:
@@ -98,60 +108,56 @@ class Visualizer():
         V["position"] = verts_norm
         V["normal"] = normals / np.linalg.norm(normals, axis=1)[:,None]
 
+        I = (faces).astype(np.uint32)
+
         ###ATOMS CODE
-        atoms_coords = self.add_structure("../../maps/1010/pdb1mi6.ent")
-        amin, amax =  atoms_coords.min(), atoms_coords.max()
-        atoms_norm = 2*(atoms_coords-amin)/(amax-amin) - 1
-        ####Generalte atoms vertices
-        
-        slices = 8 + 1
-        stacks = 8 + 1
-        n = slices*stacks
-        V_atoms = np.zeros(len(atoms_norm)*n, [("position", np.float32, 3),  ("normal", np.float32, 3), ("color", np.float32, 3)])
-        sphere_verts = np.zeros(n, [("position", np.float32, 3), ("normal", np.float32, 3), ("color", np.float32, 3)])
-        radius = 0.03
-        theta1 = np.repeat(np.linspace(0,     np.pi, stacks, endpoint=True), slices)
-        theta2 = np.tile(np.linspace(0, 2 * np.pi, slices, endpoint=True), stacks)
-        sphere_verts["position"][:,0] =  np.sin(theta1) * np.cos(theta2) * radius
-        sphere_verts["position"][:,1] =  np.cos(theta1) * radius
-        sphere_verts["position"][:,2] =  np.sin(theta1) * np.sin(theta2) * radius
-        print (sphere_verts.shape)
-        sphere_verts = np.repeat(sphere_verts[None,:], len(atoms_norm), axis=0).reshape(-1)
-        print (sphere_verts[0])
-        print (sphere_verts.shape)
-        print (atoms_norm.shape)
-        atoms_norm = np.repeat(atoms_norm, n, axis=0)
-        print (atoms_norm.shape)
-        V_atoms["position"][:,0] = atoms_norm[:,2] + sphere_verts["position"][:,2]
-        V_atoms["position"][:,1] = atoms_norm[:,1] + sphere_verts["position"][:,1]
-        V_atoms["position"][:,2] = atoms_norm[:,0] + sphere_verts["position"][:,0]
-        V_atoms["normal"] = V_atoms["position"]
-        V_atoms["color"] = np.repeat(np.array([[0.0, 0.1, 1.0]]),len(atoms_norm),axis=0)
+        if self.atoms is not None:
+            atoms_coords = self.atoms
+            amin, amax =  atoms_coords.min(), atoms_coords.max()
+            atoms_norm = 2*(atoms_coords-amin)/(amax-amin) - 1
+            ####Generalte atoms vertices
+            
+            slices = 8 + 1
+            stacks = 8 + 1
+            n = slices*stacks
+            V_atoms = np.zeros(len(atoms_norm)*n, [("position", np.float32, 3),  ("normal", np.float32, 3), ("color", np.float32, 3)])
+            sphere_verts = np.zeros(n, [("position", np.float32, 3), ("normal", np.float32, 3), ("color", np.float32, 3)])
+            radius = 0.03
+            theta1 = np.repeat(np.linspace(0,     np.pi, stacks, endpoint=True), slices)
+            theta2 = np.tile(np.linspace(0, 2 * np.pi, slices, endpoint=True), stacks)
+            sphere_verts["position"][:,0] =  np.sin(theta1) * np.cos(theta2) * radius
+            sphere_verts["position"][:,1] =  np.cos(theta1) * radius
+            sphere_verts["position"][:,2] =  np.sin(theta1) * np.sin(theta2) * radius
+            sphere_verts = np.repeat(sphere_verts[None,:], len(atoms_norm), axis=0).reshape(-1)
+            atoms_norm = np.repeat(atoms_norm, n, axis=0)
+            V_atoms["position"][:,0] = atoms_norm[:,2] + sphere_verts["position"][:,2]
+            V_atoms["position"][:,1] = atoms_norm[:,1] + sphere_verts["position"][:,1]
+            V_atoms["position"][:,2] = atoms_norm[:,0] + sphere_verts["position"][:,0]
+            V_atoms["normal"] = V_atoms["position"]
+            V_atoms["color"] = np.repeat(np.array([[0.0, 0.1, 1.0]]),len(atoms_norm),axis=0)
 
-        vamin, vamax =  V_atoms["position"].min(), V_atoms["position"].max()
-        V_atoms["position"] = 2*(V_atoms["position"]-vamin)/(vamax-vamin) - 1
-        
-        V = np.concatenate((V_atoms, V), axis=0)
+            vamin, vamax =  V_atoms["position"].min(), V_atoms["position"].max()
+            V_atoms["position"] = 2*(V_atoms["position"]-vamin)/(vamax-vamin) - 1
+            
+            indices = []
+            initial_offset = 0
+            for atom in range(len(atoms_coords)):
+                for i in range(stacks-1):
+                    for j in range(slices-1):
+                        indices.append(i*(slices) + j + initial_offset)
+                        indices.append(i*(slices) + j+1 + initial_offset)
+                        indices.append(i*(slices) + j+slices+1 + initial_offset)
+                        indices.append(i*(slices) + j+slices + initial_offset)
+                        indices.append(i*(slices) + j+slices+1+ initial_offset)
+                        indices.append(i*(slices) + j+ initial_offset)
+                initial_offset+=n
+            indices = np.array(indices, dtype=np.uint32).reshape(-1,3)
 
-        indices = []
-        initial_offset = 0
-        for atom in range(len(atoms_coords)):
-            for i in range(stacks-1):
-                for j in range(slices-1):
-                    indices.append(i*(slices) + j + initial_offset)
-                    indices.append(i*(slices) + j+1 + initial_offset)
-                    indices.append(i*(slices) + j+slices+1 + initial_offset)
-                    indices.append(i*(slices) + j+slices + initial_offset)
-                    indices.append(i*(slices) + j+slices+1+ initial_offset)
-                    indices.append(i*(slices) + j+ initial_offset)
-            initial_offset+=n
-        indices = np.array(indices, dtype=np.uint32).reshape(-1,3)
-
-        I = np.concatenate((indices,(faces).astype(np.uint32)+len(V_atoms)), axis=0)
+            V = np.concatenate((V_atoms, V), axis=0)
+            I = np.concatenate((indices,(faces).astype(np.uint32)+len(V_atoms)), axis=0)
         
         
         V = V.view(gloo.VertexBuffer)
-        #I = (faces).astype(np.uint32)
         I = I.view(gloo.IndexBuffer)
 
         points = gloo.Program(self.vertex, self.fragment)
@@ -181,66 +187,78 @@ class Visualizer():
         @window.event
         def on_init():
             gl.glEnable(gl.GL_DEPTH_TEST)
-            gl.glEnable(gl.GL_BLEND)
             update()
 
         window.attach(points['transform'])
         app.run()
-        return verts
+
 
     def add_structure(self, filename):
         ppdb =PandasPdb()
         ppdb.read_pdb(filename)
         atoms = ppdb.df["ATOM"][ppdb.df['ATOM']['atom_name'] == 'CA']
         self.atoms = atoms[["z_coord", "y_coord", "x_coord"]].values
-        return self.atoms
+
+    def show_atom_correlation(self):
+        if self.atoms is None:
+            raise ValueError("Atomic structure is not present")
+        if self.labels is None:
+            raise ValueError("Need to segmentate map first")
+        else:
+            molecule = self.molecule
+            atoms_coords = self.atoms
+            verts = self.verts
+            zlen,ylen,xlen = molecule.cell_dim()
+            mz, my, mx = molecule.grid_size()
+            map_size = np.array([mz, my, mx])
+            cell_dim = np.array([xlen,ylen,zlen])
+            voxel_len = cell_dim/map_size
+            map_min = np.min(verts, axis=0)
+            map_max = np.max(verts, axis=0)
+            voxel_padding = map_size - (map_max-map_min)
+            padding_adjustment = voxel_padding * voxel_len / 2
+            pdb_min = np.min(atoms_coords, axis=0)
+            adjustment = (pdb_min - padding_adjustment)/voxel_len
+
+            atoms_found=1
+            for coord in atoms_coords:
+                for region in regionprops(self.labels):
+                    min_z,min_y,min_x,max_z,max_y,max_x= region.bbox
+                    min_box = np.array([min_z,min_y,min_x]) + adjustment
+                    max_box = np.array([max_z,max_y,max_x]) + adjustment
+                    if np.all(coord <= max_box) and np.all(coord >= min_box):
+                        print("Found atom %d with coords (%f, %f, %f) in region %d " % (atoms_found, coord[0], coord[1], coord[2], region.label))
+                        atoms_found+=1
 
 
 
-r = reader.Reader("../../maps/1010/EMD-1010.map")
-m = r.read()
-#cube = np.zeros((130,130,130))
-#cube[50:80,50:80,50:80] = 1
-#m.set_data(cube)
-import processing
-from skimage.measure import regionprops
-s = processing.gaussian_smooth(m,1.5)
-l = processing.watershed_segmentation(s)
-v = Visualizer(m,l)
-max_v = np.max(m.data())
-mean_v = np.mean(m.data())
-level_frac = 0.1
-level = (max_v-mean_v)*level_frac + mean_v
-verts =v.show(level)
-
-atoms_coords = v.add_structure("../../pdb1mi6.ent")
-zlen,ylen,xlen = m.cell_dim()
-mz, my, mx = m.grid_size()
-map_size = np.array([mz, my, mx])
-cell_dim = np.array([xlen,ylen,zlen])
-voxel_len = cell_dim/map_size
-print(voxel_len)
-print(cell_dim)
+    def segmentate(self, smooth=False, sigma=1.0):
+        molecule = self.molecule
+        if smooth:
+            molecule = processing.gaussian_smooth(molecule, sigma)
+        self.labels = processing.watershed_segmentation(molecule, self.th_level)
 
 
-#verts =v.show()
-map_min = np.min(verts, axis=0)
-map_max = np.max(verts, axis=0)
-voxel_padding = map_size - (map_max-map_min)
-padding_adjustment = voxel_padding * voxel_len / 2
-print(padding_adjustment)
-pdb_min = np.min(atoms_coords, axis=0)
-adjustment = (pdb_min - padding_adjustment)/voxel_len
-print(adjustment)
-
-atoms_found=1
-for coord in atoms_coords:
-    for region in regionprops(l):
-        min_z,min_y,min_x,max_z,max_y,max_x= region.bbox
-        min_box = np.array([min_z,min_y,min_x]) + adjustment
-        max_box = np.array([max_z,max_y,max_x]) + adjustment
-        if np.all(coord <= max_box) and np.all(coord >= min_box):
-            print("Found atom %d with coords (%f, %f, %f) in region %d " % (atoms_found, coord[0], coord[1], coord[2], region.label))
-            atoms_found+=1
 
 
+
+
+
+#'''
+#Read molecule map from file
+mapReader = reader.Reader()
+#Open file
+mapReader.open("../../maps/1010/EMD-1010.map")
+#Get map object
+myMap = mapReader.read()
+# Create visualizer with a map surface threshold level
+# Otherwise use otsu threshold
+v= Visualizer(myMap, level=0.45)
+#v = Visualizer(myMap)
+# Watershed 
+v.segmentate()
+# add corresponding atomic structure
+v.add_structure("../../maps/1010/pdb1mi6.ent")
+v.show()
+#v.show_atom_correlation()
+#'''
