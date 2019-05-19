@@ -244,7 +244,7 @@ class Visualizer():
 
 
 
-#'''
+'''
 #Read molecule map from file
 mapReader = reader.Reader()
 #Open file
@@ -261,4 +261,4 @@ v.segmentate()
 v.add_structure("../../maps/1010/pdb1mi6.ent")
 v.show()
 #v.show_atom_correlation()
-#'''
+'''
