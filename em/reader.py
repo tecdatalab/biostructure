@@ -60,7 +60,7 @@ class Reader():
     #Header size in bytes
     HEADER_SIZE = 1024
     
-    def __init__(self, filename):
+    def open(self, filename):
         try:
             with open(filename, 'rb') as mrc_file:
                 mrc_buffer = mrc_file.read()
