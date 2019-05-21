@@ -1,5 +1,17 @@
 <div class="container">
-  <input type="date" name="minDate" [(ngModel)]="minDate" />
+  <h4 class="text-primary">My queries</h4>
+  <br />
+  <div>
+    <span>
+      Find by date
+      <input type="date" name="minDate" [(ngModel)]="minDate" />
+    </span>
+    <span>
+      to
+      <input type="date" name="minDate" [(ngModel)]="maxDate" />
+    </span>
+  </div>
+  <br />
   <div>
     <button
       type="button"
@@ -9,7 +21,6 @@
     >
       <<
     </button>
-    <label class="col-sm-10"></label>
     <button
       type="button"
       class="btn btn-secondary"
@@ -39,7 +50,7 @@
       </thead>
       <tbody *ngFor="let record of filterFunction(records); let a = index">
         <tr *ngIf="currentPage < a && a < currentPage + rowsPerPage">
-          <td>{{ record.date_time | date: "MM/dd/yyyy" }}</td>
+          <td>{{ record.date_time | date: "dd/MM/yyyy" }}</td>
           <td>{{ record.emd_entry_id }}</td>
           <td>{{ record.name_file }}</td>
           <td>{{ record.counter_level }}</td>

@@ -14,7 +14,8 @@ export class SearchHistoryComponent implements OnInit {
     private router: Router
   ) {}
   records: SearchHistory[];
-  minDate = new Date();
+  minDate: Date;
+  maxDate: Date;
   currentPage = -1;
   rowsPerPage = 6;
 
@@ -41,8 +42,12 @@ export class SearchHistoryComponent implements OnInit {
 
   filterFunction(records) {
     return records.filter(record => {
-      //console.log(new Date(record["date_time"]));
-      if (new Date(record["date_time"]) < this.minDate) {
+      if (
+        (this.minDate == null ||
+          new Date(this.minDate) <= new Date(record["date_time"])) &&
+        (this.maxDate == null ||
+          new Date(record["date_time"]) <= new Date(this.maxDate))
+      ) {
         return true;
       }
       return false;
@@ -53,7 +58,6 @@ export class SearchHistoryComponent implements OnInit {
     this.searchHistoryService
       .getSearchHistory()
       .then((response: SearchHistory[]) => {
-        console.log(response);
         this.records = response;
       });
   }
