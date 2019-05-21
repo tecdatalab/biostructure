@@ -33,7 +33,7 @@ exports.saveSearch = async (req, res, next) => {
         ip: req.connection.remoteAddress,
         user_id:
           req.authenticatedUser.id == null ? "0" : req.authenticatedUser.id,
-        emd_entry_id: emdbid,
+        emd_entry_id: req.params.emdbID == null ? 1 : req.params.emdbID,
         name_file: req.params.filename,
         counter_level: req.params.contourLevel,
         representation_id: req.params.contourRepresentation,

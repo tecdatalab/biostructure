@@ -13,6 +13,7 @@ router.get(
 
 router.get(
   "/resultsmap/:filename/:contourRepresentation/:contourLevel/:isVolumeFilterOn/:minRes/:maxRes",
+  userController.isUserLoggedIn,
   searchController.saveSearch,
   searchController.searchResultMap
 );

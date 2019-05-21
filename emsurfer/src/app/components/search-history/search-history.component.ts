@@ -14,9 +14,11 @@ export class SearchHistoryComponent implements OnInit {
     private router: Router
   ) {}
   records: SearchHistory[];
+  minDate = new Date();
+  currentPage = -1;
+  rowsPerPage = 6;
 
   searchByEmdbID(record) {
-    console.log(record);
     const url = "result/" + record.emd_entry_id;
     const params = {
       contourRepresentation: record.representation_id,
@@ -26,6 +28,24 @@ export class SearchHistoryComponent implements OnInit {
     };
     this.router.navigate([url], {
       queryParams: params
+    });
+  }
+
+  nextPage() {
+    this.currentPage += this.rowsPerPage - 1;
+  }
+
+  previousPage() {
+    this.currentPage -= this.rowsPerPage - 1;
+  }
+
+  filterFunction(records) {
+    return records.filter(record => {
+      //console.log(new Date(record["date_time"]));
+      if (new Date(record["date_time"]) < this.minDate) {
+        return true;
+      }
+      return false;
     });
   }
 

@@ -113,6 +113,12 @@ export class BiomoleculeSearchService {
     minRes: string,
     maxRes: string
   ): Promise<any> {
+    let httpHeaders;
+    if (this.userService.isUserLoggedIn()) {
+      httpHeaders = new HttpHeaders({
+        authorization: this.userService.getStoredAuthToken().token
+      });
+    }
     return this.httpClient
       .get(
         this.API_URL +
@@ -127,7 +133,10 @@ export class BiomoleculeSearchService {
           "/" +
           minRes +
           "/" +
-          maxRes
+          maxRes,
+        {
+          headers: httpHeaders
+        }
       )
       .toPromise()
       .then((data: SearchResult) => {
