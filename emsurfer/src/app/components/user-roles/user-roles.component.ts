@@ -34,8 +34,6 @@ export class UserRolesComponent implements OnInit {
         }
         return true;
       }
-      console.log(this.adminFilter);
-      console.log(user["name"]);
       return false;
     });
   }

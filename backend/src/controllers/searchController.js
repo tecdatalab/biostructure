@@ -39,6 +39,7 @@ exports.searchResult = async (req, res, next) => {
       .build({
         date_time: new Date(),
         ip: req.connection.remoteAddress,
+        user_id: "0",
         emd_entry_id: emdbid,
         name_file: "-",
         counter_level: 0.0,
@@ -56,6 +57,7 @@ exports.searchResult = async (req, res, next) => {
         res.status(200).json(result);
       })
       .catch(error => {
+        console.log(error);
         res.status(500).send({
           message: "Backend error: Search not registered"
         });
@@ -82,6 +84,7 @@ exports.searchResultMap = async (req, res, next) => {
       .build({
         date_time: new Date(),
         ip: req.connection.remoteAddress,
+        user_id: "0",
         emd_entry_id: 1,
         name_file: filename,
         counter_level: contourLevel,

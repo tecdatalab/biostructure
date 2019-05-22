@@ -15,10 +15,12 @@ describe("Search form e2e tests", () => {
     let alert = page.getAlert("digits_alert");
     inputText.sendKeys("eeee");
     expect(alert.isDisplayed()).toBe(true);
+    page.wait(500);
     inputText.click();
     inputText.clear();
     inputText.sendKeys("222");
     alert = page.getAlert("4_digits_alert");
+    page.wait(500);
     expect(alert.isDisplayed()).toBe(true);
   });
 

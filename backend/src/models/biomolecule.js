@@ -1,37 +1,47 @@
-const Sequelize = require('sequelize');
-const sequelize = require('../database').sequelize;
-const Op = require('../database').Op;
+const Sequelize = require("sequelize");
+const sequelize = require("../database").sequelize;
+const Op = require("../database").Op;
 
-const biomolecule = sequelize.define('emd_entry', {
-  id: {
+const biomolecule = sequelize.define(
+  "emd_entry",
+  {
+    id: {
       type: Sequelize.INTEGER,
       primaryKey: true
-  },
-  full_name: {
+    },
+    full_name: {
       type: Sequelize.STRING
-  },
-  acronym: {
+    },
+    acronym: {
       type: Sequelize.STRING
-  },
-  volume: {
+    },
+    volume: {
       type: Sequelize.DOUBLE
-  },
-  resolution: {
+    },
+    resolution: {
       type: Sequelize.DOUBLE
-  },
-  image_url: {
+    },
+    image_url: {
       type: Sequelize.STRING
-  },
-  xml_url: {
+    },
+    xml_url: {
       type: Sequelize.STRING
-  },
-  map_url: {
+    },
+    map_url: {
       type: Sequelize.STRING
+    },
+    png_img_3d: {
+      type: Sequelize.STRING
+    },
+    gif_img_3d: {
+      type: Sequelize.STRING
+    }
+  },
+  {
+    timestamps: false,
+    freezeTableName: true,
+    tableName: "emd_entry"
   }
-},{
-  timestamps: false,
-  freezeTableName: true,
-  tableName: 'emd_entry'
-});
+);
 
-module.exports = biomolecule
+module.exports = biomolecule;
