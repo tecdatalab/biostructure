@@ -788,7 +788,6 @@ class Emd_entry(Map_information):
         self.__map_url = map_url
         self.__emd_url = emd_url
         
-    
     def create_by_ftp(self,emd_id,ftp_connection):
         URL = "{1}/structures/EMD-{0}/header/emd-{0}.xml".format(emd_id,self.__emd_url)
         response = requests.get(URL)
@@ -920,6 +919,10 @@ class Emd_entry(Map_information):
 
     def get_map_url(self):
         return self.__map_url
+    
+            
+    def get_emd_url(self):
+        return self.__emd_url
 
 
     def set_id(self, value):
@@ -952,6 +955,10 @@ class Emd_entry(Map_information):
 
     def set_map_url(self, value):
         self.__map_url = value
+        
+
+    def set_emd_url(self, value):
+        self.__emd_url = value
 
 
     def del_id(self):
@@ -985,6 +992,9 @@ class Emd_entry(Map_information):
     def del_map_url(self):
         del self.__map_url
         
+        
+    def del_emd_url(self):
+        del self.__emd_url
         
     def __eq__(self, emd_entry):        
         return self.id == emd_entry.id \
@@ -1039,6 +1049,7 @@ class Emd_entry(Map_information):
     image_url = property(get_image_url, set_image_url, del_image_url, "image_url's docstring")
     xml_url = property(get_xml_url, set_xml_url, del_xml_url, "xml_url's docstring")
     map_url = property(get_map_url, set_map_url, del_map_url, "map_url's docstring")
+    emd_url = property(get_emd_url, set_emd_url, del_emd_url, "emd_url's docstring")
 
     
     
