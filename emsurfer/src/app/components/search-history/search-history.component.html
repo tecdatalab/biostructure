@@ -12,6 +12,15 @@
     </span>
   </div>
   <br />
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link active" href="#">Single</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Batch</a>
+    </li>
+  </ul>
+  <br />
   <div>
     <button
       type="button"
@@ -23,7 +32,7 @@
     </button>
     <button
       type="button"
-      class="btn btn-secondary"
+      class="btn btn-secondary float-right"
       [disabled]="!records || currentPage + rowsPerPage + 1 > records.length"
       (click)="nextPage()"
     >
