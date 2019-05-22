@@ -117,8 +117,8 @@ class Visualizer():
             atoms_norm = 2*(atoms_coords-amin)/(amax-amin) - 1
             ####Generalte atoms vertices
             
-            slices = 8 + 1
-            stacks = 8 + 1
+            slices = 32 + 1
+            stacks = 32 + 1
             n = slices*stacks
             V_atoms = np.zeros(len(atoms_norm)*n, [("position", np.float32, 3),  ("normal", np.float32, 3), ("color", np.float32, 3)])
             sphere_verts = np.zeros(n, [("position", np.float32, 3), ("normal", np.float32, 3), ("color", np.float32, 3)])
@@ -197,7 +197,9 @@ class Visualizer():
         ppdb =PandasPdb()
         ppdb.read_pdb(filename)
         atoms = ppdb.df["ATOM"][ppdb.df['ATOM']['atom_name'] == 'CA']
-        self.atoms = atoms[["z_coord", "y_coord", "x_coord"]].values
+        self.atoms = np.zeros(len(atoms),  [("id", np.int32, 1), ("position", np.float32, 3)])
+        self.atoms["id"] = atoms["atom_number"].values
+        self.atoms["position"]=atoms[["z_coord", "y_coord", "x_coord"]].values
 
     def show_atom_correlation(self):
         if self.atoms is None:
@@ -206,7 +208,7 @@ class Visualizer():
             raise ValueError("Need to segmentate map first")
         else:
             molecule = self.molecule
-            atoms_coords = self.atoms
+            atoms_coords = self.atoms["position"]
             verts = self.verts
             zlen,ylen,xlen = molecule.cell_dim()
             mz, my, mx = molecule.grid_size()
@@ -220,15 +222,14 @@ class Visualizer():
             pdb_min = np.min(atoms_coords, axis=0)
             adjustment = (pdb_min - padding_adjustment)/voxel_len
 
-            atoms_found=1
-            for coord in atoms_coords:
+            for atom in self.atoms:
                 for region in regionprops(self.labels):
                     min_z,min_y,min_x,max_z,max_y,max_x= region.bbox
                     min_box = np.array([min_z,min_y,min_x]) + adjustment
                     max_box = np.array([max_z,max_y,max_x]) + adjustment
+                    coord = atom["position"]
                     if np.all(coord <= max_box) and np.all(coord >= min_box):
-                        print("Found atom %d with coords (%f, %f, %f) in region %d " % (atoms_found, coord[0], coord[1], coord[2], region.label))
-                        atoms_found+=1
+                        print("Found atom %d with coords (%f, %f, %f) in region %d " % (atom["id"], coord[0], coord[1], coord[2], region.label))
 
 
 
@@ -253,12 +254,12 @@ mapReader.open("../../maps/1010/EMD-1010.map")
 myMap = mapReader.read()
 # Create visualizer with a map surface threshold level
 # Otherwise use otsu threshold
-v= Visualizer(myMap, level=0.45)
+v= Visualizer(myMap, level=0.35)
 #v = Visualizer(myMap)
 # Watershed 
 v.segmentate()
 # add corresponding atomic structure
 v.add_structure("../../maps/1010/pdb1mi6.ent")
-v.show()
-#v.show_atom_correlation()
+#v.show()
+v.show_atom_correlation()
 '''
