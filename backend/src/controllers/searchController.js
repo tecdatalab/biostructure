@@ -31,11 +31,10 @@ exports.saveSearch = async (req, res, next) => {
       .build({
         date_time: new Date(),
         ip: req.connection.remoteAddress,
-        user_id:
-          req.authenticatedUser.id == null ? "0" : req.authenticatedUser.id,
+        user_id: req.authenticatedUser.id,
         emd_entry_id: req.params.emdbID == null ? 1 : req.params.emdbID,
         name_file: req.params.filename,
-        counter_level: req.params.contourLevel,
+        contour_level: req.params.contourLevel,
         representation_id: req.params.contourRepresentation,
         volume_filter_id: req.params.isVolumeFilterOn == "true" ? 1 : 0,
         resolution_filter_min: checkMinResolutionFilter(req.params.minRes),
@@ -44,7 +43,6 @@ exports.saveSearch = async (req, res, next) => {
       .save()
       .then(next());
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       message: "Internal server error"
     });

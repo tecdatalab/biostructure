@@ -14,17 +14,17 @@ const search_history = sequelize.define(
     ip: {
       type: Sequelize.STRING
     },
+    user_id: {
+      type: Sequelize.STRING
+    },
     emd_entry_id: {
       type: Sequelize.INTEGER
     },
     name_file: {
       type: Sequelize.STRING
     },
-    counter_level: {
+    contour_level: {
       type: Sequelize.DOUBLE
-    },
-    user_id: {
-      type: Sequelize.STRING
     },
     representation_id: {
       type: Sequelize.INTEGER

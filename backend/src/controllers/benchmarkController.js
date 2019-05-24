@@ -10,7 +10,7 @@ exports.batchQuery = async (req, res, next) => {
       .build({
         date_time: new Date(),
         ip: req.connection.remoteAddress,
-        user_id: 0,
+        user_id: null,
         representation_id: req.params.contour,
         volume_filter_id: req.params.filter == "true" ? 1 : 0,
         top_results: req.params.top,
