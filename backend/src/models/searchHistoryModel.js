@@ -23,7 +23,7 @@ const search_history = sequelize.define(
     name_file: {
       type: Sequelize.STRING
     },
-    counter_level: {
+    contour_level: {
       type: Sequelize.DOUBLE
     },
     representation_id: {

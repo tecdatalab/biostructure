@@ -41,7 +41,7 @@ npm install
 #### Step 3 - Run API
 
 ```shell
-npm start
+node src/index.js [database username] [database password] [host] [port]
 ```
 
 ## Angular installation

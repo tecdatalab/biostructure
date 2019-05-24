@@ -39,7 +39,7 @@ exports.searchResult = async (req, res, next) => {
       .build({
         date_time: new Date(),
         ip: req.connection.remoteAddress,
-        user_id: "0",
+        user_id: null,
         emd_entry_id: emdbid,
         name_file: "-",
         counter_level: 0.0,
@@ -84,10 +84,10 @@ exports.searchResultMap = async (req, res, next) => {
       .build({
         date_time: new Date(),
         ip: req.connection.remoteAddress,
-        user_id: "0",
-        emd_entry_id: 1,
+        user_id: null,
+        emd_entry_id: null,
         name_file: filename,
-        counter_level: contourLevel,
+        contour_level: contourLevel,
         representation_id: contourRepresentation,
         volume_filter_id: isVolumeFilterOn == "true" ? 1 : 0,
         resolution_filter_min: minRes,

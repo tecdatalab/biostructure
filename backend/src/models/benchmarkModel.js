@@ -15,7 +15,7 @@ const benchmark = sequelize.define(
       type: Sequelize.INTEGER
     },
     user_id: {
-      type: Sequelize.INTEGER
+      type: Sequelize.TEXT
     },
     representation_id: {
       type: Sequelize.INTEGER

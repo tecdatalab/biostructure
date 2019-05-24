@@ -6,7 +6,8 @@ const sequelize = new Sequelize(
   args[1], //password
   {
     dialect: "postgres",
-    host: "localhost",
+    host: args[2],
+    port: args[3],
     omitNull: true,
     operatorAliases: false,
     pool: {
