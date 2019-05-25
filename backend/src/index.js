@@ -11,6 +11,7 @@ const contourRepresentationRoutes = require("./routes/contourRepresentation");
 const checkerRoutes = require("./routes/checker");
 const userRoutes = require("./routes/user");
 const descriptors = require("./routes/descriptor");
+const parameters = require("./routes/parameters");
 
 //settings
 app.set("port", process.env.PORT || 3000);
@@ -31,6 +32,7 @@ app.use("/contour", contourRepresentationRoutes);
 app.use("/checker", checkerRoutes);
 app.use("/user", userRoutes);
 app.use("/descriptor", descriptors);
+app.use("/parameters", parameters);
 
 //public routes
 app.use("/img", express.static("public/img"));
