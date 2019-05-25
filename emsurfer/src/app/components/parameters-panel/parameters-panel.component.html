@@ -1,26 +1,28 @@
 <div class="container">
   <h4 class="text-primary">Parameters Panel</h4>
   <br />
-  <div>
-    <span
-      >Volume filter:
-      <input type="number" style="width: 5em;" [(ngModel)]="minVolume"/>
-      - <input type="number" style="width: 5em;" [(ngModel)]="maxVolume"
-    /></span>
+  <div class="row">
+    <label for="volume" class="col-sm-3 col-form-label">Volume filter: </label>
+    <div class="col-sm-9">
+      <input type="number" style="width: 5em;" [(ngModel)]="minVolume" />
+      - <input type="number" style="width: 5em;" [(ngModel)]="maxVolume" />
+    </div>
   </div>
   <br />
-  <div>
-    <span
-      >Hits number:
-      <input type="number" style="width: 5em;" [(ngModel)]="hitsNumber"
-    /></span>
+  <div class="row">
+    <label for="volume" class="col-sm-3 col-form-label">Hits number: </label>
+    <div class="col-sm-9">
+      <input type="number" style="width: 5em;" [(ngModel)]="hitsNumber" />
+    </div>
   </div>
   <br />
-  <div>
-    <span>
-      Update rate (hours):
+  <div class="row">
+    <label for="volume" class="col-sm-3 col-form-label"
+      >Update rate (hours):
+    </label>
+    <div class="col-sm-9">
       <input type="number" style="width: 5em;" [(ngModel)]="updateRate" />
-    </span>
+    </div>
   </div>
   <br />
   <div class="col-2 offset-5">

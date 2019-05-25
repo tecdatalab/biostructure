@@ -6,8 +6,7 @@ import { Router } from "@angular/router";
 
 @Component({
   selector: "app-parameters-panel",
-  templateUrl: "./parameters-panel.component.html",
-  styleUrls: ["./parameters-panel.component.css"]
+  templateUrl: "./parameters-panel.component.html"
 })
 export class ParametersPanelComponent implements OnInit {
   parameters: Parameters;
@@ -23,12 +22,16 @@ export class ParametersPanelComponent implements OnInit {
   ) {}
 
   saveChanges() {
-    this.parameterService.setParameters(
-      this.minVolume,
-      this.maxVolume,
-      this.hitsNumber,
-      this.updateRate
-    );
+    this.parameterService
+      .setParameters(
+        this.minVolume,
+        this.maxVolume,
+        this.hitsNumber,
+        this.updateRate
+      )
+      .then(response => {
+        alert("Changes saved successfully");
+      });
   }
 
   ngOnInit() {

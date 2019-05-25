@@ -38,7 +38,7 @@ export class ParametersService {
     const httpHeaders = new HttpHeaders({
       authorization: this.userService.getStoredAuthToken().token
     });
-    this.http
+    return this.http
       .get(
         this.API_URL +
           "/parameters/set/" +
@@ -52,7 +52,7 @@ export class ParametersService {
         { headers: httpHeaders }
       )
       .toPromise()
-      .then()
+      .then(response => {})
       .catch(err => {
         this.errorHandlerService.handleError(err);
       });
