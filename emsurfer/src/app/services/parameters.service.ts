@@ -26,6 +26,9 @@ export class ParametersService {
       .toPromise()
       .then((response: Parameters) => {
         return response;
+      })
+      .catch(err => {
+        this.errorHandlerService.handleError(err);
       });
   }
 
