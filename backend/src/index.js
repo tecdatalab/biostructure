@@ -12,6 +12,7 @@ const checkerRoutes = require("./routes/checker");
 const userRoutes = require("./routes/user");
 const descriptors = require("./routes/descriptor");
 const parameters = require("./routes/parameters");
+const update = require("./routes/update");
 
 //settings
 app.set("port", process.env.PORT || 3000);
@@ -33,6 +34,7 @@ app.use("/checker", checkerRoutes);
 app.use("/user", userRoutes);
 app.use("/descriptor", descriptors);
 app.use("/parameters", parameters);
+app.use("/update", update);
 
 //public routes
 app.use("/img", express.static("public/img"));

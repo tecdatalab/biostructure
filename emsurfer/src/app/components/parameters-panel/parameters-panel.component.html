@@ -1,5 +1,13 @@
 <div class="container">
   <h4 class="text-primary">Parameters Panel</h4>
+  <div class="row">
+    <label for="updater_date" class="col-sm-4 col-form-label"
+      >Last PDB/EMDB update: {{ lastUpdate }}</label
+    >
+  </div>
+  <div class="row col-sm-5">
+    <button (click)="saveChanges()">Force Update</button>
+  </div>
   <br />
   <div class="row">
     <label for="volume" class="col-sm-3 col-form-label">Volume filter: </label>
@@ -10,14 +18,14 @@
   </div>
   <br />
   <div class="row">
-    <label for="volume" class="col-sm-3 col-form-label">Hits number: </label>
+    <label for="hits" class="col-sm-3 col-form-label">Hits number: </label>
     <div class="col-sm-9">
       <input type="number" style="width: 5em;" [(ngModel)]="hitsNumber" />
     </div>
   </div>
   <br />
   <div class="row">
-    <label for="volume" class="col-sm-3 col-form-label"
+    <label for="update" class="col-sm-3 col-form-label"
       >Update rate (hours):
     </label>
     <div class="col-sm-9">

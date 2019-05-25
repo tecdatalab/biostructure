@@ -14,6 +14,7 @@ export class ParametersPanelComponent implements OnInit {
   maxVolume: number;
   hitsNumber: number;
   updateRate: number;
+  lastUpdate = new Date();
 
   constructor(
     private userService: UserService,
