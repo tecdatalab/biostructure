@@ -9,4 +9,11 @@ router.get(
   parametersController.getParameters
 );
 
+router.get(
+  "/set/:volumeMin/:volumeMax/:hits/:update",
+  userController.verifyUserToken,
+  userController.verifyAdminUser,
+  parametersController.setParameters
+);
+
 module.exports = router;

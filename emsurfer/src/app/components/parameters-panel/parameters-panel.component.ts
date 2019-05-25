@@ -11,10 +11,10 @@ import { Router } from "@angular/router";
 })
 export class ParametersPanelComponent implements OnInit {
   parameters: Parameters;
-  min_volume: number;
-  max_volume: number;
-  hits_number: number;
-  update_rate: number;
+  minVolume: number;
+  maxVolume: number;
+  hitsNumber: number;
+  updateRate: number;
 
   constructor(
     private userService: UserService,
@@ -22,15 +22,24 @@ export class ParametersPanelComponent implements OnInit {
     private parameterService: ParametersService
   ) {}
 
+  saveChanges() {
+    this.parameterService.setParameters(
+      this.minVolume,
+      this.maxVolume,
+      this.hitsNumber,
+      this.updateRate
+    );
+  }
+
   ngOnInit() {
     if (this.userService.isUserLoggedIn()) {
       this.userService.checkAdminRole().then((data: boolean) => {
         if (data) {
           this.parameterService.getParameters().then((response: Parameters) => {
-            this.min_volume = response.volume_filter_min;
-            this.max_volume = response.volume_filter_max;
-            this.hits_number = response.hits_number;
-            this.update_rate = response.update_rate;
+            this.minVolume = response.volume_filter_min;
+            this.maxVolume = response.volume_filter_max;
+            this.hitsNumber = response.hits_number;
+            this.updateRate = response.update_rate;
           });
         } else {
           this.router.navigate(["/home"]);

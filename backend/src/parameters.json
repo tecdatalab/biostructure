@@ -1,6 +1,1 @@
-{
-  "volume_filter_min": 0.8,
-  "volume_filter_max": 1.2,
-  "hits_number": 15,
-  "update_rate": 100
-}
+{"volume_filter_min":555,"volume_filter_max":777,"hits_number":1000,"update_rate":999}

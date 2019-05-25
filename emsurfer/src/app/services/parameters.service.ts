@@ -28,4 +28,33 @@ export class ParametersService {
         return response;
       });
   }
+
+  setParameters(
+    volumeMin: number,
+    volumeMax: number,
+    hits: number,
+    update: number
+  ) {
+    const httpHeaders = new HttpHeaders({
+      authorization: this.userService.getStoredAuthToken().token
+    });
+    this.http
+      .get(
+        this.API_URL +
+          "/parameters/set/" +
+          volumeMin +
+          "/" +
+          volumeMax +
+          "/" +
+          hits +
+          "/" +
+          update,
+        { headers: httpHeaders }
+      )
+      .toPromise()
+      .then()
+      .catch(err => {
+        this.errorHandlerService.handleError(err);
+      });
+  }
 }
