@@ -1,3 +1,31 @@
 <div class="container">
   <h4 class="text-primary">Parameters Panel</h4>
+  <br />
+  <div>
+    <span
+      >Volume filter:
+      <input type="number" style="width: 5em;" [(ngModel)]="min_volume"/>
+      - <input type="number" style="width: 5em;" [(ngModel)]="max_volume"
+    /></span>
+  </div>
+  <br />
+  <div>
+    <span
+      >Hits number:
+      <input type="number" style="width: 5em;" [(ngModel)]="hits_number"
+    /></span>
+  </div>
+  <br />
+  <div>
+    <span>
+      Update rate (hours):
+      <input type="number" style="width: 5em;" [(ngModel)]="update_rate" />
+    </span>
+  </div>
+  <br />
+  <div class="col-2 offset-5">
+    <button id="submitButton" type="submit">
+      Save
+    </button>
+  </div>
 </div>
