@@ -31,6 +31,7 @@ import { SocialLoginModule } from "angularx-social-login";
 import { ZernikeDescriptorsModuleComponent } from "./components/zernike-descriptors-module/zernike-descriptors-module.component";
 import { ZernikeResultComponent } from "./components/zernike-result/zernike-result.component";
 import { UserRolesComponent } from "./components/user-roles/user-roles.component";
+import { StatisticsTableComponent } from './components/statistics-table/statistics-table.component';
 
 @NgModule({
   declarations: [
@@ -57,7 +58,8 @@ import { UserRolesComponent } from "./components/user-roles/user-roles.component
     SignInComponent,
     ZernikeDescriptorsModuleComponent,
     ZernikeResultComponent,
-    UserRolesComponent
+    UserRolesComponent,
+    StatisticsTableComponent
   ],
   imports: [
     BrowserModule,
