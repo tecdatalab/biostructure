@@ -1,6 +1,7 @@
 import numpy as np
 from glumpy import app, gloo, gl, glm
 from glumpy.transforms import Trackball, Position
+from glumpy.ext import png
 from skimage import measure
 from skimage.color import label2rgb
 from biopandas.pdb import PandasPdb 
@@ -73,12 +74,12 @@ class Visualizer():
         verts, faces, _,_ = measure.marching_cubes_lewiner(data, self.th_level)
 
         self.verts = verts
-        self.faces = faces        
+        self.faces = faces      
         self.atoms = None
         self.labels = None
 
 
-    def show(self):
+    def show(self, export=False, start_angle=None, time=1):
 
         faces = self.faces
         verts = self.verts
@@ -101,7 +102,7 @@ class Visualizer():
         normals[faces[:,2]] += N
         L = np.sqrt(normals[:,0]**2+normals[:,1]**2+normals[:,2]**2)
         normals /= L[:, np.newaxis]
-
+        
         vmin, vmax =  verts.min(), verts.max()
         verts_norm = 2*(verts-vmin)/(vmax-vmin) - 1
 
@@ -113,8 +114,8 @@ class Visualizer():
         ###ATOMS CODE
         if self.atoms is not None:
             atoms_coords = self.atoms
-            amin, amax =  atoms_coords.min(), atoms_coords.max()
-            atoms_norm = 2*(atoms_coords-amin)/(amax-amin) - 1
+            amin, amax =  np.min(atoms_coords["position"]), np.max(atoms_coords["position"])
+            atoms_norm = 2*(atoms_coords["position"]-amin)/(amax-amin) - 1
             ####Generalte atoms vertices
             
             slices = 32 + 1
@@ -164,9 +165,17 @@ class Visualizer():
         points.bind(V)
         trackball = Trackball(Position("position"))
         points['transform'] = trackball
-        trackball.theta, trackball.phi, trackball.zoom = 0, 0, 15
+        trackball.zoom = 15
 
-        window = app.Window(width=1024, height=1024, color=(1,1,1,1))
+        if start_angle != None:
+            trackball.theta, trackball.phi = start_angle[0], start_angle[1]
+        else:
+            trackball.theta, trackball.phi = 0, 0
+
+        
+        window = app.Window(width=512, height=512, color=(1,1,1,1))
+
+        framebuffer = np.zeros((window.height, window.width * 3), dtype=np.uint8)
 
         def update():
             model = points['transform']['model'].reshape(4,4)
@@ -174,32 +183,49 @@ class Visualizer():
             points['m_view']  = view
             points['m_model'] = model
             points['m_normal'] = np.array(np.matrix(np.dot(view, model)).I.T)
-            
-        @window.event
-        def on_draw(dt):
-            window.clear()
-            points.draw(gl.GL_TRIANGLES, I)
 
         @window.event
         def on_mouse_drag(x, y, dx, dy, button):
             update()
             
         @window.event
+        def on_draw(dt):
+            window.clear()
+            points.draw(gl.GL_TRIANGLES, I)
+            
+            
+        @window.event
         def on_init():
             gl.glEnable(gl.GL_DEPTH_TEST)
             update()
 
+        if export:
+            frame_count = 1
+
+            @window.timer(0.1) 
+            def timer(elapsed):
+                nonlocal frame_count
+                points['transform'].phi +=1
+                update()
+                gl.glReadPixels(0, 0, window.width, window.height, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, framebuffer)
+                png.from_array(framebuffer, 'RGB').save('export/frame'+str(frame_count)+'.png')
+                frame_count+=1
+
+                
         window.attach(points['transform'])
-        app.run()
+        if export:
+            app.run(duration=time)
+        else:
+            app.run()
 
 
     def add_structure(self, filename):
-        ppdb =PandasPdb()
+        ppdb = PandasPdb()
         ppdb.read_pdb(filename)
         atoms = ppdb.df["ATOM"][ppdb.df['ATOM']['atom_name'] == 'CA']
         self.atoms = np.zeros(len(atoms),  [("id", np.int32, 1), ("position", np.float32, 3)])
         self.atoms["id"] = atoms["atom_number"].values
-        self.atoms["position"]=atoms[["z_coord", "y_coord", "x_coord"]].values
+        self.atoms["position"] = atoms[["z_coord", "y_coord", "x_coord"]].values
 
     def show_atom_correlation(self):
         if self.atoms is None:
@@ -245,21 +271,22 @@ class Visualizer():
 
 
 
-'''
+
 #Read molecule map from file
 mapReader = reader.Reader()
 #Open file
-mapReader.open("../../maps/1010/EMD-1010.map")
+mapReader.open("../../EMD-1010.map")
 #Get map object
 myMap = mapReader.read()
 # Create visualizer with a map surface threshold level
 # Otherwise use otsu threshold
-v= Visualizer(myMap, level=0.35)
-#v = Visualizer(myMap)
+#v= Visualizer(myMap, level=0.35)
+v = Visualizer(myMap)
 # Watershed 
 v.segmentate()
 # add corresponding atomic structure
-v.add_structure("../../maps/1010/pdb1mi6.ent")
-#v.show()
-v.show_atom_correlation()
-'''
+#v.add_structure("../../maps/1010/pdb1mi6.ent")
+v.show(export=True, start_angle=[65,0], time=10)
+#v.show_atom_correlation()
+
+
