@@ -22,11 +22,12 @@ COMMENT ON TABLE volume_filter IS 'Stores the states that the volume filter can 
 
 CREATE TABLE search_history(
 	id SERIAL PRIMARY KEY,
+	user_id TEXT REFERENCES "user"(id),
 	date_time TIMESTAMP NOT NULL,
 	ip TEXT NOT NULL,
-	emd_entry_id INT REFERENCES emd_entry(id) NOT NULL,
+	emd_entry_id INT REFERENCES emd_entry(id),
 	name_file TEXT,
-	counter_level FLOAT8,
+	contour_level FLOAT8,
 	representation_id INT REFERENCES representation(id) NOT NULL,
 	volume_filter_id INT REFERENCES volume_filter(id) NOT NULL,
 	resolution_filter_min FLOAT8,
@@ -39,7 +40,7 @@ CREATE TABLE benchmark_history(
     id SERIAL PRIMARY KEY,
     date_time TIMESTAMP NOT NULL,
     ip TEXT NOT NULL,
-    user_id INT,
+    user_id TEXT REFERENCES "user"(id),
     representation_id INT REFERENCES representation(id) NOT NULL,
     volume_filter_id INT REFERENCES volume_filter(id) NOT NULL,
     top_results INT NOT NULL,

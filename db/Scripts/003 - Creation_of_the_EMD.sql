@@ -15,17 +15,18 @@ CREATE TABLE type_descriptor(
 COMMENT ON TABLE type_descriptor IS 'Stores the different types of existing descriptors.';
 
 CREATE TABLE emd_entry(
-	id INT PRIMARY KEY, /* The id corresponds to the 4 digits of EMDB */
-	full_name TEXT NOT NULL,
-	acronym TEXT NOT NULL,
-	volume FLOAT8 NOT NULL,
-	resolution FLOAT8 NOT NULL,
-	image_url TEXT,
-	xml_url TEXT NOT NULL,
-	map_url TEXT NOT NULL,
-	map_information_id INT REFERENCES map_information(id) NOT NULL
+    id INT PRIMARY KEY, /* The id corresponds to the 4 digits of EMDB */
+    full_name TEXT NOT NULL,
+    acronym TEXT NOT NULL,
+    volume FLOAT8 NOT NULL,
+    resolution FLOAT8 NOT NULL,
+    image_url TEXT,
+    png_img_3d TEXT,
+    gif_img_3d TEXT,
+    xml_url TEXT NOT NULL,
+    map_url TEXT NOT NULL,
+    map_information_id INT REFERENCES map_information(id) NOT NULL
 );
-
 COMMENT ON TABLE emd_entry IS 'Stores existing EMDs.';
 
 CREATE TABLE descriptor(
