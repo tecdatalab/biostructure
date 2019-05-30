@@ -31,7 +31,8 @@ import { SocialLoginModule } from "angularx-social-login";
 import { ZernikeDescriptorsModuleComponent } from "./components/zernike-descriptors-module/zernike-descriptors-module.component";
 import { ZernikeResultComponent } from "./components/zernike-result/zernike-result.component";
 import { UserRolesComponent } from "./components/user-roles/user-roles.component";
-import { SearchHistoryComponent } from './components/search-history/search-history.component';
+import { SearchHistoryComponent } from "./components/search-history/search-history.component";
+import { ParametersPanelComponent } from "./components/parameters-panel/parameters-panel.component";
 
 @NgModule({
   declarations: [
@@ -59,7 +60,8 @@ import { SearchHistoryComponent } from './components/search-history/search-histo
     ZernikeDescriptorsModuleComponent,
     ZernikeResultComponent,
     UserRolesComponent,
-    SearchHistoryComponent
+    SearchHistoryComponent,
+    ParametersPanelComponent
   ],
   imports: [
     BrowserModule,

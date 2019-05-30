@@ -1,11 +1,13 @@
+const args = process.argv.slice(2);
 const Sequelize = require("sequelize");
 const sequelize = new Sequelize(
   "biomolecules_db", //db name
-  "postgres", //username
-  "root", //password
+  args[0], //username
+  args[1], //password
   {
     dialect: "postgres",
-    host: "localhost",
+    host: args[2],
+    port: args[3],
     omitNull: true,
     operatorAliases: false,
     pool: {

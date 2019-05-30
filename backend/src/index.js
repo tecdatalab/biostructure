@@ -12,7 +12,7 @@ const checkerRoutes = require("./routes/checker");
 const userRoutes = require("./routes/user");
 const descriptorsRoutes = require("./routes/descriptor");
 const searchHistoryRoutes = require("./routes/searchHistory");
-
+const parameters = require("./routes/parameters");
 //settings
 app.set("port", process.env.PORT || 3000);
 
@@ -33,6 +33,7 @@ app.use("/checker", checkerRoutes);
 app.use("/user", userRoutes);
 app.use("/descriptor", descriptorsRoutes);
 app.use("/history", searchHistoryRoutes);
+app.use("/parameters", parameters);
 
 //public routes
 app.use("/img", express.static("public/img"));

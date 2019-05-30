@@ -22,7 +22,54 @@
       ></a
     >
     <p>{{ biomolecule.full_name }}</p>
-    <img class="img-fluid" [src]="biomolecule.image_url" />
+    <div class="tab-content" id="nav-tabContent">
+      <div
+        class="tab-pane fade show active"
+        id="rep2d"
+        role="tabpanel"
+        aria-labelledby="nav-2d-tab"
+      >
+        <img class="img-fluid" [src]="biomolecule.image_url" />
+      </div>
+      <div
+        class="tab-pane fade"
+        id="rep3d"
+        role="tabpanel"
+        aria-labelledby="nav-3d-tab"
+      >
+        <img
+          class="img-fluid"
+          [src]="imgSrc || biomolecule.png_img_3d"
+          (mouseout)="imgSrc = biomolecule.png_img_3d"
+          (mouseover)="imgSrc = biomolecule.gif_img_3d"
+        />
+      </div>
+    </div>
+    <br />
+    <nav>
+      <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+        <a
+          class="nav-item nav-link active"
+          id="nav-2d-tab"
+          data-toggle="tab"
+          href="#rep2d"
+          role="tab"
+          aria-controls="rep2d"
+          aria-selected="true"
+          ><strong>2D</strong></a
+        >
+        <a
+          class="nav-item nav-link"
+          id="nav-3d-tab"
+          data-toggle="tab"
+          href="#rep3d"
+          role="tab"
+          aria-controls="rep3d"
+          aria-selected="false"
+          ><strong>3D</strong></a
+        >
+      </div>
+    </nav>
   </div>
   <div class="col-3 border border-dark" [hidden]="isSearchById">
     <p class="text-primary"><strong>User uploaded query</strong></p>
