@@ -273,8 +273,20 @@ def test_42_set_get_map_annotation_details():
     annotation_details = "Cryo-EM map of E.coli 70S ribosome"            
     emd_entry.annotation_details = annotation_details
     assert emd_entry.annotation_details == annotation_details
+
+def test_43_set_get_map_annotation_details():
+        
+    png_img_3d = "www.url.com"            
+    emd_entry.png_img_3d = png_img_3d
+    assert emd_entry.png_img_3d == png_img_3d
     
-def test_43_insert_db(postgresql):
+def test_44_set_get_map_annotation_details():
+        
+    gif_img_3d = "www.url.com"             
+    emd_entry.gif_img_3d = gif_img_3d
+    assert emd_entry.gif_img_3d == gif_img_3d
+    
+def test_45_insert_db(postgresql):
     
     create_map_information_table(postgresql)
     create_emd_entry_table(postgresql)
@@ -283,7 +295,7 @@ def test_43_insert_db(postgresql):
     result = get_emd_entrys(postgresql)
     assert result[0] == Emd_entry(
         1,"RsgA-30S ribosome-GMPPNP complex","RsgA-30S",
-        0.1,0.1,"imageURL","xmlURL","mapURL",1,
+        0.1,0.1,"imageURL","png_img_3d","gif_img_3d","xmlURL","mapURL",1,
         {'format':'CCP4','sizeKb': 8584,'type':'map','file':'emd_1364.map.gz'},
         "Image stored as Reals",130,130,130,-65,-65,-65,64,64,64,130,130,130,
         {'units':'A','value': 366.6},{'units':'A','value': 366.6},
@@ -294,7 +306,7 @@ def test_43_insert_db(postgresql):
         {'units':'A','value': 2.82},{'units':'A','value': 2.82},9.07 ,
         "Cryo-EM map of E.coli 70S ribosome")
     
-def test_44_update_db(postgresql):
+def test_46_update_db(postgresql):
     
     create_map_information_table(postgresql)
     create_emd_entry_table(postgresql)
@@ -302,7 +314,7 @@ def test_44_update_db(postgresql):
     insert_emd_entrys(postgresql,emd_entrys)
     emd_entrys[0] = Emd_entry(
         1,"RsgA-30S ribosome-GMPPNP complexUp","RsgA-30SUp",
-        0.2,0.2,"imageURLUp","xmlURLUp","mapURLUp",1,
+        0.2,0.2,"imageURLUp","png_img_3dUp","gif_img_3dUp","xmlURLUp","mapURLUp",1,
         {'format':'CCP4Up','sizeKb': 85842,'type':'mapUp','file':'emd_1364.map.gzUp'},
         "Image stored as RealsUp",230,230,230,-25,-25,-25,24,24,24,230,230,230,
         {'units':'B','value': 366.2},{'units':'B','value': 366.2},
@@ -317,7 +329,7 @@ def test_44_update_db(postgresql):
     result = get_emd_entrys(postgresql)
     assert result[0] == Emd_entry(
         1,"RsgA-30S ribosome-GMPPNP complexUp","RsgA-30SUp",
-        0.2,0.2,"imageURLUp","xmlURLUp","mapURLUp",1,
+        0.2,0.2,"imageURLUp","png_img_3dUp","gif_img_3dUp","xmlURLUp","mapURLUp",1,
         {'format':'CCP4Up','sizeKb': 85842,'type':'mapUp','file':'emd_1364.map.gzUp'},
         "Image stored as RealsUp",230,230,230,-25,-25,-25,24,24,24,230,230,230,
         {'units':'B','value': 366.2},{'units':'B','value': 366.2},
@@ -334,14 +346,14 @@ def get_emd_entrys(connection):
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM emd_entry em INNER JOIN map_information map ON (em.map_information_id = map.id)")
     emd_entrys = [Emd_entry(record[0],record[1],record[2],record[3],record[4],
-                             record[5],record[6],record[7],record[8],record[10],
-                             record[11],record[12],record[13],record[14],record[15],
-                             record[16],record[17],record[18],record[19],record[20],
-                             record[21],record[22],record[23],record[24],record[25],
-                             record[26],record[27],record[28],record[29],record[30],
-                             record[31],record[32],record[33],record[34],record[35],
-                             record[36],record[37],record[38],record[39],record[40],
-                             record[41],record[42],record[43]) for record in cursor]
+                             record[5],record[6],record[7],record[8],record[9],record[10],record[12],
+                             record[13],record[14],record[15],record[16],record[17],
+                             record[18],record[19],record[20],record[21],record[22],
+                             record[23],record[24],record[25],record[26],record[27],
+                             record[28],record[29],record[30],record[31],record[32],
+                             record[33],record[34],record[35],record[36],record[37],
+                             record[38],record[39],record[40],record[41],record[42],
+                             record[43],record[44],record[45]) for record in cursor]
     cursor.close()
 
     return emd_entrys
@@ -368,7 +380,7 @@ def create_emd_entrys():
     resultado = []
     resultado.append(Emd_entry(
         1,"RsgA-30S ribosome-GMPPNP complex","RsgA-30S",
-        0.1,0.1,"imageURL","xmlURL","mapURL",1,
+        0.1,0.1,"imageURL","png_img_3d","gif_img_3d","xmlURL","mapURL",1,
         {'format':'CCP4','sizeKb': 8584,'type':'map','file':'emd_1364.map.gz'},
         "Image stored as Reals",130,130,130,-65,-65,-65,64,64,64,130,130,130,
         {'units':'A','value': 366.6},{'units':'A','value': 366.6},
@@ -390,7 +402,9 @@ def create_emd_entry_table(connection):
         acronym TEXT NOT NULL,\
         volume FLOAT8 NOT NULL,\
         resolution FLOAT8 NOT NULL,\
-        image_url TEXT NOT NULL,\
+        image_url TEXT,\
+        png_img_3d TEXT,\
+        gif_img_3d TEXT,\
         xml_url TEXT NOT NULL,\
         map_url TEXT NOT NULL,\
         map_information_id INT REFERENCES map_information(id) NOT NULL\

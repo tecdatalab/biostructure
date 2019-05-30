@@ -16,13 +16,13 @@ class Search_history(object):
     __ip = None
     __emd_entry_id = None
     __name_file = None
-    __counter_level = None
+    __contour_level = None
     __representation_id = None
     __volume_filter_id = None
     __resolution_filter_min = None
     __resolution_filter_max = None
     
-    def __init__(self, id, date_time, ip, emd_entry_id, name_file, counter_level, representation_id, volume_filter_id, resolution_filter_min, resolution_filter_max):
+    def __init__(self, id, date_time, ip, emd_entry_id, name_file, contour_level, representation_id, volume_filter_id, resolution_filter_min, resolution_filter_max):
         self.__id = id
         self.__date_time = date_time
         if isinstance(date_time, datetime):
@@ -32,7 +32,7 @@ class Search_history(object):
         self.__ip = ip
         self.__emd_entry_id = emd_entry_id
         self.__name_file = name_file
-        self.__counter_level = counter_level
+        self.__contour_level = contour_level
         self.__representation_id = representation_id
         self.__volume_filter_id = volume_filter_id
         self.__resolution_filter_min = resolution_filter_min
@@ -40,13 +40,13 @@ class Search_history(object):
     
     
     def insert_db(self, cur):
-        cur.execute(sql.SQL("INSERT INTO search_history(id,date_time,ip,emd_entry_id,name_file,counter_level,representation_id,volume_filter_id,resolution_filter_min,resolution_filter_max) VALUES (DEFAULT,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id;")
-        ,[self.__date_time,self.__ip,self.__emd_entry_id,self.__name_file,self.__counter_level,self.__representation_id,self.__volume_filter_id,self.__resolution_filter_min,self.__resolution_filter_max])
+        cur.execute(sql.SQL("INSERT INTO search_history(id,date_time,ip,emd_entry_id,name_file,contour_level,representation_id,volume_filter_id,resolution_filter_min,resolution_filter_max) VALUES (DEFAULT,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id;")
+        ,[self.__date_time,self.__ip,self.__emd_entry_id,self.__name_file,self.__contour_level,self.__representation_id,self.__volume_filter_id,self.__resolution_filter_min,self.__resolution_filter_max])
         self.id = [record for record in cur][0]
         
     def update_db(self, cur):
-        cur.execute(sql.SQL("UPDATE search_history SET date_time = %s, ip = %s, emd_entry_id = %s, name_file = %s, counter_level = %s, representation_id = %s, volume_filter_id = %s, resolution_filter_min = %s, resolution_filter_max = %s WHERE id  = %s;")
-        ,[self.__date_time,self.__ip,self.__emd_entry_id,self.__name_file,self.__counter_level,self.__representation_id,self.__volume_filter_id,self.__resolution_filter_min,self.__resolution_filter_max,self.__id])
+        cur.execute(sql.SQL("UPDATE search_history SET date_time = %s, ip = %s, emd_entry_id = %s, name_file = %s, contour_level = %s, representation_id = %s, volume_filter_id = %s, resolution_filter_min = %s, resolution_filter_max = %s WHERE id  = %s;")
+        ,[self.__date_time,self.__ip,self.__emd_entry_id,self.__name_file,self.__contour_level,self.__representation_id,self.__volume_filter_id,self.__resolution_filter_min,self.__resolution_filter_max,self.__id])
         
 
     def get_id(self):
@@ -69,8 +69,8 @@ class Search_history(object):
         return self.__name_file
 
 
-    def get_counter_level(self):
-        return self.__counter_level
+    def get_contour_level(self):
+        return self.__contour_level
 
 
     def get_representation_id(self):
@@ -110,8 +110,8 @@ class Search_history(object):
         self.__name_file = value
 
 
-    def set_counter_level(self, value):
-        self.__counter_level = value
+    def set_contour_level(self, value):
+        self.__contour_level = value
 
 
     def set_representation_id(self, value):
@@ -150,8 +150,8 @@ class Search_history(object):
         del self.__name_file
 
 
-    def del_counter_level(self):
-        del self.__counter_level
+    def del_contour_level(self):
+        del self.__contour_level
 
 
     def del_representation_id(self):
@@ -176,7 +176,7 @@ class Search_history(object):
            and self.ip == search_history.ip \
            and self.emd_entry_id == search_history.emd_entry_id \
            and self.name_file == search_history.name_file \
-           and self.counter_level == search_history.counter_level \
+           and self.contour_level == search_history.contour_level \
            and self.representation_id == search_history.representation_id \
            and self.volume_filter_id == search_history.volume_filter_id \
            and self.resolution_filter_min == search_history.resolution_filter_min \
@@ -187,7 +187,7 @@ class Search_history(object):
     ip = property(get_ip, set_ip, del_ip, "ip's docstring")
     emd_entry_id = property(get_emd_entry_id, set_emd_entry_id, del_emd_entry_id, "emd_entry_id's docstring")
     name_file = property(get_name_file, set_name_file, del_name_file, "name_file's docstring")
-    counter_level = property(get_counter_level, set_counter_level, del_counter_level, "counter_level's docstring")
+    contour_level = property(get_contour_level, set_contour_level, del_contour_level, "contour_level's docstring")
     representation_id = property(get_representation_id, set_representation_id, del_representation_id, "representation_id's docstring")
     volume_filter_id = property(get_volume_filter_id, set_volume_filter_id, del_volume_filter_id, "volume_filter_id's docstring")
     resolution_filter_min = property(get_resolution_filter_min, set_resolution_filter_min, del_resolution_filter_min, "resolution_filter_min's docstring")

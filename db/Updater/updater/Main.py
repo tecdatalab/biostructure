@@ -63,10 +63,12 @@ def first_time_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path):
         temp_emd_entry = Emd_entry()
         temp_emd_entry.emd_url = "http://{0}{1}".format(emd_url_server,emd_url_path)
         temp_emd_entry.create_by_ftp(i,conec_ftp.ftp)
-        temp_emd_entry.insert_db(cursor_sql)
         
         download_file(i)
-        gifG.generateGif(i)
+        imagpath,gifpath = gifG.generateGif(i)
+        temp_emd_entry.gif_img_3d = gifpath
+        temp_emd_entry.png_img_3d = imagpath
+        temp_emd_entry.insert_db(cursor_sql)
         insert_descriptor(temp_emd_entry,cursor_sql)
         remove_map(i)
         
@@ -96,20 +98,24 @@ def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path):
         map_result = [record[0] for record in cursor_sql]
         if len(map_result)==1:
             temp_emd_entry.map_id = map_result[0]
-            temp_emd_entry.update_db(cursor_sql)
-            temp_time_stamp.update_db(cursor_sql)
             download_file(i)
-            gifG.generateGif(i)
+            imagpath,gifpath = gifG.generateGif(i)
+            temp_emd_entry.gif_img_3d = gifpath
+            temp_emd_entry.png_img_3d = imagpath
+            temp_emd_entry.update_db(cursor_sql)
             update_descriptor(temp_emd_entry,cursor_sql)
             remove_map(i)
+            temp_time_stamp.update_db(cursor_sql)
+            
         else:
-            temp_emd_entry.insert_db(cursor_sql)
-            temp_time_stamp.insert_db(cursor_sql)
             download_file(i)
-            gifG.generateGif(i)
+            imagpath,gifpath = gifG.generateGif(i)
+            temp_emd_entry.gif_img_3d = gifpath
+            temp_emd_entry.png_img_3d = imagpath
+            temp_emd_entry.insert_db(cursor_sql)
             insert_descriptor(temp_emd_entry,cursor_sql)
             remove_map(i)
-        
+            temp_time_stamp.insert_db(cursor_sql)
         conec_sql.commit()
         print(i)
     

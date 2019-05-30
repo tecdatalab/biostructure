@@ -772,10 +772,13 @@ class Emd_entry(Map_information):
     __volume = None
     __resolution = None
     __image_url = None
+    __png_img_3d  = None
+    __gif_img_3d  = None
     __xml_url = None
     __map_url = None
 
-    def __init__(self, id=None, full_name=None, acronym=None, volume=None, resolution=None, image_url=None, xml_url=None, map_url=None, map_id=None, map_file_information=None, map_data_type=None, map_num_columns=None, map_num_rows=None, map_num_sections=None, map_origin_col=None, map_origin_row=None, map_origin_sec=None, map_limit_col=None, map_limit_row=None, map_limit_sec=None, map_spacing_col=None, map_spacing_row=None, map_spacing_sec=None, map_cell_a=None, map_cell_b=None, map_cell_c=None, map_cell_alpha=None, map_cell_beta=None, map_cell_gamma=None, map_axis_order_fast=None, map_axis_order_medium=None, map_axis_order_slow=None, map_minimum=None, map_maximum=None, map_average=None, map_std=None, map_space_group_number=None, map_details=None, map_pixel_x=None, map_pixel_y=None, map_pixel_z=None, map_countour_level=None, map_annotation_details=None, emd_url = "http://ftp.ebi.ac.uk/pub/databases/emdb"):
+    def __init__(self, id=None, full_name=None, acronym=None, volume=None, resolution=None, image_url=None, png_img_3d  = None, gif_img_3d  = None,
+                 xml_url=None, map_url=None, map_id=None, map_file_information=None, map_data_type=None, map_num_columns=None, map_num_rows=None, map_num_sections=None, map_origin_col=None, map_origin_row=None, map_origin_sec=None, map_limit_col=None, map_limit_row=None, map_limit_sec=None, map_spacing_col=None, map_spacing_row=None, map_spacing_sec=None, map_cell_a=None, map_cell_b=None, map_cell_c=None, map_cell_alpha=None, map_cell_beta=None, map_cell_gamma=None, map_axis_order_fast=None, map_axis_order_medium=None, map_axis_order_slow=None, map_minimum=None, map_maximum=None, map_average=None, map_std=None, map_space_group_number=None, map_details=None, map_pixel_x=None, map_pixel_y=None, map_pixel_z=None, map_countour_level=None, map_annotation_details=None, emd_url = "http://ftp.ebi.ac.uk/pub/databases/emdb"):
         Map_information.__init__(self, 
             map_id, map_file_information, map_data_type, map_num_columns, map_num_rows, map_num_sections, map_origin_col, map_origin_row, map_origin_sec, map_limit_col, map_limit_row, map_limit_sec, map_spacing_col, map_spacing_row, map_spacing_sec, map_cell_a, map_cell_b, map_cell_c, map_cell_alpha, map_cell_beta, map_cell_gamma, map_axis_order_fast, map_axis_order_medium, map_axis_order_slow, map_minimum, map_maximum, map_average, map_std, map_space_group_number, map_details, map_pixel_x, map_pixel_y, map_pixel_z, map_countour_level, map_annotation_details)
         self.__id = id
@@ -784,6 +787,8 @@ class Emd_entry(Map_information):
         self.__volume = volume
         self.__resolution = resolution
         self.__image_url = image_url
+        self.__png_img_3d = png_img_3d
+        self.__gif_img_3d = gif_img_3d
         self.__xml_url = xml_url
         self.__map_url = map_url
         self.__emd_url = emd_url
@@ -874,12 +879,12 @@ class Emd_entry(Map_information):
           self.map_annotation_details,self.map_id])
     
     def __insert_emd_entry(self, cur):
-        cur.execute(sql.SQL("INSERT INTO emd_entry(id,full_name,acronym,volume,resolution,image_url,xml_url,map_url,map_information_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s);")
-        ,[self.id,self.full_name,self.acronym,self.volume,self.resolution,self.image_url,self.xml_url,self.map_url,self.map_id])
+        cur.execute(sql.SQL("INSERT INTO emd_entry(id,full_name,acronym,volume,resolution,image_url,png_img_3d,gif_img_3d,xml_url,map_url,map_information_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);")
+        ,[self.id,self.full_name,self.acronym,self.volume,self.resolution,self.image_url,self.png_img_3d,self.gif_img_3d,self.xml_url,self.map_url,self.map_id])
         
     def __update_emd_entry(self, cur):
-        cur.execute(sql.SQL("UPDATE emd_entry SET full_name = %s, acronym = %s, volume = %s, resolution = %s, image_url = %s, xml_url = %s, map_url = %s, map_information_id = %s WHERE id = %s;")
-        ,[self.full_name,self.acronym,self.volume,self.resolution,self.image_url,self.xml_url,self.map_url,self.map_id,self.id])    
+        cur.execute(sql.SQL("UPDATE emd_entry SET full_name = %s, acronym = %s, volume = %s, resolution = %s, image_url = %s, png_img_3d = %s, gif_img_3d = %s, xml_url = %s, map_url = %s, map_information_id = %s WHERE id = %s;")
+        ,[self.full_name,self.acronym,self.volume,self.resolution,self.image_url,self.png_img_3d,self.gif_img_3d,self.xml_url,self.map_url,self.map_id,self.id])    
         
     def insert_db(self, cur):
         self.__insert_map_db(cur)
@@ -923,6 +928,15 @@ class Emd_entry(Map_information):
             
     def get_emd_url(self):
         return self.__emd_url
+    
+    
+    def get_png_img_3d(self):
+        return self.__png_img_3d
+
+
+    def get_gif_img_3d(self):
+        return self.__gif_img_3d
+
 
 
     def set_id(self, value):
@@ -959,6 +973,14 @@ class Emd_entry(Map_information):
 
     def set_emd_url(self, value):
         self.__emd_url = value
+        
+            
+    def set_png_img_3d(self, value):
+        self.__png_img_3d = value
+
+
+    def set_gif_img_3d(self, value):
+        self.__gif_img_3d = value
 
 
     def del_id(self):
@@ -996,13 +1018,23 @@ class Emd_entry(Map_information):
     def del_emd_url(self):
         del self.__emd_url
         
-    def __eq__(self, emd_entry):        
+
+    def del_png_img_3d(self):
+        del self.__png_img_3d
+
+
+    def del_gif_img_3d(self):
+        del self.__gif_img_3d
+        
+    def __eq__(self, emd_entry):                
         return self.id == emd_entry.id \
            and self.full_name == emd_entry.full_name \
            and self.acronym == emd_entry.acronym \
            and self.volume == emd_entry.volume \
            and self.resolution == emd_entry.resolution \
            and self.image_url == emd_entry.image_url \
+           and self.gif_img_3d == emd_entry.gif_img_3d \
+           and self.png_img_3d == emd_entry.png_img_3d \
            and self.xml_url == emd_entry.xml_url \
            and self.map_url == emd_entry.map_url \
            and self.map_id == emd_entry.map_id \
@@ -1050,6 +1082,8 @@ class Emd_entry(Map_information):
     xml_url = property(get_xml_url, set_xml_url, del_xml_url, "xml_url's docstring")
     map_url = property(get_map_url, set_map_url, del_map_url, "map_url's docstring")
     emd_url = property(get_emd_url, set_emd_url, del_emd_url, "emd_url's docstring")
+    png_img_3d = property(get_png_img_3d, set_png_img_3d, del_png_img_3d, "png_img_3d's docstring")
+    gif_img_3d = property(get_gif_img_3d, set_gif_img_3d, del_gif_img_3d, "gif_img_3d's docstring")
 
     
     

@@ -36,10 +36,10 @@ def test_4_set_get_name_file():
     search_history.set_name_file("fileName")
     assert search_history.get_name_file() == "fileName"
     
-def test_5_set_get_counter_level():
+def test_5_set_get_contour_level():
        
-    search_history.set_counter_level(1.0)
-    assert search_history.get_counter_level() == 1.0
+    search_history.set_contour_level(1.0)
+    assert search_history.get_contour_level() == 1.0
     
 def test_6_set_get_representation_id():
        
@@ -77,7 +77,7 @@ def test_10_update_db(postgresql):
     search_historys[0].ip = "2.2.3.3"
     search_historys[0].emd_entry_id = 2
     search_historys[0].name_file = "fileNameUp"
-    search_historys[0].counter_level = 2.0
+    search_historys[0].contour_level = 2.0
     search_historys[0].representation_id = 2
     search_historys[0].volume_filter_id = 2
     search_historys[0].resolution_filter_min = 2.0
@@ -131,7 +131,7 @@ def create_search_history_table(connection):
         ip TEXT NOT NULL,\
         emd_entry_id INT NOT NULL,\
         name_file TEXT,\
-        counter_level FLOAT8,\
+        contour_level FLOAT8,\
         representation_id INT NOT NULL,\
         volume_filter_id INT NOT NULL,\
         resolution_filter_min FLOAT8,\
