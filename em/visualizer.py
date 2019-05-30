@@ -205,7 +205,7 @@ class Visualizer():
             @window.timer(0.1) 
             def timer(elapsed):
                 nonlocal frame_count
-                points['transform'].phi +=1
+                points['transform'].phi +=2
                 update()
                 gl.glReadPixels(0, 0, window.width, window.height, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, framebuffer)
                 png.from_array(framebuffer, 'RGB').save('export/frame'+str(frame_count)+'.png')
@@ -246,16 +246,26 @@ class Visualizer():
             voxel_padding = map_size - (map_max-map_min)
             padding_adjustment = voxel_padding * voxel_len / 2
             pdb_min = np.min(atoms_coords, axis=0)
+            pdb_max = np.max(atoms_coords, axis=0)
             adjustment = (pdb_min - padding_adjustment)/voxel_len
 
+            atoms_labels = dict()
+
             for atom in self.atoms:
+                atoms_labels[atom["id"]] = []
                 for region in regionprops(self.labels):
                     min_z,min_y,min_x,max_z,max_y,max_x= region.bbox
-                    min_box = np.array([min_z,min_y,min_x]) + adjustment
-                    max_box = np.array([max_z,max_y,max_x]) + adjustment
-                    coord = atom["position"]
+                    #min_box = np.array([min_z,min_y,min_x]) + adjustment
+                    #max_box = np.array([max_z,max_y,max_x]) + adjustment
+                    min_box = 2*(np.array([min_z,min_y,min_x])-map_min)/(map_max-map_min) - 1
+                    max_box = 2*(np.array([max_z,max_y,max_x])-map_min)/(map_max-map_min) - 1
+
+                    coord = 2*(atom["position"]-pdb_min)/(pdb_max-pdb_min) -1
                     if np.all(coord <= max_box) and np.all(coord >= min_box):
+                        atoms_labels[atom["id"]].append(region.label)
                         print("Found atom %d with coords (%f, %f, %f) in region %d " % (atom["id"], coord[0], coord[1], coord[2], region.label))
+
+            
 
 
 
@@ -280,13 +290,13 @@ mapReader.open("../../EMD-1010.map")
 myMap = mapReader.read()
 # Create visualizer with a map surface threshold level
 # Otherwise use otsu threshold
-#v= Visualizer(myMap, level=0.35)
-v = Visualizer(myMap)
+v= Visualizer(myMap, level=0.39)
+#v = Visualizer(myMap)
 # Watershed 
 v.segmentate()
 # add corresponding atomic structure
-#v.add_structure("../../maps/1010/pdb1mi6.ent")
-v.show(export=True, start_angle=[65,0], time=10)
-#v.show_atom_correlation()
+v.add_structure("../../maps/1010/pdb1mi6.ent")
+v.show()
+v.show_atom_correlation()
 
 
