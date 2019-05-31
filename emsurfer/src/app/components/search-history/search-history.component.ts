@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { SearchHistory } from "src/app/models/search-history";
+import { UserService } from "src/app/services/user.service";
 import { SearchHistoryService } from "src/app/services/search-history.service";
 
 @Component({
@@ -10,6 +11,7 @@ import { SearchHistoryService } from "src/app/services/search-history.service";
 })
 export class SearchHistoryComponent implements OnInit {
   constructor(
+    private userService: UserService,
     private searchHistoryService: SearchHistoryService,
     private router: Router
   ) {}
@@ -55,10 +57,20 @@ export class SearchHistoryComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.searchHistoryService
-      .getSearchHistory()
-      .then((response: SearchHistory[]) => {
-        this.records = response;
+    if (this.userService.isUserLoggedIn()) {
+      this.userService.checkAdminRole().then((data: boolean) => {
+        if (data) {
+          this.searchHistoryService
+            .getSearchHistory()
+            .then((response: SearchHistory[]) => {
+              this.records = response;
+            });
+        } else {
+          this.router.navigate(["/home"]);
+        }
       });
+    } else {
+      this.router.navigate(["/home"]);
+    }
   }
 }
