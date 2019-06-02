@@ -5,6 +5,10 @@ export class Page {
     return browser.get(path);
   }
 
+  getCurrentUrl() {
+    return browser.getCurrentUrl();
+  }
+
   navigateToDriver(path) {
     return browser.driver.get(path);
   }
@@ -44,5 +48,9 @@ export class Page {
 
   getSignIn() {
     return element(by.id("sign_in"));
+  }
+
+  getElementByID(elementID) {
+    return element(by.id(elementID));
   }
 }

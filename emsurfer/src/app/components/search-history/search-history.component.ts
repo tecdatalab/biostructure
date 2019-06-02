@@ -58,17 +58,11 @@ export class SearchHistoryComponent implements OnInit {
 
   ngOnInit() {
     if (this.userService.isUserLoggedIn()) {
-      this.userService.checkAdminRole().then((data: boolean) => {
-        if (data) {
-          this.searchHistoryService
-            .getSearchHistory()
-            .then((response: SearchHistory[]) => {
-              this.records = response;
-            });
-        } else {
-          this.router.navigate(["/home"]);
-        }
-      });
+      this.searchHistoryService
+        .getSearchHistory()
+        .then((response: SearchHistory[]) => {
+          this.records = response;
+        });
     } else {
       this.router.navigate(["/home"]);
     }

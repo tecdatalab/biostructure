@@ -4,11 +4,11 @@
   <div>
     <span>
       Find by date
-      <input type="date" name="minDate" [(ngModel)]="minDate" />
+      <input id="minDate" type="date" name="minDate" [(ngModel)]="minDate" />
     </span>
     <span>
       to
-      <input type="date" name="minDate" [(ngModel)]="maxDate" />
+      <input id="maxDate" type="date" name="maxDate" [(ngModel)]="maxDate" />
     </span>
   </div>
   <br />
@@ -61,6 +61,7 @@
           <td>
             <button
               type="button"
+              id="searchBtn"
               class="btn btn-dark"
               (click)="searchByEmdbID(record)"
               [disabled]="record.name_file != null"
