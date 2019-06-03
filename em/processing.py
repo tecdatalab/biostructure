@@ -1,8 +1,9 @@
 from scipy import ndimage as ndi
-from skimage.morphology import watershed, erosion, dilation, ball
+from skimage.morphology import dilation, ball
+from skimage.segmentation import watershed
 from skimage.feature import peak_local_max
 from skimage.filters import  gaussian
-from copy import copy
+from copy import deepcopy
 import numpy as np
 
 
@@ -10,7 +11,8 @@ import numpy as np
 def watershed_segmentation(myMolecule, level):
     imageData = myMolecule.data()
     thresholded = imageData > level
-    mask = dilation(thresholded)
+    mask = dilation(thresholded, ball(2))
+
 
     
     #-------
@@ -23,13 +25,15 @@ def watershed_segmentation(myMolecule, level):
     
     plt.imshow(imageData[48], cmap='gray')
     plt.show()
+    plt.imshow(mask[48], cmap='gray')
+    plt.show()
     plt.imshow(labels[48])
     plt.show()
     
     return labels
 
 def gaussian_smooth(myMolecule, sigma = 1):
-    newMolecule = copy(myMolecule)
+    newMolecule = deepcopy(myMolecule)
     smoothed = gaussian(newMolecule.data(), sigma=sigma)
     newMolecule.set_data(smoothed)
     return newMolecule
