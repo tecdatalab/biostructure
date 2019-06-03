@@ -7,6 +7,7 @@ from skimage.color import label2rgb
 from biopandas.pdb import PandasPdb 
 from skimage.filters import threshold_otsu
 from skimage.measure import regionprops
+from collections import Counter
 
 
 
@@ -233,6 +234,7 @@ class Visualizer():
         if self.labels is None:
             raise ValueError("Need to segmentate map first")
         else:
+            '''
             molecule = self.molecule
             atoms_coords = self.atoms["position"]
             verts = self.verts
@@ -248,7 +250,14 @@ class Visualizer():
             pdb_min = np.min(atoms_coords, axis=0)
             pdb_max = np.max(atoms_coords, axis=0)
             adjustment = (pdb_min - padding_adjustment)/voxel_len
-
+            '''
+            verts = self.verts
+            atoms_coords = self.atoms["position"]
+            map_min = np.min(verts, axis=0)
+            map_max = np.max(verts, axis=0)
+            pdb_min = np.min(atoms_coords, axis=0)
+            pdb_max = np.max(atoms_coords, axis=0)
+            
             atoms_labels = dict()
 
             for atom in self.atoms:
@@ -257,16 +266,33 @@ class Visualizer():
                     min_z,min_y,min_x,max_z,max_y,max_x= region.bbox
                     #min_box = np.array([min_z,min_y,min_x]) + adjustment
                     #max_box = np.array([max_z,max_y,max_x]) + adjustment
+                    #coord = atom["position"]
                     min_box = 2*(np.array([min_z,min_y,min_x])-map_min)/(map_max-map_min) - 1
                     max_box = 2*(np.array([max_z,max_y,max_x])-map_min)/(map_max-map_min) - 1
-
                     coord = 2*(atom["position"]-pdb_min)/(pdb_max-pdb_min) -1
                     if np.all(coord <= max_box) and np.all(coord >= min_box):
                         atoms_labels[atom["id"]].append(region.label)
-                        print("Found atom %d with coords (%f, %f, %f) in region %d " % (atom["id"], coord[0], coord[1], coord[2], region.label))
-
+            atoms_labels = self.assign_atom_knn(atoms_labels, 50)
+            print(Counter(atoms_labels.values()))
+           
+    def assign_atom_knn(self, atoms_dict, k):
+        atomic_structure = self.atoms
+        new_atoms_dict = dict()
+        atoms_distance = np.zeros(len(atomic_structure), [("id", np.int32, 1), ("distance", np.float32, 1)])
+        atoms_distance["id"] = atomic_structure["id"][:]
+        for key in atoms_dict:
+            distance = lambda x: np.linalg.norm(atomic_structure[atomic_structure["id"]==key]['position']-x, axis=1)
+            atoms_distance["distance"] = distance(atomic_structure["position"])
+            sorted_distance = np.sort(atoms_distance, order=["distance"])
+            selected_keys = sorted_distance["id"][1:k+1]
+            selected_labels = np.array([label for label_list in [atoms_dict[selected_key] for selected_key in selected_keys] for label in label_list])
+            if selected_labels != []:
+                label = np.bincount(selected_labels).argmax()
+            else:
+                label = 0
+            new_atoms_dict[key] = label
+        return new_atoms_dict
             
-
 
 
     def segmentate(self, smooth=False, sigma=1.0):
@@ -293,7 +319,7 @@ myMap = mapReader.read()
 v= Visualizer(myMap, level=0.39)
 #v = Visualizer(myMap)
 # Watershed 
-v.segmentate()
+v.segmentate(smooth=True, sigma=0)
 # add corresponding atomic structure
 v.add_structure("../../maps/1010/pdb1mi6.ent")
 v.show()
