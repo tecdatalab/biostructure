@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Parameters } from "../models/parameters";
+import { Update } from "../models/update";
 import { UserService } from "../services/user.service";
 import { ErrorHandlerService } from "./error-handler.service";
 import config from "../../config.json";
@@ -8,7 +8,7 @@ import config from "../../config.json";
 @Injectable({
   providedIn: "root"
 })
-export class ParametersService {
+export class UpdateService {
   constructor(
     private http: HttpClient,
     private userService: UserService,
@@ -17,14 +17,14 @@ export class ParametersService {
 
   readonly API_URL = config.api_url;
 
-  getParameters(): Promise<void | Parameters> {
+  getLastUpdate(): Promise<void | Update> {
     const httpHeaders = new HttpHeaders({
       authorization: this.userService.getStoredAuthToken().token
     });
     return this.http
-      .get(this.API_URL + "/parameters", { headers: httpHeaders })
+      .get(this.API_URL + "/update", { headers: httpHeaders })
       .toPromise()
-      .then((response: Parameters) => {
+      .then((response: Update) => {
         return response;
       })
       .catch(err => {
@@ -32,30 +32,16 @@ export class ParametersService {
       });
   }
 
-  setParameters(
-    volumeMin: number,
-    volumeMax: number,
-    hits: number,
-    update: number
-  ) {
+  forceUpdate() {
     const httpHeaders = new HttpHeaders({
       authorization: this.userService.getStoredAuthToken().token
     });
     return this.http
-      .get(
-        this.API_URL +
-          "/parameters/set/" +
-          volumeMin +
-          "/" +
-          volumeMax +
-          "/" +
-          hits +
-          "/" +
-          update,
-        { headers: httpHeaders }
-      )
+      .get(this.API_URL + "/update/forceUpdater", { headers: httpHeaders })
       .toPromise()
-      .then(response => {})
+      .then((response: Update) => {
+        return response;
+      })
       .catch(err => {
         this.errorHandlerService.handleError(err);
       });

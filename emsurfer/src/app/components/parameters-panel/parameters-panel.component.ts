@@ -1,7 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 import { ParametersService } from "../../services/parameters.service";
 import { Parameters } from "../../models/parameters";
-import { UserService } from "src/app/services/user.service";
+import { UpdateService } from "../../services/update.service";
+import { UserService } from "../../services/user.service";
+import { Update } from "../../models/update";
 import { Router } from "@angular/router";
 
 @Component({
@@ -14,13 +16,18 @@ export class ParametersPanelComponent implements OnInit {
   maxVolume: number;
   hitsNumber: number;
   updateRate: number;
+  lastUpdate: Date;
 
   constructor(
     private userService: UserService,
-    private router: Router,
-    private parameterService: ParametersService
+    private parameterService: ParametersService,
+    private updateService: UpdateService,
+    private router: Router
   ) {}
 
+  forceUpdate() {
+    this.updateService.forceUpdate().then();
+  }
   saveChanges() {
     this.parameterService
       .setParameters(
@@ -38,6 +45,9 @@ export class ParametersPanelComponent implements OnInit {
     if (this.userService.isUserLoggedIn()) {
       this.userService.checkAdminRole().then((data: boolean) => {
         if (data) {
+          this.updateService.getLastUpdate().then((response: Update) => {
+            this.lastUpdate = response.last_update;
+          });
           this.parameterService.getParameters().then((response: Parameters) => {
             this.minVolume = response.volume_filter_min;
             this.maxVolume = response.volume_filter_max;
