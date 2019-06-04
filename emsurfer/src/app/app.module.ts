@@ -32,6 +32,7 @@ import { ZernikeDescriptorsModuleComponent } from "./components/zernike-descript
 import { ZernikeResultComponent } from "./components/zernike-result/zernike-result.component";
 import { UserRolesComponent } from "./components/user-roles/user-roles.component";
 import { StatisticsTableComponent } from './components/statistics-table/statistics-table.component';
+import { TutorialPageComponent } from './components/tutorial-page/tutorial-page.component';
 import { ParametersPanelComponent } from './components/parameters-panel/parameters-panel.component';
 
 @NgModule({
@@ -61,6 +62,7 @@ import { ParametersPanelComponent } from './components/parameters-panel/paramete
     ZernikeResultComponent,
     UserRolesComponent,
     StatisticsTableComponent,
+    TutorialPageComponent,
     ParametersPanelComponent
   ],
   imports: [
