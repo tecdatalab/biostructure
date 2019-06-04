@@ -10,6 +10,7 @@ import { ContactComponent } from "./components/contact/contact.component";
 import { ZernikeDescriptorsModuleComponent } from "./components/zernike-descriptors-module/zernike-descriptors-module.component";
 import { UserRolesComponent } from "./components/user-roles/user-roles.component";
 import { TutorialPageComponent } from "./components/tutorial-page/tutorial-page.component";
+import { ParametersPanelComponent } from "./components/parameters-panel/parameters-panel.component";
 
 export const router: Routes = [
   {
@@ -60,6 +61,10 @@ export const router: Routes = [
   {
     path: "tutorial",
     component: TutorialPageComponent
+  },
+  {
+    path: "admin/parameters",
+    component: ParametersPanelComponent 
   }
 ];
 

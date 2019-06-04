@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js postgres root localhost 5432"
+    "start": "node src/index.js postgres root localhost 5432 biomolecules_db"
   },
   "keywords": [],
   "author": "",

@@ -53,6 +53,7 @@ exports.getZernikeList = async (req, res, next) => {
 
 async function asyncForEach(array, path, callback) {
   let zernikeResults = [];
+  //generate each zernike descriptor file
   for (let index = 0; index < array.length; index++) {
     descriptorZernike = await descriptor.findOne({
       where: {
@@ -75,6 +76,7 @@ async function asyncForEach(array, path, callback) {
       });
     }
   }
+  //generate the compressed file
   zipFolder.zipFolder(path + "/results", path + "/results.zip", function(err) {
     if (err) {
       callback(err);

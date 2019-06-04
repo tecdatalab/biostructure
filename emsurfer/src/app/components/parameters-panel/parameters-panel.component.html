@@ -1,0 +1,64 @@
+<div class="container">
+  <h4 class="text-primary">Parameters Panel</h4>
+  <div class="row">
+    <label for="updater_date" class="col-sm-4 col-form-label"
+      >Last PDB/EMDB update: {{ lastUpdate }}</label
+    >
+  </div>
+  <div class="row col-sm-5">
+    <button (click)="forceUpdate()">Force Update</button>
+  </div>
+  <br />
+  <div class="row">
+    <label for="volume" class="col-sm-3 col-form-label">Volume filter: </label>
+    <div class="col-sm-9">
+      <input
+        id="minVolume"
+        type="number"
+        style="width: 5em;"
+        [(ngModel)]="minVolume"
+      />
+      -
+      <input
+        id="maxVolume"
+        type="number"
+        style="width: 5em;"
+        [(ngModel)]="maxVolume"
+      />
+    </div>
+  </div>
+  <br />
+  <div class="row">
+    <label for="hitsNumber" class="col-sm-3 col-form-label"
+      >Hits number:
+    </label>
+    <div class="col-sm-9">
+      <input
+        id="hitsNumber"
+        type="number"
+        style="width: 5em;"
+        [(ngModel)]="hitsNumber"
+      />
+    </div>
+  </div>
+  <br />
+  <div class="row">
+    <label for="updateRate" class="col-sm-3 col-form-label"
+      >Update rate (hours):
+    </label>
+    <div class="col-sm-9">
+      <input
+        id="updateRate"
+        type="number"
+        style="width: 5em;"
+        [(ngModel)]="updateRate"
+      />
+    </div>
+  </div>
+  <br />
+  <div class="col-2 offset-5">
+    <button id="submitButton" (click)="saveChanges()">
+      Save
+    </button>
+  </div>
+</div>
