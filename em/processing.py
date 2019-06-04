@@ -25,7 +25,6 @@ def watershed_segmentation(myMolecule, level, scale_maps, steps):
     rows, cols = np.where(inverse == idx_repeated[:, np.newaxis])
     _, inverse_rows = np.unique(rows, return_index=True)
     idx_repeated = np.split(cols, inverse_rows[1:])
-    print(idx_repeated)
     for i in range(len(idx_repeated)):
         new_label = idx_repeated[i].min()+1  #Labels are from 1 to n
         mask = np.isin(labels, idx_repeated[i]+1) ##Labels are from 1 to n
