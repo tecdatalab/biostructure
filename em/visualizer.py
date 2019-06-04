@@ -259,22 +259,23 @@ class Visualizer():
             pdb_max = np.max(atoms_coords, axis=0)
             
             atoms_labels = dict()
+            label_centroid = dict()
+
+            for region in regionprops(self.labels):
+                centroid = 2*(np.array(region.centroid)-map_min)/(map_max-map_min) -1
+                label_centroid[region.label] = centroid
 
             for atom in self.atoms:
-                atoms_labels[atom["id"]] = []
-                for region in regionprops(self.labels):
-                    min_z,min_y,min_x,max_z,max_y,max_x= region.bbox
-                    #min_box = np.array([min_z,min_y,min_x]) + adjustment
-                    #max_box = np.array([max_z,max_y,max_x]) + adjustment
-                    #coord = atom["position"]
-                    min_box = 2*(np.array([min_z,min_y,min_x])-map_min)/(map_max-map_min) - 1
-                    max_box = 2*(np.array([max_z,max_y,max_x])-map_min)/(map_max-map_min) - 1
-                    coord = 2*(atom["position"]-pdb_min)/(pdb_max-pdb_min) -1
-                    if np.all(coord <= max_box) and np.all(coord >= min_box):
-                        atoms_labels[atom["id"]].append(region.label)
-            atoms_labels = self.assign_atom_knn(atoms_labels, 50)
+                coord = 2*(atom["position"]-pdb_min)/(pdb_max-pdb_min) -1
+                atom_centroid_dist = {key: np.linalg.norm(label_centroid[key] - coord) for key in label_centroid.keys()}
+                atoms_labels[atom["id"]] = min(atom_centroid_dist, key=atom_centroid_dist.get)
+
+            print(atoms_labels)
+            #atoms_labels = self.assign_atom_knn(atoms_labels, 2)
+            #print("-------------------------")
             print(Counter(atoms_labels.values()))
-           
+    
+    # Not in use
     def assign_atom_knn(self, atoms_dict, k):
         atomic_structure = self.atoms
         new_atoms_dict = dict()
@@ -285,7 +286,7 @@ class Visualizer():
             atoms_distance["distance"] = distance(atomic_structure["position"])
             sorted_distance = np.sort(atoms_distance, order=["distance"])
             selected_keys = sorted_distance["id"][1:k+1]
-            selected_labels = np.array([label for label_list in [atoms_dict[selected_key] for selected_key in selected_keys] for label in label_list])
+            selected_labels = [label for label_list in [atoms_dict[selected_key] for selected_key in selected_keys] for label in label_list]
             if selected_labels != []:
                 label = np.bincount(selected_labels).argmax()
             else:
@@ -310,17 +311,21 @@ class Visualizer():
 #Read molecule map from file
 mapReader = reader.Reader()
 #Open file
-mapReader.open("../maps/1364/EMD-1364.map")
+mapReader.open("../maps/1010/EMD-1010.map")
+#mapReader.open("../maps/1364/EMD-1364.map")
+#mapReader.open("../maps/5017/EMD-5017.map")
 #Get map object
 myMap = mapReader.read()
 # Create visualizer with a map surface threshold level
 # Otherwise use otsu threshold
-v= Visualizer(myMap)
+v= Visualizer(myMap,)
 #v = Visualizer(myMap)
 # Watershed 
-v.segmentate(step_sigma=0.3, steps=3)
+v.segmentate(step_sigma=3, steps=3)
 # add corresponding atomic structure
-v.add_structure("../maps/1364/pdb1pn6.ent")
+v.add_structure("../maps/1010/pdb1mi6.ent")
+#v.add_structure("../maps/1364/pdb1pn6.ent")
+#v.add_structure("../maps/5017/pdb3dny.ent")
 v.show()
 v.show_atom_correlation()
 
