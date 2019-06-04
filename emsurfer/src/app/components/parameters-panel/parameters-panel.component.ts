@@ -28,7 +28,6 @@ export class ParametersPanelComponent implements OnInit {
   forceUpdate() {
     this.updateService.forceUpdate().then();
   }
-
   saveChanges() {
     this.parameterService
       .setParameters(
