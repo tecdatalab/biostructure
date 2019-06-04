@@ -65,7 +65,7 @@ class Visualizer():
                                             lambertian * diffuse_color +
                                             specular * specular_color;
                         vec3 color_gamma = pow(color_linear, vec3(1.0/gamma));
-                        gl_FragColor = vec4(color_gamma, 0.75);
+                        gl_FragColor = vec4(color_gamma, 0.8);
                     }
                     """
         self.molecule = myMolecule
@@ -124,7 +124,7 @@ class Visualizer():
             n = slices*stacks
             V_atoms = np.zeros(len(atoms_norm)*n, [("position", np.float32, 3),  ("normal", np.float32, 3), ("color", np.float32, 3)])
             sphere_verts = np.zeros(n, [("position", np.float32, 3), ("normal", np.float32, 3), ("color", np.float32, 3)])
-            radius = 0.03
+            radius = 0.02
             theta1 = np.repeat(np.linspace(0,     np.pi, stacks, endpoint=True), slices)
             theta2 = np.tile(np.linspace(0, 2 * np.pi, slices, endpoint=True), stacks)
             sphere_verts["position"][:,0] =  np.sin(theta1) * np.cos(theta2) * radius
@@ -295,11 +295,10 @@ class Visualizer():
             
 
 
-    def segmentate(self, smooth=False, sigma=1.0):
+    def segmentate(self, step_sigma, steps):
         molecule = self.molecule
-        if smooth:
-            molecule = processing.gaussian_smooth(molecule, sigma)
-        self.labels = processing.watershed_segmentation(molecule, self.th_level)
+        step_maps = processing.gaussian_step_filtering(molecule, step_sigma, steps)
+        self.labels = processing.watershed_segmentation(molecule, self.th_level, step_maps, steps)
 
 
 
@@ -311,17 +310,17 @@ class Visualizer():
 #Read molecule map from file
 mapReader = reader.Reader()
 #Open file
-mapReader.open("../../EMD-1010.map")
+mapReader.open("../maps/1364/EMD-1364.map")
 #Get map object
 myMap = mapReader.read()
 # Create visualizer with a map surface threshold level
 # Otherwise use otsu threshold
-v= Visualizer(myMap, level=0.39)
+v= Visualizer(myMap)
 #v = Visualizer(myMap)
 # Watershed 
-v.segmentate(smooth=True, sigma=0)
+v.segmentate(step_sigma=0.3, steps=3)
 # add corresponding atomic structure
-v.add_structure("../../maps/1010/pdb1mi6.ent")
+v.add_structure("../maps/1364/pdb1pn6.ent")
 v.show()
 v.show_atom_correlation()
 
