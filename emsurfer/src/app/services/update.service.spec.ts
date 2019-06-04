@@ -3,12 +3,12 @@ import {
   HttpClientTestingModule,
   HttpTestingController
 } from "@angular/common/http/testing";
-import { ParametersService } from "./parameters.service";
+import { UpdateService } from "./update.service";
 import { ErrorHandlerService } from "./error-handler.service";
-import { Parameters } from "../models/parameters";
 import { Credential } from "../models/credential";
 import { User } from "../models/user";
 import { Router } from "@angular/router";
+import { Update } from "../models/update";
 
 class MockErrorHandlerService {
   handleError(error: any) {}
@@ -24,22 +24,22 @@ dummyCredential.token = "token";
 dummyCredential.user = new User();
 dummyCredential.user.id = "id";
 
-describe("ParametersService", () => {
+describe("UpdateService", () => {
   let injector: TestBed;
-  let service: ParametersService;
+  let service: UpdateService;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
-        ParametersService,
+        UpdateService,
         { provide: Router, useClass: MockRouter },
         { provide: ErrorHandlerService, useClass: MockErrorHandlerService }
       ]
     });
     injector = getTestBed();
-    service = injector.get(ParametersService);
+    service = injector.get(UpdateService);
     httpMock = injector.get(HttpTestingController);
 
     let store = {};
@@ -65,44 +65,43 @@ describe("ParametersService", () => {
     httpMock.verify();
   });
 
-  describe("#getParameters", () => {
-    it("should do a get request and return a parameters object", () => {
-      const dummyParameters = new Parameters();
-      dummyParameters.hits_number = 20;
-      dummyParameters.update_rate = 20;
-      dummyParameters.volume_filter_max = 0.5;
-      dummyParameters.volume_filter_min = 0.5;
+  describe("#getLastUpdate", () => {
+    it("should do a get request and return an update object", () => {
+      const dummyUpdate = new Update();
+      dummyUpdate.last_update = new Date("00-00-00");
       window.localStorage.setItem(
         "credential",
         JSON.stringify(dummyCredential)
       );
       const expectedHeader = dummyCredential.token;
-      service.getParameters().then((res: Parameters) => {
-        expect(JSON.stringify(res)).toEqual(JSON.stringify(dummyParameters));
+      service.getLastUpdate().then((res: Update) => {
+        expect(JSON.stringify(res)).toEqual(JSON.stringify(dummyUpdate));
       });
 
-      const req = httpMock.expectOne(`${service.API_URL}/parameters`);
+      const req = httpMock.expectOne(`${service.API_URL}/update`);
       expect(req.request.method).toBe("GET");
       expect(req.request.headers.get("authorization")).toEqual(expectedHeader);
-      req.flush(dummyParameters);
+      req.flush(dummyUpdate);
     });
   });
 
-  describe("#setParameters", () => {
-    it("should do a get request", () => {
+  describe("#forceUpdate", () => {
+    it("should do a get request and return an update object", () => {
+      const dummyUpdate = new Update();
+      dummyUpdate.last_update = new Date("00-00-00");
       window.localStorage.setItem(
         "credential",
         JSON.stringify(dummyCredential)
       );
       const expectedHeader = dummyCredential.token;
-      service.setParameters(0.5, 0.6, 5, 6).then((res: any) => {});
+      service.forceUpdate().then((res: Update) => {
+        expect(JSON.stringify(res)).toEqual(JSON.stringify(dummyUpdate));
+      });
 
-      const req = httpMock.expectOne(
-        `${service.API_URL}/parameters/set/0.5/0.6/5/6`
-      );
+      const req = httpMock.expectOne(`${service.API_URL}/update/forceUpdater`);
       expect(req.request.method).toBe("GET");
       expect(req.request.headers.get("authorization")).toEqual(expectedHeader);
-      req.flush(null);
+      req.flush(dummyUpdate);
     });
   });
 });

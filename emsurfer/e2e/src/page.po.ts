@@ -1,6 +1,13 @@
-import { browser, by, element } from "protractor";
+import { browser, by, element, protractor } from "protractor";
 
 export class Page {
+  dismissAlert() {
+    browser
+      .switchTo()
+      .alert()
+      .accept();
+  }
+
   navigateTo(path) {
     return browser.get(path);
   }
