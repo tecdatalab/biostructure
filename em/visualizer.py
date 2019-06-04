@@ -200,6 +200,12 @@ class Visualizer():
             gl.glEnable(gl.GL_DEPTH_TEST)
             update()
 
+        @window.event
+        def on_key_press(key, modifiers):
+            if key == app.window.key.SPACE:
+                gl.glReadPixels(0, 0, window.width, window.height, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, framebuffer)
+                png.from_array(framebuffer, 'RGB').save('export/sample.png')
+
         if export:
             frame_count = 1
 
