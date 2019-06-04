@@ -270,7 +270,7 @@ class Visualizer():
                 atom_centroid_dist = {key: np.linalg.norm(label_centroid[key] - coord) for key in label_centroid.keys()}
                 atoms_labels[atom["id"]] = min(atom_centroid_dist, key=atom_centroid_dist.get)
 
-            print(atoms_labels)
+            #print(atoms_labels)
             #atoms_labels = self.assign_atom_knn(atoms_labels, 2)
             #print("-------------------------")
             print(Counter(atoms_labels.values()))
@@ -311,9 +311,9 @@ class Visualizer():
 #Read molecule map from file
 mapReader = reader.Reader()
 #Open file
-mapReader.open("../maps/1010/EMD-1010.map")
+#mapReader.open("../maps/1010/EMD-1010.map")
 #mapReader.open("../maps/1364/EMD-1364.map")
-#mapReader.open("../maps/5017/EMD-5017.map")
+mapReader.open("../maps/5017/EMD-5017.map")
 #Get map object
 myMap = mapReader.read()
 # Create visualizer with a map surface threshold level
@@ -323,9 +323,9 @@ v= Visualizer(myMap,)
 # Watershed 
 v.segmentate(step_sigma=3, steps=3)
 # add corresponding atomic structure
-v.add_structure("../maps/1010/pdb1mi6.ent")
+#v.add_structure("../maps/1010/pdb1mi6.ent")
 #v.add_structure("../maps/1364/pdb1pn6.ent")
-#v.add_structure("../maps/5017/pdb3dny.ent")
+v.add_structure("../maps/5017/pdb3dny.ent")
 v.show()
 v.show_atom_correlation()
 
