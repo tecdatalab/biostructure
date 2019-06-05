@@ -6,8 +6,7 @@ import { SearchHistoryService } from "src/app/services/search-history.service";
 
 @Component({
   selector: "app-search-history",
-  templateUrl: "./search-history.component.html",
-  styleUrls: ["./search-history.component.css"]
+  templateUrl: "./search-history.component.html"
 })
 export class SearchHistoryComponent implements OnInit {
   constructor(
