@@ -72,6 +72,7 @@ class Visualizer():
         data = self.molecule.data()
 
         self.th_level = np.min(data) + level * (np.max(data) - np.min(data)) if level is not None else threshold_otsu(data)
+        print("Using density threshold level: ", self.th_level)
         verts, faces, _,_ = measure.marching_cubes_lewiner(data, self.th_level)
 
         self.verts = verts
@@ -174,7 +175,7 @@ class Visualizer():
             trackball.theta, trackball.phi = 0, 0
 
         
-        window = app.Window(width=512, height=512, color=(1,1,1,1))
+        window = app.Window(width=800, height=800, color=(1,1,1,1))
 
         framebuffer = np.zeros((window.height, window.width * 3), dtype=np.uint8)
 
@@ -318,21 +319,21 @@ class Visualizer():
 mapReader = reader.Reader()
 #Open file
 #mapReader.open("../maps/1010/EMD-1010.map")
-#mapReader.open("../maps/1364/EMD-1364.map")
-mapReader.open("../maps/5017/EMD-5017.map")
+mapReader.open("../maps/1364/EMD-1364.map")
+#mapReader.open("../maps/5017/EMD-5017.map")
 #Get map object
 myMap = mapReader.read()
 # Create visualizer with a map surface threshold level
 # Otherwise use otsu threshold
-v= Visualizer(myMap,)
+v= Visualizer(myMap, level=0.55)
 #v = Visualizer(myMap)
 # Watershed 
 v.segmentate(step_sigma=3, steps=3)
 # add corresponding atomic structure
 #v.add_structure("../maps/1010/pdb1mi6.ent")
 #v.add_structure("../maps/1364/pdb1pn6.ent")
-v.add_structure("../maps/5017/pdb3dny.ent")
+#v.add_structure("../maps/5017/pdb3dny.ent")
 v.show()
-v.show_atom_correlation()
+#v.show_atom_correlation()
 
 
