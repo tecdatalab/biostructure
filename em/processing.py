@@ -9,10 +9,11 @@ import numpy as np
 
 def watershed_segmentation(myMolecule, level, scale_maps, steps):
     imageData = myMolecule.data()
-    thresholded = imageData > level
-    mask = dilation(thresholded, ball(2))
+    threshold = imageData > level
+    mask = dilation(threshold, ball(2))
+    imageData[imageData<=level]=0
     labels = watershed(-imageData, connectivity=26, mask=mask)
-    local_maxima = peak_local_max(imageData, labels=labels, num_peaks_per_label=1)
+    local_maxima = peak_local_max(imageData)
     # Space-scale filtering
     for step in range(steps):
         step_local_maxima = peak_local_max(scale_maps[step].data())
@@ -31,13 +32,13 @@ def watershed_segmentation(myMolecule, level, scale_maps, steps):
         labels[mask] = new_label
     return labels
 
-def gaussian_step_filtering(myMolecule, step_sigma, steps):
+def gaussian_step_filtering(myMolecule, level, step_sigma, steps):
     step_maps = []
+    newMolecule = deepcopy(myMolecule)
+    data = newMolecule.data()
+    data[data<=level] = 0
     for map_id in range(steps):
-        if map_id == 0:
-            newMolecule = deepcopy(myMolecule)
-        else:
-            newMolecule = deepcopy(newMolecule)
+        newMolecule = deepcopy(newMolecule) 
         smoothed = gaussian(newMolecule.data(), sigma=step_sigma)
         newMolecule.set_data(smoothed)
         step_maps.append(newMolecule)
