@@ -47,7 +47,7 @@ class Visualizer():
                     const vec3 diffuse_color = vec3(0.125, 0.125, 0.125);
                     const vec3 specular_color = vec3(1.0, 1.0, 1.0);
                     const float shininess = 128.0;
-                    const float gamma = 2.2;
+                    const float gamma = 1.5;
                     void main()
                     {
                         vec3 normal= normalize(v_normal);
@@ -175,7 +175,7 @@ class Visualizer():
             trackball.theta, trackball.phi = 0, 0
 
         
-        window = app.Window(width=800, height=800, color=(1,1,1,1))
+        window = app.Window(width=1920, height=1080, color=(1,1,1,1))
 
         framebuffer = np.zeros((window.height, window.width * 3), dtype=np.uint8)
 
@@ -280,7 +280,12 @@ class Visualizer():
             #print(atoms_labels)
             #atoms_labels = self.assign_atom_knn(atoms_labels, 2)
             #print("-------------------------")
-            print(Counter(atoms_labels.values()))
+            total_atoms = len(self.atoms)
+            count = Counter(atoms_labels.values())
+            print("Total number of atoms: ", total_atoms)
+            for key in count:
+                print("    Atoms in segment %d: %.2f%%  %d/%d" % (key, count[key]*100/total_atoms, count[key], total_atoms))
+                
     
     # Not in use
     def assign_atom_knn(self, atoms_dict, k):
@@ -305,7 +310,7 @@ class Visualizer():
 
     def segmentate(self, step_sigma, steps):
         molecule = self.molecule
-        step_maps = processing.gaussian_step_filtering(molecule, step_sigma, steps)
+        step_maps = processing.gaussian_step_filtering(molecule, self.th_level, step_sigma, steps)
         self.labels = processing.watershed_segmentation(molecule, self.th_level, step_maps, steps)
 
 
@@ -314,26 +319,26 @@ class Visualizer():
 
 
 
-
+'''
 #Read molecule map from file
 mapReader = reader.Reader()
 #Open file
-#mapReader.open("../maps/1010/EMD-1010.map")
-mapReader.open("../maps/1364/EMD-1364.map")
+mapReader.open("../maps/1010/EMD-1010.map")
+#mapReader.open("../maps/1364/EMD-1364.map")
 #mapReader.open("../maps/5017/EMD-5017.map")
 #Get map object
 myMap = mapReader.read()
 # Create visualizer with a map surface threshold level
 # Otherwise use otsu threshold
-v= Visualizer(myMap, level=0.55)
+v= Visualizer(myMap, level=0.3)
 #v = Visualizer(myMap)
 # Watershed 
-v.segmentate(step_sigma=3, steps=3)
+v.segmentate(step_sigma=2.5, steps=3)
 # add corresponding atomic structure
-#v.add_structure("../maps/1010/pdb1mi6.ent")
+v.add_structure("../maps/1010/pdb1mi6.ent")
 #v.add_structure("../maps/1364/pdb1pn6.ent")
 #v.add_structure("../maps/5017/pdb3dny.ent")
 v.show()
-#v.show_atom_correlation()
-
+v.show_atom_correlation()
+'''
 
