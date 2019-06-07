@@ -57,7 +57,7 @@ exports.sendAuthToken = async (req, res) => {
   }
 };
 
-exports.verifyUserToken = (req, res, next) => {
+exports.verifyUserToken = async (req, res, next) => {
   const token = req.header("authorization");
   jwt.verify(token, (err, decodedToken) => {
     if (err) {
@@ -143,5 +143,14 @@ exports.isUserAdmin = (req, res) => {
     res.status(200).send(true);
   } else {
     res.status(200).send(false);
+  }
+};
+
+exports.isUserLoggedIn = (req, res, next) => {
+  if (req.header("authorization")) {
+    exports.verifyUserToken(req, res, next);
+  } else {
+    req.authenticatedUser = { id: null };
+    next();
   }
 };

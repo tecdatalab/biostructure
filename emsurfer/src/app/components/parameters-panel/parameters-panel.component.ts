@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { ParametersService } from "../../services/parameters.service";
 import { Parameters } from "../../models/parameters";
 import { UpdateService } from "../../services/update.service";
-import { UserService } from "../../services/user.service";
+import { UserService } from "src/app/services/user.service";
 import { Update } from "../../models/update";
 import { Router } from "@angular/router";
 
@@ -28,6 +28,7 @@ export class ParametersPanelComponent implements OnInit {
   forceUpdate() {
     this.updateService.forceUpdate().then();
   }
+  
   saveChanges() {
     this.parameterService
       .setParameters(

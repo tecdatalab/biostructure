@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import config from "../../config.json";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { ErrorHandlerService } from "./error-handler.service.js";
+import { ErrorHandlerService } from "./error-handler.service";
 import { Credential } from "../models/credential.js";
 import { UserRole } from "../models/userRole";
 import { User } from "../models/user";
@@ -61,7 +61,7 @@ export class UserService {
       })
       .catch(this.errorHandlerService.handleError);
   }
-  
+
   getUserRoles(): Promise<void | UserRole[]> {
     const httpHeaders = new HttpHeaders({
       authorization: this.getStoredAuthToken().token
@@ -90,6 +90,10 @@ export class UserService {
       .catch(err => {
         this.errorHandlerService.handleError(err);
       });
+  }
+
+  public isOn() {
+    return true;
   }
 
   checkAdminRole(): Promise<void | boolean> {

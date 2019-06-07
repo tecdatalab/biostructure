@@ -17,9 +17,9 @@ describe("Download benchmark test", () => {
     page.wait(4000);
     const downloadLink = page.getDownloadLink();
     downloadLink.click();
-    page.wait(4000);
+    page.wait(6000);
     const fileExists = fs.existsSync(downloadsPath);
-    page.wait(4000);
+    page.wait(6000);
     expect(fileExists).toBe(true);
   });
 });

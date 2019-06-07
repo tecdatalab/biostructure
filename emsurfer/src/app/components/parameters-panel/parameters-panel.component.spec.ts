@@ -1,15 +1,16 @@
-import { async, ComponentFixture, TestBed } from "@angular/core/testing";
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ParametersPanelComponent } from "./parameters-panel.component";
+import { ParametersPanelComponent } from './parameters-panel.component';
 
-describe("ParametersPanelComponent", () => {
+describe('ParametersPanelComponent', () => {
   let component: ParametersPanelComponent;
   let fixture: ComponentFixture<ParametersPanelComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ParametersPanelComponent]
-    }).compileComponents();
+      declarations: [ ParametersPanelComponent ]
+    })
+    .compileComponents();
   }));
 
   beforeEach(() => {
