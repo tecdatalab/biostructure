@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../')
 from connections.FTP_connection import FTP_connection
 from connections.SQL_connection import SQL_connection
 from classes.Emd_entry import Emd_entry
@@ -59,6 +61,7 @@ def first_time_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path):
     
     create_type_descriptors(cursor_sql)
     print("Total inserts",len(emds))
+    k = 1
     for i in emds:
         temp_emd_entry = Emd_entry()
         temp_emd_entry.emd_url = "http://{0}{1}".format(emd_url_server,emd_url_path)
@@ -75,7 +78,8 @@ def first_time_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path):
         temp_time_stamp = Time_stamp (i,date.today(),temp_emd_entry.map_url,temp_emd_entry.xml_url,temp_emd_entry.image_url )
         temp_time_stamp.insert_db(cursor_sql)
         conec_sql.commit()
-        print(i)
+        print(k)
+        k+=1
     
     update_date = Update(date.today())
     update_date.insert_db(cursor_sql)
@@ -87,6 +91,7 @@ def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path):
     
     emds = conec_ftp.get_emds_higher_than_date(conec_sql.last_update())
     print("Total changes",len(emds))
+    k=1
     for i in emds:
         temp_emd_entry = Emd_entry()
         temp_emd_entry.emd_url = "http://{0}{1}".format(emd_url_server,emd_url_path)
@@ -117,7 +122,8 @@ def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path):
             remove_map(i)
             temp_time_stamp.insert_db(cursor_sql)
         conec_sql.commit()
-        print(i)
+        print(k)
+        k+=1
     
     if(conec_sql.last_update().date()!=date.today()):
         update_date = Update(date.today())
@@ -145,7 +151,7 @@ def main(emd_url_server, emd_url_path):
   
 if __name__== "__main__":
     ini = time() 
-    main("ftp.pdbj.org","/pub/emdb")
+    main("ftp.wwpdb.org","/pub/emdb")
     final = time() 
     ejec = final - ini
     print ('Execution time:', ejec)
