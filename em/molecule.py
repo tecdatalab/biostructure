@@ -15,7 +15,7 @@ class Molecule():
         d_min = np.min(self.array)
         d_max = np.max(self.array)
         if density_ranges != (d_min, d_max, d_mean):
-            print("File density range does not match with data")
+            print("File density range does not match with computed values")
             (self.dmin, self.dmax, self.dmean) = (d_min, d_max, d_mean)
         else:
             (self.dmin, self.dmax, self.dmean) = density_ranges
