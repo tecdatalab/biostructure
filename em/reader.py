@@ -53,6 +53,7 @@
 import struct
 import array
 import numpy as np
+import os.path
 
 import molecule
 
@@ -70,6 +71,7 @@ class Reader():
         self.mrc_header = mrc_buffer[0:self.HEADER_SIZE]
         self.is_endianness_reversed = self.test_and_set_endianness()
         self.mrc_data = mrc_buffer[self.HEADER_SIZE:]
+        self.filename = os.path.splitext(os.path.basename(filename))[0]
         
     def read(self):
         #Read number of collumns(x), rows(y) and sections(z)
@@ -104,7 +106,7 @@ class Reader():
         #Read densities
         densities = self.read_densities((nz, ny, nx))
         #Generate Molecule object with parameters
-        return molecule.Molecule(self.mrc_header, densities,  (nz, ny, nx), (nzstart, nystart, nxstart), (mz, my, mx), (zlen, ylen, xlen), (dmin, dmax, dmean), (zorigin, yorigin, xorigin))
+        return molecule.Molecule(self.mrc_header, densities,  (nz, ny, nx), (nzstart, nystart, nxstart), (mz, my, mx), (zlen, ylen, xlen), (dmin, dmax, dmean), (zorigin, yorigin, xorigin), self.filename)
             
     def test_and_set_endianness(self):
         regular_nx = struct.unpack('<I', self.mrc_header[0:4])

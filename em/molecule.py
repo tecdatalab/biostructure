@@ -2,9 +2,10 @@ import numpy as np
 
 class Molecule():
 
-    def __init__(self, rawHeader, data, size, start, grid_size, cell_dim, density_ranges, origin):
+    def __init__(self, rawHeader, data, size, start, grid_size, cell_dim, density_ranges, origin, name):
         self.rawHeader = rawHeader
         self.array = data
+        self.name = name
         (self.nz, self.ny, self.nx) = size
         (self.nzstart, self.nystart, self.nxstart) = start
         (self.mz, self.my, self.mx) = grid_size
@@ -15,7 +16,7 @@ class Molecule():
         d_min = np.min(self.array)
         d_max = np.max(self.array)
         if density_ranges != (d_min, d_max, d_mean):
-            print("File density range does not match with computed values")
+            print("File density range does not match with computed value")
             (self.dmin, self.dmax, self.dmean) = (d_min, d_max, d_mean)
         else:
             (self.dmin, self.dmax, self.dmean) = density_ranges
@@ -33,6 +34,9 @@ class Molecule():
     
     def data(self):
         return self.array
+
+    def name(self):
+        return self.name
 
     def set_data(self, newData):
         self.array = newData
