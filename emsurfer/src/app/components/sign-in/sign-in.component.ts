@@ -12,8 +12,8 @@ import { Router } from "@angular/router";
   styleUrls: ["bootstrap-social.css"]
 })
 export class SignInComponent implements OnInit {
-  private loggedIn: boolean;
-  private isAdminUser: boolean;
+  loggedIn: boolean;
+  isAdminUser: boolean;
   private errorSubscription;
 
   constructor(

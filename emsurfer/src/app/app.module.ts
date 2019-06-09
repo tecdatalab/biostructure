@@ -33,8 +33,12 @@ import { ZernikeResultComponent } from "./components/zernike-result/zernike-resu
 import { UserRolesComponent } from "./components/user-roles/user-roles.component";
 import { SearchHistoryComponent } from "./components/search-history/search-history.component";
 import { ParametersPanelComponent } from "./components/parameters-panel/parameters-panel.component";
-import { StatisticsTableComponent } from './components/statistics-table/statistics-table.component';
-import { TutorialPageComponent } from './components/tutorial-page/tutorial-page.component';
+import { StatisticsTableComponent } from "./components/statistics-table/statistics-table.component";
+import { TutorialPageComponent } from "./components/tutorial-page/tutorial-page.component";
+
+export function provideConfig() {
+  return config;
+}
 
 @NgModule({
   declarations: [
@@ -73,10 +77,15 @@ import { TutorialPageComponent } from './components/tutorial-page/tutorial-page.
     ReactiveFormsModule,
     routes,
     AngularFontAwesomeModule,
-    SocialLoginModule.initialize(config),
+    SocialLoginModule,
     FormsModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: provideConfig,
+      useFactory: provideConfig
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
