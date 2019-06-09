@@ -4,7 +4,6 @@ import { FormsModule } from "@angular/forms";
 import { ReactiveFormsModule } from "@angular/forms";
 import { HttpClientModule } from "@angular/common/http";
 import { routes } from "./app.router";
-import { config } from "./app.social.config";
 import { AppComponent } from "./app.component";
 import { HeaderComponent } from "./components/header/header.component";
 import { ContourShapeInputComponent } from "./components/contour-shape-input/contour-shape-input.component";
@@ -33,8 +32,22 @@ import { ZernikeResultComponent } from "./components/zernike-result/zernike-resu
 import { UserRolesComponent } from "./components/user-roles/user-roles.component";
 import { SearchHistoryComponent } from "./components/search-history/search-history.component";
 import { ParametersPanelComponent } from "./components/parameters-panel/parameters-panel.component";
-import { StatisticsTableComponent } from './components/statistics-table/statistics-table.component';
-import { TutorialPageComponent } from './components/tutorial-page/tutorial-page.component';
+import { StatisticsTableComponent } from "./components/statistics-table/statistics-table.component";
+import { TutorialPageComponent } from "./components/tutorial-page/tutorial-page.component";
+import { AuthServiceConfig } from "angularx-social-login";
+import { GoogleLoginProvider } from "angularx-social-login";
+export const config = new AuthServiceConfig([
+  {
+    id: GoogleLoginProvider.PROVIDER_ID,
+    provider: new GoogleLoginProvider(
+      "930088451397-t93v5v7esll90st0rtc7lvl10uc391cv.apps.googleusercontent.com"
+    )
+  }
+]);
+
+export function provideConfig() {
+  return config;
+}
 
 @NgModule({
   declarations: [
@@ -73,10 +86,15 @@ import { TutorialPageComponent } from './components/tutorial-page/tutorial-page.
     ReactiveFormsModule,
     routes,
     AngularFontAwesomeModule,
-    SocialLoginModule.initialize(config),
+    SocialLoginModule,
     FormsModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: AuthServiceConfig,
+      useFactory: provideConfig
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
