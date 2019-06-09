@@ -8,6 +8,7 @@ from biopandas.pdb import PandasPdb
 from skimage.filters import threshold_otsu
 from skimage.measure import regionprops
 from collections import Counter
+import os.path
 
 
 
@@ -85,7 +86,7 @@ class Visualizer():
         self.labels = None
 
 
-    def show(self, export=False, start_angle=None, time=1):
+    def show(self, export=False, start_angle=None, time=1, export_path=""):
 
         faces = self.faces
         verts = self.verts
@@ -178,8 +179,12 @@ class Visualizer():
         else:
             trackball.theta, trackball.phi = 0, 0
 
-        
-        window = app.Window(width=1920, height=1080, color=(1,1,1,1))
+        if export:
+            visible = False
+        else:
+            visible = True
+
+        window = app.Window(width=1920, height=1080, color=(1,1,1,1), visible=visible)
 
         framebuffer = np.zeros((window.height, window.width * 3), dtype=np.uint8)
 
@@ -213,15 +218,24 @@ class Visualizer():
 
         if export:
             frame_count = 1
+            total_time = 0.0
 
-            @window.timer(0.1) 
+            @window.timer(0.1)
             def timer(elapsed):
                 nonlocal frame_count
+                nonlocal total_time
+                nonlocal window
+                if total_time >= time:
+                    return
                 points['transform'].phi +=2
                 update()
                 gl.glReadPixels(0, 0, window.width, window.height, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, framebuffer)
-                png.from_array(framebuffer, 'RGB').save('export/frame'+str(frame_count)+'.png')
+                png.from_array(framebuffer, 'RGB').save('{0}export/'.format(export_path)+str(frame_count)+'.png')
                 frame_count+=1
+                total_time+= elapsed
+                if total_time >= time:
+                    app.quit()
+                    window.close()
 
                 
         window.attach(points['transform'])
@@ -346,7 +360,13 @@ class Visualizer():
         regions = [r for r in regions]
         print("Number of segmented regions: %d" % len(regions))
         print("    step sigma = %.2f\n    steps = %.2f" % (step_sigma, steps))
-
+        try:
+            with open(os.path.join("export/", molecule.name+".txt"), "w") as output_file:
+                output_file.write("Number of segmented regions: %d\n" % len(regions))
+                output_file.write("    step sigma = %.2f\n    steps = %.2f\n" % (step_sigma, steps))
+        except Exception as e:
+            print("Could not create output file, ", e)
+        
 
 
 
@@ -360,16 +380,16 @@ mapReader = reader.Reader()
 #mapReader.open("../maps/1010/EMD-1010.map")
 #mapReader.open("../maps/1364/EMD-1364.map")
 #mapReader.open("../maps/5017/EMD-5017.map")
-mapReader.open("../../maps/emd_1067.map")
+mapReader.open("../../maps/EMD-2596.map")
 
 #Get map object
 myMap = mapReader.read()
 # Create visualizer with a map surface threshold level
 # Otherwise use otsu threshold
-v= Visualizer(myMap, level=0.55)
+v= Visualizer(myMap, level=0.40)
 #v = Visualizer(myMap)
 # Watershed 
-v.segmentate(step_sigma=6.5, steps=3)
+v.segmentate(step_sigma=2.1, steps=3)
 
 # add corresponding atomic structure
 #v.add_structure("../maps/1010/pdb1mi6.ent")
@@ -392,6 +412,6 @@ v.segmentate(step_sigma=6.5, steps=3)
 
 #v.show_atom_correlation()
 v.show()
-
+'''
 
 
