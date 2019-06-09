@@ -5,6 +5,7 @@ from skimage.filters import  gaussian
 from skimage.measure import regionprops
 from copy import deepcopy
 import numpy as np
+import math
 
 
 
@@ -14,18 +15,27 @@ def watershed_segmentation(myMolecule, level, scale_maps, steps):
     mask = dilation(threshold, ball(2))
     imageData[imageData<=level]=0
     labels = watershed(-imageData, connectivity=26, mask=mask)
-    local_maxima = peak_local_max(imageData, labels=labels, num_peaks_per_label=1)
-    #TODO labels_properties_list = regionprops(labels)
+    
     # Space-scale filtering
+    local_maxima = peak_local_max(imageData)
     for step in range(steps):
-        step_local_maxima = peak_local_max(scale_maps[step].data())
+        data = scale_maps[step].data()
+        step_local_maxima = peak_local_max(data)
+        # Get densities for corresponding local maxima, needed to choose local maxima with steepest ascent density
+        #precomputed_data = [ data[tuple(step_local_maxima[i])] for i in range(step_local_maxima.shape[0])]
         for row in range(local_maxima.shape[0]):
             point = local_maxima[row]
-            #Only unify labels if labels centroid are closest 
-            id_closest_local_maxima = np.linalg.norm(step_local_maxima-point, axis=1).argmin()
-            #if labels_properties_list[label_array_index].centroid
-            #TODO only unify labels which density centroid is closest
-            local_maxima[row] = step_local_maxima[id_closest_local_maxima]
+            
+            id_closest_local_maxima = np.argsort(np.linalg.norm(step_local_maxima-point, axis=1))
+
+            # Order by minimun distance between local maxima at a diferent scale
+            # And choose closest local maxima which represent the steepest ascent in density value
+            # TODO order by both locality and maximun ascent step in terms of density value
+            for local_maxima_id in id_closest_local_maxima:
+                voxel_coords = tuple(step_local_maxima[local_maxima_id])
+                if data[voxel_coords] > data[tuple(point)]:
+                    local_maxima[row] = step_local_maxima[local_maxima_id]
+                    break
     # Unify labels
     vals, inverse, count = np.unique(local_maxima, return_inverse=True, return_counts=True, axis=0)
     idx_repeated = np.where(count > 1)[0]
@@ -36,6 +46,7 @@ def watershed_segmentation(myMolecule, level, scale_maps, steps):
         new_label = idx_repeated[i].min()+1  #Labels are from 1 to n
         mask = np.isin(labels, idx_repeated[i]+1) ##Labels are from 1 to n
         labels[mask] = new_label
+    
     return labels
 
 def gaussian_step_filtering(myMolecule, level, step_sigma, steps):
@@ -48,4 +59,5 @@ def gaussian_step_filtering(myMolecule, level, step_sigma, steps):
         smoothed = gaussian(newMolecule.data(), sigma=step_sigma)
         newMolecule.set_data(smoothed)
         step_maps.append(newMolecule)
+        step_sigma +=step_sigma
     return step_maps
