@@ -49,7 +49,7 @@ def watershed_segmentation(myMolecule, level, scale_maps, steps):
     
     return labels
 
-def gaussian_step_filtering(myMolecule, level, step_sigma, steps):
+def scale_space_filtering(myMolecule, level, step_sigma, steps):
     step_maps = []
     newMolecule = deepcopy(myMolecule)
     data = newMolecule.data()

@@ -264,7 +264,7 @@ class Visualizer():
         self.atoms[mask] = subarray
 
 
-    def show_atom_correlation(self):
+    def show_atom_matching(self):
         if self.atoms is None:
             raise ValueError("Atomic structure is not present")
         if self.labels is None:
@@ -352,9 +352,9 @@ class Visualizer():
             
 
 
-    def segmentate(self, step_sigma, steps):
+    def segmentation(self, step_sigma, steps):
         molecule = self.molecule
-        step_maps = processing.gaussian_step_filtering(molecule, self.th_level, step_sigma, steps)
+        step_maps = processing.scale_space_filtering(molecule, self.th_level, step_sigma, steps)
         self.labels = processing.watershed_segmentation(molecule, self.th_level, step_maps, steps)
         regions = regionprops(self.labels)
         regions = [r for r in regions]
@@ -389,7 +389,7 @@ myMap = mapReader.read()
 v= Visualizer(myMap, level=0.40)
 #v = Visualizer(myMap)
 # Watershed 
-v.segmentate(step_sigma=2.1, steps=3)
+v.segmentate(step_sigma=2.5, steps=3)
 
 # add corresponding atomic structure
 #v.add_structure("../maps/1010/pdb1mi6.ent")
@@ -410,7 +410,7 @@ v.segmentate(step_sigma=2.1, steps=3)
 #v.map_structure_to_domain("../maps/5017/B-1N0U.aligned.pdb")
 #v.map_structure_to_domain("../maps/5017/C-1N0U.aligned.pdb")
 
-#v.show_atom_correlation()
+#v.show_atom_matching()
 v.show()
 '''
 
