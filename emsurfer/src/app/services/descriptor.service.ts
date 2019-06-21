@@ -16,9 +16,18 @@ export class DescriptorService {
 
   readonly API_URL = config.api_url;
 
-  getDescriptor(emdbId: number): Promise<void | Descriptor> {
+  getDescriptor(
+    emdbId: number,
+    contourRepresentation: number
+  ): Promise<void | Descriptor> {
     return this.httpClient
-      .get(this.API_URL + "/descriptor/zernike/" + emdbId)
+      .get(
+        this.API_URL +
+          "/descriptor/zernike/" +
+          emdbId +
+          "/" +
+          contourRepresentation
+      )
       .toPromise()
       .then((response: Descriptor) => {
         return response;
@@ -28,9 +37,18 @@ export class DescriptorService {
       });
   }
 
-  getDescriptorsList(emdbList: string): Promise<void | DescriptorsList> {
+  getDescriptorsList(
+    emdbList: string,
+    contourRepresentation: number
+  ): Promise<void | DescriptorsList> {
     return this.httpClient
-      .get(this.API_URL + "/descriptor/zernikelist/" + emdbList)
+      .get(
+        this.API_URL +
+          "/descriptor/zernikelist/" +
+          emdbList +
+          "/" +
+          contourRepresentation
+      )
       .toPromise()
       .then((response: DescriptorsList) => {
         response.path = this.API_URL + response.path;

@@ -7,9 +7,11 @@ const createIndex = require("../utilities/indexGenerator");
 exports.getZernikeDescriptors = async (req, res, next) => {
   try {
     const emdbid = req.params.emdbID;
+    const type_descriptor = req.params.contourRepresentation;
     let descriptorZernike = await descriptor.findOne({
       where: {
-        emd_entry_id: parseInt(emdbid)
+        emd_entry_id: parseInt(emdbid),
+        type_descriptor_id: parseInt(type_descriptor)
       }
     });
     if (!descriptorZernike) {
@@ -30,9 +32,10 @@ exports.getZernikeDescriptors = async (req, res, next) => {
 exports.getZernikeList = async (req, res, next) => {
   try {
     const list = req.params.emdblist.split(",");
+    const type_descriptor = req.params.contourRepresentation;
     const pathFiles = "./public/descriptors/" + createIndex.createIndex();
     mkdirp(pathFiles + "/results", function(err) {
-      asyncForEach(list, pathFiles, function(response) {
+      asyncForEach(list, pathFiles, type_descriptor, function(response) {
         if (response instanceof Error) {
           console.log("I/O Error");
           res.status(500).send({
@@ -51,13 +54,14 @@ exports.getZernikeList = async (req, res, next) => {
   }
 };
 
-async function asyncForEach(array, path, callback) {
+async function asyncForEach(array, path, contour, callback) {
   let zernikeResults = [];
   //generate each zernike descriptor file
   for (let index = 0; index < array.length; index++) {
     descriptorZernike = await descriptor.findOne({
       where: {
-        emd_entry_id: parseInt(array[index])
+        emd_entry_id: parseInt(array[index]),
+        type_descriptor_id: contour
       }
     });
     if (descriptorZernike) {

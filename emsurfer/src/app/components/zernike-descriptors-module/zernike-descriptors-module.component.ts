@@ -48,8 +48,11 @@ export class ZernikeDescriptorsModuleComponent implements OnInit {
 
   ngOnInit() {
     const emdbIdList = this.route.snapshot.queryParamMap.get("emdbList");
+    const contourRepresentation = this.route.snapshot.queryParamMap.get(
+      "contour"
+    );
     this.descriptorService
-      .getDescriptorsList(emdbIdList)
+      .getDescriptorsList(emdbIdList, parseInt(contourRepresentation))
       .then((data: DescriptorsList) => {
         this.results = data;
         this.showList = true;
