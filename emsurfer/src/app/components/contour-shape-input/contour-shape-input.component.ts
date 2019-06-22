@@ -9,7 +9,7 @@ import { ContourRepresentation } from "../../models/contour-representation";
 })
 export class ContourShapeInputComponent implements OnInit {
   @Input() parentForm: FormGroup;
-  contourRepresentations: ContourRepresentation[];
+  contourRepresentations = [{ id: 1 }];
   constructor(
     private contourRepresentationService: ContourRepresentationService
   ) {}

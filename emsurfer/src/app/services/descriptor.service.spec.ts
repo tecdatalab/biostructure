@@ -12,7 +12,7 @@ class MockErrorHandlerService {
   handleError(error: any) {}
 }
 
-describe("ContourRepresentationService", () => {
+describe("DescriptorService", () => {
   let injector: TestBed;
   let service: DescriptorService;
   let httpMock: HttpTestingController;
@@ -38,14 +38,14 @@ describe("ContourRepresentationService", () => {
     it("should do a get request and return a Descriptor", () => {
       const dummyDescriptor = new Descriptor();
       dummyDescriptor.emd_entry_id = 1;
-      dummyDescriptor.type_descriptor_id = "1";
+      dummyDescriptor.type_descriptor_id = 1;
       dummyDescriptor.numbers = JSON.parse("[1, 2, 3]");
-      service.getDescriptor(5555).then((res: Descriptor) => {
+      service.getDescriptor(5555, 1).then((res: Descriptor) => {
         expect(JSON.stringify(res)).toEqual(JSON.stringify(dummyDescriptor));
       });
 
       const req = httpMock.expectOne(
-        `${service.API_URL}/descriptor/zernike/5555`
+        `${service.API_URL}/descriptor/zernike/5555/1`
       );
       expect(req.request.method).toBe("GET");
       req.flush(dummyDescriptor);
@@ -58,14 +58,14 @@ describe("ContourRepresentationService", () => {
       dummyDescriptorList.descriptors = [];
       dummyDescriptorList.expirationDate = new Date();
       dummyDescriptorList.path = "test";
-      service.getDescriptorsList("5555").then((res: DescriptorsList) => {
+      service.getDescriptorsList("5555", 1).then((res: DescriptorsList) => {
         expect(JSON.stringify(res)).toEqual(
           JSON.stringify(dummyDescriptorList)
         );
       });
 
       const req = httpMock.expectOne(
-        `${service.API_URL}/descriptor/zernikelist/5555`
+        `${service.API_URL}/descriptor/zernikelist/5555/1`
       );
       expect(req.request.method).toBe("GET");
       req.flush(dummyDescriptorList);
