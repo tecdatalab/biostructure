@@ -113,7 +113,7 @@ describe("SearchFormComponent", () => {
       spyOn(router, "navigate");
       component.submitHandler();
       const expectedQueryParams = {
-        contourRepresentation: 0,
+        contourRepresentation: 1,
         volumeFilter: "On",
         minResolution: null,
         maxResolution: null
@@ -142,7 +142,7 @@ describe("SearchFormComponent", () => {
         filename: "test_file.map",
         mapId: 4444,
         contourLevel: 3.14,
-        contourRepresentation: 0,
+        contourRepresentation: 1,
         volumeFilter: "On",
         minResolution: null,
         maxResolution: null

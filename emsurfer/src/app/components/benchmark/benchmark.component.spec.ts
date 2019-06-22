@@ -72,7 +72,7 @@ describe("BenchmarkComponent", () => {
       component.submitHandler();
       const expectedQueryParams = {
         emdbIdList: "1010,1884,5502",
-        contourRepresentation: 0,
+        contourRepresentation: 1,
         volumeFilter: "On",
         topResults: 20
       };
