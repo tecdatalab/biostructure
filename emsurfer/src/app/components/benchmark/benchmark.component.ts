@@ -41,6 +41,8 @@ export class BenchmarkComponent implements OnInit {
 
   goToZernikeModule() {
     const url = "/zernike/";
+    const idList = this.getIdList();
+    /*
     let idList = "";
     if (this.cbEmdbList) {
       idList = this.benchmarkForm.get("emdb_id_list").value;
@@ -48,8 +50,10 @@ export class BenchmarkComponent implements OnInit {
       idList = this.benchmarkForm.get("file").value;
     }
     idList = idList.replace(/\r?\n/g, ",");
+    */
     const params = {
-      emdbList: idList
+      emdbList: idList,
+      contour: this.benchmarkForm.get("contour_representation").value
     };
     this.router.navigate([url], {
       queryParams: params
@@ -60,6 +64,17 @@ export class BenchmarkComponent implements OnInit {
     this.benchmarkForm.reset(this.defaultFormState);
     this.cbEmdbList = false;
     this.cbEmdbListChange();
+  }
+
+  getIdList() {
+    let idList = "";
+    if (this.cbEmdbList) {
+      idList = this.benchmarkForm.get("emdb_id_list").value;
+    } else {
+      idList = this.benchmarkForm.get("file").value;
+    }
+    idList = idList.replace(/\r?\n/g, ",");
+    return idList;
   }
 
   submitHandler() {
