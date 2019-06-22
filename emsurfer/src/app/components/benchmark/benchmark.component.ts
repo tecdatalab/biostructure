@@ -42,15 +42,6 @@ export class BenchmarkComponent implements OnInit {
   goToZernikeModule() {
     const url = "/zernike/";
     const idList = this.getIdList();
-    /*
-    let idList = "";
-    if (this.cbEmdbList) {
-      idList = this.benchmarkForm.get("emdb_id_list").value;
-    } else {
-      idList = this.benchmarkForm.get("file").value;
-    }
-    idList = idList.replace(/\r?\n/g, ",");
-    */
     const params = {
       emdbList: idList,
       contour: this.benchmarkForm.get("contour_representation").value
@@ -86,13 +77,7 @@ export class BenchmarkComponent implements OnInit {
       volumeFilter: this.benchmarkForm.get("volume_filter").value,
       topResults: this.benchmarkForm.get("top_results").value
     };
-    let idList = "";
-    if (this.cbEmdbList) {
-      idList = this.benchmarkForm.get("emdb_id_list").value;
-    } else {
-      idList = this.benchmarkForm.get("file").value;
-    }
-    idList = idList.replace(/\r?\n/g, ",");
+    let idList = this.getIdList();
     params.emdbIdList = idList;
     this.router.navigate([url], {
       queryParams: params
