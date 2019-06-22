@@ -6,6 +6,7 @@ import { Biomolecule } from "src/app/models/biomolecule";
 import { BiomoleculeComparison } from "src/app/models/biomolecule-comparison";
 import { DescriptorService } from "src/app/services/descriptor.service";
 import { StringPadder } from "src/app/models/string-padder";
+import { Descriptor } from "src/app/models/descriptor";
 
 @Component({
   selector: "app-search-result",
@@ -55,17 +56,10 @@ export class SearchResultComponent implements OnInit {
         .then((biomoleculeResponse: Biomolecule) => {
           if (biomoleculeResponse) {
             this.biomolecule = biomoleculeResponse;
-            /*
-            this.biomoleculeSearchService
-              .getZernikeDescriptors(emdbId, contourRepresentation)
-              .then(response => {
-                this.setValues(response);
-              });
-              */
             this.descriptorService
               .getDescriptor(emdbId, contourRepresentation)
-              .then(response => {
-                console.log(response);
+              .then((response: Descriptor) => {
+                this.setValues(response.numbers);
               });
             this.biomoleculeSearchService
               .getSimilarBioMolecules(
