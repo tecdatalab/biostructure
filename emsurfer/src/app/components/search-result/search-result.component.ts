@@ -4,6 +4,7 @@ import { Chart } from "chart.js";
 import { BiomoleculeSearchService } from "../../services/biomolecule-search.service";
 import { Biomolecule } from "src/app/models/biomolecule";
 import { BiomoleculeComparison } from "src/app/models/biomolecule-comparison";
+import { DescriptorService } from "src/app/services/descriptor.service";
 import { StringPadder } from "src/app/models/string-padder";
 
 @Component({
@@ -26,6 +27,7 @@ export class SearchResultComponent implements OnInit {
 
   constructor(
     private biomoleculeSearchService: BiomoleculeSearchService,
+    private descriptorService: DescriptorService,
     private route: ActivatedRoute
   ) {
     this.stringPadder = new StringPadder();
@@ -53,10 +55,17 @@ export class SearchResultComponent implements OnInit {
         .then((biomoleculeResponse: Biomolecule) => {
           if (biomoleculeResponse) {
             this.biomolecule = biomoleculeResponse;
+            /*
             this.biomoleculeSearchService
               .getZernikeDescriptors(emdbId, contourRepresentation)
               .then(response => {
                 this.setValues(response);
+              });
+              */
+            this.descriptorService
+              .getDescriptor(emdbId, contourRepresentation)
+              .then(response => {
+                console.log(response);
               });
             this.biomoleculeSearchService
               .getSimilarBioMolecules(
@@ -74,6 +83,7 @@ export class SearchResultComponent implements OnInit {
         });
       this.isSearchById = true;
     } else {
+      //Search by custom .map file
       this.filename = this.route.snapshot.queryParamMap.get("filename");
       const contourLevel = +this.route.snapshot.queryParamMap.get(
         "contourLevel"

@@ -7,6 +7,7 @@
       formControlName="contour_representation"
       class="custom-select mr-sm-2"
       id="contour"
+      [ngModel]="contourRepresentations[0].id"
     >
       <option
         *ngFor="let contour of contourRepresentations"
