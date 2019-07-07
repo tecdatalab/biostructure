@@ -16,14 +16,14 @@ dir = ""
 images_path = "assets/img/front/{0}.png"
 gif_path = "assets/img/gif/{0}.gif"
 
-def generateGif(emd_id):
+def generateGif(emd_id, contour_level):
     mapReader = reader.Reader()
     mapReader.open("{0}temp/emd_{1}.map".format(dir,emd_id))
     #Get map object
     myMap = mapReader.read()
     # Create visualizer with a map surface threshold level
     # Otherwise use otsu threshold
-    v= Visualizer(myMap, level=0.39)
+    v= Visualizer(myMap, level=contour_level)
     #v = Visualizer(myMap)
     # Watershed 
     v.segmentate()

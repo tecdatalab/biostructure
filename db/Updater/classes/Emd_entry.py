@@ -885,14 +885,22 @@ class Emd_entry(Map_information):
     def __update_emd_entry(self, cur):
         cur.execute(sql.SQL("UPDATE emd_entry SET full_name = %s, acronym = %s, volume = %s, resolution = %s, image_url = %s, png_img_3d = %s, gif_img_3d = %s, xml_url = %s, map_url = %s, map_information_id = %s WHERE id = %s;")
         ,[self.full_name,self.acronym,self.volume,self.resolution,self.image_url,self.png_img_3d,self.gif_img_3d,self.xml_url,self.map_url,self.map_id,self.id])    
+    
+    def __update_emd_entry_without_images(self, cur):
+        cur.execute(sql.SQL("UPDATE emd_entry SET full_name = %s, acronym = %s, volume = %s, resolution = %s, image_url = %s, xml_url = %s, map_url = %s, map_information_id = %s WHERE id = %s;")
+        ,[self.full_name,self.acronym,self.volume,self.resolution,self.image_url,self.xml_url,self.map_url,self.map_id,self.id])    
         
     def insert_db(self, cur):
         self.__insert_map_db(cur)
         self.__insert_emd_entry(cur)
-        
+    
     def update_db(self, cur):
         self.__update_map_db(cur)
         self.__update_emd_entry(cur)
+
+    def update_db_without_images(self, cur):
+        self.__update_map_db(cur)
+        self.__update_emd_entry_without_images(cur)
 
     def get_id(self):
         return self.__id
