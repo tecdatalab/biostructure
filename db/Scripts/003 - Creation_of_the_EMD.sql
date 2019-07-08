@@ -19,7 +19,7 @@ CREATE TABLE emd_entry(
     full_name TEXT NOT NULL,
     acronym TEXT NOT NULL,
     volume FLOAT8,
-    resolution FLOAT8 NOT NULL,
+    resolution FLOAT8,
     image_url TEXT,
     png_img_3d TEXT,
     gif_img_3d TEXT,
