@@ -43,9 +43,9 @@ def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mod
     cursor_sql = conec_sql.get_cursor()
     
     if mode == 'c':
-        emds = conec_ftp.get_all_emds_id()
+        emds = conec_ftp.get_all_emds_id(initialEMD)
     else:
-        emds = conec_ftp.get_emds_higher_than_date(conec_sql.last_update())
+        emds = conec_ftp.get_emds_higher_than_date(conec_sql.last_update(),initialEMD)
     
     print("Total changes",len(emds))
     k=1
@@ -61,7 +61,15 @@ def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mod
         download_file(i)
         
         if image == 'T':
-            imagpath,gifpath = gifG.generateGif(i,temp_emd_entry.map_countour_level)
+            try:
+                imagpath,gifpath = gifG.generateGif(i,temp_emd_entry.map_countour_level)
+            except Exception as e:
+                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
+                log_file.write("Error in the images generation of EMD {0}".format(i))
+                log_file.write(str(e))
+                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
+                print("Error in image generator")
+                print(str(e))
         else:
             imagpath,gifpath = None, None
         
@@ -70,22 +78,58 @@ def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mod
         
         if len(map_result)==1:
             temp_emd_entry.map_id = map_result[0]
-            if image == 'T':
-                temp_emd_entry.update_db(cursor_sql)
-            else:
-                temp_emd_entry.update_db_without_images(cursor_sql)
+            try:
+                if image == 'T':
+                    temp_emd_entry.update_db(cursor_sql)
+                else:
+                    temp_emd_entry.update_db_without_images(cursor_sql)
+            except Exception as e:
+                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
+                log_file.write("Error in the update of EMD {0}".format(i))
+                log_file.write(str(e))
+                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
+                print("Error in the update")
+                print(str(e))
+            
             if descriptor == 'T':
-                update_descriptor(temp_emd_entry,cursor_sql)
+                try:
+                    update_descriptor(temp_emd_entry,cursor_sql)
+                except Exception as e:
+                    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
+                    log_file.write("Error in the descriptor generation of EMD {0}".format(i))
+                    log_file.write(str(e))
+                    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
+                    print("Error in descriptor generator")
+                    print(str(e))
+                    
             temp_time_stamp.update_db(cursor_sql)
         else:
-            temp_emd_entry.insert_db(cursor_sql)
+            try:
+                temp_emd_entry.insert_db(cursor_sql)
+            except Exception as e:
+                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
+                log_file.write("Error in the insert of EMD {0}".format(i))
+                log_file.write(str(e))
+                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
+                print("Error in the insert")
+                print(str(e))
+            
             if descriptor == 'T':
-                insert_descriptor(temp_emd_entry,cursor_sql)
+                try:
+                    insert_descriptor(temp_emd_entry,cursor_sql)
+                except Exception as e:
+                    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
+                    log_file.write("Error in the descriptor generation of EMD {0}".format(i))
+                    log_file.write(str(e))
+                    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
+                    print("Error in descriptor generator")
+                    print(str(e))
+                    
             temp_time_stamp.insert_db(cursor_sql)
         
         remove_map(i)
         conec_sql.commit()
-        print("Execution actual: {0} with EMD: {1}".format(k,i))
+        print("Actual execution : {0} with EMD: {1}".format(k,i))
         k+=1
     
     if(conec_sql.last_update().date()!=date.today()):

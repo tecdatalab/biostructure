@@ -40,27 +40,29 @@ class FTP_connection(object):
         self.__ftp.close()
         
         
-    def get_all_emds_id(self):
+    def get_all_emds_id(self,initialEMD):
         files = []
         result = []
         self.__ftp.retrlines("NLST",files.append)
-        #for i in range(len(files)):
-        #    try:
-        #        self.__ftp.voidcmd("MDTM EMD-{0}/map/emd_{0}.map.gz".format(files[i].replace("EMD-", "")))
-        #        result.append(files[i].replace("EMD-", ""))
-        #    except:
-        #        pass
-        for i in range(0,4):
+        for i in range(len(files)):
+            if int(files[i].replace("EMD-", ""))<int(initialEMD):
+                continue
             try:
                 self.__ftp.voidcmd("MDTM EMD-{0}/map/emd_{0}.map.gz".format(files[i].replace("EMD-", "")))
                 result.append(files[i].replace("EMD-", ""))
             except:
-                pass    
+                pass
+        #for i in range(0,4):
+        #    try:
+        #        self.__ftp.voidcmd("MDTM EMD-{0}/map/emd_{0}.map.gz".format(files[i].replace("EMD-", "")))
+        #        result.append(files[i].replace("EMD-", ""))
+        #    except:
+        #        pass    
         return result
     
     
-    def get_emds_higher_than_date(self,date):
-        emds_id = self.get_all_emds_id()
+    def get_emds_higher_than_date(self,date,initialEMD):
+        emds_id = self.get_all_emds_id(initialEMD)
         result = []
         for emd in emds_id:
             time_xml = None
