@@ -1,6 +1,4 @@
 import sys
-from _ast import arg
-from code import args
 sys.path.append('../')
 from connections.FTP_connection import FTP_connection
 from connections.SQL_connection import SQL_connection
@@ -140,14 +138,14 @@ def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mod
     cursor_sql.close()
     
 
-def main(emd_url_server, emd_url_path):
+def main(emd_url_server, emd_url_path, initialEMD, mode, image, descriptor):
     valg.emd_url = "http://{0}{1}".format(emd_url_server,emd_url_path)
     conec_ftp = FTP_connection(ftp_server=emd_url_server)
     conec_ftp.init_connection(initial_directory="{0}{1}".format(emd_url_path,"/structures/"))
     conec_sql = SQL_connection()
     conec_sql.init_connection()
     
-    update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path)
+    update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mode, image, descriptor)
         
     conec_sql.close_connection()    
     conec_ftp.close_connection()
