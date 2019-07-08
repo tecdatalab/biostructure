@@ -18,7 +18,7 @@ CREATE TABLE emd_entry(
     id INT PRIMARY KEY, /* The id corresponds to the 4 digits of EMDB */
     full_name TEXT NOT NULL,
     acronym TEXT NOT NULL,
-    volume FLOAT8 NOT NULL,
+    volume FLOAT8,
     resolution FLOAT8 NOT NULL,
     image_url TEXT,
     png_img_3d TEXT,
