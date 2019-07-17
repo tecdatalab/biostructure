@@ -155,7 +155,7 @@ if __name__== "__main__":
     parser = argparse.ArgumentParser(description='Calculation of data for EMD.')
     parser.add_argument('-l','--log', help='Log file name.', default='log.txt')
     parser.add_argument('-ie','--initialEMD', help='Initial EMD for execution.', default='0001')
-    parser.add_argument('-fe','--finalEMD', help='Final EMD for execution (use "inf" for a complete execution).', default='-')
+    parser.add_argument('-fe','--finalEMD', help='Final EMD for execution (use "inf" for a complete execution).', default='inf')
     required_arguments = parser.add_argument_group('required arguments')
     required_arguments.add_argument('-m', '--mode', choices=['c','u'], help='Execution mode, where "c" is complete and "u" update.', required=True)
     required_arguments.add_argument('-i', '--image', choices=['Y','N'], help='Generation of images and gif where "Y" is yes and "N" is no.', required=True)
