@@ -37,13 +37,13 @@ def update_descriptor(emd_entry_p,cursor_sql):
         des_temp = Descriptor(emd_entry_p.id,i+1,result[i])
         des_temp.update_db(cursor_sql)
 
-def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mode, image, descriptor):
+def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mode, image, descriptor, finalEMD):
     cursor_sql = conec_sql.get_cursor()
     
     if mode == 'c':
-        emds = conec_ftp.get_all_emds_id(initialEMD)
+        emds = conec_ftp.get_all_emds_id(initialEMD,finalEMD)
     else:
-        emds = conec_ftp.get_emds_higher_than_date(conec_sql.last_update(),initialEMD)
+        emds = conec_ftp.get_emds_higher_than_date(conec_sql.last_update(),initialEMD,finalEMD)
     
     print("Total changes",len(emds))
     k=1
@@ -138,14 +138,14 @@ def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mod
     cursor_sql.close()
     
 
-def main(emd_url_server, emd_url_path, initialEMD, mode, image, descriptor):
+def main(emd_url_server, emd_url_path, initialEMD, mode, image, descriptor, finalEMD):
     valg.emd_url = "http://{0}{1}".format(emd_url_server,emd_url_path)
     conec_ftp = FTP_connection(ftp_server=emd_url_server)
     conec_ftp.init_connection(initial_directory="{0}{1}".format(emd_url_path,"/structures/"))
     conec_sql = SQL_connection()
     conec_sql.init_connection()
     
-    update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mode, image, descriptor)
+    update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mode, image, descriptor, finalEMD)
         
     conec_sql.close_connection()    
     conec_ftp.close_connection()
@@ -155,6 +155,7 @@ if __name__== "__main__":
     parser = argparse.ArgumentParser(description='Calculation of data for EMD.')
     parser.add_argument('-l','--log', help='Log file name.', default='log.txt')
     parser.add_argument('-ie','--initialEMD', help='Initial EMD for execution.', default='0001')
+    parser.add_argument('-fe','--finalEMD', help='Final EMD for execution (use "inf" for a complete execution).', default='-')
     required_arguments = parser.add_argument_group('required arguments')
     required_arguments.add_argument('-m', '--mode', choices=['c','u'], help='Execution mode, where "c" is complete and "u" update.', required=True)
     required_arguments.add_argument('-i', '--image', choices=['Y','N'], help='Generation of images and gif where "Y" is yes and "N" is no.', required=True)
@@ -164,7 +165,7 @@ if __name__== "__main__":
     log_file = open(args.log, 'a+')  # open file in append mode
     log_file.write("========================================")
     ini = time() 
-    main("ftp.wwpdb.org", "/pub/emdb", args.initialEMD, args.mode, args.image, args.descriptor)
+    main("ftp.wwpdb.org", "/pub/emdb", args.initialEMD, args.mode, args.image, args.descriptor, args.finalEMD)
     final = time() 
     ejec = final - ini
     log_file.close()
