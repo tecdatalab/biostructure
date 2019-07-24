@@ -1,6 +1,7 @@
 const biomolecule = require("../models/biomoleculeModel");
 const search_history = require("../models/searchHistoryModel");
-const Op = require("../database").Op;
+// const Op = require("../database").Op;
+const Sequelize = require("sequelize");
 
 exports.searchByID = async (req, res) => {
   try {
@@ -121,6 +122,13 @@ function checkMaxResolutionFilter(maxRes) {
   }
 }
 
+/**
+ * Function 'getBiomolecules' Updated to work with the SP of Luis in the DB
+ * Updated by: Esteban Sanabria
+ * Date: 24/07/2019
+ */
+
+// OLD VERSION
 async function getBiomolecules(minRes, maxRes) {
   try {
     let biomolecules = await biomolecule.findAll({
@@ -140,8 +148,39 @@ async function getBiomolecules(minRes, maxRes) {
         euc_distance: 5
       });
     });
+
     return resultArray;
   } catch (err) {
     return err;
   }
 }
+
+/*
+async function getBiomolecules(emd_id_p, type_descriptor, top_can) {
+  try {
+
+    // Query to DB
+    let biomolecules = await Sequelize.query('CALL top_distance(' + 
+                                              emd_id_p.toString() + ',' + 
+                                              type_descriptor.toString() + ',' +
+                                              top_can.toString() + ')')
+
+    // final result array
+    let resultArray = [];
+
+    // Clasification Process
+    biomolecules.forEach(biomoleculeItem => {
+      resultArray.push({
+        biomolecule: biomoleculeItem.get({
+          plain: true
+        }),
+        euc_distance: 5
+      });
+    });
+
+    return resultArray;
+  } catch (err) {
+    return err;
+  }
+}
+*/
