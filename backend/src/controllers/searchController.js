@@ -1,7 +1,7 @@
 const biomolecule = require("../models/biomoleculeModel");
 const search_history = require("../models/searchHistoryModel");
 // const Op = require("../database").Op;
-const Sequelize = require("sequelize");
+const sequelize = require("../database").sequelize;
 
 exports.searchByID = async (req, res) => {
   try {
@@ -160,7 +160,7 @@ async function getBiomolecules(emd_id_p, type_descriptor, top_can) {
   try {
 
     // Query to DB
-    let biomolecules = await Sequelize.query('CALL top_distance(' + 
+    let biomolecules = await sequelize.query('CALL top_distance(' + 
                                               emd_id_p.toString() + ',' + 
                                               type_descriptor.toString() + ',' +
                                               top_can.toString() + ')')
