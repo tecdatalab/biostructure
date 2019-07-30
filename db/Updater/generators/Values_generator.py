@@ -6,10 +6,7 @@ Created on 28 abr. 2019
 import os
 import requests
 
-dir = ""
-emd_url = "http://ftp.ebi.ac.uk/pub/databases/emdb"
-
-def download_file(emd_id):
+def download_file(emd_id, emd_url):
     URL = "{1}/structures/EMD-{0}/map/emd_{0}.map.gz".format(emd_id,emd_url)
     response = requests.get(URL)
     with open('{0}temp/emd_{1}.map.gz'.format(dir,emd_id), 'wb') as file:
@@ -46,6 +43,8 @@ def generate_descriptors_files(emd_id, contour, std):
 
 def remove_map(emd_id):
     os.system("rm {0}temp/emd_{1}.map".format(dir,emd_id))
+    os.system("sudo rm -rf {0}temp".format(dir))
+    os.system("mkdir {0}temp".format(dir))
 
 def get_emd_descriptors(emd_id, contour, std):
     

@@ -13,6 +13,7 @@ from generators import Values_generator as valg
 from time import time 
 from generators import Gif_generator as gifG
 import argparse 
+import os
 '''
 Created on 31 mar. 2019
 
@@ -22,6 +23,10 @@ Created on 31 mar. 2019
 valg.dir = "../generators/"
 gifG.dir = "../generators/"
 log_file = None
+
+def update_log_file():
+    log_file.flush()
+    os.fsync(log_file.fileno())
 
 def insert_descriptor(emd_entry_p,cursor_sql):
     result = get_emd_descriptors(emd_entry_p.id,emd_entry_p.map_countour_level,emd_entry_p.map_std)
@@ -48,6 +53,7 @@ def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mod
     print("Total changes",len(emds))
     k=1
     for i in emds:
+        print("Actual execution : {0} with EMD: {1}".format(k,i))
         temp_emd_entry = Emd_entry()
         temp_emd_entry.emd_url = "http://{0}{1}".format(emd_url_server,emd_url_path)
         temp_emd_entry.create_by_ftp(i,conec_ftp.ftp)
@@ -56,18 +62,19 @@ def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mod
         cursor_sql.execute(sql.SQL("SELECT map_information_id FROM emd_entry WHERE id = %s")
         ,[temp_emd_entry.id])
         map_result = [record[0] for record in cursor_sql]
-        download_file(i)
+        download_file(i, "http://{0}{1}".format(emd_url_server,emd_url_path))
         
-        if image == 'T':
+        if image == 'Y':
             try:
                 imagpath,gifpath = gifG.generateGif(i,temp_emd_entry.map_countour_level)
             except Exception as e:
-                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
-                log_file.write("Error in the images generation of EMD {0}".format(i))
-                log_file.write(str(e))
-                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
-                print("Error in image generator")
-                print(str(e))
+                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                log_file.write("Error in the images generation of EMD {0}".format(i)+"\n")
+                log_file.write(str(e)+"\n")
+                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                print("Error in image generator\n")
+                print(str(e)+"\n")
+                update_log_file()
         else:
             imagpath,gifpath = None, None
         
@@ -77,60 +84,65 @@ def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mod
         if len(map_result)==1:
             temp_emd_entry.map_id = map_result[0]
             try:
-                if image == 'T':
+                if image == 'Y':
                     temp_emd_entry.update_db(cursor_sql)
                 else:
                     temp_emd_entry.update_db_without_images(cursor_sql)
             except Exception as e:
-                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
-                log_file.write("Error in the update of EMD {0}".format(i))
-                log_file.write(str(e))
-                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
-                print("Error in the update")
-                print(str(e))
+                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                log_file.write("Error in the update of EMD {0}".format(i)+"\n")
+                log_file.write(str(e)+"\n")
+                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                print("Error in the update\n")
+                print(str(e)+"\n")
+                update_log_file()
             
-            if descriptor == 'T':
+            if descriptor == 'Y':
                 try:
                     update_descriptor(temp_emd_entry,cursor_sql)
                 except Exception as e:
-                    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
-                    log_file.write("Error in the descriptor generation of EMD {0}".format(i))
-                    log_file.write(str(e))
-                    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
-                    print("Error in descriptor generator")
-                    print(str(e))
+                    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                    log_file.write("Error in the descriptor generation of EMD {0}".format(i)+"\n")
+                    log_file.write(str(e)+"\n")
+                    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                    print("Error in descriptor generator\n")
+                    print(str(e)+"\n")
+                    update_log_file()
                     
             temp_time_stamp.update_db(cursor_sql)
         else:
             try:
                 temp_emd_entry.insert_db(cursor_sql)
             except Exception as e:
-                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
-                log_file.write("Error in the insert of EMD {0}".format(i))
-                log_file.write(str(e))
-                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
-                print("Error in the insert")
-                print(str(e))
+                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                log_file.write("Error in the insert of EMD {0}".format(i)+"\n")
+                log_file.write(str(e)+"\n")
+                log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                print("Error in the insert\n")
+                print(str(e)+"\n")
+                update_log_file()
             
-            if descriptor == 'T':
+            if descriptor == 'Y':
                 try:
                     insert_descriptor(temp_emd_entry,cursor_sql)
                 except Exception as e:
-                    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
-                    log_file.write("Error in the descriptor generation of EMD {0}".format(i))
-                    log_file.write(str(e))
-                    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+")
-                    print("Error in descriptor generator")
-                    print(str(e))
+                    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                    log_file.write("Error in the descriptor generation of EMD {0}".format(i)+"\n")
+                    log_file.write(str(e)+"\n")
+                    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                    print("Error in descriptor generator\n")
+                    print(str(e)+"\n")
+                    update_log_file()
                     
             temp_time_stamp.insert_db(cursor_sql)
         
         remove_map(i)
         conec_sql.commit()
-        print("Actual execution : {0} with EMD: {1}".format(k,i))
         k+=1
-    
-    if(conec_sql.last_update().date()!=date.today()):
+    if (conec_sql.last_update() == None):
+        initial_date = Update(date.today())
+        initial_date.insert_db(cursor_sql)
+    elif(conec_sql.last_update().date()!=date.today()):
         update_date = Update(date.today())
         update_date.insert_db(cursor_sql)
     
@@ -163,7 +175,8 @@ if __name__== "__main__":
     args = parser.parse_args()
     
     log_file = open(args.log, 'a+')  # open file in append mode
-    log_file.write("========================================")
+    log_file.write("====================Start====================\n")
+    update_log_file()
     ini = time() 
     main("ftp.wwpdb.org", "/pub/emdb", args.initialEMD, args.mode, args.image, args.descriptor, args.finalEMD)
     final = time() 
