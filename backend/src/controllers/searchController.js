@@ -139,6 +139,7 @@ async function getBiomolecules(minRes, maxRes) {
         }
       }
     });
+    console.log('   \n\n          Esteban esta aqui             \n\n  ');
     let resultArray = [];
     biomolecules.forEach(biomoleculeItem => {
       resultArray.push({

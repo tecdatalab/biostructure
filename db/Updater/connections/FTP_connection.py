@@ -59,7 +59,7 @@ class FTP_connection(object):
         #         result.append(files[i].replace("EMD-", ""))
         #     except:
         #         pass
-        for i in range(0,4):
+        for i in range(0,40):
             try:
                 self.__ftp.voidcmd("MDTM EMD-{0}/map/emd_{0}.map.gz".format(files[i].replace("EMD-", "")))
                 result.append(files[i].replace("EMD-", ""))
