@@ -50,8 +50,10 @@ class SQL_connection(object):
         cursor.execute("SELECT * FROM update ORDER BY last_update DESC")
         updates = [record[0] for record in cursor]
         cursor.close()
-        return datetime.combine(updates[0], datetime.min.time())
-        
+        try:
+            return datetime.combine(updates[0], datetime.min.time())
+        except:
+            return None
         
     def close_connection(self):
         self.__con.close()
