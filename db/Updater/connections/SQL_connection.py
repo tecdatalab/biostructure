@@ -21,7 +21,7 @@ class SQL_connection(object):
     __PSQL_DB   = None
     __con = None
 
-    def __init__(self, PSQL_HOST = "localhost", PSQL_PORT = "5432", PSQL_USER ="postgres" , PSQL_PASS ="root", PSQL_DB = "biomolecules_db"):
+    def __init__(self, PSQL_HOST = "localhost", PSQL_PORT = "5432", PSQL_USER ="postgres" , PSQL_PASS ="sk8amazing", PSQL_DB = "biomolecules_db"):
         self.__PSQL_HOST = PSQL_HOST
         self.__PSQL_PORT = PSQL_PORT
         self.__PSQL_USER = PSQL_USER
