@@ -1,6 +1,6 @@
 const biomolecule = require("../models/biomoleculeModel");
 const search_history = require("../models/searchHistoryModel");
-// const Op = require("../database").Op;
+const Op = require("../database").Op;
 const sequelize = require("../database").sequelize;
 
 exports.searchByID = async (req, res) => {
@@ -54,7 +54,14 @@ exports.searchResult = async (req, res) => {
   try {
     minRes = checkMinResolutionFilter(req.params.minRes);
     maxRes = checkMaxResolutionFilter(req.params.maxRes);
+
     let query_results = await getBiomolecules(minRes, maxRes);
+    // let query_results = await getBiomolecules(12, 1, 5);
+
+    console.log("\n");
+    console.log(query_results);
+    console.log("\n")
+
     let result = {
       path: "/results/result.hit",
       results: query_results
@@ -139,7 +146,9 @@ async function getBiomolecules(minRes, maxRes) {
         }
       }
     });
-    console.log('   \n\n          Esteban esta aqui             \n\n  ');
+
+    console.log(biomolecules);
+    
     let resultArray = [];
     biomolecules.forEach(biomoleculeItem => {
       resultArray.push({
@@ -156,32 +165,36 @@ async function getBiomolecules(minRes, maxRes) {
   }
 }
 
-/*
-async function getBiomolecules(emd_id_p, type_descriptor, top_can) {
-  try {
 
-    // Query to DB
-    let biomolecules = await sequelize.query('CALL top_distance(' + 
-                                              emd_id_p.toString() + ',' + 
-                                              type_descriptor.toString() + ',' +
-                                              top_can.toString() + ')')
+// async function getBiomolecules(emd_id_p, type_descriptor, top_can) {
+//   try {
 
-    // final result array
-    let resultArray = [];
+//     // Query to DB
+//     let biomolecules = await sequelize.query(
+//                   'SELECT * FROM top_distance(:emd_id, :type_des, :top)',
+//                   {replacements: { emd_id: emd_id_p, 
+//                                    type_des: type_descriptor, 
+//                                    top: top_can }
+//                                   });
 
-    // Clasification Process
-    biomolecules.forEach(biomoleculeItem => {
-      resultArray.push({
-        biomolecule: biomoleculeItem.get({
-          plain: true
-        }),
-        euc_distance: 5
-      });
-    });
+//     console.log(biomolecules);
 
-    return resultArray;
-  } catch (err) {
-    return err;
-  }
-}
-*/
+//     // final result array
+//     let resultArray = [];
+
+//     // Clasification Process
+//     biomolecules.forEach(biomoleculeItem => {
+//       resultArray.push({
+//         biomolecule: biomoleculeItem.get({
+//           plain: true
+//         }),
+//         euc_distance: 5
+//       });
+//     });
+
+//     return resultArray;
+//   } catch (err) {
+//     return err;
+//   }
+// }
+
