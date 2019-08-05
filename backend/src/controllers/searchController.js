@@ -146,9 +146,6 @@ function checkMaxResolutionFilter(maxRes) {
 //         }
 //       }
 //     });
-
-//     console.log(biomolecules);
-    
 //     let resultArray = [];
 //     biomolecules.forEach(biomoleculeItem => {
 //       resultArray.push({
@@ -158,7 +155,6 @@ function checkMaxResolutionFilter(maxRes) {
 //         euc_distance: 5
 //       });
 //     });
-
 //     return resultArray;
 //   } catch (err) {
 //     return err;
@@ -182,30 +178,31 @@ async function getBiomolecules(emd_id_p, type_descriptor, top_can) {
 
     // Clasification Process
     biomolecules[0].forEach(biomoleculeItem => {
-
-      console.log(biomoleculeItem);
-      console.log(biomoleculeItem["distance"]);
-      console.log(biomoleculeItem["emd_id"]);
-      console.log();
-
-      searchByID(biomoleculeItem["emd_id"]);
-
-      console.log(bio);
-
-    });                         
-
-    // biomolecules.forEach(biomoleculeItem => {
-    //   resultArray.push({
-    //     biomolecule: biomoleculeItem.get({
-    //       plain: true
-    //     }),
-    //     euc_distance: 5
-    //   });
-    // });
-
+      resultArray.push({
+                biomolecule: searchByID(biomoleculeItem["emd_id"]),
+                euc_distance: biomoleculeItem["distance"]
+              });
+    });                        
     return resultArray;
   } catch (err) {
     return err;
   }
 }
 
+async function searchByID(emdbid){
+  try {
+    let biomolecules = await biomolecule.findOne({
+      where: {
+        id: parseInt(emdbid)
+      }
+    });
+    if (!biomolecules) {
+      console.log("Biomolecule " + emdbid + " not found.");
+      return -1;
+    } else {
+      return biomolecules.get({plain: true});
+    }
+  } catch (err) {
+    return -1;
+  }
+}
