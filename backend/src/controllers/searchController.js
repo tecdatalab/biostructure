@@ -56,7 +56,7 @@ exports.searchResult = async (req, res) => {
     maxRes = checkMaxResolutionFilter(req.params.maxRes);
 
     // let query_results = await getBiomolecules(minRes, maxRes);
-    let query_results = await getBiomolecules(12, 1, 5);
+    let query_results = await getBiomolecules(12, 1, 10);
 
     console.log("\n");
     console.log(query_results);
@@ -161,10 +161,8 @@ function checkMaxResolutionFilter(maxRes) {
 //   }
 // }
 
-
 async function getBiomolecules(emd_id_p, type_descriptor, top_can) {
   try {
-
     // Query to DB
     let biomolecules = await sequelize.query(
                   'SELECT * FROM top_distance(:emd_id, :type_des, :top)',
@@ -172,17 +170,15 @@ async function getBiomolecules(emd_id_p, type_descriptor, top_can) {
                                    type_des: type_descriptor, 
                                    top: top_can }
                                   });
-
     // final result array
     let resultArray = [];
-
     // Clasification Process
     biomolecules[0].forEach(biomoleculeItem => {
       resultArray.push({
                 biomolecule: searchByID(biomoleculeItem["emd_id"]),
                 euc_distance: biomoleculeItem["distance"]
               });
-    });                        
+    });     
     return resultArray;
   } catch (err) {
     return err;
@@ -191,17 +187,19 @@ async function getBiomolecules(emd_id_p, type_descriptor, top_can) {
 
 async function searchByID(emdbid){
   try {
-    let biomolecules = await biomolecule.findOne({
+    await biomolecule.findOne({
       where: {
         id: parseInt(emdbid)
       }
-    });
-    if (!biomolecules) {
-      console.log("Biomolecule " + emdbid + " not found.");
-      return -1;
-    } else {
-      return biomolecules.get({plain: true});
-    }
+    }).then(biomolecules => {
+        if (!biomolecules) {
+          console.log("Biomolecule " + emdbid + " not found.");
+          return -1;
+        } else {
+          return biomolecules.get({plain: true});
+        }
+      }
+    );
   } catch (err) {
     return -1;
   }
