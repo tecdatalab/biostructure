@@ -58,10 +58,6 @@ exports.searchResult = async (req, res) => {
     // let query_results = await getBiomolecules(minRes, maxRes);
     let query_results = await getBiomolecules(12, 1, 10);
 
-    console.log("\n");
-    console.log(query_results);
-    console.log("\n")
-
     let result = {
       path: "/results/result.hit",
       results: query_results
@@ -173,12 +169,14 @@ async function getBiomolecules(emd_id_p, type_descriptor, top_can) {
     // final result array
     let resultArray = [];
     // Clasification Process
-    biomolecules[0].forEach(biomoleculeItem => {
-      resultArray.push({
-                biomolecule: searchByID(biomoleculeItem["emd_id"]),
-                euc_distance: biomoleculeItem["distance"]
-              });
-    });     
+    for (const biomoleculeItem of biomolecules[0]){
+      let bioInfo = await searchByID(biomoleculeItem["emd_id"]);
+      let distance = biomoleculeItem["distance"].toString();
+       resultArray.push({
+                      biomolecule: bioInfo,
+                      euc_distance: distance.substring(0, 5)
+                    });
+    }  
     return resultArray;
   } catch (err) {
     return err;
@@ -186,21 +184,18 @@ async function getBiomolecules(emd_id_p, type_descriptor, top_can) {
 }
 
 async function searchByID(emdbid){
-  try {
-    await biomolecule.findOne({
+    return biomolecule.findOne({
       where: {
         id: parseInt(emdbid)
       }
-    }).then(biomolecules => {
+    }).then((biomolecules) => {
         if (!biomolecules) {
           console.log("Biomolecule " + emdbid + " not found.");
           return -1;
-        } else {
-          return biomolecules.get({plain: true});
         }
-      }
-    );
-  } catch (err) {
-    return -1;
-  }
+        let info = biomolecules["dataValues"];
+        return info;
+      }).catch ((err) => {
+          return -1;
+  });
 }
