@@ -5,7 +5,7 @@ const userController = require("../controllers/userController");
 router.get("/:emdbID", searchController.searchByID);
 
 router.get(
-  "/results/:emdbID/:contourRepresentation/:isVolumeFilterOn/:minRes/:maxRes",
+  "/results/:emdbID/:contourRepresentation/:isVolumeFilterOn/:minRes/:maxRes/:typeDescriptor/:topCan",
   userController.isUserLoggedIn,
   searchController.saveSearch,
   searchController.searchResult

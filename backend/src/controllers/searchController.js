@@ -52,11 +52,18 @@ exports.saveSearch = async (req, res, next) => {
 
 exports.searchResult = async (req, res) => {
   try {
-    minRes = checkMinResolutionFilter(req.params.minRes);
-    maxRes = checkMaxResolutionFilter(req.params.maxRes);
+    // OLD VALUES
+    // minRes = checkMinResolutionFilter(req.params.minRes);
+    // maxRes = checkMaxResolutionFilter(req.params.maxRes);
 
     // let query_results = await getBiomolecules(minRes, maxRes);
-    let query_results = await getBiomolecules(12, 1, 10);
+
+    // NEW PROCEDURE
+    emd_id = req.params.emdbID;
+    type_descriptor = req.params.typeDescriptor;
+    top_can = req.params.topCan;
+
+    let query_results = await getBiomolecules(emd_id, type_descriptor, top_can);
 
     let result = {
       path: "/results/result.hit",
