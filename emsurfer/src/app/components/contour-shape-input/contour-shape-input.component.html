@@ -8,6 +8,7 @@
       class="custom-select mr-sm-2"
       id="contour"
       [ngModel]="contourRepresentations[0].id"
+      (change)="onChange($event.target.value)"
     >
       <option
         *ngFor="let contour of contourRepresentations"
