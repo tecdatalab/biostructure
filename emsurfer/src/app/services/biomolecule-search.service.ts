@@ -70,7 +70,9 @@ export class BiomoleculeSearchService {
     contourRepresentationId: number,
     isVolumeFilterOn: boolean,
     minRes: string,
-    maxRes: string
+    maxRes: string,
+    typeDescriptor: number,
+    topCan: number
   ): Promise<any> {
     let httpHeaders;
     if (this.userService.isUserLoggedIn()) {
@@ -90,7 +92,11 @@ export class BiomoleculeSearchService {
           "/" +
           minRes +
           "/" +
-          maxRes,
+          maxRes +
+          "/" +
+          typeDescriptor +
+          "/" +
+          topCan,
         {
           headers: httpHeaders
         }
