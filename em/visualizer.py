@@ -73,7 +73,7 @@ class Visualizer():
         data = self.molecule.data()
         
         if level!=None:
-            self.th_level = np.min(data) + level * (np.max(data) - np.min(data))
+            self.th_level = level
             print("Using density threshold level: %.4f, ratio: %f" % (self.th_level, level))
         else:
             self.th_level =  threshold_otsu(data)
@@ -94,7 +94,7 @@ class Visualizer():
 
         if self.labels.any() != None:
             V = np.zeros(len(verts), [("position", np.float32, 3),  ("normal", np.float32, 3), ("color", np.float32, 3)])
-            colors = label2rgb(self.labels[verts_index[:,0], verts_index[:,1], verts_index[:,2]])
+            colors = label2rgb(self.labels[verts_index[:,0], verts_index[:,1], verts_index[:,2]], bg_label=0)
             V["color"] = colors * 0.5
         else:
             V = np.zeros(len(verts), [("position", np.float32, 3),  ("normal", np.float32, 3)])
@@ -271,6 +271,7 @@ class Visualizer():
             raise ValueError("Need to segmentate map first")
         else:
             '''
+            OLD
             molecule = self.molecule
             atoms_coords = self.atoms["position"]
             verts = self.verts
@@ -373,23 +374,24 @@ class Visualizer():
 
 
 
-'''
+
 #Read molecule map from file
 mapReader = reader.Reader()
 #Open file
+#mapReader.open("../maps/EMD-2596.map")
 #mapReader.open("../maps/1010/EMD-1010.map")
-#mapReader.open("../maps/1364/EMD-1364.map")
+mapReader.open("../maps/1364/EMD-1364.map")
 #mapReader.open("../maps/5017/EMD-5017.map")
-mapReader.open("../../maps/EMD-2596.map")
+#mapReader.open("emd_8750.map")
 
 #Get map object
 myMap = mapReader.read()
 # Create visualizer with a map surface threshold level
 # Otherwise use otsu threshold
-v= Visualizer(myMap, level=0.40)
+v= Visualizer(myMap, level=23)
 #v = Visualizer(myMap)
 # Watershed 
-v.segmentate(step_sigma=2.5, steps=3)
+v.segmentation(step_sigma=1, steps=0)
 
 # add corresponding atomic structure
 #v.add_structure("../maps/1010/pdb1mi6.ent")
@@ -412,6 +414,6 @@ v.segmentate(step_sigma=2.5, steps=3)
 
 #v.show_atom_matching()
 v.show()
-'''
+
 
 
