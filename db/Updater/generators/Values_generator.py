@@ -4,6 +4,7 @@ Created on 28 abr. 2019
 @author: luis98
 '''
 import os
+import os.path
 import requests
 
 def download_file(emd_id, emd_url):
@@ -19,15 +20,18 @@ def get_min_max_density(emd_id, contour):
     return (float(list_a[10]),float(list_a[11]))
 
 def generate_descriptor_file(emd_id, contour, exit_file_name):
-    os.system("./{0}map2zernike {0}temp/emd_{1}.map -n 20 -c {2}  -p {0}temp/{3}".format(dir,emd_id,contour,exit_file_name))
+    os.system("./{0}map2zernike {0}temp/emd_{1}.map -n 20 -c {2}  -p {0}temp/{3} ".format(dir,emd_id,contour,exit_file_name))
+    if (not os.path.exists("{0}temp/{1}.inv".format(dir,exit_file_name))):
+        raise Exception('Emd descriptor file was not created.')
+
 
 def generate_descriptor_file_for_union(emd_id, contour_list, exit_file_name):
     temp_file_name = "temp"
     for i in contour_list:
-        os.system("./{0}map2zernike {0}temp/emd_{1}.map -n 20 -c {2}  -p {0}temp/{3}".format(dir,emd_id,i,temp_file_name))
-        os.system("tail -$(wc -l {0}temp/{1}.inv | awk '{{print $1-1}}') {0}temp/{1}.inv >> {0}temp/{2}.inv".format(dir,temp_file_name,exit_file_name))
+        generate_descriptor_file(emd_id, i, temp_file_name)
+        os.system("tail -$(wc -l {0}temp/{1}.inv | awk '{{print $1-1}}') {0}temp/{1}.inv >> {0}temp/{2}.inv ".format(dir,temp_file_name,exit_file_name))
 
-    os.system("rm {0}temp/{1}.inv".format(dir,temp_file_name))
+    os.system("rm {0}temp/{1}.inv ".format(dir,temp_file_name))
 
 def generate_descriptors_files(emd_id, contour, std):
     max_density = get_min_max_density(emd_id,contour)[1]
@@ -42,9 +46,8 @@ def generate_descriptors_files(emd_id, contour, std):
     generate_descriptor_file_for_union(emd_id,[contour,one_std_contour],"one_std_contour")
 
 def remove_map(emd_id):
-    os.system("rm {0}temp/emd_{1}.map".format(dir,emd_id))
-    os.system("sudo rm -rf {0}temp".format(dir))
-    os.system("mkdir {0}temp".format(dir))
+    os.system("rm -rf {0}temp ".format(dir))
+    os.system("mkdir {0}temp ".format(dir))
 
 def get_emd_descriptors(emd_id, contour, std):
     
@@ -59,7 +62,7 @@ def get_emd_descriptors(emd_id, contour, std):
             result.append(array)
 
     for i in files:
-        os.system("rm {0}temp/{1}.inv".format(dir,i))
+        os.system("rm {0}temp/{1}.inv ".format(dir,i))
     
     return result
 
