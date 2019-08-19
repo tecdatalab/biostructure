@@ -829,13 +829,13 @@ class Emd_entry(Map_information):
         
         try:
             volumeInformationElement = doc.getElementsByTagName("volume")[0]
-            self.__volume = volumeInformationElement.firstChild.data
+            self.__volume = float(volumeInformationElement.firstChild.data)
         except:
             self.__volume = None
         
         try:
-            volumeInformationElement = doc.getElementsByTagName("resolutionByAuthor")[0]
-            self.__resolution = volumeInformationElement.firstChild.data
+            resolutionInformationElement = doc.getElementsByTagName("resolutionByAuthor")[0]
+            self.__resolution = float(resolutionInformationElement.firstChild.data)
         except:
             self.__resolution = None
             

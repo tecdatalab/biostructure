@@ -98,17 +98,26 @@ def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mod
                 update_log_file()
             
             if descriptor == 'Y':
-                try:
-                    update_descriptor(temp_emd_entry,cursor_sql)
-                except Exception as e:
+                if temp_emd_entry.map_countour_level != None and temp_emd_entry.map_std != None:
+                    try:
+                        update_descriptor(temp_emd_entry,cursor_sql)
+                    except Exception as e:
+                        log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                        log_file.write("Error in the descriptor generation of EMD {0}".format(i)+"\n")
+                        log_file.write(str(e)+"\n")
+                        log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                        print("Error in descriptor generator\n")
+                        print(str(e)+"\n")
+                        update_log_file()
+                else:
                     log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
                     log_file.write("Error in the descriptor generation of EMD {0}".format(i)+"\n")
-                    log_file.write(str(e)+"\n")
+                    log_file.write("Countour level or std not exist.\n")
                     log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
                     print("Error in descriptor generator\n")
-                    print(str(e)+"\n")
+                    print("Countour level or std not exist.\n")
                     update_log_file()
-                    
+
             temp_time_stamp.update_db(cursor_sql)
         else:
             try:
@@ -123,15 +132,25 @@ def update_emd(conec_ftp,conec_sql,emd_url_server, emd_url_path, initialEMD, mod
                 update_log_file()
             
             if descriptor == 'Y':
-                try:
-                    insert_descriptor(temp_emd_entry,cursor_sql)
-                except Exception as e:
+                if temp_emd_entry.map_countour_level != None and temp_emd_entry.map_std != None:
+                    try:
+                        insert_descriptor(temp_emd_entry,cursor_sql)
+                    except Exception as e:
+                        log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                        log_file.write("Error in the descriptor generation of EMD {0}".format(i)+"\n")
+                        log_file.write(str(e)+"\n")
+                        log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
+                        print("Error in descriptor generator\n")
+                        print(str(e)+"\n")
+                        update_log_file()
+
+                else:
                     log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
                     log_file.write("Error in the descriptor generation of EMD {0}".format(i)+"\n")
-                    log_file.write(str(e)+"\n")
+                    log_file.write("Countour level or std not exist.\n")
                     log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
                     print("Error in descriptor generator\n")
-                    print(str(e)+"\n")
+                    print("Countour level or std not exist.\n")
                     update_log_file()
                     
             temp_time_stamp.insert_db(cursor_sql)
