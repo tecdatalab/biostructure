@@ -6,13 +6,17 @@
 }
 
 /* --------------------------------------------- Tablet Styles -------------------------------------------- */
-@media only screen and (min-width: 401px) and (max-width: 960px) {
+@media only screen and (min-width: 401px) and (max-width: 1024px) {
   body {
     background-color: #F5CF8E; /* Yellow */
   }
 }
 
 /* --------------------------------------------- Desktop Styles ------------------------------------------- */
-@media only screen and (min-width: 961px) {
+@media only screen and (min-width: 1025px) {
+
+  *{
+    background-color: white;
+  }
   
 }
