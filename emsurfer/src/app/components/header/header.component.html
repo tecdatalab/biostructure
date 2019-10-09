@@ -1,61 +1,39 @@
-<div class="container-fluid">
-  <app-sign-in></app-sign-in>
-  <img
-    src="assets/img/em-surfer-banner.png"
-    alt="banner"
-    class="img-responsive fit-image"
-  />
+<div class="container-fluid head-banner">
+  <app-sign-in class="google"></app-sign-in>
+  <img src="assets/img/em-surfer-banner.png" alt="banner" class="img-responsive fit-image" />
 </div>
-<div class="container">
+<div class="container dimension">
   <nav class="navbar-dark bg-dark">
     <ul class="nav nav-pills nav-fill">
       <li class="nav-item">
-        <a
-          class="nav-link button"
-          routerLinkActive="button_active"
-          routerLink="home"
-          >Home</a
-        >
+        <a routerLinkActive="button_active" routerLink="2d" class="nav-link button">2D</a>
       </li>
       <li class="nav-item">
-        <a
-          class="nav-link button"
-          routerLinkActive="button_active"
-          routerLink="search"
-          >Search</a
-        >
+        <a routerLinkActive="button_active" routerLink="3d" class="nav-link button">3D</a>
+      </li>
+    </ul>
+  </nav>
+</div>
+<div class="container menu">
+  <nav class="navbar-dark bg-dark">
+    <ul class="nav nav-pills nav-fill">
+      <li class="nav-item">
+        <a class="nav-link button" routerLinkActive="button_active" routerLink="home">Home</a>
       </li>
       <li class="nav-item">
-        <a
-          class="nav-link button"
-          routerLinkActive="button_active"
-          routerLink="benchmark"
-          >Benchmark</a
-        >
+        <a class="nav-link button" routerLinkActive="button_active" routerLink="search">Search</a>
       </li>
       <li class="nav-item">
-        <a
-          class="nav-link button"
-          routerLinkActive="button_active"
-          routerLink="tutorial"
-          >Tutorial</a
-        >
+        <a class="nav-link button" routerLinkActive="button_active" routerLink="benchmark">Benchmark</a>
       </li>
       <li class="nav-item">
-        <a
-          class="nav-link button"
-          routerLinkActive="button_active"
-          routerLink="reference"
-          >Reference</a
-        >
+        <a class="nav-link button" routerLinkActive="button_active" routerLink="tutorial">Tutorial</a>
       </li>
       <li class="nav-item">
-        <a
-          class="nav-link button"
-          routerLinkActive="button_active"
-          routerLink="contact"
-          >Contact</a
-        >
+        <a class="nav-link button" routerLinkActive="button_active" routerLink="reference">Reference</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link button" routerLinkActive="button_active" routerLink="contact">Contact</a>
       </li>
     </ul>
   </nav>
