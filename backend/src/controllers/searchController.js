@@ -1,22 +1,41 @@
 const biomolecule = require("../models/biomoleculeModel");
+const biomolecule_pdb = require("../models/biomoleculeModelPDB");
 const search_history = require("../models/searchHistoryModel");
 const Op = require("../database").Op;
 
 exports.searchByID = async (req, res) => {
   try {
-    const emdbid = req.params.emdbID;
-    let biomolecules = await biomolecule.findOne({
-      where: {
-        id: parseInt(emdbid)
-      }
-    });
-    if (!biomolecules) {
-      console.log("Biomolecule " + emdbid + " not found.");
-      res.status(400).send({
-        message: "Biomolecule " + emdbid + " not found."
+    const table = req.params.app;
+    if (parseInt(table)==1){
+      const emdbid = req.params.ID;
+      let biomolecules = await biomolecule.findOne({
+        where: {
+          id: parseInt(emdbid)
+        }
       });
+      if (!biomolecules) {
+        console.log("Biomolecule " + emdbid + " not found.");
+        res.status(400).send({
+          message: "Biomolecule " + emdbid + " not found."
+        });
+      } else {
+        res.status(200).json(biomolecules);
+      }
     } else {
-      res.status(200).json(biomolecules);
+      const pdbid = req.params.ID;
+      let biomolecules = await biomolecule_pdb.findOne({
+        where: {
+          pdb_id: pdbid
+        }
+      });
+      if (!biomolecules) {
+        console.log("Biomolecule " + pdbid + " not found.");
+        res.status(400).send({
+          message: "Biomolecule " + pdbid + " not found."
+        });
+      } else {
+        res.status(200).json(biomolecules);
+      }
     }
   } catch (err) {
     res.status(500).send({

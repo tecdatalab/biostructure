@@ -2,7 +2,7 @@ const router = require("express").Router();
 const searchController = require("../controllers/searchController");
 const userController = require("../controllers/userController");
 
-router.get("/:emdbID", searchController.searchByID);
+router.get("/:app/:ID", searchController.searchByID);
 
 router.get(
   "/results/:emdbID/:contourRepresentation/:isVolumeFilterOn/:minRes/:maxRes",
