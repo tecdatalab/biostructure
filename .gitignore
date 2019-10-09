@@ -12,6 +12,8 @@
 # generators db
 /db/Updater/classes
 /db/Updater/connections
+/db/Updater/generators
+/db/Updater/Updater
 
 # profiling files
 chrome-profiler-events.json
