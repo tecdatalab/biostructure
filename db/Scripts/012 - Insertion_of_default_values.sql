@@ -20,3 +20,7 @@ INSERT INTO type_descriptor VALUES (1,'EMDB Contour', 'EMDB Contour'),
 (3, 'EMDB Contour + 2/3 core', 'EMDB Contour + 2/3 core'),
 (4, 'MDB Contour + 1/3 + 2/3 core', 'EMDB Contour + 1/3 + 2/3 core'),
 (5, 'EMDB Contour + 1 std dev', 'EMDB Contour + 1 std dev');
+
+INSERT INTO atomic_structure_type VALUES (1,'Complex'),
+(2,'Chain'),
+(3,'Domain');

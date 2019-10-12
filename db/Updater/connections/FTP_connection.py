@@ -5,9 +5,13 @@ Created on 30 mar. 2019
 '''
 from ftplib import FTP
 from mycellanic_classes.pdb_all_result import Pdb_all_result
+from mycellanic_classes.cath_all_result import Cath_all_result
+from mycellanic_classes.cath_domain_boundaries_all_result import Cath_domain_boundaries_all_result
 import datetime
 import urllib.request
 import os
+from xml.dom import minidom
+from classes.Pdb_entry_x_emd_entry import Pdb_entry_x_emd_entry
 
 def max_datetime(date1, date2):
     if date1 == None:
@@ -127,8 +131,124 @@ class FTP_connection(object):
         file.close()
         os.remove("pdb_entry_type.txt")
         return result
-        
-
+    
+    def get_all_cath_chain(self, url = "http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-chain-list.txt"):
+        urllib.request.urlretrieve(url, 'cath-chain-list.txt')
+        file = open("cath-chain-list.txt","r")
+        result = []
+        for line in file:
+            fields = line.split()
+            if fields[0][0]=="#":
+                continue
+            data1 = fields[0]
+            data2 = fields[1]
+            data3 = fields[2]
+            data4 = fields[0]
+            data5 = fields[1]
+            data6 = fields[2]
+            data7 = fields[0]
+            data8 = fields[1]
+            data9 = fields[2]
+            data10 = fields[0]
+            data11 = fields[1]
+            data12 = fields[2]
+            result.append(Cath_all_result(data1,data2,data3,data4,data5,data6,data7,data8,data9,data10,data11,data12))
+        file.close()
+        os.remove("cath-chain-list.txt")
+        return result
+    
+    def get_all_cath_domain_boundarie(self, url = "http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-domain-boundaries-seqreschopping.txt"):
+        urllib.request.urlretrieve(url, 'cath-domain-boundaries-seqreschopping.txt')
+        file = open("cath-domain-boundaries-seqreschopping.txt","r")
+        result = []
+        for line in file:
+            fields = line.split()
+            data1 = fields[0]            
+            temp = fields[1].split(",")
+            data2 = []
+            for i in temp:
+                temp_range = i.split("-")
+                data2.append([int(temp_range[0]),int(temp_range[1])])
+            result.append(Cath_domain_boundaries_all_result(data1,data2))
+        file.close()
+        os.remove("cath-domain-boundaries-seqreschopping.txt")
+        return result
+    
+    def get_all_cath_domain_boundarie_dic(self, url = "http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-domain-boundaries-seqreschopping.txt"):
+        urllib.request.urlretrieve(url, 'cath-domain-boundaries-seqreschopping.txt')
+        file = open("cath-domain-boundaries-seqreschopping.txt","r")
+        dic = {}
+        for line in file:
+            fields = line.split()
+            data1 = fields[0]            
+            temp = fields[1].split(",")
+            data2 = []
+            for i in temp:
+                temp_range = i.split("-")
+                data2.append([int(temp_range[0]),int(temp_range[1])])
+            element = Cath_domain_boundaries_all_result(data1,data2)
+            if dic.get(data1[0:4]) == None:
+                dic[data1[0:4]] = [element]
+            else:
+                dic[data1[0:4]].append(element)
+            
+        file.close()
+        os.remove("cath-domain-boundaries-seqreschopping.txt")
+        return dic
+    
+    def get_all_cath_domain(self, url = "http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-domain-list.txt"):
+        urllib.request.urlretrieve(url, 'cath-domain-list.txt')
+        file = open("cath-domain-list.txt","r")
+        result = []
+        for line in file:
+            fields = line.split()
+            if fields[0][0]=="#":
+                continue
+            data1 = fields[0]
+            data2 = fields[1]
+            data3 = fields[2]
+            data4 = fields[0]
+            data5 = fields[1]
+            data6 = fields[2]
+            data7 = fields[0]
+            data8 = fields[1]
+            data9 = fields[2]
+            data10 = fields[0]
+            data11 = fields[1]
+            data12 = fields[2]
+            result.append(Cath_all_result(data1,data2,data3,data4,data5,data6,data7,data8,data9,data10,data11,data12))
+        file.close()
+        os.remove("cath-domain-list.txt")
+        return result
+    
+    def get_all_pdb_entry_x_emd_entry(self,initialEMD,finalEMD):
+        emds_id = self.get_all_emds_id(initialEMD,finalEMD)
+        result = []
+        for emd in emds_id:
+            url = "http://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/header/emd-{0}.xml".format(emd)
+            urllib.request.urlretrieve(url, 'xml.xml')
+            doc = minidom.parse("{0}.xml".format(emd))
+            
+            pdbs = doc.getElementsByTagName("fittedPDBEntryId")
+            for i in pdbs:
+                result.append(Pdb_entry_x_emd_entry(i,emd)) 
+            os.remove("{0}.xml".format(emd))
+        return result
+    
+    def get_all_pdb_entry_x_emd_entry_higher_than_date(self,date,initialEMD,finalEMD):
+        emds_id = self.get_emds_higher_than_date(date, initialEMD, finalEMD)
+        result = []
+        for emd in emds_id:
+            url = "http://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/header/emd-{0}.xml".format(emd)
+            urllib.request.urlretrieve(url, 'xml.xml')
+            doc = minidom.parse("{0}.xml".format(emd))
+            
+            pdbs = doc.getElementsByTagName("fittedPDBEntryId")
+            for i in pdbs:
+                result.append(Pdb_entry_x_emd_entry(i,emd)) 
+            os.remove("{0}.xml".format(emd))
+        return result
+             
     ftp = property(get_ftp, set_ftp, del_ftp, "ftp's docstring")
 
 '''
