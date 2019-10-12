@@ -4,6 +4,7 @@ from time import time
 from classes.update import Update
 from connections.sql_connection import SQL_connection
 from connections.ftp_connection import FTP_connection
+from classes.atomic_structure import Atomic_structure
 
 '''
 Created on 31 mar. 2019
@@ -25,23 +26,57 @@ def generate_error_message(personalized_error, compute_error):
     print(str(compute_error) + "\n")
     update_log_file()
 
-def update_pdb(connec_ftp, cathComplex, cathDomain, atomic, atomicEmd):
+def update_pdb(connec_ftp, connec_sql, cathComplex, cathDomain, atomic, atomicEmd):
     
+    cursor_sql = connec_sql.get_cursor()
     if atomic == 'Y':
-        
-    else:
+        all_pdb = connec_ftp.get_all_pdb()
+        print("Total changes", len(all_pdb))
+        domain_dic = connec_ftp.get_all_cath_domain_boundarie_dic()
+        k = 1
+        for i in all_pdb:
+            try:
+                temp = Atomic_structure()
+                temp.create_by_online_file(i.data1, domain_dic.get(i.data1))
+                temp.insert_update_db_without_descriptors(cursor_sql)
+            except Exception as e:
+                generate_error_message("Error in the generation of PDB {0}".format(i),e)
+            print ("Actual execution {0} with PDB {1}".format(i, k))
+            k += 1
 
+            connec_sql.commit()
 
-    print("Total changes", len(emds))
+    elif atomic == 'YD':
+        all_pdb = connec_ftp.get_all_pdb()
+        print("Total changes", len(all_pdb))
+        domain_dic = connec_ftp.get_all_cath_domain_boundarie_dic()
+        k = 1
+        for i in all_pdb:
+            try:
+                temp = Atomic_structure()
+                temp.create_by_online_file(i.data1, domain_dic.get(i.data1))
+                temp.calculate_descriptors()
+                temp.insert_update_db(cursor_sql)
+            except Exception as e:
+                generate_error_message("Error in the generation of PDB {0}".format(i),e)
+            print ("Actual execution {0} with PDB {1}".format(i, k))
+            k += 1
 
+            connec_sql.commit()
+
+    connec_sql.commit()
+    cursor_sql.close()
 
 def main(cathComplex, cathDomain, atomic, atomicEmd):
     
     connec_ftp = FTP_connection()
     connec_ftp.init_connection()
+    connec_sql = SQL_connection()
+    connec_sql.init_connection()
 
-    update_pdb(connec_ftp, cathComplex, cathDomain, atomic, atomicEmd)
+    update_pdb(connec_ftp, connec_sql, cathComplex, cathDomain, atomic, atomicEmd)
 
+    connec_sql.close_connection()
     connec_ftp.close_connection()
     print("Finish")
 

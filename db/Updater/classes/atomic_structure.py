@@ -149,6 +149,12 @@ class Atomic_structure(object):
         file.close()
         os.remove("atomic-strcuture.txt")
 
+    def calculate_descriptors(self):
+        pass
+
+    def insert_update_db(self, cursor_sql):
+        pass
+
     def get_id(self):
         return self.__id
 
