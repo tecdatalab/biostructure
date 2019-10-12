@@ -9,42 +9,44 @@ class Pdb_result:
     '''
     classdocs
     '''
-    __data1 = None
-    __data2 = None
-    __data3 = None
+    __id_code = None
+    __structure_type = None
+    __method = None
+    
 
-    def __init__(self, data1, data2, data3):
-        self.__data1 = data1
-        self.__data2 = data2
-        self.__data3 = data3
+    def __init__(self, id_code, method, structure_type):
+        self.__id_code = id_code
+        self.__method = method
+        self.__structure_type = structure_type
 
-    def get_data_1(self):
-        return self.__data1
+    def get_id_code(self):
+        return self.__id_code
 
-    def get_data_2(self):
-        return self.__data2
+    def get_structure_type(self):
+        return self.__structure_type
+    
+    def get_method(self):
+        return self.__method
 
-    def get_data_3(self):
-        return self.__data3
+    def set_id_code(self, value):
+        self.__id_code = value
 
-    def set_data_1(self, value):
-        self.__data1 = value
+    def set_structure_type(self, value):
+        self.__structure_type = value
+    
+    def set_method(self, value):
+        self.__method = value
 
-    def set_data_2(self, value):
-        self.__data2 = value
+    def del_id_code(self):
+        del self.__id_code
 
-    def set_data_3(self, value):
-        self.__data3 = value
+    def del_structure_type(self):
+        del self.__structure_type
 
-    def del_data_1(self):
-        del self.__data1
+    def del_method(self):
+        del self.__method
 
-    def del_data_2(self):
-        del self.__data2
-
-    def del_data_3(self):
-        del self.__data3
-
-    data1 = property(get_data_1, set_data_1, del_data_1, "data1's docstring")
-    data2 = property(get_data_2, set_data_2, del_data_2, "data2's docstring")
-    data3 = property(get_data_3, set_data_3, del_data_3, "data3's docstring")
+    id_code = property(get_id_code, set_id_code, del_id_code, "id_code's docstring")
+    structure_type = property(get_structure_type, set_structure_type, del_structure_type, "structure_type's docstring")
+    method = property(get_method, set_method, del_method, "method's docstring")
+    
