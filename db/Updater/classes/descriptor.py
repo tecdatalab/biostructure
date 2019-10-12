@@ -33,9 +33,8 @@ class Descriptor(object):
         
     def insert_update_db(self, cur):
         cur.execute(
-            sql.SQL("SELECT numbers FROM emd_entry WHERE emd_entry_id = %s and type_descriptor_id = %s;"),[
-                json.dumps(
-                    self.__numbers), self.__emd_entry_id, self.__type_descriptor_id])
+            sql.SQL("SELECT numbers FROM descriptor WHERE emd_entry_id = %s and type_descriptor_id = %s;"),[
+                self.__emd_entry_id, self.__type_descriptor_id])
         result = [record[0] for record in cur]
         if len(result)>0:
             self.update_db(cur)

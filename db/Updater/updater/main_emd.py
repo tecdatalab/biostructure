@@ -44,13 +44,13 @@ def generate_error_message(personalized_error, compute_error):
     print(str(compute_error) + "\n")
     update_log_file()
 
-def update_emd(conec_ftp,conec_sql,initialEMD,mode,image,descriptor,finalEMD):
+def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
     
-    cursor_sql = conec_sql.get_cursor()
+    cursor_sql = connec_sql.get_cursor()
     if mode == 'c':
-        emds = conec_ftp.get_all_emds_id(initialEMD, finalEMD)
+        emds = connec_ftp.get_all_emds_id(initialEMD, finalEMD)
     else:
-        emds = conec_ftp.get_emds_higher_than_date(conec_sql.last_update(), initialEMD, finalEMD)
+        emds = connec_ftp.get_emds_higher_than_date(connec_sql.last_update(), initialEMD, finalEMD)
 
     print("Total changes", len(emds))
 
@@ -58,7 +58,7 @@ def update_emd(conec_ftp,conec_sql,initialEMD,mode,image,descriptor,finalEMD):
     for i in emds:
         print("Actual execution : {0} with EMD: {1}".format(k, i))
         temp_emd_entry = Emd_entry()
-        temp_emd_entry.create_by_ftp(i, conec_ftp.ftp)
+        temp_emd_entry.create_by_ftp(i, connec_ftp.ftp)
         temp_time_stamp = Time_stamp(i, date.today(), temp_emd_entry.map_url, temp_emd_entry.xml_url, temp_emd_entry.image_url)
         
         if image == 'Y' or descriptor == 'Y':
@@ -84,25 +84,25 @@ def update_emd(conec_ftp,conec_sql,initialEMD,mode,image,descriptor,finalEMD):
         
         temp_time_stamp.insert_update_db(cursor_sql)
         remove_map(i)
-        conec_sql.commit()
+        connec_sql.commit()
         k += 1
         
     update_temp = Update(date.today())
-    update_temp.insert_update_db(cursor_sql)
-    conec_sql.commit()
+    update_temp.insert_update_db(connec_sql, cursor_sql)
+    connec_sql.commit()
     cursor_sql.close()
 
 def main(initialEMD, mode, image, descriptor, finalEMD):
     
-    conec_ftp = FTP_connection()
-    conec_ftp.init_connection()
-    conec_sql = SQL_connection()
-    conec_sql.init_connection()
+    connec_ftp = FTP_connection()
+    connec_ftp.init_connection()
+    connec_sql = SQL_connection()
+    connec_sql.init_connection()
 
-    update_emd(conec_ftp, conec_sql, initialEMD, mode, image, descriptor, finalEMD)
+    update_emd(connec_ftp, connec_sql, initialEMD, mode, image, descriptor, finalEMD)
 
-    conec_sql.close_connection()
-    conec_ftp.close_connection()
+    connec_sql.close_connection()
+    connec_ftp.close_connection()
     print("Finish")
 
 

@@ -25,12 +25,13 @@ def get_min_max_density(emd_id, contour):
 
 
 def generate_descriptor_file(emd_id, contour, exit_file_name):
-    os.system(
-        "./{0}map2zernike {0}temp/emd_{1}.map -n 20 -c {2}  -p {0}temp/{3} ".format(
+    execute_string = "./{0}map2zernike {0}temp/emd_{1}.map -n 20 -c {2} -p {0}temp/{3} ".format(
             dir,
             emd_id,
             contour,
-            exit_file_name))
+            exit_file_name)
+    os.system(
+        execute_string)
     if (not os.path.exists("{0}temp/{1}.inv".format(dir, exit_file_name))):
         raise Exception('Emd descriptor file was not created.')
 
