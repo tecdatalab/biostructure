@@ -4,9 +4,7 @@ Created on 30 mar. 2019
 @author: luis98
 '''
 import psycopg2
-from classes.Update import Update
-import datetime
-from datetime import date
+from classes.update import Update
 from datetime import datetime
 
 

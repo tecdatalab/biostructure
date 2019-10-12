@@ -5,7 +5,7 @@ Created on 22 sep. 2019
 '''
 
 
-class Pdb_all_result:
+class Pdb_result:
     '''
     classdocs
     '''

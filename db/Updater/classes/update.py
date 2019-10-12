@@ -3,7 +3,6 @@ Created on 22 feb. 2019
 
 @author: luis98
 '''
-import time
 import datetime
 from datetime import date
 from psycopg2 import sql
@@ -30,7 +29,11 @@ class Update(object):
         cur.execute(
             sql.SQL("INSERT INTO update(last_update) VALUES (%s);"), [
                 self.__last_update])
-
+        
+    def insert_update_db(self, conec_sql, cur):
+        if (conec_sql.last_update() is None or conec_sql.last_update().date() != date.today()):
+            self.insert_db(cur)
+        
     def get_last_update(self):
         return self.__last_update
 

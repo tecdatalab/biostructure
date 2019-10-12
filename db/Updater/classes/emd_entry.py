@@ -8,7 +8,7 @@ import requests
 import json
 from os import remove
 from xml.dom import minidom
-
+from generators import gif_generator as gifG
 
 class Map_information(object):
     '''
@@ -965,6 +965,9 @@ class Emd_entry(Map_information):
 
         self.create_emd_by_file("{0}.xml".format(emd_id), emd_id, have_image)
         remove("{0}.xml".format(emd_id))
+        
+    def create_gif(self):
+        self.png_img_3d, self.gif_img_3d =  gifG.generateGif(self.id, self.map_countour_level)
 
     def create_emd_by_file(self, file, emd_id, have_image):
         self.create_map_by_file(file)
@@ -1059,6 +1062,27 @@ class Emd_entry(Map_information):
     def update_db(self, cur):
         self.__update_map_db(cur)
         self.__update_emd_entry(cur)
+        
+    def insert_update_db(self,cur):
+        cur.execute(
+            sql.SQL("SELECT map_information_id FROM emd_entry WHERE id = %s"), [
+                self.id])
+        result = [record[0] for record in cur]
+        if len(result)>0:
+            self.update_db(cur)
+        else:
+            self.insert_db(cur)
+
+    def insert_without_images_db(self,cur):
+        cur.execute(
+            sql.SQL("SELECT map_information_id FROM emd_entry WHERE id = %s"), [
+                self.id])
+        result = [record[0] for record in cur]
+        if len(result)>0:
+            self.map_id = result[0]
+            self.__update_emd_entry_without_images(cur)
+        else:
+            self.insert_db(cur)
 
     def update_db_without_images(self, cur):
         self.__update_map_db(cur)

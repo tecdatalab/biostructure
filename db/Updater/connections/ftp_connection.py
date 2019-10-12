@@ -4,15 +4,14 @@ Created on 30 mar. 2019
 @author: luis98
 '''
 from ftplib import FTP
-from mycellanic_classes.pdb_all_result import Pdb_all_result
-from mycellanic_classes.cath_all_result import Cath_all_result
-from mycellanic_classes.cath_domain_boundaries_all_result import Cath_domain_boundaries_all_result
+from mycellanic_classes.pdb_result import Pdb_result
+from classes.cath_atomic_structure import Cath_atomic_structure
+from mycellanic_classes.cath_domain_boundaries_result import Cath_domain_boundaries_result
+from xml.dom import minidom
+from classes.pdb_entry_x_emd_entry import Pdb_entry_x_emd_entry
 import datetime
 import urllib.request
 import os
-from xml.dom import minidom
-from classes.Pdb_entry_x_emd_entry import Pdb_entry_x_emd_entry
-
 
 def max_datetime(date1, date2):
     if date1 is None:
@@ -140,7 +139,7 @@ class FTP_connection(object):
             data1 = fields[0]
             data2 = fields[1]
             data3 = fields[2]
-            result.append(Pdb_all_result(data1, data2, data3))
+            result.append(Pdb_result(data1, data2, data3))
         file.close()
         os.remove("pdb_entry_type.txt")
         return result
@@ -168,7 +167,7 @@ class FTP_connection(object):
             data11 = fields[1]
             data12 = fields[2]
             result.append(
-                Cath_all_result(
+                Cath_atomic_structure(
                     data1,
                     data2,
                     data3,
@@ -200,7 +199,7 @@ class FTP_connection(object):
             for i in temp:
                 temp_range = i.split("-")
                 data2.append([int(temp_range[0]), int(temp_range[1])])
-            result.append(Cath_domain_boundaries_all_result(data1, data2))
+            result.append(Cath_domain_boundaries_result(data1, data2))
         file.close()
         os.remove("cath-domain-boundaries-seqreschopping.txt")
         return result
@@ -220,7 +219,7 @@ class FTP_connection(object):
             for i in temp:
                 temp_range = i.split("-")
                 data2.append([int(temp_range[0]), int(temp_range[1])])
-            element = Cath_domain_boundaries_all_result(data1, data2)
+            element = Cath_domain_boundaries_result(data1, data2)
             if dic.get(data1[0:4]) is None:
                 dic[data1[0:4]] = [element]
             else:
@@ -253,7 +252,7 @@ class FTP_connection(object):
             data11 = fields[1]
             data12 = fields[2]
             result.append(
-                Cath_all_result(
+                Cath_atomic_structure(
                     data1,
                     data2,
                     data3,

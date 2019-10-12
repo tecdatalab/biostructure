@@ -5,7 +5,7 @@ Created on 5 oct. 2019
 '''
 
 
-class Cath_all_result(object):
+class Cath_atomic_structure(object):
     '''
     classdocs
     '''

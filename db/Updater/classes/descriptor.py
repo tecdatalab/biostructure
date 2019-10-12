@@ -6,7 +6,6 @@ Created on 22 feb. 2019
 from psycopg2 import sql
 import json
 
-
 class Descriptor(object):
     '''
     classdocs
@@ -31,6 +30,17 @@ class Descriptor(object):
             sql.SQL("UPDATE descriptor SET numbers = %s WHERE emd_entry_id = %s and type_descriptor_id = %s;"), [
                 json.dumps(
                     self.__numbers), self.__emd_entry_id, self.__type_descriptor_id])
+        
+    def insert_update_db(self, cur):
+        cur.execute(
+            sql.SQL("SELECT numbers FROM emd_entry WHERE emd_entry_id = %s and type_descriptor_id = %s;"),[
+                json.dumps(
+                    self.__numbers), self.__emd_entry_id, self.__type_descriptor_id])
+        result = [record[0] for record in cur]
+        if len(result)>0:
+            self.update_db(cur)
+        else:
+            self.insert_db(cur)
 
     def get_emd_entry_id(self):
         return self.__emd_entry_id

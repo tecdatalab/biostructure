@@ -5,7 +5,7 @@ Created on 5 oct. 2019
 '''
 
 
-class Cath_domain_boundaries_all_result(object):
+class Cath_domain_boundaries_result(object):
     __domain = None
     __sequences = []
 

@@ -7,8 +7,6 @@ from psycopg2 import sql
 import json
 import urllib
 import os
-from email._header_value_parser import Domain
-
 
 class Atomic_structure(object):
     '''

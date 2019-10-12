@@ -21,6 +21,11 @@ class Pdb_entry_x_emd_entry(object):
         cur.execute(
             sql.SQL("INSERT INTO pdb_entry_x_emd_entry(pdb_entry_id,emd_entry_id) VALUES (%s,%s);"), [
                 self.__pdb_entry_id, self.__emd_entry_id])
+    
+    def insert_update_db(self, cur):
+        cur.execute(
+            sql.SQL("INSERT INTO pdb_entry_x_emd_entry(pdb_entry_id,emd_entry_id) VALUES (%s,%s);"), [
+                self.__pdb_entry_id, self.__emd_entry_id])
 
     def get_pdb_entry_id(self):
         return self.__pdb_entry_id

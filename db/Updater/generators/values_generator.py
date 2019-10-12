@@ -7,9 +7,10 @@ import os
 import os.path
 import requests
 
+dir = ""
 
-def download_file(emd_id, emd_url):
-    URL = "{1}/structures/EMD-{0}/map/emd_{0}.map.gz".format(emd_id, emd_url)
+def download_file(emd_id):
+    URL = "http://ftp.wwpdb.org/pub/emdb/structures/EMD-{0}/map/emd_{0}.map.gz".format(emd_id)
     response = requests.get(URL)
     with open('{0}temp/emd_{1}.map.gz'.format(dir, emd_id), 'wb') as file:
         file.write(response.content)

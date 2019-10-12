@@ -3,7 +3,6 @@ Created on 22 feb. 2019
 
 @author: luis98
 '''
-import time
 import datetime
 from datetime import date
 from psycopg2 import sql
@@ -47,7 +46,17 @@ class Time_stamp(object):
         cur.execute(
             sql.SQL("UPDATE time_stamp set modification = %s, map_file = %s, xml_file = %s, image_file = %s WHERE emd_entry_id = %s;"), [
                 self.__modification, self.__map_file, self.__xml_file, self.__image_file, self.__emd_entry_id])
-
+        
+    def insert_update_db(self, cur):
+        cur.execute(
+            sql.SQL("SELECT modification FROM time_stamp WHERE emd_entry_id = %s;"),[
+            self.__emd_entry_id])
+        result = [record[0] for record in cur]
+        if len(result)>0:
+            self.update_db(cur)
+        else:
+            self.insert_db(cur)
+    
     def get_emd_entry_id(self):
         return self.__emd_entry_id
 
