@@ -8,7 +8,7 @@ from mycellanic_classes.pdb_result import Pdb_result
 from classes.cath_atomic_structure import Cath_atomic_structure
 from mycellanic_classes.cath_domain_boundaries_result import Cath_domain_boundaries_result
 from xml.dom import minidom
-from classes.pdb_entry_x_emd_entry import Pdb_entry_x_emd_entry
+from classes.atomic_structure_x_emd_entry import Atomic_structure_x_emd_entry
 import datetime
 import urllib.request
 import os
