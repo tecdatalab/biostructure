@@ -1,7 +1,7 @@
 /*
  * Author: Luis Castillo-Valverde.
  * Purpose: Creation of the tables that store
- * the data of the pdb, also as well as the 
+ * the data of the complex, also as well as the 
  * structures related to the pdb.
  */
 
@@ -14,10 +14,10 @@ COMMENT ON TABLE atomic_structure_type IS 'Storage of the different types of ato
 
 CREATE TABLE atomic_structure(
 	id SERIAL PRIMARY KEY,
-	pdb_id TEXT UNIQUE NOT NULL,
+	id_code TEXT UNIQUE NOT NULL,
 	parent INT REFERENCES atomic_structure(id),
     atomic_structure_type_id INT REFERENCES atomic_structure_type(id) NOT NULL,
-    secuence TEXT NOT NULL,
+    sequence TEXT NOT NULL,
     atoms TEXT NOT NULL,
     atoms_count INT NOT NULL,
     aminoacid_count INT NOT NULL,

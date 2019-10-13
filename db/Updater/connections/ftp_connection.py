@@ -154,20 +154,35 @@ class FTP_connection(object):
             fields = line.split()
             if fields[0][0] == "#":
                 continue
-            data1 = fields[0]
-            data2 = fields[1]
-            data3 = fields[2]
-            data4 = fields[0]
-            data5 = fields[1]
-            data6 = fields[2]
-            data7 = fields[0]
-            data8 = fields[1]
-            data9 = fields[2]
-            data10 = fields[0]
-            data11 = fields[1]
-            data12 = fields[2]
+            if len(fields)<12:
+                data1 = fields[0]
+                data2 = fields[1]
+                data3 = fields[2]
+                data4 = fields[3]
+                data5 = fields[4]
+                data6 = fields[5]
+                data7 = fields[6]
+                data8 = fields[7]
+                data9 = fields[8][0]
+                data10 = fields[8][1:-1]
+                data11 = fields[9]
+                data12 = fields[10]
+            else:
+                data1 = fields[0]
+                data2 = fields[1]
+                data3 = fields[2]
+                data4 = fields[3]
+                data5 = fields[4]
+                data6 = fields[5]
+                data7 = fields[6]
+                data8 = fields[7]
+                data9 = fields[8]
+                data10 = fields[9]
+                data11 = fields[10]
+                data12 = fields[11]
             result.append(
                 Cath_atomic_structure(
+                    None,
                     data1,
                     data2,
                     data3,
@@ -239,20 +254,35 @@ class FTP_connection(object):
             fields = line.split()
             if fields[0][0] == "#":
                 continue
-            data1 = fields[0]
-            data2 = fields[1]
-            data3 = fields[2]
-            data4 = fields[0]
-            data5 = fields[1]
-            data6 = fields[2]
-            data7 = fields[0]
-            data8 = fields[1]
-            data9 = fields[2]
-            data10 = fields[0]
-            data11 = fields[1]
-            data12 = fields[2]
+            if len(fields)<12:
+                data1 = fields[0]
+                data2 = fields[1]
+                data3 = fields[2]
+                data4 = fields[3]
+                data5 = fields[4]
+                data6 = fields[5]
+                data7 = fields[6]
+                data8 = fields[7]
+                data9 = fields[8][0]
+                data10 = fields[8][1:-1]
+                data11 = fields[9]
+                data12 = fields[10]
+            else:
+                data1 = fields[0]
+                data2 = fields[1]
+                data3 = fields[2]
+                data4 = fields[3]
+                data5 = fields[4]
+                data6 = fields[5]
+                data7 = fields[6]
+                data8 = fields[7]
+                data9 = fields[8]
+                data10 = fields[9]
+                data11 = fields[10]
+                data12 = fields[11]
             result.append(
                 Cath_atomic_structure(
+                    None,
                     data1,
                     data2,
                     data3,
@@ -269,8 +299,8 @@ class FTP_connection(object):
         os.remove("cath-domain-list.txt")
         return result
 
-    def get_all_pdb_entry_x_emd_entry(self, initialEMD, finalEMD):
-        emds_id = self.get_all_emds_id(initialEMD, finalEMD)
+    def get_all_structure_x_emd_entry(self):
+        emds_id = self.get_all_emds_id('0001', 'inf')
         result = []
         for emd in emds_id:
             url = "http://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/header/emd-{0}.xml".format(
@@ -280,27 +310,9 @@ class FTP_connection(object):
 
             pdbs = doc.getElementsByTagName("fittedPDBEntryId")
             for i in pdbs:
-                result.append(Pdb_entry_x_emd_entry(i, emd))
+                result.append(Atomic_structure_x_emd_entry(i, emd))
             os.remove("{0}.xml".format(emd))
         return result
-
-    def get_all_pdb_entry_x_emd_entry_higher_than_date(
-            self, date, initialEMD, finalEMD):
-        emds_id = self.get_emds_higher_than_date(date, initialEMD, finalEMD)
-        result = []
-        for emd in emds_id:
-            url = "http://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/header/emd-{0}.xml".format(
-                emd)
-            urllib.request.urlretrieve(url, 'xml.xml')
-            doc = minidom.parse("{0}.xml".format(emd))
-
-            pdbs = doc.getElementsByTagName("fittedPDBEntryId")
-            for i in pdbs:
-                result.append(Pdb_entry_x_emd_entry(i, emd))
-            os.remove("{0}.xml".format(emd))
-        return result
-
-    ftp = property(get_ftp, set_ftp, del_ftp, "ftp's docstring")
 
 
 '''

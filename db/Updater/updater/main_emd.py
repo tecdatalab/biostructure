@@ -68,10 +68,16 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
             try:
                 temp_emd_entry.create_gif()
             except Exception as e:
-                generate_error_message("Error in the images generation of EMD {0}".format(i),e)
+                generate_error_message("Error in the images generation of EMD {0}".format(i),e)   
+            try:
                 temp_emd_entry.insert_update_db(cursor_sql)
+            except Exception as e:
+                generate_error_message("Error in the insertion of EMD {0}".format(i),e)
         else:
-            temp_emd_entry.insert_without_images_db(cursor_sql)
+            try:
+                temp_emd_entry.insert_without_images_db(cursor_sql)
+            except Exception as e:
+                generate_error_message("Error in the insertion of EMD {0}".format(i),e)
         
         if descriptor == 'Y':
             if temp_emd_entry.map_countour_level is not None and temp_emd_entry.map_std is not None:
@@ -81,8 +87,11 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
                     generate_error_message("Error in the descriptor generation of EMD {0}".format(i),e)
             else:
                 generate_error_message("Error in the descriptor generation of EMD {0}.Countour level or std not exist.".format(i),None)
+        try:
+            temp_time_stamp.insert_update_db(cursor_sql)
+        except Exception as e:
+            generate_error_message("Error in the time stamp generation of EMD {0}".format(i),e)
         
-        temp_time_stamp.insert_update_db(cursor_sql)
         remove_map(i)
         connec_sql.commit()
         k += 1

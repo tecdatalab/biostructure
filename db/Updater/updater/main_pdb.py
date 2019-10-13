@@ -1,7 +1,6 @@
 import sys, argparse, os
 sys.path.append('../')
 from time import time
-from classes.update import Update
 from connections.sql_connection import SQL_connection
 from connections.ftp_connection import FTP_connection
 from classes.atomic_structure import Atomic_structure
@@ -26,55 +25,79 @@ def generate_error_message(personalized_error, compute_error):
     print(str(compute_error) + "\n")
     update_log_file()
 
-def update_pdb(connec_ftp, connec_sql, cathComplex, cathDomain, atomic, atomicEmd):
+def update_pdb(connec_ftp, connec_sql, cathChain, cathDomain, atomic, atomicEmd):
     
     cursor_sql = connec_sql.get_cursor()
+    #Create atomic structures
     if atomic == 'Y':
         all_pdb = connec_ftp.get_all_pdb()
-        print("Total changes", len(all_pdb))
+        print("Total changes atomic structures", len(all_pdb))
         domain_dic = connec_ftp.get_all_cath_domain_boundarie_dic()
         k = 1
         for i in all_pdb:
+            print ("Actual execution {0} with PDB {1}".format(k, i.id_code))
             try:
                 temp = Atomic_structure()
-                temp.create_by_online_file(i.data1, domain_dic.get(i.data1))
-                temp.insert_update_db_without_descriptors(cursor_sql)
+                temp.create_by_online_file(i.id_code, domain_dic.get(i.id_code))
+                temp.insert_update_db_complex(cursor_sql)
             except Exception as e:
-                generate_error_message("Error in the generation of PDB {0}".format(i),e)
-            print ("Actual execution {0} with PDB {1}".format(i, k))
+                generate_error_message("Error in execution {0} with PDB {1}".format(k, i.id_code),e)
             k += 1
-
             connec_sql.commit()
-
-    elif atomic == 'YD':
-        all_pdb = connec_ftp.get_all_pdb()
-        print("Total changes", len(all_pdb))
-        domain_dic = connec_ftp.get_all_cath_domain_boundarie_dic()
+    #Create cathChain
+    if cathChain == 'Y':
+        all_cathChain = connec_ftp.get_all_cath_chain()
+        print("Total changes cath chain atomic structures", len(all_cathChain))
         k = 1
-        for i in all_pdb:
+        for i in all_cathChain:
+            print ("Actual cath chain {0} with chain {1}".format(k, i.id_code))
             try:
-                temp = Atomic_structure()
-                temp.create_by_online_file(i.data1, domain_dic.get(i.data1))
-                temp.calculate_descriptors()
-                temp.insert_update_db(cursor_sql)
+                i.insert_update_db(cursor_sql)
             except Exception as e:
-                generate_error_message("Error in the generation of PDB {0}".format(i),e)
-            print ("Actual execution {0} with PDB {1}".format(i, k))
+                generate_error_message("Error in execution cath chain {0} with chain {1}".format(k, i.id_code),e)
             k += 1
-
             connec_sql.commit()
-
+    
+    #Create cathDomain
+    if cathDomain == 'Y':
+        all_cathDomain = connec_ftp.get_all_cath_domain()
+        print("Total changes cath domain atomic structures", len(all_cathDomain))
+        k = 1
+        for i in all_cathDomain:
+            print ("Actual cath domain {0} with domain {1}".format(k, i.id_code))
+            try:
+                i.insert_update_db(cursor_sql)
+            except Exception as e:
+                pass
+                generate_error_message("Error in execution cath domain {0} with domain {1}".format(k, i.id_code),e)
+            k += 1
+            connec_sql.commit()
+    
+    #Create atomic x emd
+    if atomicEmd == 'Y':
+        all_cathChain = connec_ftp.get_all_structure_x_emd_entry()
+        print("Total changes atomic structure x emd entry", len(all_cathChain))
+        k = 1
+        for i in cathChain:
+            try:
+                i.insert_update_db(cursor_sql)
+            except Exception as e:
+                generate_error_message("Error in execution atomic structure x emd_entry {0} with atomic_structure {1}, emd_entry {2}".format(k, i.atomic_structure_id , i.emd_entry_id),e)
+            print ("Actual atomic structure x emd_entry {0} with atomic_structure {1}, emd_entry {2}".format(k, i.atomic_structure_id , i.emd_entry_id))
+            k += 1
+            connec_sql.commit()
+    
     connec_sql.commit()
     cursor_sql.close()
 
-def main(cathComplex, cathDomain, atomic, atomicEmd):
+def main(cathChain, cathDomain, atomic, atomicEmd):
     
     connec_ftp = FTP_connection()
     connec_ftp.init_connection()
     connec_sql = SQL_connection()
     connec_sql.init_connection()
 
-    update_pdb(connec_ftp, connec_sql, cathComplex, cathDomain, atomic, atomicEmd)
+    update_pdb(connec_ftp, connec_sql, cathChain, cathDomain, atomic, atomicEmd)
 
     connec_sql.close_connection()
     connec_ftp.close_connection()
@@ -92,11 +115,11 @@ if __name__ == "__main__":
     required_arguments = parser.add_argument_group('required arguments')
     required_arguments.add_argument(
         '-cc',
-        '--cathComplex',
+        '--cathChain',
         choices=[
             'Y',
             'N'],
-        help='Generate cath atomic structures for complex.',
+        help='Generate cath atomic structures for chain.',
         required=True)
     required_arguments.add_argument(
         '-cd',
@@ -111,10 +134,8 @@ if __name__ == "__main__":
         '--atomic',
         choices=[
             'Y',
-            'N',
-            'YD',
-            'ND'],
-        help='Generation atomic structures. Letter D means add descriptors',
+            'N'],
+        help='Generation atomic structures.',
         required=True)
     required_arguments.add_argument(
         '-ae',
@@ -130,7 +151,7 @@ if __name__ == "__main__":
     log_file.write("====================Start====================\n")
     update_log_file()
     ini = time()
-    main(args.cathComplex, args.cathDomain, args.atomic, args.atomicEmd)
+    main(args.cathChain, args.cathDomain, args.atomic, args.atomicEmd)
     final = time()
     ejec = final - ini
     log_file.close()
