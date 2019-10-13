@@ -10,10 +10,7 @@
 /backend/node_modules
 
 # generators db
-/db/Updater/classes
-/db/Updater/connections
-/db/Updater/generators
-/db/Updater/updater
+*.pyc
 
 # profiling files
 chrome-profiler-events.json
