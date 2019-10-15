@@ -1,0 +1,40 @@
+.row{
+  padding-top: 5%;
+  padding-bottom: 5%;
+}
+
+.row .col-8{
+  padding-left: 3%;
+  padding-right: 5%;
+}
+
+.text-bio{
+  color: rgba(223, 181, 46, 1);
+}
+
+.row .col-4 .active{
+  background-color: rgba(223, 181, 46, 0.753);
+}
+
+/* --------------------------------------------- Mobile Styles -------------------------------------------- */
+@media only screen and (max-width: 400px) {
+    body {
+      background-color: #F09A9D; /* Red */
+    }
+  }
+  
+  /* --------------------------------------------- Tablet Styles -------------------------------------------- */
+  @media only screen and (min-width: 401px) and (max-width: 1024px) {
+    body {
+      background-color: #F5CF8E; /* Yellow */
+    }
+  }
+  
+  /* --------------------------------------------- Desktop Styles ------------------------------------------- */
+  @media only screen and (min-width: 1025px) {
+  
+    *{
+      background-color: white;
+    }
+    
+  }
