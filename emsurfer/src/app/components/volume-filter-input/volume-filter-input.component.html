@@ -1,26 +1,27 @@
 <div class="form-group row" [formGroup]="parentForm">
+  <div class="col-sm-1"></div>
   <label class="col-sm-4 col-form-label">
     <strong> Volume filter: </strong>
     (The volume of the EM entry in the database is between 0.8 and 1.2 times the
     volume of the query entry if ON, or else if OFF)
   </label>
-  <div class="custom-control custom-radio col-sm-1 offset-sm-1">
-    <input
-      type="radio"
-      formControlName="volume_filter"
-      class="custom-control-input"
-      id="on"
-      value="On"
-    />
-    <label class="custom-control-label" for="on">On</label>
-  </div>
-  <div class="custom-control custom-radio col-sm-1">
+  <div class="custom-control custom-radio col-sm-1 offset-sm-1" style="margin-top: 6%; margin-right: 6%;">
     <input
       type="radio"
       formControlName="volume_filter"
       class="custom-control-input"
       id="off"
       value="Off"
+    />
+    <label class="custom-control-label" for="on">On</label>
+  </div>
+  <div class="custom-control custom-radio col-sm-1" style="margin-top: 6%;">
+    <input
+      type="radio"
+      formControlName="volume_filter"
+      class="custom-control-input"
+      id="on"
+      value="On"
     />
     <label class="custom-control-label" for="off">Off</label>
   </div>
