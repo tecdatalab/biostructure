@@ -6,7 +6,8 @@ import { CheckerService } from "src/app/services/checker.service";
 
 @Component({
   selector: "app-search-form",
-  templateUrl: "./search-form.component.html"
+  templateUrl: "./search-form.component.html",
+  styleUrls: ['./search-form.component.css'],
 })
 export class SearchFormComponent implements OnInit {
   searchForm: FormGroup;
