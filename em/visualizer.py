@@ -295,16 +295,16 @@ class Visualizer():
             pdb_min = np.min(atoms_coords, axis=0)
             pdb_max = np.max(atoms_coords, axis=0)
             
-            label_centroid = dict()
+            label_coords = dict()
 
             for region in regionprops(self.labels):
-                centroid = 2*(np.array(region.centroid)-map_min)/(map_max-map_min) -1
-                label_centroid[region.label] = centroid
+                coords = 2*(np.array(region.coords)-map_min)/(map_max-map_min) -1
+                label_coords[region.label] = coords
 
             for atom in self.atoms:
                 coord = 2*(atom["position"]-pdb_min)/(pdb_max-pdb_min) -1
-                atom_centroid_dist = {key: np.linalg.norm(label_centroid[key] - coord) for key in label_centroid.keys()}
-                atom["label"] =min(atom_centroid_dist, key=atom_centroid_dist.get)
+                atom_coords_dist = {key: np.min(np.linalg.norm(label_coords[key] - coord)) for key in label_coords.keys()}
+                atom["label"] =min(atom_coords_dist, key=atom_coords_dist.get)
 
             chain_ids, inverse, count = np.unique(self.atoms["chain_id"], return_inverse=True, return_counts=True, axis=0)
             
@@ -378,8 +378,8 @@ class Visualizer():
 #Read molecule map from file
 #mapReader = reader.Reader()
 #Open file
-#mapReader.open("../maps/EMD-1048.map") #level 2.2479
-#mapReader.open("../maps/EMD-2596.map") #level 0.1462
+#mapReader.open("../maps/1010/EMD-1010.map") #level 2.2479
+# #mapReader.open("../maps/EMD-2596.map") #level 0.1462
 #mapReader.open("../maps/1010/EMD-1010.map") #level 23
 #mapReader.open("../maps/1364/EMD-1364.map") #level 39.0086
 #mapReader.open("../maps/5017/EMD-5017.map") #level 17.3347
@@ -389,7 +389,7 @@ class Visualizer():
 #myMap = mapReader.read()
 # Create visualizer with a map surface threshold level
 # Otherwise use otsu threshold
-#v= Visualizer(myMap, level=17.3347)
+#v= Visualizer(myMap, level=9.07)
 #v = Visualizer(myMap)
 # Watershed 
 #v.segmentation(step_sigma=1, steps=3)
