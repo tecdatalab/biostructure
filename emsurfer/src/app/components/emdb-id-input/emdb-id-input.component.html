@@ -1,14 +1,15 @@
 <div class="form-group row" [formGroup]="parentForm">
-  <label for="emdbid" class="col-4 col-form-label"
+  <div class="col-sm-1"></div>
+  <label for="emdbid" class="col-3 col-form-label"
     >4-digit EMDB entry ID:</label
   >
-  <div class="col-8">
+  <div class="col-6 offset-1">
     <input
       id="emdb_id"
       placeholder="EMDB entry ID"
       formControlName="emdb_id"
       type="text"
-      class="form-control"
+      class="form-control border-info"
       maxlength="4"
       [ngClass]="{
         'is-invalid':
