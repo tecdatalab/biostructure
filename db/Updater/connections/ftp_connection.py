@@ -302,16 +302,21 @@ class FTP_connection(object):
     def get_all_structure_x_emd_entry(self):
         emds_id = self.get_all_emds_id('0001', 'inf')
         result = []
+        print(len(emds_id))
+        k = 0
         for emd in emds_id:
             url = "http://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/header/emd-{0}.xml".format(
                 emd)
-            urllib.request.urlretrieve(url, 'xml.xml')
+            urllib.request.urlretrieve(url, "{0}.xml".format(emd))
             doc = minidom.parse("{0}.xml".format(emd))
 
             pdbs = doc.getElementsByTagName("fittedPDBEntryId")
+            
             for i in pdbs:
-                result.append(Atomic_structure_x_emd_entry(i, emd))
+                result.append(Atomic_structure_x_emd_entry(i.firstChild.data, emd))
             os.remove("{0}.xml".format(emd))
+            print(str(k) + str(len(result)))
+            k+=1
         return result
 
 

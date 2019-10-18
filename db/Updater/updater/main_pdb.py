@@ -75,15 +75,15 @@ def update_pdb(connec_ftp, connec_sql, cathChain, cathDomain, atomic, atomicEmd)
     
     #Create atomic x emd
     if atomicEmd == 'Y':
-        all_cathChain = connec_ftp.get_all_structure_x_emd_entry()
-        print("Total changes atomic structure x emd entry", len(all_cathChain))
+        all_se = connec_ftp.get_all_structure_x_emd_entry()
+        print("Total changes atomic structure x emd entry", len(all_se))
         k = 1
-        for i in cathChain:
+        for i in all_se:
+            print ("Actual atomic structure x emd_entry {0} with atomic_structure {1}, emd_entry {2}".format(k, i.atomic_structure , i.emd_entry))
             try:
                 i.insert_update_db(cursor_sql)
             except Exception as e:
-                generate_error_message("Error in execution atomic structure x emd_entry {0} with atomic_structure {1}, emd_entry {2}".format(k, i.atomic_structure_id , i.emd_entry_id),e)
-            print ("Actual atomic structure x emd_entry {0} with atomic_structure {1}, emd_entry {2}".format(k, i.atomic_structure_id , i.emd_entry_id))
+                generate_error_message("Error in execution atomic structure x emd_entry {0} with atomic_structure {1}, emd_entry {2}".format(k, i.atomic_structure , i.emd_entry),e)
             k += 1
             connec_sql.commit()
     
