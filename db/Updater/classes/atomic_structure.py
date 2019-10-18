@@ -38,9 +38,7 @@ class Atomic_structure(object):
             aminoacid_count=None,
             png_img_3d=None,
             gif_img_3d=None,
-            numbers_descriptor=[],
-            domains_strc=[],
-            chains_strc=[]):
+            numbers_descriptor=[]):
         self.__id = id
         self.__id_code = id_code
         self.__parent = parent
@@ -52,8 +50,8 @@ class Atomic_structure(object):
         self.__png_img_3d = png_img_3d
         self.__gif_img_3d = gif_img_3d
         self.__numbers_descriptor = numbers_descriptor
-        self.__domains_strc = domains_strc
-        self.__chains_strc = chains_strc
+        self.__domains_strc = []
+        self.__chains_strc = []
         
     def insert_update_db_complex(self, cur):
         self.insert_update_db(cur)
@@ -71,7 +69,7 @@ class Atomic_structure(object):
                 self.__id_code])
         result = [record[0] for record in cur]
         if len(result)>0:
-            self.id = result[0]
+            self.__id = result[0]
             self.update_db(cur)
         else:
             self.insert_db(cur)
@@ -94,16 +92,6 @@ class Atomic_structure(object):
         else:
             cur.execute(sql.SQL("UPDATE atomic_structure SET parent = %s, atomic_structure_type_id = %s, sequence = %s, atoms = %s, atoms_count = %s, aminoacid_count = %s, png_img_3d = %s, gif_img_3d = %s, numbers_descriptor = %s WHERE id = %s;"), [
                         self.__parent, self.__atomic_structure_type_id, self.__sequence, self.__atoms, self.__atoms_count, self.__aminoacid_count, self.__png_img_3d, self.__gif_img_3d, json.dumps(self.__numbers_descriptor),self.__id])
-
-
-    def update_db_without_descriptors(self, cur):
-        if self.__id is not None:
-            cur.execute(sql.SQL("UPDATE atomic_structure SET parent = %s, atomic_structure_type_id = %s, sequence = %s, atoms = %s, atoms_count = %s, aminoacid_count = %s, png_img_3d = %s, gif_img_3d = %s WHERE id_code = %s);"), [
-                        self.__parent, self.__atomic_structure_type_id, self.__sequence, self.__atoms, self.__atoms_count, self.__aminoacid_count, self.__png_img_3d, self.__gif_img_3d,self.__id_code])
-        else:
-            cur.execute(sql.SQL("UPDATE atomic_structure SET parent = %s, atomic_structure_type_id = %s, sequence = %s, atoms = %s, atoms_count = %s, aminoacid_count = %s, png_img_3d = %s, gif_img_3d = %s WHERE id = %s);"), [
-                        self.__parent, self.__atomic_structure_type_id, self.__sequence, self.__atoms, self.__atoms_count, self.__aminoacid_count, self.__png_img_3d, self.__gif_img_3d,self.__id])
-
     
     def __different_elements(self, list):
         dicc = {}
@@ -113,14 +101,31 @@ class Atomic_structure(object):
                 count += 1
                 dicc[i] = "ok"
         return count
+    
+    def __aminoacid_list(self, list):
+        elements = []
+        for i in list:
+            temp = i.split()
+            temp_add = [temp[3],temp[5]]
+            if temp_add not in elements:
+                elements.append(temp_add)
+        
+        result = []
+        
+        for i in elements:
+            result.append(i[0])
+        
+        return result
 
     def create_by_online_file(self, id_code, domains):
+        
         file_url = "https://files.rcsb.org/download/{0}.pdb".format(str(id_code))
         urllib.request.urlretrieve(file_url, 'atomic-strcuture.txt')
         file = open("atomic-strcuture.txt", "r")
 
         atom_lines = []
         atom_aminoacid = []
+        dic_atom_aminoacid = {}
 
         for line in file:
             line_split = line.split()
@@ -128,7 +133,11 @@ class Atomic_structure(object):
                 atom_lines.append(line)
             elif line_split[0] == "SEQRES":
                 atom_aminoacid += line_split[4:-1]
-
+                
+                if dic_atom_aminoacid.get(line_split[2]) == None:
+                    dic_atom_aminoacid[line_split[2]] = []
+                    dic_atom_aminoacid[line_split[2]] += line_split[4:-1]
+        
         # Create complex
         self.id_code = id_code
         self.atomic_structure_type_id = 1
@@ -147,18 +156,16 @@ class Atomic_structure(object):
                 temp_add = Atomic_structure(
                     None,
                     str(id_code+actual_chain),
-                    None,
+                    id_code,
                     2,
-                    "\n".join(atom_aminoacid),
+                    "\n".join(dic_atom_aminoacid[actual_chain]),
                     "".join(temp_atom_lines),
                     len(temp_atom_lines),
-                    self.__different_elements(temp_atom_lines),
+                    len(dic_atom_aminoacid[actual_chain]),
                     None,
                     None,
-                    [],
-                    [],
                     [])
-                self.chains_strc.append(temp_add)
+                self.__chains_strc.append(temp_add)
                 temp_atom_lines = []
             else:
                 temp_atom_lines.append(atom_lines[i])
@@ -169,22 +176,22 @@ class Atomic_structure(object):
                 add_atoms = []
                 for k in i.sequences:
                     add_atoms += atom_lines[k[0] - 1:k[1]]
+                    
+                atom_aminoacid_domain = self.__aminoacid_list(add_atoms)
 
                 temp = Atomic_structure(
                     None,
                     i.domain,
-                    None,
+                    id_code,
                     3,
-                    "\n".join(atom_aminoacid),
+                    "\n".join(atom_aminoacid_domain),
                     "".join(add_atoms),
                     len(add_atoms),
-                    self.__different_elements(atom_aminoacid),
+                    len(atom_aminoacid_domain),
                     None,
                     None,
-                    [],
-                    [],
                     [])
-                self.domains_strc.append(temp)
+                self.__domains_strc.append(temp)
         file.close()
         os.remove("atomic-strcuture.txt")
 
@@ -313,8 +320,8 @@ class Atomic_structure(object):
                "id_code: {0}".format(self.id_code) + "\n" +
                "parent: {0}".format(self.parent) + "\n" +
                "atomic_structure_type_id: {0}".format(self.atomic_structure_type_id) + "\n" +
-               "sequence: {0}".format(self.sequence) + "\n" +
-               "atoms: {0}".format(self.atoms) +
+               #"sequence: {0}".format(self.sequence) + "\n" +
+               #"atoms: {0}".format(self.atoms) +
                "atoms_count: {0}".format(self.atoms_count) + "\n" +
                "aminoacid_count: {0}".format(self.aminoacid_count) + "\n" +
                "png_img_3d: {0}".format(self.png_img_3d) + "\n" +

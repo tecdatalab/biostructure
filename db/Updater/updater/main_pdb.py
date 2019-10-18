@@ -38,7 +38,7 @@ def update_pdb(connec_ftp, connec_sql, cathChain, cathDomain, atomic, atomicEmd)
             print ("Actual execution {0} with PDB {1}".format(k, i.id_code))
             try:
                 temp = Atomic_structure()
-                temp.create_by_online_file(i.id_code, domain_dic.get(i.id_code))
+                temp.create_by_online_file(i.id_code, domain_dic.get(i.id_code))                    
                 temp.insert_update_db_complex(cursor_sql)
             except Exception as e:
                 generate_error_message("Error in execution {0} with PDB {1}".format(k, i.id_code),e)
