@@ -1,6 +1,7 @@
 const biomolecule = require("../models/biomoleculeModel");
 const biomolecule_pdb = require("../models/biomoleculeModelPDB");
 const search_history = require("../models/searchHistoryModel");
+const cathInfo = require("../models/cathModel");
 const Op = require("../database").Op;
 
 exports.searchByID = async (req, res) => {
@@ -101,6 +102,29 @@ exports.searchResultMap = async (req, res) => {
     });
   }
 };
+
+exports.getCathDetail = async (req, res) => {
+  try {
+    const pdb_id = req.params.ID;
+    let cath = await cathInfo.findOne({
+      where: {
+        atomic_structure_id: pdb_id
+      }
+    });
+    if (!cath) {
+      console.log("Cath information " + pdb_id + " not found.");
+      res.status(400).send({
+        message: "Cath information " + pdb_id + " not found."
+      });
+    } else {
+      res.status(200).json(cath);
+    }
+  }catch (error) {
+    res.status(500).send({
+      message: "Backend error"
+    });
+  }
+}
 
 exports.zernike = async (req, res, next) => {
   response = [];

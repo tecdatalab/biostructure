@@ -1,4 +1,3 @@
-//const cath = require("./cathModel");
 const Sequelize = require("sequelize");
 const sequelize = require("../database").sequelize;
 
@@ -31,7 +30,5 @@ const biomolecule = sequelize.define(
         tableName: "atomic_structure"
     }
 );
-
-//biomolecule.hasOne(cath,{foreignKey:"atomic_structure_id"})
 
 module.exports = biomolecule;
