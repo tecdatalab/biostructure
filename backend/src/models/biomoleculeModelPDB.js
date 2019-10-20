@@ -1,5 +1,6 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../database").sequelize;
+const cathInfo = require("cathModel");
 
 const biomolecule = sequelize.define(
     "pdb_entry",
@@ -31,4 +32,11 @@ const biomolecule = sequelize.define(
     }
 );
 
+//biomolecule.findAll({
+//    include: [{
+//        model: Tool,
+//        required: true,
+//        right: true // has no effect, will create an inner join
+//    }]
+//});
 module.exports = biomolecule;

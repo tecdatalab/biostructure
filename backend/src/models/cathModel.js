@@ -20,8 +20,13 @@ const cath = sequelize.define(
           type: Sequelize.INTEGER
       },
       atomic_structure_id: {
-          type: Sequelize.INTEGER
-      }
+          type: Sequelize.INTEGER,
+          references: {
+              model: biomoleculeModelPBD,
+              key: 'Id',
+              deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
+            }
+        }
     },
     {
       timestamps: false,

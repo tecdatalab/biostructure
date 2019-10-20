@@ -1,7 +1,6 @@
 const biomolecule = require("../models/biomoleculeModel");
 const biomolecule_pdb = require("../models/biomoleculeModelPDB");
 const search_history = require("../models/searchHistoryModel");
-const cathInfo = require("../models/cathModel");
 const Op = require("../database").Op;
 
 exports.searchByID = async (req, res) => {
