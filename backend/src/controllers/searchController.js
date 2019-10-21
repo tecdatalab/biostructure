@@ -4,6 +4,8 @@ const cathInfo_pdb = require("../models/cathModel");
 const search_history = require("../models/searchHistoryModel");
 const Op = require("../database").Op;
 
+//#region General Functions
+
 exports.searchByID = async (req, res) => {
   try {
     const table = req.params.app;
@@ -30,17 +32,6 @@ exports.searchByID = async (req, res) => {
   }
 };
 
-function giveResponse(id, biomolecule, res) {
-  if (!biomolecule) {
-    console.log("Biomolecule " + id + " not found.");
-    return res.status(400).send({
-      message: "Biomolecule " + id + " not found."
-    });
-  } else {
-      return res.status(200).json(biomolecule);  
-  }
-}
-
 exports.saveSearch = async (req, res, next) => {
   try {
     await search_history
@@ -64,6 +55,10 @@ exports.saveSearch = async (req, res, next) => {
     });
   }
 };
+
+//#endregion
+
+//#region Functions for EMDB Queries
 
 exports.searchResult = async (req, res) => {
   try {
@@ -115,9 +110,13 @@ exports.zernikeMap = async (req, res, next) => {
   res.status(200).json(response);
 };
 
+//#endregion
+
+//#region Functions for PDB Queries
+
 exports.getCathDetail = async (req, res) => {
   try {
-    const id = req.params.ID;
+    const id = parseInt(req.params.ID);
     let cath = await cathInfo_pdb.findOne({
       where: {
         atomic_structure_id: id
@@ -137,6 +136,10 @@ exports.getCathDetail = async (req, res) => {
     });
   }
 }
+
+//#endregion
+
+//#region Auxiliar functions
 
 function checkMinResolutionFilter(minRes) {
   if (isNaN(minRes)) {
@@ -184,3 +187,16 @@ async function getBiomolecules(minRes, maxRes) {
     return err;
   }
 }
+
+function giveResponse(id, biomolecule, res) {
+  if (!biomolecule) {
+    console.log("Biomolecule " + id + " not found.");
+    return res.status(400).send({
+      message: "Biomolecule " + id + " not found."
+    });
+  } else {
+      return res.status(200).json(biomolecule);  
+  }
+}
+
+//#endregion

@@ -25,4 +25,6 @@ router.get(
   searchController.zernikeMap
 );
 
+router.get("/:ID",searchController.getCathDetail);
+
 module.exports = router;
