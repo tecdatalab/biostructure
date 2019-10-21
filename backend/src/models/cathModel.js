@@ -4,34 +4,30 @@ const sequelize = require("../database").sequelize;
 const cath = sequelize.define(
     "cathDetail",
     {
-      cath_domain_name: {
-          type: Sequelize.TEXT
-      },
-      class_number: {
-          type: Sequelize.INTEGER
-      },
-      arquitecture_number: {
-          type: Sequelize.INTEGER
-      },
-      topology_number: {
-          type: Sequelize.INTEGER
-      },
-      homologous_superfamily_number: {
-          type: Sequelize.INTEGER
-      },
-      atomic_structure_id: {
-          type: Sequelize.INTEGER,
-          references: {
-              model: biomoleculeModelPBD,
-              key: 'Id',
-              deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
-            }
+        atomic_structure_id: {
+            type: Sequelize.INTEGER,
+            primaryKey : true
+        },
+        class_number: {
+            type: Sequelize.INTEGER
+        },
+        architecture_number: {
+            type: Sequelize.INTEGER
+        },
+        topology_number: {
+            type: Sequelize.INTEGER
+        },
+        homologous_superfamily_number: {
+            type: Sequelize.INTEGER
+        },
+        domain_length: {
+            type: Sequelize.INTEGER
         }
     },
     {
-      timestamps: false,
-      freezeTableName: true,
-      tableName: "cath_x_atomic_structure"
+        timestamps: false,
+        freezeTableName: true,
+        tableName: "cath_atomic_structure"
     }
 );
 

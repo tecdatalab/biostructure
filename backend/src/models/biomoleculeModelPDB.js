@@ -1,6 +1,5 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../database").sequelize;
-const cathInfo = require("cathModel");
 
 const biomolecule = sequelize.define(
     "pdb_entry",
@@ -9,13 +8,13 @@ const biomolecule = sequelize.define(
             type: Sequelize.INTEGER,
             primaryKey : true
         },
-        pdb_id: {
+        id_code: {
             type: Sequelize.STRING
         },
         numbers_descriptor: {
             type: Sequelize.JSON
         },
-        secuence: {
+        sequence: {
             type: Sequelize.STRING
         },
         png_img_3d: {
@@ -32,11 +31,4 @@ const biomolecule = sequelize.define(
     }
 );
 
-//biomolecule.findAll({
-//    include: [{
-//        model: Tool,
-//        required: true,
-//        right: true // has no effect, will create an inner join
-//    }]
-//});
 module.exports = biomolecule;
