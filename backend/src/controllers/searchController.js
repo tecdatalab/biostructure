@@ -137,6 +137,23 @@ exports.getCathDetail = async (req, res) => {
   }
 }
 
+exports.getResultsPDB = async (req, res) => {
+  try {
+    const c = parseInt(req.params.C);
+    const a = parseInt(req.params.A);
+    const t = parseInt(req.params.T);
+    const h = parseInt(req.params.H);
+    const id = parseInt(req.params.ID);
+    let query_results = getBiomoleculesPDB(c,a,t,h,id);
+    res.status(200).json(query_results);
+  } catch (error) {
+    res.status(500).send({
+      message: "Backend error"
+    });
+  }
+  
+}
+
 //#endregion
 
 //#region Auxiliar functions
@@ -182,6 +199,37 @@ async function getBiomolecules(minRes, maxRes) {
         euc_distance: 5
       });
     });
+    return resultArray;
+  } catch (err) {
+    return err;
+  }
+}
+
+async function getBiomoleculesPDB(c,a,t,h,id_pdb){
+  try {
+    let caths = await cathInfo_pdb.findAll({
+      where : {
+        class_numbervolume : c,
+        architecture_number : a,
+        topology_number : t,
+        homologous_superfamily_number : h,
+        atomic_structure_id: { $not : id_pdb }
+      }
+    });
+    let biomolecules = [];
+    caths.forEach(cathItem => {
+      biomolecules.push({
+        biomolecule: biomoleculeItem.findOne({
+          where :{
+            id : cathItem.atomic_structure_id
+          }
+      })
+    });
+  });
+  let resultArray = [];
+  for (let index = 0; index < biomolecules.length; index++) {
+    resultArray.push(biomolecules[index],caths[index]);  
+  }
     return resultArray;
   } catch (err) {
     return err;
