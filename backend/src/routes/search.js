@@ -27,6 +27,6 @@ router.get(
 
 router.get("/:ID",searchController.getCathDetail);
 
-router.get("/:ID/:C/:A/:T/:H/:L", searchController.getResultsPDB)
+router.get("/getResultsPDB/:ID/:C/:A/:T/:H/", searchController.getResultsPDB)
 
 module.exports = router;
