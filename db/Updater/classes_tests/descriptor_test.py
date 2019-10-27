@@ -4,7 +4,7 @@ Created on 10 mar. 2019
 @author: luis98
 '''
 
-from classes.Descriptor import Descriptor
+from classes.descriptor import Descriptor
 import pytest
 from pytest_postgresql import factories  # Import the ability to use postgresql
 
