@@ -3,7 +3,7 @@ Created on 18 mar. 2019
 
 @author: luis98
 '''
-from classes.Emd_entry import Emd_entry
+from classes.emd_entry import Emd_entry
 import pytest
 from pytest_postgresql import factories  # Import the ability to use postgresql
 

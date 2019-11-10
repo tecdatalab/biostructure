@@ -12,6 +12,8 @@ from classes.atomic_structure_x_emd_entry import Atomic_structure_x_emd_entry
 import datetime
 import urllib.request
 import os
+from operator import add
+
 
 def max_datetime(date1, date2):
     if date1 is None:
@@ -142,6 +144,72 @@ class FTP_connection(object):
             result.append(Pdb_result(data1, data2, data3))
         file.close()
         os.remove("pdb_entry_type.txt")
+        return result
+    
+    def get_all_cath_complex(
+            self,
+            url="http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-chain-list.txt"):
+        urllib.request.urlretrieve(url, 'cath-chain-list.txt')
+        file = open("cath-chain-list.txt", "r")
+        dic_complex = {}
+        result = []
+        for line in file:
+            fields = line.split()
+            if fields[0][0] == "#":
+                continue
+            
+            if len(fields)<12:
+                data1 = fields[0]
+                data2 = fields[1]
+                data3 = fields[2]
+                data4 = fields[3]
+                data5 = fields[4]
+                data6 = fields[5]
+                data7 = fields[6]
+                data8 = fields[7]
+                data9 = fields[8][0]
+                data10 = fields[8][1:-1]
+                data11 = fields[9]
+                data12 = fields[10]
+            else:
+                data1 = fields[0]
+                data2 = fields[1]
+                data3 = fields[2]
+                data4 = fields[3]
+                data5 = fields[4]
+                data6 = fields[5]
+                data7 = fields[6]
+                data8 = fields[7]
+                data9 = fields[8]
+                data10 = fields[9]
+                data11 = fields[10]
+                data12 = fields[11]
+                
+            var = [int(data2),int(data3),int(data4),int(data5),int(data6),int(data7),int(data8),int(data9),int(data10),int(data11),float(data12)]
+            if dic_complex.get(data1[0:4]) == None:
+                dic_complex[data1[0:4]] = var
+            else:
+                dic_complex[data1[0:4]] =  list( map(add, dic_complex[data1[0:4]], var) )
+                
+
+        for key, value in dic_complex.items():
+            result.append(
+                Cath_atomic_structure(
+                    None,
+                    key,
+                    value[0],
+                    value[1],
+                    value[2],
+                    value[3],
+                    value[4],
+                    value[5],
+                    value[6],
+                    value[7],
+                    value[8],
+                    value[9],
+                    value[10]))
+            file.close()
+        os.remove("cath-chain-list.txt")
         return result
 
     def get_all_cath_chain(

@@ -25,7 +25,7 @@ def generate_error_message(personalized_error, compute_error):
     print(str(compute_error) + "\n")
     update_log_file()
 
-def update_pdb(connec_ftp, connec_sql, cathChain, cathDomain, atomic, atomicEmd):
+def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomic, atomicEmd):
     
     cursor_sql = connec_sql.get_cursor()
     #Create atomic structures
@@ -44,6 +44,21 @@ def update_pdb(connec_ftp, connec_sql, cathChain, cathDomain, atomic, atomicEmd)
                 generate_error_message("Error in execution {0} with PDB {1}".format(k, i.id_code),e)
             k += 1
             connec_sql.commit()
+    
+    #Create cathComplex
+    if cathComplex == 'Y':
+        all_cathChain = connec_ftp.get_all_cath_complex()
+        print("Total changes cath complex atomic structures", len(all_cathChain))
+        k = 1
+        for i in all_cathChain:
+            print ("Actual cath complex {0} with complex {1}".format(k, i.id_code))
+            try:
+                i.insert_update_db(cursor_sql)
+            except Exception as e:
+                generate_error_message("Error in execution cath complex {0} with complex {1}".format(k, i.id_code),e)
+            k += 1
+            connec_sql.commit()
+    
     #Create cathChain
     if cathChain == 'Y':
         all_cathChain = connec_ftp.get_all_cath_chain()
@@ -90,14 +105,14 @@ def update_pdb(connec_ftp, connec_sql, cathChain, cathDomain, atomic, atomicEmd)
     connec_sql.commit()
     cursor_sql.close()
 
-def main(cathChain, cathDomain, atomic, atomicEmd):
+def main(cathComplex, cathChain, cathDomain, atomic, atomicEmd):
     
     connec_ftp = FTP_connection()
     connec_ftp.init_connection()
     connec_sql = SQL_connection()
     connec_sql.init_connection()
 
-    update_pdb(connec_ftp, connec_sql, cathChain, cathDomain, atomic, atomicEmd)
+    update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomic, atomicEmd)
 
     connec_sql.close_connection()
     connec_ftp.close_connection()
@@ -113,6 +128,14 @@ if __name__ == "__main__":
         help='Log file name.',
         default='log.txt')
     required_arguments = parser.add_argument_group('required arguments')
+    required_arguments.add_argument(
+        '-cco',
+        '--cathComplex',
+        choices=[
+            'Y',
+            'N'],
+        help='Generate cath atomic structures for complex.',
+        required=True)
     required_arguments.add_argument(
         '-cc',
         '--cathChain',
@@ -151,7 +174,7 @@ if __name__ == "__main__":
     log_file.write("====================Start====================\n")
     update_log_file()
     ini = time()
-    main(args.cathChain, args.cathDomain, args.atomic, args.atomicEmd)
+    main(args.cathComplex, args.cathChain, args.cathDomain, args.atomic, args.atomicEmd)
     final = time()
     ejec = final - ini
     log_file.close()

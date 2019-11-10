@@ -24,7 +24,7 @@ class Cath_atomic_structure(object):
     __domain_length = None
     __structure_resolution = None
     
-    def __init__(self, atomic_structure_id, id_code, class_number, architecture_number, topology_number, homologous_superfamily_number, S35_sequence_cluster_number, S60_sequence_cluster_number, S95_sequence_cluster_number, S100_sequence_cluster_number, S100_sequence_count_number, domain_length, structure_resolution):
+    def __init__(self, atomic_structure_id = None, id_code = None, class_number = None, architecture_number = None, topology_number = None, homologous_superfamily_number = None, S35_sequence_cluster_number = None, S60_sequence_cluster_number = None, S95_sequence_cluster_number = None, S100_sequence_cluster_number = None, S100_sequence_count_number = None, domain_length = None, structure_resolution = None):
         self.__atomic_structure_id = atomic_structure_id
         self.__id_code = id_code
         self.__class_number = class_number
@@ -40,7 +40,7 @@ class Cath_atomic_structure(object):
         self.__structure_resolution = structure_resolution
         
     def insert_db(self, cur):
-        if self.atomic_structure_id == None:
+        if self.__atomic_structure_id == None:
             cur.execute(
             sql.SQL("SELECT id FROM atomic_structure WHERE id_code = %s;"),[
                 self.__id_code])
@@ -49,18 +49,18 @@ class Cath_atomic_structure(object):
         
         cur.execute(
             sql.SQL("INSERT INTO cath_atomic_structure(atomic_structure_id,class_number,architecture_number,topology_number,homologous_superfamily_number,S35_sequence_cluster_number,S60_sequence_cluster_number,S95_sequence_cluster_number,S100_sequence_cluster_number,S100_sequence_count_number,domain_length,structure_resolution) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s); "),[
-                self.atomic_structure_id,
-                self.class_number,
-                self.architecture_number,
-                self.topology_number,
-                self.homologous_superfamily_number,
-                self.S35_sequence_cluster_number,
-                self.S60_sequence_cluster_number,
-                self.S95_sequence_cluster_number,
-                self.S100_sequence_cluster_number,
-                self.S100_sequence_count_number,
-                self.domain_length,
-                self.structure_resolution])
+                self.__atomic_structure_id,
+                self.__class_number,
+                self.__architecture_number,
+                self.__topology_number,
+                self.__homologous_superfamily_number,
+                self.__S35_sequence_cluster_number,
+                self.__S60_sequence_cluster_number,
+                self.__S95_sequence_cluster_number,
+                self.__S100_sequence_cluster_number,
+                self.__S100_sequence_count_number,
+                self.__domain_length,
+                self.__structure_resolution])
         
     def update_db(self, cur):
         if self.atomic_structure_id == None:
@@ -72,21 +72,21 @@ class Cath_atomic_structure(object):
         
         cur.execute(
             sql.SQL("UPDATE cath_atomic_structure SET class_number = %s,architecture_number = %s,topology_number = %s,homologous_superfamily_number = %s,S35_sequence_cluster_number = %s,S60_sequence_cluster_number = %s,S95_sequence_cluster_number = %s,S100_sequence_cluster_number = %s,S100_sequence_count_number = %s,domain_length = %s,structure_resolution = %s WHERE atomic_structure_id = %s; "),[
-                self.class_number,
-                self.architecture_number,
-                self.topology_number,
-                self.homologous_superfamily_number,
-                self.S35_sequence_cluster_number,
-                self.S60_sequence_cluster_number,
-                self.S95_sequence_cluster_number,
-                self.S100_sequence_cluster_number,
-                self.S100_sequence_count_number,
-                self.domain_length,
-                self.structure_resolution,
-                self.atomic_structure_id])
+                self.__class_number,
+                self.__architecture_number,
+                self.__topology_number,
+                self.__homologous_superfamily_number,
+                self.__S35_sequence_cluster_number,
+                self.__S60_sequence_cluster_number,
+                self.__S95_sequence_cluster_number,
+                self.__S100_sequence_cluster_number,
+                self.__S100_sequence_count_number,
+                self.__domain_length,
+                self.__structure_resolution,
+                self.__atomic_structure_id])
     
     def insert_update_db(self, cur):
-        if self.atomic_structure_id == None:
+        if self.__atomic_structure_id == None:
             cur.execute(
             sql.SQL("SELECT id FROM atomic_structure WHERE id_code = %s;"),[
                 self.__id_code])
