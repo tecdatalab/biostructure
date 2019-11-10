@@ -4,7 +4,6 @@ from time import time
 from connections.sql_connection import SQL_connection
 from connections.ftp_connection import FTP_connection
 from classes.atomic_structure import Atomic_structure
-
 '''
 Created on 31 mar. 2019
 @author: luis98

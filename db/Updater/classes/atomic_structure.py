@@ -7,6 +7,7 @@ from psycopg2 import sql
 import json
 import urllib
 import os
+from generators.LZerD.generate_atom_descriptor import Calculate
 
 class Atomic_structure(object):
     '''
@@ -145,7 +146,7 @@ class Atomic_structure(object):
         self.atoms = "".join(atom_lines)
         self.atoms_count = len(atom_lines)
         self.aminoacid_count = self.__different_elements(atom_aminoacid)
-        self.numbers_descriptor = []
+        self.numbers_descriptor = self.calculate_descriptors("".join(atom_lines))
 
         # Create chains
         actual_chain = ""
@@ -164,7 +165,7 @@ class Atomic_structure(object):
                     len(dic_atom_aminoacid[actual_chain]),
                     None,
                     None,
-                    [])
+                    self.calculate_descriptors("".join(temp_atom_lines)))
                 self.__chains_strc.append(temp_add)
                 temp_atom_lines = []
             else:
@@ -190,14 +191,15 @@ class Atomic_structure(object):
                     len(atom_aminoacid_domain),
                     None,
                     None,
-                    [])
+                    self.calculate_descriptors("".join(add_atoms)))
                 self.__domains_strc.append(temp)
         file.close()
         os.remove("atomic-strcuture.txt")
 
-    def calculate_descriptors(self):
-        pass
-
+    def calculate_descriptors(self, atoms):
+        temp = Calculate()
+        return temp.calculate_descriptors(atoms)    
+        
     def get_id(self):
         return self.__id
 
