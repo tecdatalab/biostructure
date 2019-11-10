@@ -140,11 +140,12 @@ exports.getCathDetail = async (req, res) => {
 exports.getResultsPDB = async (req, res) => {
   try {
     const id = parseInt(req.params.ID);
-    const c = parseInt(req.params.C);
-    const a = parseInt(req.params.A);
-    const t = parseInt(req.params.T);
-    const h = parseInt(req.params.H);
-    let query_results = await getBiomoleculesPDB(c,a,t,h,id);
+    const rep = parseInt(req.params.rep);
+    const type = parseInt(req.params.type);
+    const cath = parseInt(req.params.cath);
+    const len = parseInt(req.params.len);
+    const top = parseInt(req.params.top);
+    let query_results = await getBiomoleculesPDB(id,rep,type,cath,len,top);
     res.status(200).json(query_results);
   } catch (error) {
     res.status(500).send({
@@ -205,24 +206,19 @@ async function getBiomolecules(minRes, maxRes) {
   }
 }
 
-async function getBiomoleculesPDB(c,a,t,h,id){
+async function getBiomoleculesPDB(id_p, rep_p, db_p, cath_p, len_p, top_p) {
   try {
-    let caths = await cathInfo_pdb.findAll({
-      where : {
-        class_number : c,
-        architecture_number : a,
-        topology_number : t,
-        homologous_superfamily_number : h
-      }
-    });
-    let biomolecules = await biomolecule_pdb.findAll({
-      limit : caths.length
-    });
-    let resultArray = [];
-    for (let index = 0; index < biomolecules.length; index++) {
-      resultArray.push([biomolecules[index].dataValues,caths[index].dataValues]);  
-    }
-    return resultArray;
+    // Query to DB
+    let biomolecules = await sequelize.query(
+                  'SELECT * FROM atomic_query(:pdb_id, :rep, :db, :cath, :len, :top)',
+                  {replacements: { pdb_id: id_p, 
+                                   rep: rep_p, 
+                                   db: db_p,
+                                   cath: cath_p,
+                                   len: len_p,
+                                   top: top_p }
+                                  });
+    return biomolecules;
   } catch (err) {
     return err;
   }
