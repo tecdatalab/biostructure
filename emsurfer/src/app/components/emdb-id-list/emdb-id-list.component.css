@@ -1,41 +1,5 @@
-.row{
-    padding: 5% 10%;
-}
-
-hr{
-    border-style: solid;
-    border-color: rgba(0, 0, 0, 0.3);
-    border-width: 1px;
-    margin: 5% 0%;
-}
-
-.card-body ul{
-    padding-left: 4%;
-}
-
-.card-body p, .card-body li{
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 18px;
-}
-
-h5{
-    margin-bottom: 5%;
-}
-
-.steps{
-    background-color: rgba(221, 221, 221, 0.24);
-}
-
-.form-group.row{
-    padding: 0%;
-}
-
-.download{
-    margin: 3% 0%;
-}
-
-.fix{
-    margin: 0% 10%;
+.fix-emdb-title{
+  margin-left: 9%;
 }
 
 /* --------------------------------------------- Mobile Styles -------------------------------------------- */
@@ -54,6 +18,5 @@ h5{
   
   /* --------------------------------------------- Desktop Styles ------------------------------------------- */
   @media only screen and (min-width: 1025px) {
-  
     
   }
