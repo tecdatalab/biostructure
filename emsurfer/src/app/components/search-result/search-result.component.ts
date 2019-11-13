@@ -11,7 +11,8 @@ import { Descriptor } from "src/app/models/descriptor";
 @Component({
   selector: "app-search-result",
   templateUrl: "./search-result.component.html",
-  providers: [BiomoleculeSearchService]
+  providers: [BiomoleculeSearchService],
+  styleUrls: ['./search-result.component.css'],
 })
 export class SearchResultComponent implements OnInit {
   @ViewChild("canvas") canvasElementRef: ElementRef;
