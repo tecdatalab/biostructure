@@ -1,9 +1,23 @@
 .my-custom-scrollbar {
   position: relative;
-  height: 275px;
+  height: 345px;
   width: 100%;
   overflow: auto;
+  margin-bottom: 10%;
 }
 .table-wrapper-scroll-y {
   display: block;
+}
+
+table{
+  align-self: center;
+  text-align: center;
+  border-style: solid;
+  border-color: rgb(210, 208, 247);
+  border-width: 2px;
+}
+
+#cpyToClipboardBtn{
+  width: 50%;
+  margin-left: 25%;
 }

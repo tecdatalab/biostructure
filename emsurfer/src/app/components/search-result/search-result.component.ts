@@ -112,7 +112,7 @@ export class SearchResultComponent implements OnInit {
         datasets: [
           {
             data: this.values,
-            borderColor: "black",
+            borderColor: "blue",
             fill: false,
             pointRadius: 0
           }
