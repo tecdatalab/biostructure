@@ -1,4 +1,4 @@
-const biomolecule = require("../models/biomoleculeModel");
+const biomolecule = require("../models/biomoleculeModelEMD");
 
 exports.checkBiomolecule = async (req, res, next) => {
   emdbid = req.params.emdbID;

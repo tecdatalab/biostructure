@@ -1,4 +1,4 @@
-const biomolecule = require("../models/biomoleculeModel");
+const biomolecule = require("../models/biomoleculeModelEMD");
 const Sequelize = require("sequelize");
 const Op = require("../database").Op;
 
