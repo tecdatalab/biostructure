@@ -1,6 +1,7 @@
 const biomolecule_emd = require("../models/biomoleculeModelEMD");
 const biomolecule_pdb = require("../models/biomoleculeModelPDB");
 const cathInfo_pdb = require("../models/cathModel");
+const sequelize = require("../database").sequelize;
 const search_history = require("../models/searchHistoryModel");
 const Op = require("../database").Op;
 
@@ -146,6 +147,7 @@ exports.getResultsPDB = async (req, res) => {
     const len = parseInt(req.params.len);
     const top = parseInt(req.params.top);
     let query_results = await getBiomoleculesPDB(id,rep,type,cath,len,top);
+    console.log(query_results);
     res.status(200).json(query_results);
   } catch (error) {
     res.status(500).send({
@@ -209,6 +211,7 @@ async function getBiomolecules(minRes, maxRes) {
 async function getBiomoleculesPDB(id_p, rep_p, db_p, cath_p, len_p, top_p) {
   try {
     // Query to DB
+    console.log(id_p, rep_p, db_p, cath_p, len_p, top_p);
     let biomolecules = await sequelize.query(
                   'SELECT * FROM atomic_query(:pdb_id, :rep, :db, :cath, :len, :top)',
                   {replacements: { pdb_id: id_p, 
