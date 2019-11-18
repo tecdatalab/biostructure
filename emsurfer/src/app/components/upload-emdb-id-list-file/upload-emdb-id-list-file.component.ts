@@ -3,7 +3,8 @@ import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-upload-emdb-id-list-file',
-  templateUrl: './upload-emdb-id-list-file.component.html'
+  templateUrl: './upload-emdb-id-list-file.component.html',
+  styleUrls: ['./upload-emdb-id-list-file.component.css'],
 })
 export class UploadEmdbIdListFileComponent {
   @Input() parentForm: FormGroup;
