@@ -1,31 +1,22 @@
-<a
-  class="text-warning"
-  [href]="
+<div class="card">
+  <a id="img" class="clickable" (click)="this.searchBiomolecule()">
+    <img class="img-fluid" [src]="biomoleculeComparison.biomolecule.image_url" />
+  </a>
+  <hr>
+  <a class="text-warning" [href]="
     'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-' +
     stringPadder.padEmdbId(biomoleculeComparison.biomolecule.id.toString())
-  "
-  ><strong
-    ><u
-      >EMD-{{
+  "><strong><u>EMD-{{
         stringPadder.padEmdbId(biomoleculeComparison.biomolecule.id.toString())
-      }}</u
-    ></strong
-  ></a
->
-<p>{{ biomoleculeComparison.biomolecule.full_name }}</p>
-<a id="img" class="clickable" (click)="this.searchBiomolecule()">
-  <img class="img-fluid" [src]="biomoleculeComparison.biomolecule.image_url" />
-</a>
-<p class="text-primary">
-  <strong>Euc. Distance: {{ biomoleculeComparison.euc_distance }} </strong>
-</p>
-<p class="text-primary">
-  <strong
-    >Ratio of Volume: {{ biomoleculeComparison.biomolecule.volume }}</strong
-  >
-</p>
-<p class="text-primary">
-  <strong
-    >Resolution: {{ biomoleculeComparison.biomolecule.resolution }}</strong
-  >
-</p>
+      }}</u></strong></a>
+  <p>{{ biomoleculeComparison.biomolecule.full_name }}</p>
+  <p class="text-primary">
+    <strong>Euc. Distance: {{ biomoleculeComparison.euc_distance }} </strong>
+  </p>
+  <p class="text-primary">
+    <strong>Ratio of Volume: {{ biomoleculeComparison.biomolecule.volume }}</strong>
+  </p>
+  <p class="text-primary">
+    <strong>Resolution: {{ biomoleculeComparison.biomolecule.resolution }}</strong>
+  </p>
+</div>
