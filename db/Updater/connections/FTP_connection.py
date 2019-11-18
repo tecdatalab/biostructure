@@ -4,10 +4,7 @@ Created on 30 mar. 2019
 @author: luis98
 '''
 from ftplib import FTP
-from mycellanic_classes.pdb_all_result import Pdb_all_result
 import datetime
-import urllib.request
-import os
 
 def max_datetime(date1, date2):
     if date1 == None:
@@ -113,21 +110,7 @@ class FTP_connection(object):
 
     def del_ftp(self):
         del self.__ftp
-        
-    def get_all_pdb(self, url = "http://ftp.wwpdb.org/pub/pdb/derived_data/pdb_entry_type.txt"):
-        urllib.request.urlretrieve(url, 'pdb_entry_type.txt')
-        file = open("pdb_entry_type.txt","r")
-        result = []
-        for line in file:
-            fields = line.split("\t")
-            data1 = fields[0]
-            data2 = fields[1]
-            data3 = fields[2]
-            result.append(Pdb_all_result(data1,data2,data3))
-        file.close()
-        os.remove("pdb_entry_type.txt")
-        return result
-        
+
 
     ftp = property(get_ftp, set_ftp, del_ftp, "ftp's docstring")
 

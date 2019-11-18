@@ -4,7 +4,8 @@ import { Router } from "@angular/router";
 
 @Component({
   selector: "app-benchmark",
-  templateUrl: "./benchmark.component.html"
+  templateUrl: "./benchmark.component.html",
+  styleUrls: ['./benchmark.component.css'],
 })
 export class BenchmarkComponent implements OnInit {
   benchmarkForm: FormGroup;

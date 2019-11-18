@@ -1,36 +1,43 @@
-<div class="container-fluid">
-  <div class="jumbotron">
-    <h2>Your 3DZD result is ready!</h2>
-    <p class="lead">
-      Click the button below to download the zip file which contains all 3DZD
-      info below.
-    </p>
-    <div class="d-flex" *ngIf="!timeout">
-      <p>The zip file is avaliable for: {{ minutesLeft }}:</p>
-      <p *ngIf="zero">0</p>
-      <p>{{ secondsLeft }}</p>
-    </div>
-    <div *ngIf="timeout">
-      <strong>
-        <p style="color: #b22222">
-          The zip file is expired, please perform the search again.
-        </p></strong
-      >
-    </div>
-    <div>
-      <a
-        class="btn btn-dark"
-        [href]="results.path"
-        id="download_link"
-        [class.disabled]="timeout"
-        >Download text results here</a
-      >
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="container-fluid">
+        <div class="card">
+          <div class="card-header">
+            <div class="jumbotron">
+              <h2 class="text-success">Your 3DZD result is ready!</h2>
+              <p class="lead">
+                Click the button below to download the zip file which contains all 3DZD
+                info below.
+              </p>
+              <div class="d-flex" *ngIf="!timeout">
+                <p>The zip file is avaliable for: {{ minutesLeft }}:</p>
+                <p *ngIf="zero">0</p>
+                <p>{{ secondsLeft }}</p>
+              </div>
+              <div *ngIf="timeout">
+                <strong>
+                  <p style="color: #b22222">
+                    The zip file is expired, please perform the search again.
+                  </p>
+                </strong>
+              </div>
+              <div>
+                <a class="btn btn-success" [href]="results.path" id="download_link" [class.disabled]="timeout">Download
+                  text
+                  results here</a>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div *ngIf="showList">
+              <div *ngFor="let result of results.descriptors">
+                <app-zernike-result [zernike]="result"></app-zernike-result>
+                <hr />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-  <div *ngIf="showList">
-    <div *ngFor="let result of results.descriptors">
-      <app-zernike-result [zernike]="result"></app-zernike-result>
-      <hr />
-    </div>
-  </div>
-</div>

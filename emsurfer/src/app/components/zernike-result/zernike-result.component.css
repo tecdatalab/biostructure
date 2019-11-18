@@ -3,6 +3,10 @@
   margin-bottom: 15px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
+  border-color: black;
+  border-style: solid;
+  border-radius: 3px;
+  border-width: 2px;
 }
 
 .zernike-exits {

@@ -1,0 +1,92 @@
+.row{
+    padding: 5% 1%;
+}
+
+hr{
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.3);
+    border-width: 1px;
+    margin: 5% 0%;
+}
+
+.card-body ul{
+    padding-left: 4%;
+}
+
+.card-body p, .card-body li{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 18px;
+}
+
+h5{
+    margin: 2% 0%;
+}
+
+.steps{
+    background-color: rgba(221, 221, 221, 0.24);
+}
+
+.form-group.row{
+    padding: 0%;
+}
+
+.back-fix{
+    background-color: white;
+}
+
+.card-body .steps .card-body .row{
+    padding: 0% 1%;
+}
+
+.card-body .steps .card-body .row div{
+    padding: 2% 0.5%;
+}
+
+.card-body .steps .card-body .row div p{
+    justify-content: center;
+    align-content: center;
+}
+
+.fix-zernike{
+    margin-bottom: 10%;
+}
+
+.fix-char{
+    margin-top: 20%;
+}
+
+.col-3.border.back-fix.left{
+    border-radius: 25px 0px 0px 25px;
+}
+
+.col-3.border.back-fix.right{
+    border-radius: 0px 25px 25px 0px;
+}
+
+.nav{
+    position: relative;
+    top: 19px;
+    left: 5px;
+    border-radius: 0px 0px 0px 8px;
+}
+
+/* --------------------------------------------- Mobile Styles -------------------------------------------- */
+@media only screen and (max-width: 400px) {
+    body {
+      background-color: #F09A9D; /* Red */
+    }
+  }
+  
+  /* --------------------------------------------- Tablet Styles -------------------------------------------- */
+  @media only screen and (min-width: 401px) and (max-width: 1024px) {
+    body {
+      background-color: #F5CF8E; /* Yellow */
+    }
+  }
+  
+  /* --------------------------------------------- Desktop Styles ------------------------------------------- */
+  @media only screen and (min-width: 1025px) {
+  
+    
+    
+  }
