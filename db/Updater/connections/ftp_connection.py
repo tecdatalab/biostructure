@@ -148,7 +148,7 @@ class FTP_connection(object):
     
     def get_all_cath_complex(
             self,
-            url="http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-chain-list.txt"):
+            url="http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-domain-list-S60.txt"):
         urllib.request.urlretrieve(url, 'cath-chain-list.txt')
         file = open("cath-chain-list.txt", "r")
         dic_complex = {}
@@ -157,7 +157,8 @@ class FTP_connection(object):
             fields = line.split()
             if fields[0][0] == "#":
                 continue
-            
+            if fields[0][5:8]!= "00":
+                continue
             if len(fields)<12:
                 data1 = fields[0]
                 data2 = fields[1]
@@ -214,7 +215,7 @@ class FTP_connection(object):
 
     def get_all_cath_chain(
             self,
-            url="http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-chain-list.txt"):
+            url="http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-domain-list-S60.txt"):
         urllib.request.urlretrieve(url, 'cath-chain-list.txt')
         file = open("cath-chain-list.txt", "r")
         result = []
@@ -222,8 +223,10 @@ class FTP_connection(object):
             fields = line.split()
             if fields[0][0] == "#":
                 continue
+            if fields[0][5:8]!= "00":
+                continue
             if len(fields)<12:
-                data1 = fields[0]
+                data1 = fields[0][:5]
                 data2 = fields[1]
                 data3 = fields[2]
                 data4 = fields[3]
@@ -236,7 +239,7 @@ class FTP_connection(object):
                 data11 = fields[9]
                 data12 = fields[10]
             else:
-                data1 = fields[0]
+                data1 = fields[0][:5]
                 data2 = fields[1]
                 data3 = fields[2]
                 data4 = fields[3]
@@ -267,60 +270,17 @@ class FTP_connection(object):
         os.remove("cath-chain-list.txt")
         return result
 
-    def get_all_cath_domain_boundarie(
-            self,
-            url="http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-domain-boundaries-seqreschopping.txt"):
-        urllib.request.urlretrieve(
-            url, 'cath-domain-boundaries-seqreschopping.txt')
-        file = open("cath-domain-boundaries-seqreschopping.txt", "r")
-        result = []
-        for line in file:
-            fields = line.split()
-            data1 = fields[0]
-            temp = fields[1].split(",")
-            data2 = []
-            for i in temp:
-                temp_range = i.split("-")
-                data2.append([int(temp_range[0]), int(temp_range[1])])
-            result.append(Cath_domain_boundaries_result(data1, data2))
-        file.close()
-        os.remove("cath-domain-boundaries-seqreschopping.txt")
-        return result
-
-    def get_all_cath_domain_boundarie_dic(
-            self,
-            url="http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-domain-boundaries-seqreschopping.txt"):
-        urllib.request.urlretrieve(
-            url, 'cath-domain-boundaries-seqreschopping.txt')
-        file = open("cath-domain-boundaries-seqreschopping.txt", "r")
-        dic = {}
-        for line in file:
-            fields = line.split()
-            data1 = fields[0]
-            temp = fields[1].split(",")
-            data2 = []
-            for i in temp:
-                temp_range = i.split("-")
-                data2.append([int(temp_range[0]), int(temp_range[1])])
-            element = Cath_domain_boundaries_result(data1, data2)
-            if dic.get(data1[0:4]) is None:
-                dic[data1[0:4]] = [element]
-            else:
-                dic[data1[0:4]].append(element)
-
-        file.close()
-        os.remove("cath-domain-boundaries-seqreschopping.txt")
-        return dic
-
     def get_all_cath_domain(
             self,
-            url="http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-domain-list.txt"):
+            url="http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-domain-list-S60.txt"):
         urllib.request.urlretrieve(url, 'cath-domain-list.txt')
         file = open("cath-domain-list.txt", "r")
         result = []
         for line in file:
             fields = line.split()
             if fields[0][0] == "#":
+                continue
+            if fields[0][5:8]== "00":
                 continue
             if len(fields)<12:
                 data1 = fields[0]
@@ -366,6 +326,52 @@ class FTP_connection(object):
         file.close()
         os.remove("cath-domain-list.txt")
         return result
+    
+    def get_all_cath_domain_boundarie(
+            self,
+            url="http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-domain-boundaries-seqreschopping.txt"):
+        urllib.request.urlretrieve(
+            url, 'cath-domain-boundaries-seqreschopping.txt')
+        file = open("cath-domain-boundaries-seqreschopping.txt", "r")
+        result = []
+        for line in file:
+            fields = line.split()
+            data1 = fields[0]
+            temp = fields[1].split(",")
+            data2 = []
+            for i in temp:
+                temp_range = i.split("-")
+                data2.append([int(temp_range[0]), int(temp_range[1])])
+            result.append(Cath_domain_boundaries_result(data1, data2))
+        file.close()
+        os.remove("cath-domain-boundaries-seqreschopping.txt")
+        return result
+
+    def get_all_cath_domain_boundarie_dic(
+            self,
+            url="http://download.cathdb.info/cath/releases/latest-release/cath-classification-data/cath-domain-boundaries-seqreschopping.txt"):
+        urllib.request.urlretrieve(
+            url, 'cath-domain-boundaries-seqreschopping.txt')
+        file = open("cath-domain-boundaries-seqreschopping.txt", "r")
+        dic = {}
+        for line in file:
+            fields = line.split()
+            data1 = fields[0]
+            temp = fields[1].split(",")
+            data2 = []
+            for i in temp:
+                temp_range = i.split("-")
+                data2.append([int(temp_range[0]), int(temp_range[1])])
+            element = Cath_domain_boundaries_result(data1, data2)
+            if dic.get(data1[0:4]) is None:
+                dic[data1[0:4]] = [element]
+            else:
+                dic[data1[0:4]].append(element)
+
+        file.close()
+        os.remove("cath-domain-boundaries-seqreschopping.txt")
+        return dic    
+    
 
     def get_all_structure_x_emd_entry(self):
         emds_id = self.get_all_emds_id('0001', 'inf')
