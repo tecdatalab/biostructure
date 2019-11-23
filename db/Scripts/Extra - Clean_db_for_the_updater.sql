@@ -1,1 +1,0 @@
-delete from descriptor;delete from type_descriptor;delete from pdb_entry;delete from pdb_entry_x_emd_entry;delete from update;delete from time_stamp;delete from emd_entry;delete from map_information;

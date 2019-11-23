@@ -1,18 +1,18 @@
-import numpy as np 
+import numpy as np
 import struct
 
 
 class Writer():
 
-    #Header size in bytes
+    # Header size in bytes
     HEADER_SIZE = 1024
 
-    # Write density map as ".map" format. Default write mode is set to mode 2. 
-    def write(self,filename, molecule):
-        #First generate buffer from array data in mode 2
+    # Write density map as ".map" format. Default write mode is set to mode 2.
+    def write(self, filename, molecule):
+        # First generate buffer from array data in mode 2
         data = bytearray()
         for voxel in np.nditer(molecule.data()):
-            data+=struct.pack('f',voxel)        
+            data += struct.pack('f', voxel)
         try:
             with open(filename, 'wb') as output:
                 header = bytearray(molecule.rawHeader)
@@ -23,7 +23,6 @@ class Writer():
                 output.write(data)
         except Exception as err:
             print("Could not write file, error ", err)
-
 
 
 '''
