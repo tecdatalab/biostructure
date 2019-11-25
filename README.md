@@ -216,25 +216,31 @@ sudo pip3 install -U psycopg2-binary
 sudo pip3 install -U requests
 ```
 
-#### Step 25 - Permissions of execution to em_volume
+#### Step 25 - Install Tabulate
+
+```sh
+sudo pip3 install -U tabulate
+```
+
+#### Step 26 - Permissions of execution to em_volume
 
 ```sh
 chmod +x db/Updater/generators/em_volume
 ```
 
-#### Step 26 - Permissions of execution to map2zernike
+#### Step 27 - Permissions of execution to map2zernike
 
 ```sh
 chmod +x db/Updater/generators/map2zernike
 ```
 
-#### Step 27 - Change directory to Main file
+#### Step 28 - Change directory to Main file
 
 ```shell
 cd biostructure/db/Updater/updater/
 ```
 
-#### Step 28 - Run Updater
+#### Step 29 - Run Updater
 
 ```shell
 python3.6 Main.py [log] [initialEMD] [mode] [image] [descriptor]
