@@ -1,4 +1,3 @@
-import argparse 
 import os
 import http.client as hc
 import sys
@@ -155,7 +154,11 @@ Please indicate the next data to make the query:
 def menu():
     while True:
         os.system("reset")
-        print ("""
+        print(""">====================================================================================<
+>===============  CLIENT CONSOLE PYTHON APPLICATION FOR PDB QUERIES  ================<
+>====================================================================================<
+
+
 Hi! Please indicate the option to access to the system or exit:
 >====================================================================================<
 ->Select the option:
@@ -173,7 +176,4 @@ Hi! Please indicate the option to access to the system or exit:
 
 if __name__== "__main__":
 
-    print(">====================================================================================<")
-    print(">===============  CLIENT CONSOLE PYTHON APPLICATION FOR PDB QUERIES  ================<")
-    print(">====================================================================================<")
     menu()
