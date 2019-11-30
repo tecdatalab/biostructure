@@ -63,9 +63,12 @@ exports.saveSearch = async (req, res, next) => {
 
 exports.searchResult = async (req, res) => {
   try {
-    minRes = checkMinResolutionFilter(req.params.minRes);
-    maxRes = checkMaxResolutionFilter(req.params.maxRes);
-    let query_results = await getBiomolecules(minRes, maxRes);
+    emd_id = req.params.emdbID;
+    type_descriptor = req.params.typeDescriptor;
+    top_can = req.params.topCan;
+
+    let query_results = await getBiomolecules(emd_id, type_descriptor, top_can);
+
     let result = {
       path: "/results/result.hit",
       results: query_results
@@ -78,14 +81,11 @@ exports.searchResult = async (req, res) => {
   }
 };
 
-exports.searchResult = async (req, res) => {
+exports.searchResultMap = async (req, res) => {
   try {
-    emd_id = req.params.emdbID;
-    type_descriptor = req.params.typeDescriptor;
-    top_can = req.params.topCan;
-
-    let query_results = await getBiomolecules(emd_id, type_descriptor, top_can);
-
+    minRes = checkMinResolutionFilter(req.params.minRes);
+    maxRes = checkMaxResolutionFilter(req.params.maxRes);
+    let query_results = await getBiomolecules(minRes, maxRes);
     let result = {
       path: "/results/result.hit",
       results: query_results
@@ -157,8 +157,7 @@ exports.getResultsPDB = async (req, res) => {
     res.status(500).send({
       message: "Backend error"
     });
-  }
-  
+  } 
 }
 
 //#endregion
