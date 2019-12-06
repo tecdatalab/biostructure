@@ -170,9 +170,6 @@ async function searchByID(emdbid){
       id: parseInt(emdbid)
     }
   }).then((biomolecules) => {
-
-    console.log(biomolecules);
-
       if (!biomolecules) {
         console.log("Biomolecule " + emdbid + " not found.");
         return -1;
@@ -219,22 +216,13 @@ async function getBiomolecules(emd_id_p, type_descriptor, top_can) {
     let resultArray = [];
     // Clasification Process
     for (const biomoleculeItem of biomolecules[0]){
-
-      console.log(biomoleculeItem);
-
       let bioInfo = await searchByID(biomoleculeItem["emd_id"]);
-
-      console.log(bioInfo);
-
       let distance = biomoleculeItem["distance"].toString();
        resultArray.push({
                       biomolecule: bioInfo,
                       euc_distance: distance.substring(0, 5)
                     });
     }  
-
-    console.log(resultArray);
-
     return resultArray;
   } catch (err) {
     return err;
