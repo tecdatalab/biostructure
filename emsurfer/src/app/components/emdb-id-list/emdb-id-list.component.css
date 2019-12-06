@@ -1,25 +1,5 @@
-.clickable {
-    cursor: pointer;
-}
-
-.card{
-    height: 100%;
-    padding: 5%;
-    border-radius: 25px;
-}
-
-#img{
-    margin-bottom: 20%;
-    margin-top: 20%;
-}
-
-p{
-    margin-left: 5%;
-}
-
-hr{
-    border: 1px solid black;
-    margin-bottom: 10%;
+.fix-emdb-title{
+  margin-left: 9%;
 }
 
 /* --------------------------------------------- Mobile Styles -------------------------------------------- */
@@ -38,6 +18,5 @@ hr{
   
   /* --------------------------------------------- Desktop Styles ------------------------------------------- */
   @media only screen and (min-width: 1025px) {
-  
     
   }

@@ -5,7 +5,8 @@ import { ContourRepresentation } from "../../models/contour-representation";
 
 @Component({
   selector: "app-contour-shape-input",
-  templateUrl: "./contour-shape-input.component.html"
+  templateUrl: "./contour-shape-input.component.html",
+  styleUrls: ['./contour-shape-input.component.css'],
 })
 export class ContourShapeInputComponent implements OnInit {
   @Input() parentForm: FormGroup;

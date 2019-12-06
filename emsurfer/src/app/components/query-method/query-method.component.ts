@@ -3,7 +3,8 @@ import { FormGroup, Validators } from "@angular/forms";
 
 @Component({
   selector: "app-query-method",
-  templateUrl: "./query-method.component.html"
+  templateUrl: "./query-method.component.html",
+  styleUrls: ['./query-method.component.css'],
 })
 export class QueryMethodComponent implements OnInit {
   @Input() parentForm: FormGroup;

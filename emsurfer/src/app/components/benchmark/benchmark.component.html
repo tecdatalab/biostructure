@@ -1,83 +1,93 @@
-<form [formGroup]="benchmarkForm" (ngSubmit)="submitHandler()">
-  <h4 class="text-primary">Submit your EMDB id list in a batch mode</h4>
-  <br />
-  <p><strong class="text-primary">Step 1 (Representation)</strong></p>
-  <app-contour-shape-input
-    [parentForm]="benchmarkForm"
-  ></app-contour-shape-input>
-  <br />
-  <p><strong class="text-primary">Step 2 (Query EMDB ID list)</strong></p>
-  <div class="form-group row">
-    <label class="col-sm-4 col-form-label ">Query method:</label>
-    <div class="custom-control custom-radio col-sm-2 offset-sm-1">
-      <input
-        type="radio"
-        class="custom-control-input"
-        id="emdb-list"
-        [checked]="cbEmdbList"
-        (click)="cbEmdbListChange()"
-      />
-      <label class="custom-control-label" for="emdb-list">EMDB ID list</label>
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <form [formGroup]="benchmarkForm" (ngSubmit)="submitHandler()">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="text-primary">Submit your EMDB id list in a batch mode</h4>
+          </div>
+          <div class="card-body">
+            <div class="card steps" style="width: 100%;">
+              <div class="card-body">
+                <h5 class="card-title text-primary">Step 1 (Representation)</h5>
+                <app-contour-shape-input [parentForm]="benchmarkForm"></app-contour-shape-input>
+              </div>
+            </div>
+            <hr>
+            <div class="card steps" style="width: 100%;">
+              <div class="card-body">
+                <h5 class="card-title text-primary">Step 2 (Query EMDB ID list)</h5>
+                <div class="form-group row">
+                  <div class="col-sm-1"></div>
+                  <label class="col-sm-3 col-form-label ">Query method:</label>
+                  <div class="custom-control custom-radio col-sm-3 offset-sm-1">
+                    <input type="radio" class="custom-control-input" id="emdb-list" [checked]="cbEmdbList"
+                      (click)="cbEmdbListChange()" />
+                    <label class="custom-control-label" for="emdb-list">EMDB ID list</label>
+                  </div>
+                  <div class="custom-control custom-radio col-sm-3 offset-sm-1">
+                    <input type="radio" class="custom-control-input" id="fileupload" [checked]="!cbEmdbList"
+                      (click)="cbEmdbListChange()" />
+                    <label class="custom-control-label" for="fileupload">Upload an ID list</label>
+                  </div>
+                </div>
+                <div *ngIf="cbEmdbList">
+                  <app-emdb-id-list [parentForm]="benchmarkForm"></app-emdb-id-list>
+                </div>
+                <div *ngIf="!cbEmdbList">
+                  <app-upload-emdb-id-list-file [parentForm]="benchmarkForm"></app-upload-emdb-id-list-file>
+                </div>
+              </div>
+            </div>
+            <hr>
+            <div class="card steps" style="width: 100%;">
+              <div class="card-body">
+                <h5 class="card-title text-primary">Step 3 (Download 3DZD)</h5>
+                <label for="">Do you want to download 3dzd file of your query?</label>
+                <div class="download">
+                  <button id="zernikeButton" type="button" class="btn btn-primary" (click)="goToZernikeModule()">
+                    Get 3D Zernike Descriptor
+                  </button>
+                </div>
+              </div>
+            </div>
+            <hr>
+            <div class="card steps" style="width: 100%;">
+              <div class="card-body">
+                <h5 class="card-title text-primary">Step 4 (Filter)</h5>
+                <app-volume-filter-input [parentForm]="benchmarkForm"></app-volume-filter-input>
+              </div>
+            </div>
+            <hr>
+            <div class="card steps" style="width: 100%;">
+              <div class="card-body">
+                <h5 class="card-title text-primary">Step 5 (Results)</h5>
+                <div class="form-group row">
+                  <label for="contour" class="col-sm-4 col-form-label">Top Results:</label>
+                  <div class="col-sm-8">
+                    <select formControlName="top_results" class="custom-select mr-sm-2" id="contour">
+                      <option>10</option>
+                      <option>20</option>
+                      <option>30</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <div class="col-2 offset-4">
+                <button id="submitButton" class="btn btn-primary" type="submit" [disabled]="!benchmarkForm.valid">
+                  Submit
+                </button>
+              </div>
+              <div class="col-2 offset-1">
+                <button id="resetButton" class="btn btn-danger" type="button" (click)="reset()">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
-    <div class="custom-control custom-radio col-sm-3">
-      <input
-        type="radio"
-        class="custom-control-input"
-        id="fileupload"
-        [checked]="!cbEmdbList"
-        (click)="cbEmdbListChange()"
-      />
-      <label class="custom-control-label" for="fileupload"
-        >Upload an ID list</label
-      >
-    </div>
   </div>
-  <div *ngIf="cbEmdbList">
-    <app-emdb-id-list [parentForm]="benchmarkForm"> </app-emdb-id-list>
-  </div>
-  <div *ngIf="!cbEmdbList">
-    <app-upload-emdb-id-list-file
-      [parentForm]="benchmarkForm"
-    ></app-upload-emdb-id-list-file>
-  </div>
-  <br />
-  <p><strong class="text-primary">Step 3 (Download 3DZD)</strong></p>
-  <label for="">Do you want to download 3dzd file of your query?</label>
-  <div>
-    <button id="zernikeButton" type="button" (click)="goToZernikeModule()">
-      Get 3D Zernike Descriptor
-    </button>
-  </div>
-  <br />
-  <p><strong class="text-primary">Step 4 (Filter)</strong></p>
-  <app-volume-filter-input
-    [parentForm]="benchmarkForm"
-  ></app-volume-filter-input>
-  <br />
-  <p><strong class="text-primary">Step 5 (Results)</strong></p>
-  <div class="form-group row">
-    <label for="contour" class="col-sm-4 col-form-label">Top Results:</label>
-    <div class="col-sm-8">
-      <select
-        formControlName="top_results"
-        class="custom-select mr-sm-2"
-        id="contour"
-      >
-        <option>10</option>
-        <option>20</option>
-        <option>30</option>
-      </select>
-    </div>
-  </div>
-  <br />
-  <div class="form-group row">
-    <div class="col-2 offset-5">
-      <button id="submitButton" type="submit" [disabled]="!benchmarkForm.valid">
-        Submit
-      </button>
-    </div>
-    <div class="col-2">
-      <button id="resetButton" type="button" (click)="reset()">Reset</button>
-    </div>
-  </div>
-</form>
+</div>

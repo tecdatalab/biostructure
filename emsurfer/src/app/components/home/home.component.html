@@ -1,75 +1,88 @@
 <div class="container">
-  <div class="row">
+  <div class="row row-fix">
     <div class="col-7">
       <div class="row">
-        <div class="col-2">
-          <img src="assets/img/surfer.png" width="95" height="95" />
+        <div class="card">
+          <div class="card-header">
+            <div class="row">
+              <div class="col-2">
+                <img src="assets/img/surfer.png" width="55" height="55" class="rounded-circle"/>
+              </div>
+              <div class="col-10">
+                <h3 class="text-primary header-text-fix">EM Surfer</h3>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <p align="justify">
+                <strong>
+                  A web-based tool for real-time comparison and analysis of Electron
+                  Microscopy (EM) density maps.</strong>
+                It compares the shape of EM map isosurfaces, generated using
+                author-recommended contour values. Users can either upload an EM map
+                or choose an existing map in the
+                <a class="text-primary" href="http://www.emdatabank.org" target="_blank"><u>EMDataBank</u></a>
+                and compare it against maps stored in the EMDataBank. 3D-Zernike
+                Descriptors (3DZD) are utilized for the efficient comparison between
+                EM maps. The web interface will conveniently display a quantitative
+                measure of similarty between the isosurface shape of EM maps, as well
+                as a measure indicating how similar the target isosurface is to the
+                maps retrieved in the search. <em>EM-SURFER</em> provides the users
+                with the option of comparing EM maps using additional contour levels,
+                based on the original values recommended by each map's authors. It
+                also provides filtering features to compare the target only to maps
+                with a similar volume.
+              </p>
+            </div>
+          </div>
         </div>
-        <div class="col-10"><h3 class="text-primary">EM Surfer</h3></div>
       </div>
-      <div class="row">
-        <p align="justify">
-          <strong>
-            A web-based tool for real-time comparison and analysis of Electron
-            Microscopy (EM) density maps.</strong
-          >
-          It compares the shape of EM map isosurfaces, generated using
-          author-recommended contour values. Users can either upload an EM map
-          or choose an existing map in the
-          <a
-            class="text-warning"
-            href="http://www.emdatabank.org"
-            target="_blank"
-            ><u>EMDataBank</u></a
-          >
-          and compare it against maps stored in the EMDataBank. 3D-Zernike
-          Descriptors (3DZD) are utilized for the efficient comparison between
-          EM maps. The web interface will conveniently display a quantitative
-          measure of similarty between the isosurface shape of EM maps, as well
-          as a measure indicating how similar the target isosurface is to the
-          maps retrieved in the search. <em>EM-SURFER</em> provides the users
-          with the option of comparing EM maps using additional contour levels,
-          based on the original values recommended by each map's authors. It
-          also provides filtering features to compare the target only to maps
-          with a similar volume.
-        </p>
-      </div>
-      <div class="row">
+      <div class="col-12 row-fix">
         <div class="table-responsive">
           <app-statistics-table></app-statistics-table>
         </div>
       </div>
     </div>
     <div class="col-4 offset-1">
-      <h3 class="text-primary">Latest features</h3>
-      <br />
-      <ul>
-        <li align="justify">
-          <strong>Surface representation:</strong> Four isosurface
-          representation options are provided. The first one is the isosurface
-          generated at the author-recommended contour level found in the EMDB.
-          Three additional options combine the author-recommended contour level
-          with the isosurface created by increasing the contour value to
-          represent regions of a higher density, which is usually closer to the
-          core of the molecules.
-        </li>
-        <br />
-        <li align="justify">
-          <strong>User-uploaded maps: </strong> <em>EM SURFER</em> now accepts
-          user EM maps as queries for searches.
-        </li>
-        <br />
-        <li align="justify">
-          <strong>Volume filter:</strong> Enable this filter to compare only
-          against maps with a volume similar to the query map.
-        </li>
-        <br />
-        <li align="justify">
-          <strong>Batch mode:</strong> A batch mode is available to query
-          multiple EM maps, for users who would like to benchmark their methods
-          against our approach.
-        </li>
-      </ul>
+      <div class="card">
+        <div class="card-header">
+          <h3 class="text-primary">Latest features</h3>
+        </div>
+        <div class="card-body">
+          <ul>
+            <li align="justify">
+              <strong>Surface representation:</strong> Four isosurface
+              representation options are provided. The first one is the isosurface
+              generated at the author-recommended contour level found in the EMDB.
+              Three additional options combine the author-recommended contour level
+              with the isosurface created by increasing the contour value to
+              represent regions of a higher density, which is usually closer to the
+              core of the molecules.
+            </li>
+            <br />
+            <li align="justify">
+              <strong>User-uploaded maps: </strong> <em>EM SURFER</em> now accepts
+              user EM maps as queries for searches.
+            </li>
+            <br />
+            <li align="justify">
+              <strong>Volume filter:</strong> Enable this filter to compare only
+              against maps with a volume similar to the query map.
+            </li>
+            <br />
+            <li align="justify">
+              <strong>Batch mode:</strong> A batch mode is available to query
+              multiple EM maps, for users who would like to benchmark their methods
+              against our approach.
+            </li>
+          </ul>
+        </div>
+      </div>
+
+
+
+
     </div>
   </div>
 </div>

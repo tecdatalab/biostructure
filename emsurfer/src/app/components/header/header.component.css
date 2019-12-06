@@ -1,27 +1,73 @@
+/* --------------------------------------------- General Styles -------------------------------------------- */
+
+*{
+    padding: 0;
+    margin: 0;
+}
+
+.head-banner{
+   width: 100%;
+   margin-top: 2%;
+}
+
 .fit-image{
     width: 100%;
     object-fit: cover;
     height: auto;
+    border-radius: 25px 25px 0px 0px;
 }
+
 .button {
   font: bold 20px Arial;
   text-decoration: none;
   background-color: #333333;
   color: #EEEEEE;
   padding: 10px 30px 10px 30px;
-  border-top: 1px solid #CCCCCC;
-  border-right: 1px solid #333333;
-  border-bottom: 1px solid #333333;
+  border-right: 1px solid #CCCCCC;
   border-left: 1px solid #CCCCCC;
 }
+
 .button_active, a:hover {
   font: bold 20px Arial;
   text-decoration: none;
   background-color: #8a8888;
   color: #EEEEEE;
   padding: 10px 30px 10px 30px;
-  border-top: 1px solid #CCCCCC;
   border-right: 1px solid #333333;
-  border-bottom: 1px solid #333333;
   border-left: 1px solid #CCCCCC;
+}
+
+/* --------------------------------------------- Mobile Styles -------------------------------------------- */
+@media only screen and (max-width: 400px) {
+  
+}
+
+/* --------------------------------------------- Tablet Styles -------------------------------------------- */
+@media only screen and (min-width: 401px) and (max-width: 1024px) {
+  
+}
+
+/* --------------------------------------------- Desktop Styles ------------------------------------------- */
+@media only screen and (min-width: 1025px) {
+  
+  .dimension{
+    margin: 0.3% 0% 0.3% 0%;
+    background-color: rgba(255, 255, 255, 1);
+  }
+
+  .menu{
+    background-color: rgba(255, 255, 255, 1);
+  }
+
+  .google{
+    background-color: rgba(255, 255, 255, 0.9);
+    position: absolute;
+    top: 220px;
+    right: 2%;
+    width: auto;
+    height: auto;
+    border-radius: 5px 5px 5px 5px;
+    padding: 0px;
+  }
+
 }

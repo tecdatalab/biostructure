@@ -1,40 +1,47 @@
 <div class="form-group row" [formGroup]="parentForm">
+  <div class="col-sm-1"></div>
   <label class="col-sm-4 col-form-label">
     <strong> Resolution filter: </strong>
     (The query is only compared against maps in this resolution range. If both
     are left blank, no filtering is applied. If only one is provided, it will be
     the only restriction imposed)
   </label>
-  <label class="col-form-label offset-1" for="min">Min:</label>
-  <div class="col-2">
-    <input
-      id="min"
-      formControlName="min"
-      type="number"
-      class="form-control"
-      min="0"
-      step="0.0001"
-      [ngClass]="{
-        'is-invalid':
-          parentForm.controls['min'].invalid &&
-          parentForm.controls['min'].touched
-      }"
-    />
-  </div>
-  <label class="col-form-label" for="max">Max:</label>
-  <div class="col-2">
-    <input
-      id="max"
-      formControlName="max"
-      type="number"
-      class="form-control"
-      min="0"
-      step="0.0001"
-      [ngClass]="{
-        'is-invalid':
-          parentForm.controls['max'].invalid &&
-          parentForm.controls['max'].touched
-      }"
-    />
+  <div class="col-sm-7">
+    <div class="row offset-1" style="margin-top: 5%; margin-left: 11.3%;">
+      <label class="col-form-label" for="min">Min:</label>
+      <div class="col-5" style="margin-left: 1%;">
+        <input
+          id="min"
+          formControlName="min"
+          type="number"
+          class="form-control border-info"
+          min="0"
+          step="0.0001"
+          [ngClass]="{
+            'is-invalid':
+              parentForm.controls['min'].invalid &&
+              parentForm.controls['min'].touched
+          }"
+        />
+      </div>
+    </div>
+    <div class="row offset-1" style="margin-top: 7%; margin-left: 11.3%;">
+      <label class="col-form-label" for="max">Max:</label>
+      <div class="col-5">
+        <input
+          id="max"
+          formControlName="max"
+          type="number"
+          class="form-control border-info"
+          min="0"
+          step="0.0001"
+          [ngClass]="{
+            'is-invalid':
+              parentForm.controls['max'].invalid &&
+              parentForm.controls['max'].touched
+          }"
+        />
+      </div>
+    </div>
   </div>
 </div>

@@ -1,41 +1,64 @@
-<form [formGroup]="searchForm" (ngSubmit)="submitHandler()">
-  <h4 class="text-primary">Submit an EM map</h4>
-  <p>Please refer to the tips below when uploading a file:</p>
-  <ul>
-    <li>
-      It is possible that the EMDB ID already exists in the database. Try to use
-      the search box first.
-    </li>
-    <li>
-      If you benchmark our program, please <a href="#">access the page.</a>
-    </li>
-  </ul>
-  <p>
-    <strong class="text-primary">
-      (For the purpose of review, please directly click the Submit button to get
-      the search result, with the default options provided.)
-    </strong>
-  </p>
-
-  <p><strong class="text-primary">Step 1 (Representation)</strong></p>
-  <app-contour-shape-input [parentForm]="searchForm"></app-contour-shape-input>
-
-  <p><strong class="text-primary">Step 2 (Query entry)</strong></p>
-  <app-query-method [parentForm]="searchForm.controls.query"></app-query-method>
-  
-  <p><strong class="text-primary">Step 3 (Filter)</strong></p>
-  <app-volume-filter-input [parentForm]="searchForm"></app-volume-filter-input>
-
-  <app-resolution-filter [parentForm]="searchForm.controls.resolution_filter"></app-resolution-filter>
-
-  <div class="form-group row">
-    <div class="col-2 offset-5">
-      <button  id="submitButton" type="submit" [disabled]="!searchForm.valid">
-        Submit
-      </button>
-    </div>
-    <div class="col-2">
-      <button id="resetButton" type="button" (click)="reset()">Reset</button>
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <form [formGroup]="searchForm" (ngSubmit)="submitHandler()">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="text-primary">Submit an EM map</h4>
+          </div>
+          <div class="card-body">
+            <p>Please refer to the tips below when uploading a file:</p>
+            <ul>
+              <li>
+                It is possible that the EMDB ID already exists in the database. Try to use
+                the search box first.
+              </li>
+              <li>
+                If you benchmark our program, please <a href="benchmark">access the benchmark page.</a>
+              </li>
+            </ul>
+            <p>
+              <strong class="text-primary">
+                (For the purpose of review, please directly click the Submit button to get
+                the search result, with the default options provided.)
+              </strong>
+            </p>
+            <hr>
+            <div class="card steps" style="width: 100%;">
+              <div class="card-body">
+                <h5 class="card-title text-primary">Step 1 (Representation)</h5>
+                <app-contour-shape-input [parentForm]="searchForm"></app-contour-shape-input>
+              </div>
+            </div>
+            <hr>
+            <div class="card steps" style="width: 100%;">
+              <div class="card-body">
+                <h5 class="card-title text-primary">Step 2 (Query entry)</h5>
+                <app-query-method [parentForm]="searchForm.controls.query"></app-query-method>
+              </div>
+            </div>
+            <hr>
+            <div class="card steps" style="width: 100%;">
+              <div class="card-body">
+                <h5 class="card-title text-primary">Step 3 (Filter)</h5>
+                <app-volume-filter-input [parentForm]="searchForm"></app-volume-filter-input>
+                <app-resolution-filter [parentForm]="searchForm.controls.resolution_filter"></app-resolution-filter>
+              </div>
+            </div>
+            <hr>
+            <div class="form-group row">
+              <div class="col-2 offset-4">
+                <button  id="submitButton" class="btn btn-primary" type="submit" [disabled]="!searchForm.valid">
+                  Submit
+                </button>
+              </div>
+              <div class="col-2 offset-1">
+                <button id="resetButton" class="btn btn-danger" type="button" (click)="reset()">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
-</form>
+</div>

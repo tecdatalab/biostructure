@@ -6,7 +6,8 @@ import { BenchmarkResult } from 'src/app/models/benchmark-result';
 
 @Component({
   selector: 'app-benchmark-results',
-  templateUrl: './benchmark-results.component.html'
+  templateUrl: './benchmark-results.component.html',
+  styleUrls: ['./benchmark-results.component.css'],
 })
 export class BenchmarkResultsComponent implements OnInit {
   files: CustomFile[];

@@ -1,25 +1,13 @@
-.clickable {
-    cursor: pointer;
-}
-
 .card{
-    height: 100%;
-    padding: 5%;
-    border-radius: 25px;
+    width: 100%;
 }
 
-#img{
-    margin-bottom: 20%;
-    margin-top: 20%;
+.card-header{
+    background-color: rgba(226, 225, 225, 0.616) !important;
 }
 
-p{
-    margin-left: 5%;
-}
-
-hr{
-    border: 1px solid black;
-    margin-bottom: 10%;
+.card-header h3{
+    background-color: rgba(226, 225, 225, 0) !important;
 }
 
 /* --------------------------------------------- Mobile Styles -------------------------------------------- */
@@ -39,5 +27,8 @@ hr{
   /* --------------------------------------------- Desktop Styles ------------------------------------------- */
   @media only screen and (min-width: 1025px) {
   
+    *{
+      background-color: white;
+    }
     
   }

@@ -1,26 +1,37 @@
-.clickable {
-    cursor: pointer;
-}
-
-.card{
-    height: 100%;
+.row-fix{
     padding: 5%;
-    border-radius: 25px;
 }
 
-#img{
-    margin-bottom: 20%;
-    margin-top: 20%;
+.col-12.row-fix{
+    width: 100%;
+    padding: 5% 0%;
 }
 
-p{
-    margin-left: 5%;
+.card-body .row p, .card-body ul{
+    padding: 0% 5% !important;
+    margin: 0;
 }
 
-hr{
-    border: 1px solid black;
-    margin-bottom: 10%;
+.header-text-fix{
+    position: relative;
+    top: 20%;
+    background-color: rgba(226, 225, 225, 0) !important;
 }
+
+.card-header{
+    background-color: rgba(226, 225, 225, 0.616) !important;
+}
+
+.card-header h3, .card-header .row .col-2, .card-header .row .col-10{
+    background-color: rgba(226, 225, 225, 0) !important;
+}
+
+/* .card-header .row .col-2 image{
+    border-radius: 50px;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+} */
 
 /* --------------------------------------------- Mobile Styles -------------------------------------------- */
 @media only screen and (max-width: 400px) {
@@ -39,5 +50,6 @@ hr{
   /* --------------------------------------------- Desktop Styles ------------------------------------------- */
   @media only screen and (min-width: 1025px) {
   
+    
     
   }

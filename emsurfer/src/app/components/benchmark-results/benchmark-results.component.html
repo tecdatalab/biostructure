@@ -1,17 +1,25 @@
-<h5 class="text-primary">
-  Result shown
-</h5>
-<br />
-<h3>
-  <a id="download_link" class="text-warning" [href]="compressedFilePath" download
-    ><u>Please download all result files in a compressed package</u></a
-  >
-</h3>
-<br />
-<ul class="list-group list-group-flush">
-  <li *ngFor="let file of files" class="list-group-item">
-    <h6>
-      <a class="text-dark" [href]="file.path">{{ file.filename }}</a>
-    </h6>
-  </li>
-</ul>
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="text-primary">Result shown</h2>
+        </div>
+        <div class="card-body">
+          <h3>
+            <a id="download_link" class="text-warning" [href]="compressedFilePath" download><u>Please download all
+                result files in a compressed package</u></a>
+          </h3>
+          <br />
+          <ul class="list-group list-group-flush">
+            <li *ngFor="let file of files" class="list-group-item">
+              <h6>
+                <a class="text-primary" [href]="file.path">{{ file.filename }}</a>
+              </h6>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
