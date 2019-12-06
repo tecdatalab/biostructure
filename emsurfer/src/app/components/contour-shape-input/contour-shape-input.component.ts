@@ -16,10 +16,16 @@ export class ContourShapeInputComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    sessionStorage.typeDescriptor = 1;
     this.contourRepresentationService
       .getContourShapes()
       .then((data: ContourRepresentation[]) => {
         this.contourRepresentations = data;
       });
   }
+
+  onChange(value){
+    sessionStorage.typeDescriptor = value[0];
+  }
+  
 }
