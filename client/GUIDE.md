@@ -127,23 +127,23 @@ To run the client, you have to follow the next steps:
 
 - You need to go to the folder where the document is, using the terminal
 
-![Image find program](https://github.com/tecdatalab/biostructure/blob/master/console%20client/images/Screenshot%20from%202019-11-25%2022-21-37.png)
+![](https://github.com/tecdatalab/biostructure/blob/master/client/images/Screenshot%20from%202019-11-25%2022-21-37.png)
 
 - To run the file you need to run the next command in a terminal: ```python3 console_client_PDB.py```, after that the system displays a menu
 
-![Image run program](https://github.com/tecdatalab/biostructure/blob/master/console%20client/images/Screenshot%20from%202019-11-25%2022-25-51.png)
+![](https://github.com/tecdatalab/biostructure/blob/master/client/images/Screenshot%20from%202019-11-25%2022-25-51.png)
 
 - Enter the key 1 to make a query, in case of enter the key 2 the program ends.
 
-![Image menu](https://github.com/tecdatalab/biostructure/blob/master/console%20client/images/Screenshot%20from%202019-11-25%2023-06-15.png)
+![](https://github.com/tecdatalab/biostructure/blob/master/client/images/Screenshot%20from%202019-11-25%2023-06-15.png)
 
 - Enter the id of the molecule that you want to query and example of an id can be *101mA*, and enter the key numbers of the options that you want to apply to the query.
 
-![Image query](https://github.com/tecdatalab/biostructure/blob/master/console%20client/images/Screenshot%20from%202019-11-25%2023-11-00.png)
+![](https://github.com/tecdatalab/biostructure/blob/master/client/images/Screenshot%20from%202019-11-25%2023-11-00.png)
 
 - Then you can see the results of the query, to continue using the system you need to press the key INTRO and the system display the menu again
 
-![Image query](https://github.com/tecdatalab/biostructure/blob/master/console%20client/images/Screenshot%20from%202019-11-25%2023-31-08.png)
+![](https://github.com/tecdatalab/biostructure/blob/master/client/images/Screenshot%20from%202019-11-25%2023-31-08.png)
   
 The result depends of the data that is in the database, so if you don't have a lot of data, it's possible that your result will be little, but if you have the complete database, you must have the complete result of the query.
 
