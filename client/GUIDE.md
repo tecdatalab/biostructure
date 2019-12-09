@@ -25,7 +25,7 @@ To install the library tabulate, you just need to pen the terminal and run the n
 ```
 sudo pip3 install tabulate
 ```
-Is necessary to install this library, because is the one the show the information in a format that can be changed by the user.
+Is necessary to install this library, because is the one that show the information in a format that was established by the author
 
 ### Demostration
 
@@ -367,3 +367,9 @@ sudo apt-get update
 sudo apt-get install pycharm-community
 ```
 2. Open JetBrains
+
+##### Author Information
+
+Name: Jason Gerardo Gutierrez Quiros
+Github user: geraguti0807
+Gmail: gerardogutierrezquiros.gg@gmail.com
