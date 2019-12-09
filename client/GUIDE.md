@@ -370,6 +370,6 @@ sudo apt-get install pycharm-community
 
 ##### Author Information
 
-Name: Jason Gerardo Gutierrez Quiros
-Github user: geraguti0807
-Gmail: gerardogutierrezquiros.gg@gmail.com
+- Name: Jason Gerardo Gutierrez Quiros
+- Github user: geraguti0807
+- Gmail: gerardogutierrezquiros.gg@gmail.com
