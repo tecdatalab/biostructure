@@ -3,6 +3,7 @@
 This is a little guide of how you can use the console client to make queries to the PDB structures usign the Python program. The guide consist in 3 parts:
 1. How to use
 2. Code documentation
+3. Extra
 
 ## How to use
 
@@ -10,104 +11,7 @@ This section consists to explain how to use the Python program. The first part i
 
 ### Program Installation
 
-Something that is a restriction to use the program is that you need Python3 to compile and run the program, also you need a code editor and install a library.
-
-#### Code editors & Text editors
-
-In my case I use Visual Studio to edit the program but there are some others code or text editors to do that task. Now, I'm going to show how to install some of these:
-
-##### Visual Code
-
-###### Windows
-
-Steps
-1. Go to this link: https://code.visualstudio.com/download
-2. Click the option that says Windows
-3. Execute the downloaded file
-4. Open VSC
-
-###### Linux
-
-Steps
-1. Open the terminal and run those commands
-
-```
-sudo apt update
-sudo apt install software-properties-common apt-transport-https wget
-wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
-sudo apt update
-sudo apt install code
-```
-2. Open VSC
-
-##### Sublime Text 3
-
-###### Windows
-
-Steps
-1. Go to this link: https://www.sublimetext.com/3
-2. Click the option that says Windows
-3. Execute the downloaded file
-4. Open Sublime Text
-
-##### Linux
-
-Steps
-1. Open the terminal and run those commands
-
-```
-sudo apt update
-sudo add-apt-repository ppa:webupd8team/sublime-text-3
-sudo apt-get update
-sudo apt-get install sublime-text-installer
-```
-2. Open Sublime Text
-
-##### Notepad++
-
-###### Windows
-
-Steps
-1. Go to this link: https://notepad-plus-plus.org/downloads/
-2. Click the last release7.8.1
-3. Click the option that says Windows
-4. Execute the downloaded file
-5. Open Notepad++
-
-###### Linux
-
-Steps
-1. Open the terminal and run those commands
-
-```
-sudo apt list
-sudo apt-get install snapd snapd-xdg-open
-sudo snap install notepad-plus-plus
-```
-2. Open Notepad++
-
-##### PyCharm
-
-###### Windows
-
-Steps
-1. Go to this link: https://www.jetbrains.com/pycharm/download/#section=windows
-2. Click Community version
-3. Execute the downloaded file
-4. Open JetBrains
-
-###### Linux
-
-Steps
-1. Open the terminal and run those commands
-
-```
-sudo add-apt-repository ppa:mystic-mirage/pycharm
-sudo apt-get update
-sudo apt-get install pycharm-community
-```
-2. Open JetBrains
+Something that is a restriction to use the program is that you need Python3 to compile and run the program, also you need a code editor and install a library. To see more information about some code editors and how to install them, go to the Extra section
 
 #### Libraries
 
@@ -362,3 +266,102 @@ The output of the funtion is:
   - value: ``` listData = [{'type_id': 3, 'id': 154, 'id_code': '11asA00', 'id_parent': 151, 'len': 42, 'class': 5, 'architecture': 1, 'topology': 1, 'homologous': 1, 'factor': '3.5000000000000000', 'euclidean_distance': 7.84133824762437},  ... ,{'type_id': 3, 'id': 63, 'id_code': '107mA00', 'id_parent': 61, 'len': 19, 'class': 5, 'architecture': 1, 'topology': 1, 'homologous': 1, 'factor': '1.5833333333333333', 'euclidean_distance': 8.20006168153436}]```
   - meaning: data of the similar molecules.
   - restrictions: can't be null.  
+
+## Extra
+
+### Code editors & Text editors
+
+In my case I use Visual Studio to edit the program but there are some others code or text editors to do that task. Now, I'm going to show how to install some of these:
+
+#### Visual Code
+
+##### Windows
+
+Steps
+1. Go to this link: https://code.visualstudio.com/download
+2. Click the option that says Windows
+3. Execute the downloaded file
+4. Open VSC
+
+##### Linux
+
+Steps
+1. Open the terminal and run those commands
+
+```
+sudo apt update
+sudo apt install software-properties-common apt-transport-https wget
+wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
+sudo apt update
+sudo apt install code
+```
+2. Open VSC
+
+#### Sublime Text 3
+
+##### Windows
+
+Steps
+1. Go to this link: https://www.sublimetext.com/3
+2. Click the option that says Windows
+3. Execute the downloaded file
+4. Open Sublime Text
+
+##### Linux
+
+Steps
+1. Open the terminal and run those commands
+
+```
+sudo apt update
+sudo add-apt-repository ppa:webupd8team/sublime-text-3
+sudo apt-get update
+sudo apt-get install sublime-text-installer
+```
+2. Open Sublime Text
+
+#### Notepad++
+
+##### Windows
+
+Steps
+1. Go to this link: https://notepad-plus-plus.org/downloads/
+2. Click the last release7.8.1
+3. Click the option that says Windows
+4. Execute the downloaded file
+5. Open Notepad++
+
+##### Linux
+
+Steps
+1. Open the terminal and run those commands
+
+```
+sudo apt list
+sudo apt-get install snapd snapd-xdg-open
+sudo snap install notepad-plus-plus
+```
+2. Open Notepad++
+
+#### PyCharm
+
+##### Windows
+
+Steps
+1. Go to this link: https://www.jetbrains.com/pycharm/download/#section=windows
+2. Click Community version
+3. Execute the downloaded file
+4. Open JetBrains
+
+##### Linux
+
+Steps
+1. Open the terminal and run those commands
+
+```
+sudo add-apt-repository ppa:mystic-mirage/pycharm
+sudo apt-get update
+sudo apt-get install pycharm-community
+```
+2. Open JetBrains
