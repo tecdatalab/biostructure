@@ -11,7 +11,8 @@ This section consists to explain how to use the Python program. The first part i
 
 ### Program Installation
 
-Something that is a restriction to use the program is that you need Python3 to compile and run the program, also you need a code editor and install a library. To see more information about some code editors and how to install them, go to the Extra section
+Something that is a restriction to use the program is that you need Python3 to compile and run the program, also you need a code editor and install a library. To see more information about some code editors and how to install them, go to the [**Extra**](#extra) section
+
 
 #### Libraries
 
@@ -24,6 +25,7 @@ To install the library tabulate, you just need to pen the terminal and run the n
 ```
 sudo pip3 install tabulate
 ```
+Is necessary to install this library, because is the one the show the information in a format that can be changed by the user.
 
 ### Demostration
 
