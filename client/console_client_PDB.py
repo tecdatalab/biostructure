@@ -57,6 +57,14 @@ def showMoleculeData(dataMolecule, dataCathMolecule):
     headers=['ID PDB', 'Length', 'CATH'],tablefmt="psql",colalign=("center","center","center",)))
     print("\n")
 
+def showErrorMessage():
+    print("----------------------------------------------------------------------------------------------------------------------------------------------")
+    print("##############################################################################################################################################")
+    print("\n")
+    print("Sorry but the id of the molecule that you queried, it isn't found in the database, please try with another one...")
+    print("\n")
+    print("##############################################################################################################################################")
+
 def getCathMolecule(pdbId):
     try:
         conn = hc.HTTPConnection(api_url)
@@ -85,10 +93,13 @@ def getMolecule(pdbId):
 
 def makeQuery(pdbId, optRepre, optTempDB, optCATH, optApplyLenFilter, top):
     dataMolecule = getMolecule(pdbId)
-    dataCathMolecule = getCathMolecule(dataMolecule["id"])
-    showMoleculeData(dataMolecule, dataCathMolecule)
-    dataSimilarMolecules = getSimilarMolecules(int(dataMolecule["id"]), optRepre-1, optTempDB-1, optCATH-1, optApplyLenFilter-1, top)
-    showSimilarMoleculesData(dataSimilarMolecules)
+    if not 'message' in dataMolecule:
+        dataCathMolecule = getCathMolecule(dataMolecule["id"])
+        showMoleculeData(dataMolecule, dataCathMolecule)
+        dataSimilarMolecules = getSimilarMolecules(int(dataMolecule["id"]), optRepre-1, optTempDB-1, optCATH-1, optApplyLenFilter-1, top)
+        showSimilarMoleculesData(dataSimilarMolecules)
+    else:
+        showErrorMessage()
     pause()
   
 def pause():
