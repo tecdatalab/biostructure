@@ -165,7 +165,7 @@ exports.getResultsPDB = async (req, res) => {
 //#region Auxiliar functions
 
 async function searchByID(emdbid){
-  return biomolecule.findOne({
+  return biomolecule_emd.findOne({
     where: {
       id: parseInt(emdbid)
     }

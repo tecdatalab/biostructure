@@ -51,6 +51,8 @@ export class SearchResultComponent implements OnInit {
     const minRes = this.route.snapshot.queryParamMap.get("minResolution");
     const maxRes = this.route.snapshot.queryParamMap.get("maxResolution");
     this.volumeFilter = this.route.snapshot.queryParamMap.get("volumeFilter");
+    const typeDescriptor  = sessionStorage.typeDescriptor;
+    const topCan = 12;
     if (emdbId) {
       this.biomoleculeSearchService
         .getBiomolecule(emdbId)
@@ -68,7 +70,9 @@ export class SearchResultComponent implements OnInit {
                 contourRepresentation,
                 this.volumeFilter === "On",
                 minRes,
-                maxRes
+                maxRes,
+                typeDescriptor,
+                topCan
               )
               .then(response => {
                 this.results = response.results;
