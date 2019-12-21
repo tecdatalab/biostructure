@@ -135,7 +135,7 @@ def menuQuery(value):
 \t[2] CATH
 \t[3] CAT
 \t[4] CA
-\t[4] C
+\t[5] C
 >====================================================================================<""")
     optCATH = int(input("\tOption select is: "))
     print ("""
