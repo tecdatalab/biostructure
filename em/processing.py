@@ -6,27 +6,27 @@ from skimage.measure import regionprops
 from copy import deepcopy
 import numpy as np
 import math
-#import time
+import time
 
 
 
 def watershed_segmentation(myMolecule, level, scale_maps, steps):
-    #t = time.process_time()
+    t = time.process_time()
     data = myMolecule.data()
     threshold = data > level
     mask = dilation(threshold)
     data[data<=level]=0
-    #preprocess_time = time.process_time() - t
-    #t = time.process_time()
+    preprocess_time = time.process_time() - t
+    t = time.process_time()
     labels = watershed(-data, connectivity=26, mask=mask)
     watershed_time = time.process_time() - t
     regions = regionprops(labels)
     # Space-scale filtering
-    #t = time.process_time()
+    t = time.process_time()
     local_maxima = peak_local_max(data)  
-    #initial_maxima_time = time.process_time() - t
+    initial_maxima_time = time.process_time() - t
 
-    #t = time.process_time()
+    t = time.process_time()
     region_maxima = {}
 
     #match maxima to each region
@@ -42,12 +42,12 @@ def watershed_segmentation(myMolecule, level, scale_maps, steps):
         #print(key," ",i)
         local_maxima.append(region_maxima[key])
 
-    #region_sort_time = time.process_time() - t
+    region_sort_time = time.process_time() - t
 
     # Visit neighbor voxel at each dimension
     n_range =[-1,0,1]    
     size = myMolecule.shape()
-    #t = time.process_time()
+    t = time.process_time()
     for step in range(steps):
         #print("step ",step)
         smoothed_data = scale_maps[step].data()
@@ -104,9 +104,9 @@ def watershed_segmentation(myMolecule, level, scale_maps, steps):
         
         
 
-    #scale_space_time = time.process_time() - t
+    scale_space_time = time.process_time() - t
 
-    #t = time.process_time()
+    t = time.process_time()
 
     max_label = len(regions)
 
@@ -116,17 +116,17 @@ def watershed_segmentation(myMolecule, level, scale_maps, steps):
     _, inverse_rows = np.unique(rows, return_index=True)
     idx_repeated = np.split(cols, inverse_rows[1:])
 
-    #repeated_maxima_time = time.process_time() - t
+    repeated_maxima_time = time.process_time() - t
 
 
-    #t = time.process_time()
+    t = time.process_time()
 
     replace_dict = {l.label:l.label for l in regions}
 
     for label in idx_repeated:
         max_label = max_label+1  
         for l in label:
-            replace_dict[l+1] = max_label
+            replace_dict[l] = max_label
 
     rep_keys, rep_vals = np.array(list(zip(*sorted(replace_dict.items()))))
     indices = np.digitize(labels, rep_keys, right=True)
@@ -152,13 +152,13 @@ def watershed_segmentation(myMolecule, level, scale_maps, steps):
     
     label_rename_time = time.process_time() - t
 
-    #print(" Preprocessing time ", preprocess_time)
-    #print(" Watershed time ", watershed_time)
-    #print(" Initial maxima computation time ",initial_maxima_time)
-    #print(" Region sorting time ", region_sort_time)
-    #print(" Scale space time ", scale_space_time)
-    #print(" Repeated maxima search time ", repeated_maxima_time)
-    #print(" Labels renaming time ", label_rename_time)
+    print(" Preprocessing time ", preprocess_time)
+    print(" Watershed time ", watershed_time)
+    print(" Initial maxima computation time ",initial_maxima_time)
+    print(" Region sorting time ", region_sort_time)
+    print(" Scale space time ", scale_space_time)
+    print(" Repeated maxima search time ", repeated_maxima_time)
+    print(" Labels renaming time ", label_rename_time)
 
     
     return labels
