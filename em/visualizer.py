@@ -12,7 +12,6 @@ import os.path
 
 
 
-import reader
 import processing
 
 class Visualizer():
@@ -331,25 +330,6 @@ class Visualizer():
                     print("    Atoms with label %d: %.2f%%  %d/%d" % (key, chain_labels_count[key]*100/num_atoms_in_chain, chain_labels_count[key], num_atoms_in_chain))
 
                 
-    
-    # Not in use
-    def assign_atom_knn(self, atoms_dict, k):
-        atomic_structure = self.atoms
-        new_atoms_dict = dict()
-        atoms_distance = np.zeros(len(atomic_structure), [("id", np.int32, 1), ("distance", np.float32, 1)])
-        atoms_distance["id"] = atomic_structure["id"][:]
-        for key in atoms_dict:
-            distance = lambda x: np.linalg.norm(atomic_structure[atomic_structure["id"]==key]['position']-x, axis=1)
-            atoms_distance["distance"] = distance(atomic_structure["position"])
-            sorted_distance = np.sort(atoms_distance, order=["distance"])
-            selected_keys = sorted_distance["id"][1:k+1]
-            selected_labels = [label for label_list in [atoms_dict[selected_key] for selected_key in selected_keys] for label in label_list]
-            if selected_labels != []:
-                label = np.bincount(selected_labels).argmax()
-            else:
-                label = 0
-            new_atoms_dict[key] = label
-        return new_atoms_dict
             
 
 
@@ -375,46 +355,7 @@ class Visualizer():
 
 
 
-#Read molecule map from file
-#mapReader = reader.Reader()
-#Open file
-#mapReader.open("../maps/1010/EMD-1010.map") #level 2.2479
-# #mapReader.open("../maps/EMD-2596.map") #level 0.1462
-#mapReader.open("../maps/1010/EMD-1010.map") #level 23
-#mapReader.open("../maps/1364/EMD-1364.map") #level 39.0086
-#mapReader.open("../maps/5017/EMD-5017.map") #level 17.3347
 
-
-#Get map object
-#myMap = mapReader.read()
-# Create visualizer with a map surface threshold level
-# Otherwise use otsu threshold
-#v= Visualizer(myMap, level=9.07)
-#v = Visualizer(myMap)
-# Watershed 
-#v.segmentation(step_sigma=1, steps=3)
-
-# add corresponding atomic structure
-#v.add_structure("../maps/1010/pdb1mi6.ent")
-#v.map_structure_to_domain("../maps/1010/A-1GQE.aligned.pdb")
-#v.map_structure_to_domain("../maps/1010/B-1GQE.aligned.pdb")
-#v.map_structure_to_domain("../maps/1010/C-1GQE.aligned.pdb")
-#v.map_structure_to_domain("../maps/1010/D-1GQE.aligned.pdb")
-
-#v.add_structure("../maps/1364/pdb1pn6.ent")
-#v.map_structure_to_domain("../maps/1364/A-1FNM.aligned.pdb")
-#v.map_structure_to_domain("../maps/1364/B-1FNM.aligned.pdb")
-#v.map_structure_to_domain("../maps/1364/C-1FNM.aligned.pdb")
-#v.map_structure_to_domain("../maps/1364/D-1FNM.aligned.pdb")
-#v.map_structure_to_domain("../maps/1364/E-1FNM.aligned.pdb")
-
-#v.add_structure("../maps/5017/pdb3dny.ent")
-#v.map_structure_to_domain("../maps/5017/A-1N0U.aligned.pdb")
-#v.map_structure_to_domain("../maps/5017/B-1N0U.aligned.pdb")
-#v.map_structure_to_domain("../maps/5017/C-1N0U.aligned.pdb")
-
-#v.show_atom_matching()
-#v.show()
 
 
 
