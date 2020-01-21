@@ -8,15 +8,12 @@ from biopandas.pdb import PandasPdb
 from skimage.filters import threshold_otsu
 from skimage.measure import regionprops
 from collections import Counter
-import os.path
 
 
-
-import processing
 
 class Visualizer():
     
-    def __init__(self, myMolecule, level=None):
+    def __init__(self, data, level=None, labels=None):
         self.vertex = """
                     uniform mat4 m_model;
                     uniform mat4 m_view;
@@ -68,21 +65,20 @@ class Visualizer():
                         gl_FragColor = vec4(color_gamma, 0.8);
                     }
                     """
-        self.molecule = myMolecule
-        data = self.molecule.data()
+        self.data = data
         
         if level!=None:
             self.th_level = level
             print("Using density threshold level: %.4f" % (self.th_level))
         else:
-            self.th_level =  threshold_otsu(data)
+            self.th_level =  threshold_otsu(self.data)
             print("Using density threshold level: %.4f" % (self.th_level))
-        verts, faces, _,_ = measure.marching_cubes_lewiner(data, self.th_level)
+        verts, faces, _,_ = measure.marching_cubes_lewiner(self.data, self.th_level)
 
         self.verts = verts
         self.faces = faces      
         self.atoms = None
-        self.labels = None
+        self.labels = labels
 
 
     def show(self, export=False, start_angle=None, time=1, export_path=""):
@@ -329,24 +325,6 @@ class Visualizer():
                 for key in chain_labels_count:
                     print("    Atoms with label %d: %.2f%%  %d/%d" % (key, chain_labels_count[key]*100/num_atoms_in_chain, chain_labels_count[key], num_atoms_in_chain))
 
-                
-            
-
-
-    def segmentation(self, step_sigma, steps):
-        molecule = self.molecule
-        step_maps = processing.scale_space_filtering(molecule, self.th_level, step_sigma, steps)
-        self.labels = processing.watershed_segmentation(molecule, self.th_level, step_maps, steps)
-        regions = regionprops(self.labels)
-        regions = [r for r in regions]
-        print("Number of segmented regions: %d" % len(regions))
-        print("    step sigma = %.2f\n    steps = %.2f" % (step_sigma, steps))
-        try:
-            with open(os.path.join("export/", molecule.name+".txt"), "w") as output_file:
-                output_file.write("Number of segmented regions: %d\n" % len(regions))
-                output_file.write("    step sigma = %.2f\n    steps = %.2f\n" % (step_sigma, steps))
-        except Exception as e:
-            print("Could not create output file, ", e)
         
 
 
