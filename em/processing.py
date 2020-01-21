@@ -3,19 +3,51 @@ from skimage.segmentation import watershed
 from skimage.feature import peak_local_max
 from skimage.filters import  gaussian
 from skimage.measure import regionprops
-from copy import deepcopy
 import numpy as np
 import math
 import time
+from functools import partial
+from multiprocessing import Pool
+import os.path
+
+import model
 
 
 
-def watershed_segmentation(myMolecule, level, scale_maps, steps):
+def segmentate(model, step_sigma, steps):
+    countourLevels = model.getCutoffLevels()
+    dataLevels = model.getData()
+    task_args = [(data, contour) for data,contour in zip(dataLevels,countourLevels)]
+    #parallel segmentation for each contour level
+    with Pool(len(countourLevels)) as p:
+        segmentation_func = partial(segmentation_pipeline, step_sigma=step_sigma, steps=steps)
+        labels = p.map(segmentation_func, task_args)
+    return labels,dataLevels
+        
+
+def segmentation_pipeline(task_args, step_sigma, steps):
+    data = task_args[0]
+    contourLevel = task_args[1]
+    step_maps = scale_space_filtering(data, contourLevel, step_sigma, steps)
+    labels = watershed_segmentation(data, contourLevel, step_maps, steps)
+    regions = regionprops(labels)
+    regions = [r for r in regions]
+    print("Contour Level: %.4f" % contourLevel)
+    print("Number of segmented regions: %d" % len(regions))
+    print("    step sigma = %.2f\n    steps = %.2f" % (step_sigma, steps))
+    try:
+        with open(os.path.join("export/", molecule.name+".txt"), "w") as output_file:
+            output_file.write("Number of segmented regions: %d\n" % len(regions))
+            output_file.write("    step sigma = %.2f\n    steps = %.2f\n" % (step_sigma, steps))
+    except Exception as e:
+        print("Could not create output file, ", e)
+    return labels
+
+def watershed_segmentation(data, level, scale_maps, steps):
     t = time.process_time()
-    data = myMolecule.data()
-    threshold = data > level
+    threshold = data >= level
     mask = dilation(threshold)
-    data[data<=level]=0
+    data[data<level]=0
     preprocess_time = time.process_time() - t
     t = time.process_time()
     labels = watershed(-data, connectivity=26, mask=mask)
@@ -46,11 +78,11 @@ def watershed_segmentation(myMolecule, level, scale_maps, steps):
 
     # Visit neighbor voxel at each dimension
     n_range =[-1,0,1]    
-    size = myMolecule.shape()
+    size = data.shape
     t = time.process_time()
     for step in range(steps):
         #print("step ",step)
-        smoothed_data = scale_maps[step].data()
+        smoothed_data = scale_maps[step]
 
         new_maxima = np.empty_like(local_maxima)
 
@@ -120,7 +152,7 @@ def watershed_segmentation(myMolecule, level, scale_maps, steps):
 
 
     t = time.process_time()
-
+    '''
     replace_dict = {l.label:l.label for l in regions}
 
     for label in idx_repeated:
@@ -148,7 +180,7 @@ def watershed_segmentation(myMolecule, level, scale_maps, steps):
     for i,l in enumerate(newlabels):
         mask = labels == l.label
         labels[mask]=i+1
-    '''
+    
     
     label_rename_time = time.process_time() - t
 
@@ -165,12 +197,12 @@ def watershed_segmentation(myMolecule, level, scale_maps, steps):
 
 
 
-def scale_space_filtering(myMolecule, level, step_sigma, steps):
-    step_maps = []
+def scale_space_filtering(data, level, step_sigma, steps):
+    scaled_data = []
     for map_id in range(steps):
-        newMolecule = deepcopy(myMolecule) 
-        smoothed = gaussian(myMolecule.data(), sigma=[step_sigma,step_sigma,step_sigma], truncate=1)
-        newMolecule.set_data(smoothed)
-        step_maps.append(newMolecule)
+        smoothed = gaussian(data, sigma=[step_sigma,step_sigma,step_sigma], truncate=1)
+        scaled_data.append(smoothed)
         step_sigma +=step_sigma
-    return step_maps
+    return scaled_data
+
+
