@@ -14,23 +14,27 @@ import model
 
 
 
-def segmentate(model, step_sigma, steps):
+def segment(model, step_sigma, steps):
     countourLevels = model.getCutoffLevels()
     dataLevels = model.getData()
-    task_args = [(data, contour) for data,contour in zip(dataLevels,countourLevels)]
+    voxel_size = tuple(int(i/j) for i,j in zip(model.molecule.cell_dim(), model.molecule.grid_size()))
+    task_args = [(data, contour, voxel_size) for data,contour in zip(dataLevels,countourLevels)]
     #parallel segmentation for each contour level
     with Pool(len(countourLevels)) as p:
         segmentation_func = partial(segmentation_pipeline, step_sigma=step_sigma, steps=steps)
-        labels = p.map(segmentation_func, task_args)
-    return labels,dataLevels
+        data_labels_list = p.map(segmentation_func, task_args)
+    return data_labels_list   
         
 
 def segmentation_pipeline(task_args, step_sigma, steps):
     data = task_args[0]
     contourLevel = task_args[1]
+    voxel_size = task_args[2]
     step_maps = scale_space_filtering(data, contourLevel, step_sigma, steps)
     labels = watershed_segmentation(data, contourLevel, step_maps, steps)
-    regions = regionprops(labels)
+    # Not accurate yet
+    #data, labels = remove_noise_regions(data, labels, voxel_size, 10000) 
+    regions = regionprops(labels)   
     regions = [r for r in regions]
     print("Contour Level: %.4f" % contourLevel)
     print("Number of segmented regions: %d" % len(regions))
@@ -41,7 +45,29 @@ def segmentation_pipeline(task_args, step_sigma, steps):
             output_file.write("    step sigma = %.2f\n    steps = %.2f\n" % (step_sigma, steps))
     except Exception as e:
         print("Could not create output file, ", e)
-    return labels
+    return data,labels
+
+
+def remove_noise_regions(data, labels, voxel_size, area_th=100):
+    t = time.process_time()
+    regions = regionprops(labels)
+    print(regions[1].image.shape)
+    print(np.prod(regions[1].image.shape))
+    for r in regions:
+        print("region %d" % r.label )
+        print("number voxels  %d" % r.area)
+        print("shape %s" % (r.image.shape,) )
+        print("Volume %d" % np.prod(r.image.shape*voxel_size[0]))
+        print("Remove? %s" % ("True" if np.prod(r.image.shape*voxel_size[0])<area_th else "False",) )
+    coords_to_remove = [r.coords for r in regions if np.prod(r.image.shape*voxel_size[0])<area_th]
+    if len(coords_to_remove)!=0:
+        coords_to_remove = np.vstack(coords_to_remove).astype(np.int32)
+        data[coords_to_remove[:,0],coords_to_remove[:,1],coords_to_remove[:,2]]=0
+        labels[coords_to_remove[:,0],coords_to_remove[:,1],coords_to_remove[:,2]]=0
+    return data, labels
+    
+
+    
 
 def watershed_segmentation(data, level, scale_maps, steps):
     t = time.process_time()
