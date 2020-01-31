@@ -1,0 +1,11 @@
+map2zernike
+
+Computes rotation-, translation-, and dilation/contraction- invariant 3D Zernike descriptors from Situs, CCP4, and MRC2000 files.
+Use 'make' to build. It prints its own help info.
+
+
+Contact info:
+    Charles Christoffer  (christ35@purdue.edu, charwich@charwich.net)
+    Daisuke Kihara       (dkihara@purdue.edu)
+
+See LICENSE for legal information.
