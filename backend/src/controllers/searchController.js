@@ -63,9 +63,12 @@ exports.saveSearch = async (req, res, next) => {
 
 exports.searchResult = async (req, res) => {
   try {
-    minRes = checkMinResolutionFilter(req.params.minRes);
-    maxRes = checkMaxResolutionFilter(req.params.maxRes);
-    let query_results = await getBiomolecules(minRes, maxRes);
+    emd_id = req.params.emdbID;
+    type_descriptor = req.params.typeDescriptor;
+    top_can = req.params.topCan;
+
+    let query_results = await getBiomolecules(emd_id, type_descriptor, top_can);
+
     let result = {
       path: "/results/result.hit",
       results: query_results
@@ -94,6 +97,7 @@ exports.searchResultMap = async (req, res) => {
     });
   }
 };
+
 
 exports.zernike = async (req, res, next) => {
   response = [];
@@ -153,13 +157,29 @@ exports.getResultsPDB = async (req, res) => {
     res.status(500).send({
       message: "Backend error"
     });
-  }
-  
+  } 
 }
 
 //#endregion
 
 //#region Auxiliar functions
+
+async function searchByID(emdbid){
+  return biomolecule_emd.findOne({
+    where: {
+      id: parseInt(emdbid)
+    }
+  }).then((biomolecules) => {
+      if (!biomolecules) {
+        console.log("Biomolecule " + emdbid + " not found.");
+        return -1;
+      }
+      let info = biomolecules["dataValues"];
+      return info;
+    }).catch ((err) => {
+        return -1;
+  });
+}
 
 function checkMinResolutionFilter(minRes) {
   if (isNaN(minRes)) {
@@ -183,25 +203,26 @@ function checkMaxResolutionFilter(maxRes) {
   }
 }
 
-async function getBiomolecules(minRes, maxRes) {
+async function getBiomolecules(emd_id_p, type_descriptor, top_can) {
   try {
-    let biomolecules = await biomolecule_emd.findAll({
-      where: {
-        volume: {
-          [Op.gte]: minRes,
-          [Op.lte]: maxRes
-        }
-      }
-    });
+    // Query to DB
+    let biomolecules = await sequelize.query(
+                  'SELECT * FROM top_distance(:emd_id, :type_des, :top)',
+                  {replacements: { emd_id: emd_id_p, 
+                                   type_des: type_descriptor, 
+                                   top: top_can }
+                                  });
+    // final result array
     let resultArray = [];
-    biomolecules.forEach(biomoleculeItem => {
-      resultArray.push({
-        biomolecule: biomoleculeItem.get({
-          plain: true
-        }),
-        euc_distance: 5
-      });
-    });
+    // Clasification Process
+    for (const biomoleculeItem of biomolecules[0]){
+      let bioInfo = await searchByID(biomoleculeItem["emd_id"]);
+      let distance = biomoleculeItem["distance"].toString();
+       resultArray.push({
+                      biomolecule: bioInfo,
+                      euc_distance: distance.substring(0, 5)
+                    });
+    }  
     return resultArray;
   } catch (err) {
     return err;

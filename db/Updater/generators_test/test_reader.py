@@ -5,19 +5,25 @@ import molecule as m
 
 class TestReader(unittest.TestCase):
 
-
     def test_init(self):
         with self.assertRaises(IOError):
             myreader = rd.Reader('somefile.map')
 
-
     def test_read(self):
         myreader = rd.Reader('tests/EMD-2677.map')
         mym = myreader.read()
-        
-        othermolecule = m.Molecule(mym.rawHeader, mym.data(), mym.shape(), mym.start_point(), mym.grid_size(), mym.cell_dim(), mym.density_range(), mym.origin())
+
+        othermolecule = m.Molecule(
+            mym.rawHeader,
+            mym.data(),
+            mym.shape(),
+            mym.start_point(),
+            mym.grid_size(),
+            mym.cell_dim(),
+            mym.density_range(),
+            mym.origin())
         self.assertEqual(mym, othermolecule)
- 
+
     def test_bigEndianness(self):
         readerBig = rd.Reader('tests/EMD-2627_big.map')
         self.assertTrue(readerBig.is_endianness_reversed)
@@ -30,7 +36,7 @@ class TestReader(unittest.TestCase):
     def test_mode0(self):
         return
 
-    
+
     def test_mode1(self):
         return
 
@@ -39,5 +45,3 @@ class TestReader(unittest.TestCase):
 
 
     '''
-
-        

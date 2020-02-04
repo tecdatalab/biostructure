@@ -1,8 +1,18 @@
 import numpy as np
 
+
 class Molecule():
 
-    def __init__(self, rawHeader, data, size, start, grid_size, cell_dim, density_ranges, origin):
+    def __init__(
+            self,
+            rawHeader,
+            data,
+            size,
+            start,
+            grid_size,
+            cell_dim,
+            density_ranges,
+            origin):
         self.rawHeader = rawHeader
         self.array = data
         (self.nz, self.ny, self.nx) = size
@@ -19,8 +29,6 @@ class Molecule():
             (self.dmin, self.dmax, self.dmean) = (d_min, d_max, d_mean)
         else:
             (self.dmin, self.dmax, self.dmean) = density_ranges
-        
-
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -30,7 +38,7 @@ class Molecule():
 
     def set_origin(self, new_origin):
         (self.xorigin, self.yorigin, self.zorigin) = new_origin
-    
+
     def data(self):
         return self.array
 
@@ -54,6 +62,3 @@ class Molecule():
 
     def origin(self):
         return (self.zorigin, self.yorigin, self.xorigin)
-
-
-
