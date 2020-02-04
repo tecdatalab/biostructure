@@ -2,10 +2,10 @@ const router = require("express").Router();
 const searchController = require("../controllers/searchController");
 const userController = require("../controllers/userController");
 
-router.get("/:emdbID", searchController.searchByID);
+router.get("/:app/:ID", searchController.searchByID);
 
 router.get(
-  "/results/:emdbID/:contourRepresentation/:isVolumeFilterOn/:minRes/:maxRes",
+  "/results/:emdbID/:contourRepresentation/:isVolumeFilterOn/:minRes/:maxRes/:typeDescriptor/:topCan",
   userController.isUserLoggedIn,
   searchController.saveSearch,
   searchController.searchResult
@@ -24,5 +24,9 @@ router.get(
   "/zernikemap/:emdbID/:contourRepresentation",
   searchController.zernikeMap
 );
+
+router.get("/:ID",searchController.getCathDetail);
+
+router.get("/getResultsPDB/:ID/:rep/:type/:cath/:len/:top", searchController.getResultsPDB)
 
 module.exports = router;

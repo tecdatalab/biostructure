@@ -4,7 +4,8 @@ import { Statistic } from "src/app/models/statistic";
 
 @Component({
   selector: "app-statistics-table",
-  templateUrl: "./statistics-table.component.html"
+  templateUrl: "./statistics-table.component.html",
+  styleUrls: ['./statistics-table.component.css'],
 })
 export class StatisticsTableComponent implements OnInit {
   statistics: Statistic[];

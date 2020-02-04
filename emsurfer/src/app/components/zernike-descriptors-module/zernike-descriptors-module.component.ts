@@ -6,6 +6,7 @@ import { DescriptorsList } from "src/app/models/descriptorsList";
 @Component({
   selector: "app-zernike-descriptors-module",
   templateUrl: "./zernike-descriptors-module.component.html",
+  styleUrls: ['./zernike-descriptors-module.component.css'],
   providers: [DescriptorService]
 })
 export class ZernikeDescriptorsModuleComponent implements OnInit {

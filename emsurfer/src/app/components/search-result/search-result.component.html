@@ -1,99 +1,69 @@
-<h5 class="text-primary">
-  Query entry (<a
-    id="download_link"
-    class="text-warning"
-    [href]="downloadResultFile"
-    ><u id="downloads_link">Download text results here</u></a
-  >)
-</h5>
-<br />
-<div class="row">
-  <div *ngIf="isSearchById" class="col-3 border border-dark">
-    <a
-      class="text-warning"
-      [href]="
-        'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-' +
-        stringPadder.padEmdbId(biomolecule.id.toString())
-      "
-      ><strong
-        ><u
-          >EMD-{{ stringPadder.padEmdbId(biomolecule.id.toString()) }}</u
-        ></strong
-      ></a
-    >
-    <p>{{ biomolecule.full_name }}</p>
-    <div class="tab-content" id="nav-tabContent">
-      <div
-        class="tab-pane fade show active"
-        id="rep2d"
-        role="tabpanel"
-        aria-labelledby="nav-2d-tab"
-      >
-        <img class="img-fluid" [src]="biomolecule.image_url" />
-      </div>
-      <div
-        class="tab-pane fade"
-        id="rep3d"
-        role="tabpanel"
-        aria-labelledby="nav-3d-tab"
-      >
-        <img
-          class="img-fluid"
-          [src]="imgSrc || biomolecule.png_img_3d"
-          (mouseout)="imgSrc = biomolecule.png_img_3d"
-          (mouseover)="imgSrc = biomolecule.gif_img_3d"
-        />
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="text-primary">Query entry ( <a id="download_link" class="text-warning"
+              [href]="downloadResultFile"><u id="downloads_link">Download text results here</u></a> )</h5>
+        </div>
+        <div class="card-body">
+          <div class="card steps" style="width: 100%;">
+            <div class="card-body">
+              <div class="row">
+                <div *ngIf="isSearchById" class="col-3 border back-fix left">
+                  <a class="text-warning"
+                    [href]="'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-' + stringPadder.padEmdbId(biomolecule.id.toString())">
+                    <strong><u>EMD-{{ stringPadder.padEmdbId(biomolecule.id.toString()) }}</u></strong></a>
+                  <p>{{ biomolecule.full_name }}</p>
+                  <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="rep2d" role="tabpanel" aria-labelledby="nav-2d-tab">
+                      <img class="img-fluid" [src]="biomolecule.image_url" />
+                    </div>
+                    <div class="tab-pane fade" id="rep3d" role="tabpanel" aria-labelledby="nav-3d-tab">
+                      <img class="img-fluid" [src]="imgSrc || biomolecule.png_img_3d"
+                        (mouseout)="imgSrc = biomolecule.png_img_3d" (mouseover)="imgSrc = biomolecule.gif_img_3d" />
+                    </div>
+                  </div>
+                  <br />
+                  <nav>
+                    <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                      <a class="nav-item nav-link active" id="nav-2d-tab" data-toggle="tab" href="#rep2d" role="tab"
+                        aria-controls="rep2d" aria-selected="true"><strong>2D</strong></a>
+                      <a class="nav-item nav-link" id="nav-3d-tab" data-toggle="tab" href="#rep3d" role="tab"
+                        aria-controls="rep3d" aria-selected="false"><strong>3D</strong></a>
+                    </div>
+                  </nav>
+                </div>
+                <div class="col-3 border back-fix" [hidden]="isSearchById">
+                  <p class="text-primary"><strong>User uploaded query</strong></p>
+                  <p><strong>File uploaded:</strong></p>
+                  <p>{{ filename }}</p>
+                </div>
+                <div class="col-6 border back-fix">
+                  <div class="align-self-end fix-char">
+                    <canvas #canvas>{{ chart }}</canvas>
+                  </div>
+                </div>
+                <div class="col-3 border overflow-auto back-fix right">
+                  <label class="fix-zernike" style="margin-left: 5%;"><strong>Descriptors</strong></label>
+                  <app-zernike-descriptors-list [values]="values" [descriptors]="descriptors">
+                  </app-zernike-descriptors-list>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr>
+          <div class="card steps" style="width: 100%;">
+            <div class="card-body">
+              <h5 class="text-primary">
+                Retrieval results with similar 3D surface (Volume Filter: {{ volumeFilter }})
+              </h5>
+              <hr>
+              <app-biomolecules-table [results]="results"></app-biomolecules-table>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <br />
-    <nav>
-      <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
-        <a
-          class="nav-item nav-link active"
-          id="nav-2d-tab"
-          data-toggle="tab"
-          href="#rep2d"
-          role="tab"
-          aria-controls="rep2d"
-          aria-selected="true"
-          ><strong>2D</strong></a
-        >
-        <a
-          class="nav-item nav-link"
-          id="nav-3d-tab"
-          data-toggle="tab"
-          href="#rep3d"
-          role="tab"
-          aria-controls="rep3d"
-          aria-selected="false"
-          ><strong>3D</strong></a
-        >
-      </div>
-    </nav>
-  </div>
-  <div class="col-3 border border-dark" [hidden]="isSearchById">
-    <p class="text-primary"><strong>User uploaded query</strong></p>
-    <p><strong>File uploaded:</strong></p>
-    <p>{{ filename }}</p>
-  </div>
-
-  <div class="col-6 border border-dark">
-    <div class="align-self-end">
-      <br />
-      <canvas #canvas>{{ chart }}</canvas>
-    </div>
-  </div>
-  <div class="col-3 border border-dark overflow-auto">
-    <label><strong>Descriptors</strong></label>
-    <app-zernike-descriptors-list
-      [values]="values"
-      [descriptors]="descriptors"
-    ></app-zernike-descriptors-list>
   </div>
 </div>
-<br />
-<h5 class="text-primary">
-  Retrieval results with similar 3D surface (Volume Filter: {{ volumeFilter }})
-</h5>
-<br />
-<app-biomolecules-table [results]="results"></app-biomolecules-table>

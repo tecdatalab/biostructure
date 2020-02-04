@@ -5,7 +5,8 @@ import { ContourRepresentation } from "../../models/contour-representation";
 
 @Component({
   selector: "app-contour-shape-input",
-  templateUrl: "./contour-shape-input.component.html"
+  templateUrl: "./contour-shape-input.component.html",
+  styleUrls: ['./contour-shape-input.component.css'],
 })
 export class ContourShapeInputComponent implements OnInit {
   @Input() parentForm: FormGroup;
@@ -15,10 +16,16 @@ export class ContourShapeInputComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    sessionStorage.typeDescriptor = 1;
     this.contourRepresentationService
       .getContourShapes()
       .then((data: ContourRepresentation[]) => {
         this.contourRepresentations = data;
       });
   }
+
+  onChange(value){
+    sessionStorage.typeDescriptor = value[0];
+  }
+  
 }

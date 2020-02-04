@@ -11,7 +11,8 @@ import { Descriptor } from "src/app/models/descriptor";
 @Component({
   selector: "app-search-result",
   templateUrl: "./search-result.component.html",
-  providers: [BiomoleculeSearchService]
+  providers: [BiomoleculeSearchService],
+  styleUrls: ['./search-result.component.css'],
 })
 export class SearchResultComponent implements OnInit {
   @ViewChild("canvas") canvasElementRef: ElementRef;
@@ -50,6 +51,8 @@ export class SearchResultComponent implements OnInit {
     const minRes = this.route.snapshot.queryParamMap.get("minResolution");
     const maxRes = this.route.snapshot.queryParamMap.get("maxResolution");
     this.volumeFilter = this.route.snapshot.queryParamMap.get("volumeFilter");
+    const typeDescriptor  = sessionStorage.typeDescriptor;
+    const topCan = 12;
     if (emdbId) {
       this.biomoleculeSearchService
         .getBiomolecule(emdbId)
@@ -67,7 +70,9 @@ export class SearchResultComponent implements OnInit {
                 contourRepresentation,
                 this.volumeFilter === "On",
                 minRes,
-                maxRes
+                maxRes,
+                typeDescriptor,
+                topCan
               )
               .then(response => {
                 this.results = response.results;
@@ -111,7 +116,7 @@ export class SearchResultComponent implements OnInit {
         datasets: [
           {
             data: this.values,
-            borderColor: "black",
+            borderColor: "blue",
             fill: false,
             pointRadius: 0
           }
