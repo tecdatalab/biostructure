@@ -15,7 +15,7 @@ import { Descriptor } from "src/app/models/descriptor";
   styleUrls: ['./search-result.component.css'],
 })
 export class SearchResultComponent implements OnInit {
-  @ViewChild("canvas") canvasElementRef: ElementRef;
+  @ViewChild("canvas", { static: true }) canvasElementRef: ElementRef;
   chart: Chart;
   biomolecule: Biomolecule;
   filename: string;
