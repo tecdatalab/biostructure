@@ -31,19 +31,22 @@ def main():
     #v= visualizer.Visualizer(myMap, level=0.05)
     #
     # Watershed 
-    contourRatioLvl = [1, 0.75,0.5]
+    contourRatioLvl = [1]
     myModel = model.Model(myMap, 0.05, contourRatioLvl)
-    data_labels_list = processing.segment(myModel, step_sigma=1, steps=5)
-    #v.add_structure("../maps/pdb6acf.ent")
-    #v.map_structure_to_domain("../maps/pdb6acf.ent")
+    data_labels_list = processing.segment(myModel, step_sigma=1, steps=4)
+    
     countourLvl = myModel.getCutoffLevels()
     v1 = visualizer.Visualizer(data_labels_list[0][0], countourLvl[0], data_labels_list[0][1])
-    v2 = visualizer.Visualizer(data_labels_list[1][0], countourLvl[1], data_labels_list[1][1])
-    v3 = visualizer.Visualizer(data_labels_list[2][0], countourLvl[2], data_labels_list[2][1])
+    #v2 = visualizer.Visualizer(data_labels_list[1][0], countourLvl[1], data_labels_list[1][1])
+    #v3 = visualizer.Visualizer(data_labels_list[2][0], countourLvl[2], data_labels_list[2][1])
+
+    #v1.add_structure("../maps/pdb6acf.ent")
+    #v2.add_structure("../maps/pdb6acf.ent")
+    #v3.add_structure("../maps/pdb6acf.ent")
 
     v1.show()
-    v2.show()
-    v3.show()
+    #v2.show()
+    #v3.show()
 
 
     # add corresponding atomic structure
