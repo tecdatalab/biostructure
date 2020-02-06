@@ -1,25 +1,29 @@
 import numpy as np
-from skimage import regionprops
+from skimage.measure import regionprops
+from skimage.transform import resize
 
 class Model():
-    def __init__(self,molecule, recommendedContour, cutoffRatios=[1], segments=None, atoms=None):
+    def __init__(self,molecule, recommendedContour, cutoffRatios=[1]):
         self.molecule=molecule
         self.contourLvl=recommendedContour
         self.cutoffRatios=cutoffRatios
         self.contoursNum= len(cutoffRatios)
-        self.data_
-        self.segments=[]
-        self.atoms=atoms
+        self.segments=None
+        self.data=None
+        self.atoms=None
+        self.zDescriptors=None
 
     def getData(self):
         moleculeData = self.molecule.data()
-        mydata = np.ndarray((self.contoursNum,*moleculeData.shape))
+        dimentions = tuple([round(num) for num in self.getCellDim()])
+        mydata = np.ndarray((self.contoursNum,*dimentions))
         
         for i,cutoffRatio in enumerate(self.cutoffRatios):
-            data = np.copy(moleculeData)
+            data = resize(moleculeData,dimentions,order=3)
             data[data<cutoffRatio*self.contourLvl]=0
             mydata[i,:] = data
-        return mydata   
+        self.data = mydata
+        return self.data   
 
     def getCutoffLevels(self):
         return [cutoffRatio*self.contourLvl for cutoffRatio in self.cutoffRatios]
@@ -32,6 +36,17 @@ class Model():
 
     def getSegments(self):
         return self.labels,self.segments
+
+    def getZernikeDescriptors(self, number):
+        self.zDescriptors = np.ndarray(((self.contoursNum, number)))
+        for i in range(self.contoursNum):
+            if self.data[i].flags['C_CONTIGUOUS']:
+                pass
+            else:
+                self.data[i,:] = self.data[i].ascontiguousarray('C') 
+                
+
+
 
     #def setSegmentLabels(self, labels):
     #    regions = regionprops(labels,this.)
