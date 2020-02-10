@@ -376,12 +376,12 @@ void Grid<Value>::interpRectToCubic(double in_widthx, double in_widthy, double i
 }
 
 template<typename Value>
-void Grid<Value>::readArray(double* array, size_t x, size_t y, size_t z){
+void Grid<Value>::readArray(Value* array, size_t x, size_t y, size_t z){
 	xdim = x;
 	ydim = y;
 	zdim = z;
 	
-	int ordermode = 1; //Supose "x" are colums, "y" rows and "z" slices.
+	int ordermode = 1; //Supose "x" for colums, "y" for rows and "z" for slices.
 
 	numVoxels = xdim*ydim*zdim;
 	vec.resize(numVoxels); 
@@ -635,7 +635,7 @@ Grid<Value>::Grid(Grid &g, Value contour){
 }
 
 template<typename Value>
-Grid<Value>::Grid(double* array, size_t x, size_t y, size_t z){
+Grid<Value>::Grid(Value* array, size_t x, size_t y, size_t z){
 	readArray(array, x, y, z);
 }
 

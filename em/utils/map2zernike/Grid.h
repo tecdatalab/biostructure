@@ -28,7 +28,7 @@ class Grid{
 		void readMRC(istream &in);
 		void readSitus(istream &in);
 		void readDumbGrid(istream &in);
-		void readArray(double* array, size_t x, size_t y, size_t z);
+		void readArray(Value* array, size_t x, size_t y, size_t z);
 		void interpSkewToCubic(double, double, double, double, double, double);
 		void interpRectToCubic(double, double, double);
 
@@ -40,7 +40,7 @@ class Grid{
 		Grid(istream &in, int type);
 		Grid(istream &in, int type, Value def); // create with a nonzero default default value
 		Grid(Grid &g, Value contour); // get the map at a certain contour
-		Grid(double* array, size_t x, size_t y, size_t z); // create from input buffer at a certain contour
+		Grid(Value* array, size_t x, size_t y, size_t z); // create from input buffer
 
 		void readFrom(istream &in, int type);
 
