@@ -3,27 +3,36 @@ from skimage.measure import regionprops
 from skimage.transform import resize
 
 class Model():
+
+    defaultValue = 0
+    indicatorValue = 1000
+
+
     def __init__(self,molecule, recommendedContour, cutoffRatios=[1]):
         self.molecule=molecule
         self.contourLvl=recommendedContour
         self.cutoffRatios=cutoffRatios
         self.contoursNum= len(cutoffRatios)
+
+        moleculeData = self.molecule.data()
+        dimentions = tuple([round(num) for num in self.getCellDim()])
+        #c_map_array = np.ndarray((self.contoursNum,*dimentions))
+        #map_data = resize(moleculeData,dimentions,order=3)
+        c_map_array = np.ndarray((self.contoursNum,*self.getGridSize()))
+        map_data = moleculeData
+        for i,cutoffRatio in enumerate(self.cutoffRatios):
+            map_at_contour = np.copy(map_data)
+            map_at_contour[map_at_contour<cutoffRatio*self.contourLvl]=self.defaultValue
+            map_at_contour[map_at_contour>=cutoffRatio*self.contourLvl]=self.indicatorValue
+            c_map_array[i,:] = map_at_contour
+        
+        self.data_array = c_map_array
         self.segments=None
-        self.data=None
         self.atoms=None
         self.zDescriptors=None
 
     def getData(self):
-        moleculeData = self.molecule.data()
-        dimentions = tuple([round(num) for num in self.getCellDim()])
-        mydata = np.ndarray((self.contoursNum,*dimentions))
-        
-        for i,cutoffRatio in enumerate(self.cutoffRatios):
-            data = resize(moleculeData,dimentions,order=3)
-            data[data<cutoffRatio*self.contourLvl]=0
-            mydata[i,:] = data
-        self.data = mydata
-        return self.data   
+        return self.data_array   
 
     def getCutoffLevels(self):
         return [cutoffRatio*self.contourLvl for cutoffRatio in self.cutoffRatios]
