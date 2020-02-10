@@ -11,15 +11,7 @@ class Molecule():
         (self.mz, self.my, self.mx) = grid_size
         (self.zlen, self.ylen, self.xlen) = cell_dim
         (self.zorigin, self.yorigin, self.xorigin) = origin
-        # Assert volume info match header values
-        d_mean = np.mean(self.array)
-        d_min = np.min(self.array)
-        d_max = np.max(self.array)
-        if density_ranges != (d_min, d_max, d_mean):
-            print("File density range does not match with computed value")
-            (self.dmin, self.dmax, self.dmean) = (d_min, d_max, d_mean)
-        else:
-            (self.dmin, self.dmax, self.dmean) = density_ranges
+        (self.dmin, self.dmax, self.dmean) = density_ranges
         
 
 
