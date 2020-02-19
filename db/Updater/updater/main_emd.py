@@ -58,12 +58,12 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
     for i in emds:
         print("Actual execution : {0} with EMD: {1}".format(k, i))
         temp_emd_entry = Emd_entry()
-        temp_emd_entry.create_by_ftp(i, connec_ftp.ftp)
+        temp_emd_entry.create_by_ftp(i, connec_ftp.get_ftp())
         temp_time_stamp = Time_stamp(i, date.today(), temp_emd_entry.map_url, temp_emd_entry.xml_url, temp_emd_entry.image_url)
         
         if image == 'Y' or descriptor == 'Y':
             download_file(i)
-
+  
         if image == 'Y':
             try:
                 temp_emd_entry.create_gif()
