@@ -24,7 +24,7 @@ class Molecule():
             exit()
         map_data = molecule_map.data()
         contoursNum= len(cutoffRatios)
-        contour_maks = np.ndarray((contoursNum,*molecule_map.grid_size()))
+        contour_masks = np.ndarray((contoursNum,*molecule_map.grid_size()))
         
         self.emMap=molecule_map
         self.contourLvl=recommendedContour
@@ -35,20 +35,27 @@ class Molecule():
             data_at_contour = np.copy(map_data)
             data_at_contour[data_at_contour<cutoffRatio*self.contourLvl]=self.defaultValue
             data_at_contour[data_at_contour>=cutoffRatio*self.contourLvl]=self.indicatorValue
-            contour_maks[i,:] = data_at_contour
+            contour_masks[i,:] = data_at_contour
 
-        self.contour_maks = contour_maks
-        self.segments=None
+        self.contour_masks = contour_masks
+        self.segment_masks=None
+        self.labels=None
         self.atoms=None
         self.zDescriptors=None
 
 
     def generateSegments(self, steps, sigma):
-        segments = processing.segment(self.emMap, steps, sigma, self.getCutoffLevels(), self.contoursNum)
-        self.segments = segments
+        labels = processing.segment(self.emMap, steps, sigma, self.getCutoffLevels(), self.contoursNum)
+        regprops = regionprops(labels, intensity_image=self.emMap.data())
+        voxel_size = [int(i/j) for i,j in zip(emMap.cell_dim(), emMap.grid_size())]
+        voxel_volume = np.prod(voxel_size)
+        ordered_regions=[]
+        for reg in regionprops:
+            pass
+        self.labels = labels
 
     def getContourMasks(self):
-        return self.contour_maks   
+        return self.contour_masks   
 
     def getEmMap(self):
         return self.emMap
