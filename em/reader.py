@@ -66,8 +66,8 @@ class Reader():
             with open(filename, 'rb') as mrc_file:
                 mrc_buffer = mrc_file.read()
         except IOError as err:
-            print("Could not open MRC file", err)
-            raise
+            print("[ERROR]: Could not open MRC file", err)
+            raise err
         self.mrc_header = mrc_buffer[0:self.HEADER_SIZE]
         self.is_endianness_reversed = self.test_and_set_endianness()
         self.mrc_data = mrc_buffer[self.HEADER_SIZE:]

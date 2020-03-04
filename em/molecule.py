@@ -1,55 +1,74 @@
 import numpy as np
+from skimage.measure import regionprops
+from skimage.transform import resize
+
+from reader import Reader
+import processing
+
+## This module represents the molecule object with its properties and different data representations for each contour level. 
 
 class Molecule():
 
-    def __init__(self, rawHeader, data, size, start, grid_size, cell_dim, density_ranges, origin, name):
-        self.rawHeader = rawHeader
-        self.array = data
-        self.name = name
-        (self.nz, self.ny, self.nx) = size
-        (self.nzstart, self.nystart, self.nxstart) = start
-        (self.mz, self.my, self.mx) = grid_size
-        (self.zlen, self.ylen, self.xlen) = cell_dim
-        (self.zorigin, self.yorigin, self.xorigin) = origin
-        (self.dmin, self.dmax, self.dmean) = density_ranges
+    defaultValue = 0
+    indicatorValue = 1000
+
+    ## Initialize molecule object with a filename, recomended contour value, and a list of cut-off ratios.
+    def __init__(self, filename, recommendedContour=None, cutoffRatios=[1]):
+        ## Call reader module, a exception is expected to reaise if filename is not valid. 
+        try:
+            molecule_map = Reader.open(filename)
+        except IOError:
+            print("[ERROR]: Could not create Molecule object")
+            exit
+        map_data = molecule_map.data()
+        contoursNum= len(cutoffRatios)
+        dimentions = tuple([round(num) for num in map_data.getCellDim()])
+        contour_maks = np.ndarray((contoursNum,*map_data.getGridSize()))
+
+        for i,cutoffRatio in enumerate(self.cutoffRatios):
+            data_at_contour = np.copy(map_data)
+            data_at_contour[data_at_contour<cutoffRatio*self.contourLvl]=self.defaultValue
+            data_at_contour[data_at_contour>=cutoffRatio*self.contourLvl]=self.indicatorValue
+            contour_maks[i,:] = data_at_contour
         
+        self.emMap=molecule_map
+        self.contourLvl=recommendedContour
+        self.cutoffRatios=cutoffRatios
+        self.contoursNum= contoursNum
+
+        self.contour_maks = contour_maks
+        self.segments=None
+        self.atoms=None
+        self.zDescriptors=None
 
 
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            hasSameData = ~(~np.isclose(other.array, self.array)).sum()
-            return hasSameData
-        return False
+    def generateSegments(self, steps, sigma):
+        #for range(self.contoursNum):
+            
+        #segments = processing.segment(steps, sigma)
+        return 1
 
-    def set_origin(self, new_origin):
-        (self.xorigin, self.yorigin, self.zorigin) = new_origin
-    
-    def data(self):
-        return self.array
+    def getContourMasks(self):
+        return self.map_contours_data   
 
-    def name(self):
-        return self.name
+    def getCutoffLevels(self):
+        return [cutoffRatio*self.contourLvl for cutoffRatio in self.cutoffRatios]
 
-    def set_data(self, newData):
-        self.array = newData
+    def getGridSize(self):
+        return self.map_data.grid_size()
 
-    def shape(self):
-        return (self.nz, self.ny, self.nx)
+    def getCellDim(self):
+        return self.map_data.cell_dim()
 
-    def start_point(self):
-        return (self.nzstart, self.nystart, self.nxstart)
-
-    def grid_size(self):
-        return (self.mz, self.my, self.mx)
-
-    def cell_dim(self):
-        return (self.zlen, self.ylen, self.xlen)
-
-    def density_range(self):
-        return (self.dmin, self.dmax, self.dmean)
-
-    def origin(self):
-        return (self.zorigin, self.yorigin, self.xorigin)
+    def getSegments(self):
+        return self.segments
 
 
-
+    def getZernikeDescriptors(self):
+        self.zDescriptors = np.ndarray(((self.contoursNum, zernike_vec_len)))
+        for i in range(self.contoursNum):
+            if self.data[i].flags['C_CONTIGUOUS']:
+                pass
+            else:
+                self.data[i,:] = self.data[i].ascontiguousarray('C') 
+                
