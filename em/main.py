@@ -23,12 +23,13 @@ def main():
     #mapReader.open("../maps/5017/EMD-5017.map") #level 17.3347
 
 
-    myMolecule = molecule.Molecule("../maps/EMD-2596.map", 0.1462, [1])
-    myMolecule.generateSegments(5,1)
+    myMolecule = molecule.Molecule("../maps/1010/EMD-1010.map", 7, [1])
+    myMolecule.generateSegments(3,1)
+
     # Create visualizer with a map surface threshold level
     # Otherwise use otsu threshold
 
-    v1= visualizer.Visualizer(myMolecule.getEmMap().data(), 0.1462, myMolecule.getSegments()[0])
+    #v1= visualizer.Visualizer(myMolecule.getEmMap().data(), 7, myMolecule.getSegments()[0])
     #
     # Watershed 
 
@@ -48,7 +49,7 @@ def main():
     #v2.add_structure("../maps/pdb6acf.ent")
     #v3.add_structure("../maps/pdb6acf.ent")
 
-    v1.show()
+    #v1.show()
     #v2.show()
     #v3.show()
 
