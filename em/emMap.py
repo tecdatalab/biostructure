@@ -12,6 +12,7 @@ class EMMap():
         (self.zlen, self.ylen, self.xlen) = cell_dim
         (self.zorigin, self.yorigin, self.xorigin) = origin
         (self.dmin, self.dmax, self.dmean) = density_ranges
+        self.voxel_size = tuple(int(i/j) for i,j in zip(self.cell_dim(), self.grid_size()))
         
 
 
@@ -47,6 +48,9 @@ class EMMap():
 
     def density_range(self):
         return (self.dmin, self.dmax, self.dmean)
+    
+    def getVoxelVol(self):
+        return np.prod(self.voxel_size)
 
     def origin(self):
         return (self.zorigin, self.yorigin, self.xorigin)
