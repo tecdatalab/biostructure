@@ -38,7 +38,7 @@ class Molecule():
             contour_masks[i,:] = data_at_contour
 
         self.contour_masks = contour_masks
-        self.segment_masks=None
+        self.seg_masks=None
         self.labels=None
         self.atoms=None
         self.zDescriptors=None
@@ -46,19 +46,25 @@ class Molecule():
 
     def generateSegments(self, steps, sigma):
         labels = processing.segment(self.emMap, steps, sigma, self.getCutoffLevels(), self.contoursNum)
-        regprops = regionprops(labels[0], intensity_image=self.emMap.data())
-        voxel_size = [int(i/j) for i,j in zip(self.emMap.cell_dim(), self.emMap.grid_size())]
-        voxel_volume = np.prod(voxel_size)
-        volume_reg_dict = {}
-        segment_masks = np.zeros(len(regprops), [("label", np.int, 1), ("mask", np.int, self.emMap.grid_size())])
-        for i,reg in enumerate(regprops):
-            volume_reg_dict[reg.label] = voxel_volume*reg.area
-            segment_masks["label"][i]=reg.label
-            segment_indexes=reg.coords
-            segment_masks["mask"][i][segment_indexes] = 1
+        volume_reg_lvl = []
+        voxel_vol = self.emMap.voxelVol()
+        levels_masks = []
+        for lvl_labels in labels:
+            volume_reg_dict = {}
+            regprops = regionprops(lvl_labels)
+            segment_masks = np.zeros(len(regprops), [("label", np.int, 1), ("mask", np.int, self.emMap.grid_size())])
+            for i,reg in enumerate(regprops):
+                volume_reg_dict[reg.label] = voxel_vol*reg.area
+                segment_masks["label"][i]=reg.label
+                segment_indexes=reg.coords
+                segment_masks["mask"][i][segment_indexes[:,0],segment_indexes[:,1],segment_indexes[:,2]] = 1
+            volume_reg_lvl.append(volume_reg_dict)
+            levels_masks.append(segment_masks)
         self.labels = labels
-        self.segments = segment_masks
-        print(np.sum(segment_masks["mask"][1]))
+        self.seg_masks = levels_masks
+        print(self.emMap.stdev())
+
+
 
     def getContourMasks(self):
         return self.contour_masks   
