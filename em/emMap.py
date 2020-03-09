@@ -49,7 +49,10 @@ class EMMap():
     def density_range(self):
         return (self.dmin, self.dmax, self.dmean)
     
-    def getVoxelVol(self):
+    def stdev(self):
+        return np.std(self.array)
+    
+    def voxelVol(self):
         return np.prod(self.voxel_size)
 
     def origin(self):
