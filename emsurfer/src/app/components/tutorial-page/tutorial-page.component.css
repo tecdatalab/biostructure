@@ -1,6 +1,6 @@
 
 /* --------------------------------------------- Mobile Styles -------------------------------------------- */
-@media only screen and (max-width: 400px) {
+@media only screen and (max-width: 414px) {
     
   .row{
     padding-top: 5%;
@@ -56,7 +56,7 @@
 }
   
 /* --------------------------------------------- Tablet Styles -------------------------------------------- */
-@media only screen and (min-width: 401px) and (max-width: 1024px) {
+@media only screen and (min-width: 415px) and (max-width: 1024px) {
     
   .row{
     padding-top: 5%;
