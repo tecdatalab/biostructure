@@ -9,7 +9,7 @@
         <div class="card-body">
           <div class="card steps" style="width: 100%;">
             <div class="card-body">
-              <div class="row">
+              <div class="row fix-pos">
                 <div *ngIf="isSearchById" class="col-3 border back-fix left">
                   <a class="text-warning"
                     [href]="'http://www.ebi.ac.uk/pdbe/entry/emdb/EMD-' + stringPadder.padEmdbId(biomolecule.id.toString())">
@@ -39,7 +39,7 @@
                   <p><strong>File uploaded:</strong></p>
                   <p>{{ filename }}</p>
                 </div>
-                <div class="col-6 border back-fix">
+                <div class="col-6 border back-fix center">
                   <div class="align-self-end fix-char">
                     <canvas #canvas>{{ chart }}</canvas>
                   </div>

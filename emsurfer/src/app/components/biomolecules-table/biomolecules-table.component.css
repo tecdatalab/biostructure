@@ -3,21 +3,27 @@
 }
 
 /* --------------------------------------------- Mobile Styles -------------------------------------------- */
-@media only screen and (max-width: 400px) {
-    body {
-      background-color: #F09A9D; /* Red */
-    }
-  }
-  
-  /* --------------------------------------------- Tablet Styles -------------------------------------------- */
-  @media only screen and (min-width: 401px) and (max-width: 1024px) {
-    body {
-      background-color: #F5CF8E; /* Yellow */
-    }
-  }
-  
-  /* --------------------------------------------- Desktop Styles ------------------------------------------- */
-  @media only screen and (min-width: 1025px) {
-  
+@media only screen and (max-width: 414px) {
     
+  .row.display-flex{
+    display: grid;
   }
+
+  .col-3{
+    max-width: 100%;
+  }
+
+}
+
+/* --------------------------------------------- Tablet Styles -------------------------------------------- */
+@media only screen and (min-width: 415px) and (max-width: 1024px) {
+  
+
+  
+}
+
+/* --------------------------------------------- Desktop Styles ------------------------------------------- */
+@media only screen and (min-width: 1025px) {
+
+  
+}
