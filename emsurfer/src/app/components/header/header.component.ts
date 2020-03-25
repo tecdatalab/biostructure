@@ -9,7 +9,23 @@ export class HeaderComponent implements OnInit {
 
   constructor() { }
 
+  public respon_fix = false;
+
   ngOnInit() {
+
+    if(screen.width < 601){
+      this.respon_fix = true;
+    }
+
   }
 
+  menuToggle() {
+    var x = document.getElementById("myTopnav");
+    if (x.className === "topnav") {
+      x.className += " responsive";
+    } else {
+      x.className = "topnav";
+    }
+  }
+  
 }
