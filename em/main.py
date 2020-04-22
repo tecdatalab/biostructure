@@ -22,9 +22,40 @@ def main():
     #mapReader.open("../maps/1364/EMD-1364.map") #level 39.0086
     #mapReader.open("../maps/5017/EMD-5017.map") #level 17.3347
 
-
-    myMolecule = molecule.Molecule("../maps/1010/EMD-1010.map", 7, [1])
+    ## Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off ratios.
+    myMolecule = molecule.Molecule("../maps/1010/EMD-1010.map", recommendedContour=7)
+    ## Segment EM map with parameters steps (3) and sigma (1)
     myMolecule.generateSegments(3,1)
+    ## Get generated dictionary, with contour ratio as keys and composited numpy array with segment masks and labels
+    segments_at_contour_dict = myMolecule.getSegmentsMasks()
+    ## To get density array for each segment, we can use mask array indexing
+    ## What contour ratios do we have?
+    print(segments_at_contour_dict.keys())
+    ## Get segments masks at default contour ratio (which is 1)
+    segments_masks = segments_at_contour_dict[1]
+    ## Print segment labels
+    print (segments_masks.keys())
+    ## Lets create a list to store a copy of densities for each segment
+    segment_dict = {}
+    for key in segments_masks:
+        ## Create a copy of map densities
+        densities = np.copy(myMolecule.getEmMap().data())
+        ## Set voxels outside segment to 0 
+        densities[np.logical_not(segments_masks[key])] = 0
+        segment_dict[key] = densities
+
+    ## then you can compute zernike descriptors for each segment, lets create a dict to store descriptors for each segment
+    ## lets import the module
+    import utils._zernike as z
+    ## lets create a dictionary to store descriptors for each segment
+    segments_zd = {}
+    for key in segment_dict:
+        zd = z.computeDescriptors(segment_dict[key])
+        segments_zd[key] = zd
+
+    print(segments_zd)
+
+
 
     # Create visualizer with a map surface threshold level
     # Otherwise use otsu threshold
