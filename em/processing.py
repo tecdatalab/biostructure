@@ -13,12 +13,11 @@ import os.path
 
 
 def segment(emMap, steps, sigma, countourLevels, numContours):
-    print(type(countourLevels))
     #voxel_size = tuple(int(i/j) for i,j in zip(emMap.cell_dim(), emMap.grid_size()))
     #parallel segmentation for each contour level
     with Pool(numContours) as p:
-        segmentation_func = partial(segmentation_pipeline, emMap=emMap, steps=steps, step_sigma=steps)
-        labels_list = p.map(segmentation_func, countourLevels)
+        segmentation_func = partial(segmentation_pipeline, emMap=emMap, steps=steps, step_sigma=sigma)
+        labels_list = p.map(segmentation_func, countourLevels.values())
     return labels_list   
         
 

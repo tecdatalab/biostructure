@@ -10,7 +10,7 @@ import processing
 class Molecule():
 
     defaultValue = 0
-    indicatorValue = 1000
+    indicatorValue = 1
 
     ## Initialize molecule object with a filename, recomended contour value, and a list of cut-off ratios.
     def __init__(self, filename, recommendedContour=None, cutoffRatios=[1]):
@@ -32,10 +32,10 @@ class Molecule():
         self.contoursNum= contoursNum
 
         for i,cutoffRatio in enumerate(self.cutoffRatios):
-            data_at_contour = np.copy(map_data)
-            data_at_contour[data_at_contour<cutoffRatio*self.contourLvl]=self.defaultValue
-            data_at_contour[data_at_contour>=cutoffRatio*self.contourLvl]=self.indicatorValue
-            contour_masks[i,:] = data_at_contour
+            lvl = cutoffRatio*self.contourLvl
+            mask_at_contour = np.zeros(map_data.shape)
+            mask_at_contour[mask_at_contour<=lvl]=self.indicatorValue
+            contour_masks[i,:] = mask_at_contour
 
         self.contour_masks = contour_masks
         self.seg_masks=None
@@ -43,26 +43,28 @@ class Molecule():
         self.atoms=None
         self.zDescriptors=None
 
-
+    # step and sigma are input arguments, set seg_masks which stores a collection of segment maks as composited numpy array for each countour level. 
+    # Returns a dictionary where key is level ratio and value is the composited numpy array
     def generateSegments(self, steps, sigma):
-        labels = processing.segment(self.emMap, steps, sigma, self.getCutoffLevels(), self.contoursNum)
+        cutoffLvls = self.getCutoffLevels()
+        labels = processing.segment(self.emMap, steps, sigma, cutoffLvls, self.contoursNum)
         volume_reg_lvl = []
         voxel_vol = self.emMap.voxelVol()
-        levels_masks = []
-        for lvl_labels in labels:
+        molecule_masks = {}
+        for lvl,labels in zip(self.cutoffRatios,labels):
             volume_reg_dict = {}
-            regprops = regionprops(lvl_labels)
-            segment_masks = np.zeros(len(regprops), [("label", np.int, 1), ("mask", np.int, self.emMap.grid_size())])
+            level_masks = {}
+            regprops = regionprops(labels)
             for i,reg in enumerate(regprops):
-                volume_reg_dict[reg.label] = voxel_vol*reg.area
-                segment_masks["label"][i]=reg.label
+                segment_mask = np.zeros(self.emMap.grid_size(), dtype=np.int)
                 segment_indexes=reg.coords
-                segment_masks["mask"][i][segment_indexes[:,0],segment_indexes[:,1],segment_indexes[:,2]] = 1
+                segment_mask[segment_indexes[:,0],segment_indexes[:,1],segment_indexes[:,2]] = 1
+                volume_reg_dict[reg.label] = voxel_vol*reg.area
+                level_masks[reg.label]=segment_mask
             volume_reg_lvl.append(volume_reg_dict)
-            levels_masks.append(segment_masks)
+            molecule_masks[lvl]= level_masks
         self.labels = labels
-        self.seg_masks = levels_masks
-        print(self.emMap.stdev())
+        self.seg_masks = molecule_masks
 
 
 
@@ -73,7 +75,7 @@ class Molecule():
         return self.emMap
 
     def getCutoffLevels(self):
-        return [cutoffRatio*self.contourLvl for cutoffRatio in self.cutoffRatios]
+        return {cutoffRatio: cutoffRatio*self.contourLvl for cutoffRatio in self.cutoffRatios}
 
     def getGridSize(self):
         return self.emMap.grid_size()
@@ -81,8 +83,8 @@ class Molecule():
     def getCellDim(self):
         return self.emMap.cell_dim()
 
-    def getSegments(self):
-        return self.segments
+    def getSegmentsMasks(self):
+        return self.seg_masks
 
 
     def getZernikeDescriptors(self):
