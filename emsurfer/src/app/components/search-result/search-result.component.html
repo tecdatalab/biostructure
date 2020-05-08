@@ -17,10 +17,10 @@
                   <p>{{ biomolecule.full_name }}</p>
                   <div class="tab-content" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="rep2d" role="tabpanel" aria-labelledby="nav-2d-tab">
-                      <img class="img-fluid" [src]="biomolecule.image_url" />
+                      <img class="img-fluid" [src]="biomolecule.image_url" alt=" Resource not found"/>
                     </div>
                     <div class="tab-pane fade" id="rep3d" role="tabpanel" aria-labelledby="nav-3d-tab">
-                      <img class="img-fluid" [src]="imgSrc || biomolecule.png_img_3d"
+                      <img class="img-fluid" [src]="imgSrc || biomolecule.png_img_3d" alt="Resource not found"
                         (mouseout)="imgSrc = biomolecule.png_img_3d" (mouseover)="imgSrc = biomolecule.gif_img_3d" />
                     </div>
                   </div>
