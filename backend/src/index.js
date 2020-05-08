@@ -26,6 +26,17 @@ app.use(express.json());
 app.use(cors());
 app.use(expressValidator());
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', '*');
+  if(req.method === 'OPTIONS'){
+    res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
+    return res.status(200).json({});
+  }
+  next();
+});
+
+
 //routes
 app.use(indexRoutes);
 app.use("/search", searchRoutes);
@@ -46,6 +57,6 @@ app.use("/results", express.static("public/results"));
 app.use("/benchmarks", express.static("public/benchmarks"));
 app.use("/descriptors", express.static("public/descriptors"));
 
-app.listen(app.get("port"), () => {
+app.listen(app.get("port"), '0.0.0.0', () => {
   console.log("Server on port ", app.get("port"));
 });
