@@ -6,8 +6,9 @@ const zipFolder = require("zip-a-folder");
 exports.batchQuery = async (req, res, next) => {
   try {
     const list = req.params.emdblist.split(",");
-    await benchmark_history
+    benchmark_history
       .build({
+        id:0,
         date_time: new Date(),
         ip: req.connection.remoteAddress,
         user_id: null,

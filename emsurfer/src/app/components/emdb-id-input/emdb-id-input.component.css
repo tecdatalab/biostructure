@@ -1,0 +1,20 @@
+
+/* --------------------------------------------- Mobile Styles -------------------------------------------- */
+@media only screen and (max-width: 414px) {
+
+    label.col-3.col-form-label{
+        width: 200%;
+        margin-left: 15px;
+    }
+
+    .col-3{
+        flex: 0 0 75%;
+        max-width: unset;
+    }
+
+    .offset-1{
+        margin: 3% 0 0 50%;
+        padding: 0 15px 0 0;
+    }
+
+}

@@ -35,7 +35,7 @@ exports.searchByID = async (req, res) => {
 
 exports.saveSearch = async (req, res, next) => {
   try {
-    await search_history
+    search_history
       .build({
         date_time: new Date(),
         ip: req.connection.remoteAddress,

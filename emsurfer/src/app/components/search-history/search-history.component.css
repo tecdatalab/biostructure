@@ -1,29 +1,25 @@
-.col-3{
-    margin-bottom: 3%;
-}
-
 /* --------------------------------------------- Mobile Styles -------------------------------------------- */
 @media only screen and (max-width: 414px) {
-    
-  .row.display-flex{
-    display: grid;
-  }
 
-  .col-3{
-    max-width: 100%;
-  }
+    .table-responsive{
+        margin-left: -10px;
+        width: 200%;
+        margin-bottom: 25%;
+    }
 
 }
 
 /* --------------------------------------------- Tablet Styles -------------------------------------------- */
 @media only screen and (min-width: 415px) and (max-width: 1024px) {
-  
 
-  
+    .table-responsive{
+        margin-left: 10%;
+        width: auto;
+    }
+
 }
 
 /* --------------------------------------------- Desktop Styles ------------------------------------------- */
 @media only screen and (min-width: 1025px) {
 
-  
 }

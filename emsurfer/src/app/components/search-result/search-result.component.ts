@@ -126,14 +126,17 @@ export class SearchResultComponent implements OnInit {
         legend: {
           display: false
         },
+        layout: {
+          padding: {left: 0, right: 0, top: 0, bottom: 0},
+        },
         scales: {
           xAxes: [
             {
               display: true,
               scaleLabel: {
-                display: true,
+                display: screen.width < 415 ? false : true,
                 labelString: "Zernike Descriptor Number",
-                fontSize: 24
+                fontSize: screen.width < 415 ? 15 : 24
               }
             }
           ],
@@ -141,9 +144,9 @@ export class SearchResultComponent implements OnInit {
             {
               display: true,
               scaleLabel: {
-                display: true,
+                display: screen.width < 415 ? false : true,
                 labelString: "Value",
-                fontSize: 24
+                fontSize: screen.width < 415 ? 15 : 24
               }
             }
           ]
