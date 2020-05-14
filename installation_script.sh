@@ -31,8 +31,9 @@ cd emsurfer
 # INSTALL NODE MODULES
 sudo chown -R `whoami` ~/.npm
 sudo chown -R `whoami` /usr/local/lib/node_modules
-sudo npm install
+npm install
 npm audit fix
+# ng update @angular/cli @angular/core --force
 
 # LINK ANGULAR CLI TO THE FRONT-END PROJECT
 sudo npm link @angular/cli
@@ -47,6 +48,8 @@ sudo apt-get update && sudo apt-get upgrade
 
 # PYTHON 3.6
 sudo apt-get install python3.6
+#sudo apt-get install python-dev
+#sudo apt-get install python3-dev
 
 # PIP INSTALL
 echo Y | sudo apt-get install python3-pip
@@ -59,6 +62,9 @@ echo Y | sudo apt-get install libglfw3-dev
 
 # Libpq-dev python-dev INSTALL
 sudo apt-get install libpq-dev python-dev
+
+#sudo python3 -m pip install --upgrade wheel
+#sudo python3 -m pip install --upgrade setuptools
 
 # Psycopg2
 sudo python3 -m pip install -U psycopg2
@@ -107,6 +113,7 @@ sudo python3 -m pip install -U glfw
 
 # Pyqt5
 sudo python3 -m pip install -U pyqt5
+#sudo apt-get install python3-pyqt5
 
 # Psycopg2-binary
 sudo python3 -m pip install -U psycopg2-binary
