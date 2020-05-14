@@ -5,6 +5,7 @@ const zipFolder = require("zip-a-folder");
 
 exports.batchQuery = async (req, res, next) => {
   try {
+    console.log("entramos a benchmark");
     const list = req.params.emdblist.split(",");
     benchmark_history
       .build({
