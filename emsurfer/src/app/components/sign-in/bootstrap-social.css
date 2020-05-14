@@ -1,13 +1,86 @@
 
 /* --------------------------------------------- Mobile Styles -------------------------------------------- */
-@media only screen and (max-width: 400px) {
-  body {
-    background-color: #F09A9D; /* Red */
+@media only screen and (max-width: 600px) {
+  
+  .btn-social {
+    position: relative;
+    padding-left: 44px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+
+  .btn-social > :first-child {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 32px;
+    line-height: 40px;
+    font-size: 1.6em;
+    text-align: center;
+  }
+
+  .btn-social.btn-sm {
+    padding-left: 80px;
+  }
+  .btn-social.btn-sm > :first-child {
+    line-height: 28px;
+    width: 28px;
+    font-size: 0.8em;
+  }
+
+  .btn-google {
+    color: #fff;
+    border-color: #4285f4;
+  }
+  .btn-google:focus,
+  .btn-google.focus {
+    color: #fff;
+    background-color: #4285f4;
+    border-color: rgba(0, 0, 0, 0.2);
+  }
+  .btn-google:hover {
+    color: #fff;
+    box-shadow: 1px 1px 1px 1px #4285f4;
+    border-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .navbar {
+    height: 50px;
+    width: 110px;
+    padding-left: 8px !important;
+  }
+
+  .fix{
+    position: relative;
+    display: -webkit-inline-box;
+  }
+
+  .nav-link {
+    cursor: pointer;
+  }
+
+  .adpat-menu{
+    font-size: 0.9em;
+    padding-right: 0em;
+    padding-top: 0px;
+    display: inline;
+  }
+
+  .navbar-light .navbar-nav .nav-link {
+    color: rgba(0,100,0,1);
+  }
+
+  .collapse:not(.show){
+    display: block;
+  }
+
 }
 
 /* --------------------------------------------- Tablet Styles -------------------------------------------- */
-@media only screen and (min-width: 401px) and (max-width: 1024px) {
+@media only screen and (min-width: 601px) and (max-width: 1024px) {
   body {
     background-color: #F5CF8E; /* Yellow */
   }
@@ -27,7 +100,6 @@
 
   .btn-social {
     position: relative;
-    padding-left: 44px;
     text-align: left;
     white-space: nowrap;
     overflow: hidden;

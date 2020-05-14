@@ -9,7 +9,7 @@ exports.batchQuery = async (req, res, next) => {
     const list = req.params.emdblist.split(",");
     benchmark_history
       .build({
-	id:0,
+        id:0,
         date_time: new Date(),
         ip: req.connection.remoteAddress,
         user_id: null,

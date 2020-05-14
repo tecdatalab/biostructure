@@ -36,7 +36,6 @@ app.use((req, res, next) => {
   next();
 });
 
-
 //routes
 app.use(indexRoutes);
 app.use("/search", searchRoutes);

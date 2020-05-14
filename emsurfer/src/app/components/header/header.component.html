@@ -14,27 +14,24 @@
     </ul>
   </nav>
 </div>
-<div class="container menu">
-  <nav class="navbar-dark bg-dark">
-    <ul class="nav nav-pills nav-fill">
-      <li class="nav-item">
-        <a class="nav-link button" routerLinkActive="button_active" routerLink="home">Home</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link button" routerLinkActive="button_active" routerLink="search">Search</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link button" routerLinkActive="button_active" routerLink="benchmark">Benchmark</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link button" routerLinkActive="button_active" routerLink="tutorial">Tutorial</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link button" routerLinkActive="button_active" routerLink="reference">Reference</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link button" routerLinkActive="button_active" routerLink="contact">Contact</a>
-      </li>
-    </ul>
-  </nav>
+<div class="container menu topnav" id="myTopnav">
+ 
+    <a *ngIf="respon_fix">Menu</a>
+
+    <a class="nav-link button" routerLinkActive="button_active" routerLink="home">Home</a>
+  
+    <a class="nav-link button" routerLinkActive="button_active" routerLink="search">Search</a>
+  
+    <a class="nav-link button" routerLinkActive="button_active" routerLink="benchmark">Benchmark</a>
+  
+    <a class="nav-link button" routerLinkActive="button_active" routerLink="tutorial">Tutorial</a>
+  
+    <a class="nav-link button" routerLinkActive="button_active" routerLink="reference">Reference</a>
+  
+    <a class="nav-link button" routerLinkActive="button_active" routerLink="contact">Contact</a>
+    
+    <a href="javascript:void(0);" class="icon" (click)="menuToggle()">
+      <i class="fa fa-bars"></i>
+    </a>
+      
 </div>

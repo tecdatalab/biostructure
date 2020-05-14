@@ -1,59 +1,154 @@
-.row{
-    padding: 5% 10%;
-}
-
-hr{
-    border-style: solid;
-    border-color: rgba(0, 0, 0, 0.3);
-    border-width: 1px;
-    margin: 5% 0%;
-}
-
-.card-body ul{
-    padding-left: 4%;
-}
-
-.card-body p, .card-body li{
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 18px;
-}
-
-h5{
-    margin-bottom: 5%;
-}
-
-.steps{
-    background-color: rgba(221, 221, 221, 0.24);
-}
-
-.form-group.row{
-    padding: 0%;
-}
-
-.download{
-    margin: 3% 0%;
-}
-
-.fix{
-    margin: 0% 10%;
-}
 
 /* --------------------------------------------- Mobile Styles -------------------------------------------- */
-@media only screen and (max-width: 400px) {
-    body {
-      background-color: #F09A9D; /* Red */
+@media only screen and (max-width: 414px) {
+
+    .row{
+        margin-left: -15%;
+        width: 130%;
     }
-  }
-  
-  /* --------------------------------------------- Tablet Styles -------------------------------------------- */
-  @media only screen and (min-width: 401px) and (max-width: 1024px) {
-    body {
-      background-color: #F5CF8E; /* Yellow */
-    }
-  }
-  
-  /* --------------------------------------------- Desktop Styles ------------------------------------------- */
-  @media only screen and (min-width: 1025px) {
-  
     
-  }
+    hr{
+        border-style: solid;
+        border-color: rgba(0, 0, 0, 0.3);
+        border-width: 1px;
+        margin: 5% 0%;
+    }
+    
+    .card-body ul{
+        padding-left: 4%;
+    }
+    
+    .card-body p, .card-body li{
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 18px;
+    }
+    
+    h5{
+        margin-bottom: 5%;
+    }
+    
+    .steps{
+        background-color: rgba(221, 221, 221, 0.24);
+    }
+    
+    .form-group.row{
+        padding: 0%;
+    }
+    
+    .download{
+        margin: 3% 0%;
+    }
+    
+    .fix{
+        margin: 0% 10%;
+    }
+
+    .custom-radio, .col-form-label{
+        margin-left: 40px;
+        margin-bottom: 10px;
+    }
+
+    #zernikeButton{
+        margin-left: 15px;
+    }
+
+    #contour{
+        width: 75%;
+        margin-left: 15%;
+    }
+
+    .form-group .col-2.offset-4{
+        margin-left: 25%;
+    }
+
+}
+
+/* --------------------------------------------- Tablet Styles -------------------------------------------- */
+@media only screen and (min-width: 415px) and (max-width: 1024px) {
+
+    .row{
+        padding: 5% 10%;
+    }
+    
+    hr{
+        border-style: solid;
+        border-color: rgba(0, 0, 0, 0.3);
+        border-width: 1px;
+        margin: 5% 0%;
+    }
+    
+    .card-body ul{
+        padding-left: 4%;
+    }
+    
+    .card-body p, .card-body li{
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 18px;
+    }
+    
+    h5{
+        margin-bottom: 5%;
+    }
+    
+    .steps{
+        background-color: rgba(221, 221, 221, 0.24);
+    }
+    
+    .form-group.row{
+        padding: 0%;
+    }
+    
+    .download{
+        margin: 3% 0%;
+    }
+    
+    .fix{
+        margin: 0% 10%;
+    }
+
+}
+
+/* --------------------------------------------- Desktop Styles ------------------------------------------- */
+@media only screen and (min-width: 1025px) {
+
+    .row{
+        padding: 5% 10%;
+    }
+    
+    hr{
+        border-style: solid;
+        border-color: rgba(0, 0, 0, 0.3);
+        border-width: 1px;
+        margin: 5% 0%;
+    }
+    
+    .card-body ul{
+        padding-left: 4%;
+    }
+    
+    .card-body p, .card-body li{
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 18px;
+    }
+    
+    h5{
+        margin-bottom: 5%;
+    }
+    
+    .steps{
+        background-color: rgba(221, 221, 221, 0.24);
+    }
+    
+    .form-group.row{
+        padding: 0%;
+    }
+    
+    .download{
+        margin: 3% 0%;
+    }
+    
+    .fix{
+        margin: 0% 10%;
+    }
+
+}
