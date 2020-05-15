@@ -5,11 +5,9 @@ const zipFolder = require("zip-a-folder");
 
 exports.batchQuery = async (req, res, next) => {
   try {
-    console.log("entramos a benchmark");
     const list = req.params.emdblist.split(",");
-    benchmark_history
+   await benchmark_history
       .build({
-        id:0,
         date_time: new Date(),
         ip: req.connection.remoteAddress,
         user_id: null,
@@ -40,7 +38,10 @@ exports.batchQuery = async (req, res, next) => {
             }
           });
         });
-      });
+      })
+	.catch(function(err){
+		console.log(err, req.body);
+	});
   } catch (err) {
     res.status(500).send({
       message: "Backend error"
