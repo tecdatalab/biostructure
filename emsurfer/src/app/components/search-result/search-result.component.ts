@@ -15,7 +15,7 @@ import { Descriptor } from "src/app/models/descriptor";
   styleUrls: ['./search-result.component.css'],
 })
 export class SearchResultComponent implements OnInit {
-  @ViewChild("canvas", { static: true }) canvasElementRef: ElementRef;
+  @ViewChild("canvas", { static: false }) canvasElementRef: ElementRef;
   chart: Chart;
   biomolecule: Biomolecule;
   filename: string;
@@ -26,6 +26,7 @@ export class SearchResultComponent implements OnInit {
   descriptors = [];
   values = [];
   stringPadder: StringPadder;
+  mobile = true;
 
   constructor(
     private biomoleculeSearchService: BiomoleculeSearchService,
@@ -41,6 +42,9 @@ export class SearchResultComponent implements OnInit {
       this.biomolecule.id = params.emdbId;
       this.load();
     });
+    if (window.screen.width <= 414) {
+      this.mobile = false;
+    }
   }
 
   private load() {
@@ -161,7 +165,9 @@ export class SearchResultComponent implements OnInit {
       new Array(this.values.length),
       (val, index) => index + 1
     );
-    const context = this.canvasElementRef.nativeElement;
-    this.initChart(context);
+    if (this.mobile){
+      const context = this.canvasElementRef.nativeElement;
+      this.initChart(context);
+    }
   }
 }
