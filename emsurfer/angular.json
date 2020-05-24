@@ -113,5 +113,8 @@
       }
     }
   },
-  "defaultProject": "emsurfer"
+  "defaultProject": "emsurfer",
+  "cli": {
+    "analytics": "7dda982e-002c-49c8-81bd-d6dfab8f7b26"
+  }
 }
