@@ -6,6 +6,7 @@ const benchmark = sequelize.define(
   {
     id: {
       type: Sequelize.INTEGER,
+      autoIncrement: true,
       primaryKey: true
     },
     date_time: {
