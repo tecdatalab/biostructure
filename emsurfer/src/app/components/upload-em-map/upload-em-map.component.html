@@ -14,17 +14,22 @@
     />
     <div *ngIf="parentForm.controls['file'].invalid">
       <div *ngIf="parentForm.controls['file'].errors?.required">
-          <p class="text-danger">File required</p>
+        <p class="text-danger">File required</p>
       </div>
     </div>
   </div>
 
-  <a class="col-sm-2 text-warning" href="assets/example-files/emd_1884.map" download style="padding-top: 3%;">
+  <a
+    class="col-sm-2 text-warning"
+    href="assets/example-files/emd_1884.map"
+    download="emd_1884.map"
+    style="padding-top: 3%;"
+  >
     <u>Example file.</u>
   </a>
 </div>
 <div class="form-group row" [formGroup]="parentForm">
-    <div class="col-sm-1"></div>
+  <div class="col-sm-1"></div>
   <label for="contourlvl" class="col-sm-3 col-form-label"
     >Recommended contour level:</label
   >

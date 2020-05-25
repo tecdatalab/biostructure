@@ -8,16 +8,12 @@ from biopandas.pdb import PandasPdb
 from skimage.filters import threshold_otsu
 from skimage.measure import regionprops
 from collections import Counter
-import os.path
 
 
-
-import reader
-import processing
 
 class Visualizer():
     
-    def __init__(self, myMolecule, level=None):
+    def __init__(self, data, level=None, labels=None):
         self.vertex = """
                     uniform mat4 m_model;
                     uniform mat4 m_view;
@@ -69,21 +65,20 @@ class Visualizer():
                         gl_FragColor = vec4(color_gamma, 0.8);
                     }
                     """
-        self.molecule = myMolecule
-        data = self.molecule.data()
+        self.data = data
         
         if level!=None:
             self.th_level = level
             print("Using density threshold level: %.4f" % (self.th_level))
         else:
-            self.th_level =  threshold_otsu(data)
+            self.th_level =  threshold_otsu(self.data)
             print("Using density threshold level: %.4f" % (self.th_level))
-        verts, faces, _,_ = measure.marching_cubes_lewiner(data, self.th_level)
+        verts, faces, _,_ = measure.marching_cubes_lewiner(self.data, self.th_level)
 
         self.verts = verts
         self.faces = faces      
         self.atoms = None
-        self.labels = None
+        self.labels = labels
 
 
     def show(self, export=False, start_angle=None, time=1, export_path=""):
@@ -295,16 +290,16 @@ class Visualizer():
             pdb_min = np.min(atoms_coords, axis=0)
             pdb_max = np.max(atoms_coords, axis=0)
             
-            label_centroid = dict()
+            label_coords = dict()
 
             for region in regionprops(self.labels):
-                centroid = 2*(np.array(region.centroid)-map_min)/(map_max-map_min) -1
-                label_centroid[region.label] = centroid
+                coords = 2*(np.array(region.coords)-map_min)/(map_max-map_min) -1
+                label_coords[region.label] = coords
 
             for atom in self.atoms:
                 coord = 2*(atom["position"]-pdb_min)/(pdb_max-pdb_min) -1
-                atom_centroid_dist = {key: np.linalg.norm(label_centroid[key] - coord) for key in label_centroid.keys()}
-                atom["label"] =min(atom_centroid_dist, key=atom_centroid_dist.get)
+                atom_coords_dist = {key: np.min(np.linalg.norm(label_coords[key] - coord)) for key in label_coords.keys()}
+                atom["label"] =min(atom_coords_dist, key=atom_coords_dist.get)
 
             chain_ids, inverse, count = np.unique(self.atoms["chain_id"], return_inverse=True, return_counts=True, axis=0)
             
@@ -330,43 +325,6 @@ class Visualizer():
                 for key in chain_labels_count:
                     print("    Atoms with label %d: %.2f%%  %d/%d" % (key, chain_labels_count[key]*100/num_atoms_in_chain, chain_labels_count[key], num_atoms_in_chain))
 
-                
-    
-    # Not in use
-    def assign_atom_knn(self, atoms_dict, k):
-        atomic_structure = self.atoms
-        new_atoms_dict = dict()
-        atoms_distance = np.zeros(len(atomic_structure), [("id", np.int32, 1), ("distance", np.float32, 1)])
-        atoms_distance["id"] = atomic_structure["id"][:]
-        for key in atoms_dict:
-            distance = lambda x: np.linalg.norm(atomic_structure[atomic_structure["id"]==key]['position']-x, axis=1)
-            atoms_distance["distance"] = distance(atomic_structure["position"])
-            sorted_distance = np.sort(atoms_distance, order=["distance"])
-            selected_keys = sorted_distance["id"][1:k+1]
-            selected_labels = [label for label_list in [atoms_dict[selected_key] for selected_key in selected_keys] for label in label_list]
-            if selected_labels != []:
-                label = np.bincount(selected_labels).argmax()
-            else:
-                label = 0
-            new_atoms_dict[key] = label
-        return new_atoms_dict
-            
-
-
-    def segmentation(self, step_sigma, steps):
-        molecule = self.molecule
-        step_maps = processing.scale_space_filtering(molecule, self.th_level, step_sigma, steps)
-        self.labels = processing.watershed_segmentation(molecule, self.th_level, step_maps, steps)
-        regions = regionprops(self.labels)
-        regions = [r for r in regions]
-        print("Number of segmented regions: %d" % len(regions))
-        print("    step sigma = %.2f\n    steps = %.2f" % (step_sigma, steps))
-        try:
-            with open(os.path.join("export/", molecule.name+".txt"), "w") as output_file:
-                output_file.write("Number of segmented regions: %d\n" % len(regions))
-                output_file.write("    step sigma = %.2f\n    steps = %.2f\n" % (step_sigma, steps))
-        except Exception as e:
-            print("Could not create output file, ", e)
         
 
 
@@ -375,46 +333,7 @@ class Visualizer():
 
 
 
-#Read molecule map from file
-#mapReader = reader.Reader()
-#Open file
-#mapReader.open("../maps/EMD-1048.map") #level 2.2479
-#mapReader.open("../maps/EMD-2596.map") #level 0.1462
-#mapReader.open("../maps/1010/EMD-1010.map") #level 23
-#mapReader.open("../maps/1364/EMD-1364.map") #level 39.0086
-#mapReader.open("../maps/5017/EMD-5017.map") #level 17.3347
 
-
-#Get map object
-#myMap = mapReader.read()
-# Create visualizer with a map surface threshold level
-# Otherwise use otsu threshold
-#v= Visualizer(myMap, level=17.3347)
-#v = Visualizer(myMap)
-# Watershed 
-#v.segmentation(step_sigma=1, steps=3)
-
-# add corresponding atomic structure
-#v.add_structure("../maps/1010/pdb1mi6.ent")
-#v.map_structure_to_domain("../maps/1010/A-1GQE.aligned.pdb")
-#v.map_structure_to_domain("../maps/1010/B-1GQE.aligned.pdb")
-#v.map_structure_to_domain("../maps/1010/C-1GQE.aligned.pdb")
-#v.map_structure_to_domain("../maps/1010/D-1GQE.aligned.pdb")
-
-#v.add_structure("../maps/1364/pdb1pn6.ent")
-#v.map_structure_to_domain("../maps/1364/A-1FNM.aligned.pdb")
-#v.map_structure_to_domain("../maps/1364/B-1FNM.aligned.pdb")
-#v.map_structure_to_domain("../maps/1364/C-1FNM.aligned.pdb")
-#v.map_structure_to_domain("../maps/1364/D-1FNM.aligned.pdb")
-#v.map_structure_to_domain("../maps/1364/E-1FNM.aligned.pdb")
-
-#v.add_structure("../maps/5017/pdb3dny.ent")
-#v.map_structure_to_domain("../maps/5017/A-1N0U.aligned.pdb")
-#v.map_structure_to_domain("../maps/5017/B-1N0U.aligned.pdb")
-#v.map_structure_to_domain("../maps/5017/C-1N0U.aligned.pdb")
-
-#v.show_atom_matching()
-#v.show()
 
 
 

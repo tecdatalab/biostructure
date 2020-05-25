@@ -39,9 +39,9 @@
                   <p><strong>File uploaded:</strong></p>
                   <p>{{ filename }}</p>
                 </div>
-                <div class="col-6 border back-fix center">
+                <div class="col-6 border back-fix center" *ngIf="mobile">
                   <div class="align-self-end fix-char">
-                    <canvas #canvas>{{ chart }}</canvas>
+                    <canvas #canvas >{{ chart }}</canvas>
                   </div>
                 </div>
                 <div class="col-3 border overflow-auto back-fix right">
