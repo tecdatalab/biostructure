@@ -12,7 +12,7 @@ import { UserRolesComponent } from "./components/user-roles/user-roles.component
 import { SearchHistoryComponent } from "./components/search-history/search-history.component";
 import { TutorialPageComponent } from "./components/tutorial-page/tutorial-page.component";
 import { ParametersPanelComponent } from "./components/parameters-panel/parameters-panel.component";
-import { BiomoleculeVizualizerComponent } from "./components/biomolecule-3d-visualizer/biomolecule-3d-visualizer";
+import { BiomoleculeVizualizerComponent } from "./components/biomolecule-3d-visualizer/biomolecule-3d-visualizer.component";
 
 export const router: Routes = [
   {
