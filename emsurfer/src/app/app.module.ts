@@ -36,6 +36,8 @@ import { StatisticsTableComponent } from "./components/statistics-table/statisti
 import { TutorialPageComponent } from "./components/tutorial-page/tutorial-page.component";
 import { AuthServiceConfig } from "angularx-social-login";
 import { GoogleLoginProvider } from "angularx-social-login";
+import { BiomoleculeVizualizerComponent } from "./components/biomolecule-3d-visualizer/biomolecule-3d-visualizer";
+
 export const config = new AuthServiceConfig([
   {
     id: GoogleLoginProvider.PROVIDER_ID,
@@ -78,7 +80,8 @@ export function provideConfig() {
     SearchHistoryComponent,
     StatisticsTableComponent,
     TutorialPageComponent,
-    ParametersPanelComponent
+    ParametersPanelComponent,
+    BiomoleculeVizualizerComponent
   ],
   imports: [
     BrowserModule,
