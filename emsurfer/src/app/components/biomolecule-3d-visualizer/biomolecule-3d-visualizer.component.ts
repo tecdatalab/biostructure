@@ -5,6 +5,7 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: './biomolecule-3d-visualizer.component.html',
   styleUrls: ['./biomolecule-3d-visualizer.component.css']
 })
+
 export class BiomoleculeVizualizerComponent implements OnInit {
 
   constructor() { }
