@@ -9,7 +9,6 @@ export class BiomoleculeVizualizerComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {
-  }
+  ngOnInit() { }
 
 }
