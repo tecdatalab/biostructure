@@ -1,0 +1,13 @@
+
+/* --------------------------------------------- Mobile Styles -------------------------------------------- */
+@media only screen and (max-width: 414px) {
+
+    .form-group.row{
+        margin-left: 1%;
+    }
+
+    label{
+        margin: 5px 0px;
+    }
+
+}

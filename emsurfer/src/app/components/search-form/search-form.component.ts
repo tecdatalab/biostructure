@@ -7,7 +7,7 @@ import { CheckerService } from "src/app/services/checker.service";
 @Component({
   selector: "app-search-form",
   templateUrl: "./search-form.component.html",
-  styleUrls: ['./search-form.component.css'],
+  styleUrls: ["./search-form.component.css"]
 })
 export class SearchFormComponent implements OnInit {
   searchForm: FormGroup;
@@ -39,14 +39,14 @@ export class SearchFormComponent implements OnInit {
     });
 
     const rfGroup = this.fb.group({
-      min: null,
-      max: null
+      min: 0,
+      max: 0
     });
 
     this.searchForm = this.fb.group({
       contour_representation: 0,
       query: queryGroup,
-      volume_filter: "On",
+      volume_filter: "Off",
       resolution_filter: rfGroup
     });
     this.defaultFormState = this.searchForm.getRawValue();

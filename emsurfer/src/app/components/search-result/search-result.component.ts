@@ -15,7 +15,7 @@ import { Descriptor } from "src/app/models/descriptor";
   styleUrls: ['./search-result.component.css'],
 })
 export class SearchResultComponent implements OnInit {
-  @ViewChild("canvas", { static: true }) canvasElementRef: ElementRef;
+  @ViewChild("canvas", { static: false }) canvasElementRef: ElementRef;
   chart: Chart;
   biomolecule: Biomolecule;
   filename: string;
@@ -26,6 +26,7 @@ export class SearchResultComponent implements OnInit {
   descriptors = [];
   values = [];
   stringPadder: StringPadder;
+  mobile = true;
 
   constructor(
     private biomoleculeSearchService: BiomoleculeSearchService,
@@ -41,6 +42,9 @@ export class SearchResultComponent implements OnInit {
       this.biomolecule.id = params.emdbId;
       this.load();
     });
+    if (window.screen.width <= 414) {
+      this.mobile = false;
+    }
   }
 
   private load() {
@@ -126,14 +130,17 @@ export class SearchResultComponent implements OnInit {
         legend: {
           display: false
         },
+        layout: {
+          padding: {left: 0, right: 0, top: 0, bottom: 0},
+        },
         scales: {
           xAxes: [
             {
               display: true,
               scaleLabel: {
-                display: true,
+                display: screen.width < 415 ? false : true,
                 labelString: "Zernike Descriptor Number",
-                fontSize: 24
+                fontSize: screen.width < 415 ? 15 : 24
               }
             }
           ],
@@ -141,9 +148,9 @@ export class SearchResultComponent implements OnInit {
             {
               display: true,
               scaleLabel: {
-                display: true,
+                display: screen.width < 415 ? false : true,
                 labelString: "Value",
-                fontSize: 24
+                fontSize: screen.width < 415 ? 15 : 24
               }
             }
           ]
@@ -158,7 +165,9 @@ export class SearchResultComponent implements OnInit {
       new Array(this.values.length),
       (val, index) => index + 1
     );
-    const context = this.canvasElementRef.nativeElement;
-    this.initChart(context);
+    if (this.mobile){
+      const context = this.canvasElementRef.nativeElement;
+      this.initChart(context);
+    }
   }
 }

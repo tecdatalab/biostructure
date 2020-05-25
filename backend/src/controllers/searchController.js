@@ -12,7 +12,7 @@ exports.searchByID = async (req, res) => {
     const table = req.params.app;
     let id = req.params.ID;
     let biomolecule = null;
-    if (table=="emdb"){
+    if (table == "emdb") {
       biomolecule = await biomolecule_emd.findOne({
         where: {
           id: parseInt(id)
@@ -35,7 +35,7 @@ exports.searchByID = async (req, res) => {
 
 exports.saveSearch = async (req, res, next) => {
   try {
-    await search_history
+    search_history
       .build({
         date_time: new Date(),
         ip: req.connection.remoteAddress,
@@ -66,8 +66,18 @@ exports.searchResult = async (req, res) => {
     emd_id = req.params.emdbID;
     type_descriptor = req.params.typeDescriptor;
     top_can = req.params.topCan;
+    is_volume_filter_on = req.params.isVolumeFilterOn;
+    min_res = req.params.minRes;
+    max_res = req.params.maxRes;
 
-    let query_results = await getBiomolecules(emd_id, type_descriptor, top_can);
+    let query_results = await getBiomolecules(
+      emd_id,
+      type_descriptor,
+      top_can,
+      is_volume_filter_on,
+      min_res,
+      max_res
+    );
 
     let result = {
       path: "/results/result.hit",
@@ -97,7 +107,6 @@ exports.searchResultMap = async (req, res) => {
     });
   }
 };
-
 
 exports.zernike = async (req, res, next) => {
   response = [];
@@ -135,12 +144,12 @@ exports.getCathDetail = async (req, res) => {
     } else {
       res.status(200).json(cath);
     }
-  }catch (error) {
+  } catch (error) {
     res.status(500).send({
       message: "Backend error"
     });
   }
-}
+};
 
 exports.getResultsPDB = async (req, res) => {
   try {
@@ -150,35 +159,38 @@ exports.getResultsPDB = async (req, res) => {
     const cath = parseInt(req.params.cath);
     const len = parseInt(req.params.len);
     const top = parseInt(req.params.top);
-    let query_results = await getBiomoleculesPDB(id,rep,type,cath,len,top);
+    let query_results = await getBiomoleculesPDB(id, rep, type, cath, len, top);
     console.log(query_results);
     res.status(200).json(query_results);
   } catch (error) {
     res.status(500).send({
       message: "Backend error"
     });
-  } 
-}
+  }
+};
 
 //#endregion
 
 //#region Auxiliar functions
 
-async function searchByID(emdbid){
-  return biomolecule_emd.findOne({
-    where: {
-      id: parseInt(emdbid)
-    }
-  }).then((biomolecules) => {
+async function searchByID(emdbid) {
+  return biomolecule_emd
+    .findOne({
+      where: {
+        id: parseInt(emdbid)
+      }
+    })
+    .then(biomolecules => {
       if (!biomolecules) {
         console.log("Biomolecule " + emdbid + " not found.");
         return -1;
       }
       let info = biomolecules["dataValues"];
       return info;
-    }).catch ((err) => {
-        return -1;
-  });
+    })
+    .catch(err => {
+      return -1;
+    });
 }
 
 function checkMinResolutionFilter(minRes) {
@@ -203,26 +215,63 @@ function checkMaxResolutionFilter(maxRes) {
   }
 }
 
-async function getBiomolecules(emd_id_p, type_descriptor, top_can) {
+async function getBiomolecules(
+  emd_id_p,
+  type_descriptor,
+  top_can,
+  is_volume_filter_on,
+  min_res,
+  max_res
+) {
   try {
     // Query to DB
     let biomolecules = await sequelize.query(
-                  'SELECT * FROM top_distance(:emd_id, :type_des, :top)',
-                  {replacements: { emd_id: emd_id_p, 
-                                   type_des: type_descriptor, 
-                                   top: top_can }
-                                  });
+      "SELECT * FROM top_distance(:emd_id, :type_des, :top)",
+      {
+        replacements: {
+          emd_id: emd_id_p,
+          type_des: type_descriptor,
+          top: top_can
+        }
+      }
+    );
     // final result array
     let resultArray = [];
     // Clasification Process
-    for (const biomoleculeItem of biomolecules[0]){
+    for (const biomoleculeItem of biomolecules[0]) {
       let bioInfo = await searchByID(biomoleculeItem["emd_id"]);
       let distance = biomoleculeItem["distance"].toString();
-       resultArray.push({
-                      biomolecule: bioInfo,
-                      euc_distance: distance.substring(0, 5)
-                    });
-    }  
+      if (is_volume_filter_on == "true") {
+        let min_active = min_res != "0" ? true : false;
+        let max_active = max_res != "0" ? true : false;
+        if (min_active && !max_active && bioInfo.resolution >= min_res) {
+          resultArray.push({
+            biomolecule: bioInfo,
+            euc_distance: distance.substring(0, 5)
+          });
+        } else if (!min_active && max_active && bioInfo.resolution <= max_res) {
+          resultArray.push({
+            biomolecule: bioInfo,
+            euc_distance: distance.substring(0, 5)
+          });
+        } else if (
+          min_active &&
+          max_active &&
+          bioInfo.resolution >= min_res &&
+          bioInfo.resolution <= max_res
+        ) {
+          resultArray.push({
+            biomolecule: bioInfo,
+            euc_distance: distance.substring(0, 5)
+          });
+        }
+      } else {
+        resultArray.push({
+          biomolecule: bioInfo,
+          euc_distance: distance.substring(0, 5)
+        });
+      }
+    }
     return resultArray;
   } catch (err) {
     return err;
@@ -234,14 +283,18 @@ async function getBiomoleculesPDB(id_p, rep_p, db_p, cath_p, len_p, top_p) {
     // Query to DB
     console.log(id_p, rep_p, db_p, cath_p, len_p, top_p);
     let biomolecules = await sequelize.query(
-                  'SELECT * FROM atomic_query(:pdb_id, :rep, :db, :cath, :len, :top)',
-                  {replacements: { pdb_id: id_p, 
-                                   rep: rep_p, 
-                                   db: db_p,
-                                   cath: cath_p,
-                                   len: len_p,
-                                   top: top_p }
-                                  });
+      "SELECT * FROM atomic_query(:pdb_id, :rep, :db, :cath, :len, :top)",
+      {
+        replacements: {
+          pdb_id: id_p,
+          rep: rep_p,
+          db: db_p,
+          cath: cath_p,
+          len: len_p,
+          top: top_p
+        }
+      }
+    );
     return biomolecules;
   } catch (err) {
     return err;
@@ -255,7 +308,7 @@ function giveResponse(id, biomolecule, res) {
       message: "Biomolecule " + id + " not found."
     });
   } else {
-      return res.status(200).json(biomolecule);  
+    return res.status(200).json(biomolecule);
   }
 }
 
