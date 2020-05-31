@@ -12,18 +12,20 @@ from classes.emd_entry import Emd_entry
 from connections.sql_connection import SQL_connection
 from connections.ftp_connection import FTP_connection
 
+from utilities.log import Log
+from constants.constants import *
+
 '''
 Created on 31 mar. 2019
 @author: luis98
+
+Last modified by @dnnxl
+Date on 24 may 2020
 '''
 
 valg.dir = "../generators/"
 gifG.dir = "../generators/"
 log_file = None
-
-def update_log_file():
-    log_file.flush()
-    os.fsync(log_file.fileno())
 
 def insert_update_descriptors(emd_entry_p, cursor_sql):
     result = get_emd_descriptors(
@@ -34,15 +36,6 @@ def insert_update_descriptors(emd_entry_p, cursor_sql):
     for i in range(len(result)):
         des_temp = Descriptor(emd_entry_p.id, i + 1, result[i])
         des_temp.insert_update_db(cursor_sql)
-
-def generate_error_message(personalized_error, compute_error):
-    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
-    log_file.write(personalized_error + "\n")
-    log_file.write(str(compute_error) + "\n")
-    log_file.write("+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n")
-    print(personalized_error+ "\n")
-    print(str(compute_error) + "\n")
-    update_log_file()
 
 def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
     
@@ -58,7 +51,7 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
     for i in emds:
         print("Actual execution : {0} with EMD: {1}".format(k, i))
         temp_emd_entry = Emd_entry()
-        temp_emd_entry.create_by_ftp(i, connec_ftp.ftp)
+        temp_emd_entry.create_by_ftp(i, connec_ftp.get_ftp())
         temp_time_stamp = Time_stamp(i, date.today(), temp_emd_entry.map_url, temp_emd_entry.xml_url, temp_emd_entry.image_url)
         
         if image == 'Y' or descriptor == 'Y':
@@ -68,29 +61,29 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
             try:
                 temp_emd_entry.create_gif()
             except Exception as e:
-                generate_error_message("Error in the images generation of EMD {0}".format(i),e)   
+                log_file.generate_error_message(TypeErrorEmd.EDG.value.format(i), TypeErrorEmd.EDG.name, e)
             try:
                 temp_emd_entry.insert_update_db(cursor_sql)
             except Exception as e:
-                generate_error_message("Error in the insertion of EMD {0}".format(i),e)
+                log_file.generate_error_message(TypeErrorEmd.EIN.value.format(i), TypeErrorEmd.EIN.name, e)
         else:
             try:
                 temp_emd_entry.insert_without_images_db(cursor_sql)
             except Exception as e:
-                generate_error_message("Error in the insertion of EMD {0}".format(i),e)
+                log_file.generate_error_message(TypeErrorEmd.EIN.value.format(i), TypeErrorEmd.EIN.name, e)
         
         if descriptor == 'Y':
             if temp_emd_entry.map_countour_level is not None and temp_emd_entry.map_std is not None:
                 try:
                     insert_update_descriptors(temp_emd_entry, cursor_sql)
                 except Exception as e:
-                    generate_error_message("Error in the descriptor generation of EMD {0}".format(i),e)
+                    log_file.generate_error_message(TypeErrorEmd.EID.value.format(i), TypeErrorEmd.EID.name, e)
             else:
-                generate_error_message("Error in the descriptor generation of EMD {0}.Countour level or std not exist.".format(i),None)
+                log_file.generate_error_message(TypeErrorEmd.ECS.value.format(i), TypeErrorEmd.ECS.name, None)
         try:
             temp_time_stamp.insert_update_db(cursor_sql)
         except Exception as e:
-            generate_error_message("Error in the time stamp generation of EMD {0}".format(i),e)
+            log_file.generate_error_message(TypeErrorEmd.ETS.value.format(i), TypeErrorEmd.ETS.name, e)
         
         remove_map(i)
         connec_sql.commit()
@@ -122,7 +115,7 @@ if __name__ == "__main__":
         '-l',
         '--log',
         help='Log file name.',
-        default='log.txt')
+        default='updater.log')
     parser.add_argument(
         '-ie',
         '--initialEMD',
@@ -160,12 +153,12 @@ if __name__ == "__main__":
         required=True)
     args = parser.parse_args()
 
-    log_file = open(args.log, 'a+')  # open file in append mode
-    log_file.write("====================Start====================\n")
-    update_log_file()
+    log_file = Log(args.log)  # open file in append mode
+    log_file.init_log_file(__file__)
+    log_file.generate_info_message(TypeMessage.MS1.value, TypeMessage.MS1.name)
     ini = time()
     main(args.initialEMD, args.mode, args.image, args.descriptor, args.finalEMD)
     final = time()
     ejec = final - ini
-    log_file.close()
     print('Execution time:', ejec)
+    log_file.generate_info_message(TypeMessage.MS2.value, TypeMessage.MS2.name)
