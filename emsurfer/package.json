@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --host 0.0.0.0 --disable-host-check",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
@@ -23,6 +23,7 @@
     "chart.js": "^2.8.0",
     "core-js": "^2.5.4",
     "font-awesome": "^4.7.0",
+    "ngl": "^2.0.0-dev.37",
     "rxjs": "^6.3.3",
     "semver": "^7.3.2",
     "tslib": "^1.9.0",

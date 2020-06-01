@@ -1,34 +1,21 @@
-
 /* --------------------------------------------- Mobile Styles -------------------------------------------- */
 @media only screen and (max-width: 414px) {
-
-    .container{
-        background-color: white !important;
-    }
-
-
-
+  .container {
+    background-color: white !important;
+  }
 }
 
 /* --------------------------------------------- Tablet Styles -------------------------------------------- */
 @media only screen and (min-width: 415px) and (max-width: 1024px) {
-
-    .container{
-        background-color: white !important;
-    }
-
-
-
+  .container {
+    background-color: white !important;
+  }
 }
 
 /* --------------------------------------------- Desktop Styles ------------------------------------------- */
 @media only screen and (min-width: 1025px) {
-
-    .container{
-        background-color: white !important;
-    }
-
-    
-
-
+  .container {
+    background-color: white !important;
+    min-height: 30rem;
+  }
 }
