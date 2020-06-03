@@ -56,7 +56,7 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
         
         if image == 'Y' or descriptor == 'Y':
             download_file(i)
-
+  
         if image == 'Y':
             try:
                 temp_emd_entry.create_gif()
