@@ -1,5 +1,6 @@
 const benchmark_history = require("../models/benchmarkModel");
 const biomolecule_emd = require("../models/biomoleculeModelEMD");
+const parameters = require("../parameters.json");
 const sequelize = require("../database").sequelize;
 const fs = require("fs");
 var mkdirp = require("mkdirp");
@@ -104,6 +105,7 @@ async function getText(req){
   try {
     // Query to DB
     let list = req.params.emdblist.split(",");
+    list = list.slice(0, parameters.benchmark_inputs_to_process);
     for (const ID of list){
       let biomolecules = await sequelize.query(
         "SELECT * FROM top_distance(:emd_id, :type_des, :top)",
