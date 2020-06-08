@@ -3,5 +3,5 @@
     "volume_filter_max":16,
     "hits_number":16,
     "update_rate":1000,
-    "benchmark_inputs_to_process": 3
+    "benchmark_inputs_to_process": 5
 }
