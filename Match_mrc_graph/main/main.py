@@ -6,7 +6,7 @@ matplotlib.use('TKAgg')
 
 
 segments = get_mrc_segments("../../maps/1010/EMD-1010.map", 7, 3, 1)
-face_points = get_n_points_cube(segments[0].mask, 100, 0)
+face_points = get_n_points_cube(segments[0].mask, 3, 0)
 
 x, y, z = [],[],[]
 for i in face_points:
