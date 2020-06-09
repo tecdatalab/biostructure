@@ -1,0 +1,35 @@
+2020/06/08 20:53:20	2020/06/08 20:53:20	 11741/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5.0 175d.pdb 175d.mrc
+2020/06/08 21:00:57	incomplete         	 12028/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5.0 175d.pdb exit_pdb/175d/175d.mcr
+2020/06/08 21:02:17	incomplete         	 12046/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5.0 175d.pdb exit_pdb/175d/175d.mcr
+2020/06/08 21:03:07	incomplete         	 12060/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5.0 175d.pdb a.mcr
+2020/06/08 21:09:48	incomplete         	 13097/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5.0 175d.pdb a.mcr
+2020/06/08 21:10:08	incomplete         	 13111/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5.0 175d.pdb a.mcr
+2020/06/08 21:11:18	incomplete         	 13770/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5.0 175d.pdb a.mcr
+2020/06/08 21:11:37	incomplete         	 13781/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5.0 175d.pdb a.mcr
+2020/06/08 21:12:41	incomplete         	 13954/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5.0 175d.pdb exit_pdb/175d/175d.mcr
+2020/06/08 21:13:33	incomplete         	 14029/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5.0 175d.pdb exit_pdb/175d/175d.mcr
+2020/06/08 21:16:36	incomplete         	 14121/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5.0 175d.pdb exit_pdb/175d/175d.mcr
+2020/06/08 21:24:17	incomplete         	  3683/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d.mcr
+2020/06/08 21:24:52	incomplete         	  3697/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb a.mcr
+2020/06/08 21:28:31	incomplete         	  4076/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb a.mcr
+2020/06/08 21:30:25	incomplete         	  4130/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb a.mcr
+2020/06/08 21:32:20	2020/06/08 21:32:20	  4244/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb a.mrc
+2020/06/08 21:32:55	incomplete         	  4291/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d.mcr
+2020/06/08 21:33:18	2020/06/08 21:33:18	  4318/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d.mrc
+2020/06/08 21:33:34	2020/06/08 21:33:35	  4329/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d.mrc
+2020/06/08 21:46:39	2020/06/08 21:46:39	  4565/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d.mrc
+2020/06/08 21:46:55	2020/06/08 21:46:55	  4575/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d.mrc
+2020/06/08 21:46:55	2020/06/08 21:46:55	  4580/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d_A.mrc
+2020/06/08 21:46:55	2020/06/08 21:46:55	  4584/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d_B.mrc
+2020/06/08 21:48:53	2020/06/08 21:48:53	  4652/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d.mrc
+2020/06/08 21:48:54	2020/06/08 21:48:54	  4662/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d_B.mrc
+2020/06/08 21:49:16	2020/06/08 21:49:16	  4671/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d.mrc
+2020/06/08 21:49:16	2020/06/08 21:49:16	  4679/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d_B.mrc
+2020/06/08 21:50:16	2020/06/08 21:50:16	  4695/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d.mrc
+2020/06/08 21:50:16	2020/06/08 21:50:16	  4703/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d_B.mrc
+2020/06/08 21:50:56	2020/06/08 21:50:56	  4720/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d.mrc
+2020/06/08 21:50:56	2020/06/08 21:50:56	  4724/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 --chains A 175d.pdb exit_pdb/175d/175d_A.mrc
+2020/06/08 21:50:57	2020/06/08 21:50:57	  4728/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d_B.mrc
+2020/06/08 21:52:10	2020/06/08 21:52:10	  4751/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 175d.pdb exit_pdb/175d/175d.mrc
+2020/06/08 21:52:10	2020/06/08 21:52:10	  4755/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 --chains A 175d.pdb exit_pdb/175d/175d_A.mrc
+2020/06/08 21:52:10	2020/06/08 21:52:10	  4759/    -1	ubuntu	EMAN2_py2/bin/e2pdb2mrc.py -R 5 --chains B 175d.pdb exit_pdb/175d/175d_B.mrc
