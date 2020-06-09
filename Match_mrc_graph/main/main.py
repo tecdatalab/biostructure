@@ -1,8 +1,3 @@
-'''
-Created on Jun 8, 2020
+from process_mrc.miscellaneou import get_mrc_segments
 
-@author: luis98
-'''
-
-if __name__ == '__main__':
-    print("Hello world")
+segments = get_mrc_segments("../../maps/1010/EMD-1010.map", 7, 3, 1)
