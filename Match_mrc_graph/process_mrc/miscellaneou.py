@@ -46,6 +46,7 @@ def get_mrc_segments(mrc_path, recommendedContour_p, steps, sigma):
 
 def get_mrc_synthetic_segments_pdb(folder_segments, recommendedContour_p):
     segments_paths = list(glob.glob(folder_segments+"/*_*.mrc"))
+    print(segments_paths)
     actual_id = 1
     result = []
     for path in segments_paths:

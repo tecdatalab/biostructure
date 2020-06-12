@@ -6,6 +6,8 @@ Created on Jun 9, 2020
 from sklearn.neighbors import KDTree
 from process_graph.process_segment_faces import get_n_points_cube
 import networkx as nx
+import matplotlib
+import matplotlib.pyplot as plt
 
 def generate_graph(segments, n_points_face, filter_value, max_distance, min_points):
     face_points = {}
@@ -38,6 +40,4 @@ def generate_graph(segments, n_points_face, filter_value, max_distance, min_poin
                 check.append([i.id_segment,j.id_segment])
             
     return g_result
-
-
 
