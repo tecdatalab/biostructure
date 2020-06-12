@@ -41,3 +41,93 @@ def generate_graph(segments, n_points_face, filter_value, max_distance, min_poin
             
     return g_result
 
+def draw_graph_similarity(graph1, graph2, result):
+    matplotlib.use('TKAgg')
+    graph1_nodes = []
+    graph2_nodes = []
+    
+    for i in result:
+        graph1_nodes.append(i[0])
+        graph2_nodes.append(i[1])
+    
+    graph1_match = []
+    graph2_match = []
+    
+    for i in list(graph1.nodes()):
+        if i in graph1_nodes:
+            graph1_match.append('y')
+        else:
+            graph1_match.append('r')
+            
+    for i in list(graph2.nodes()):
+        if i in graph2_nodes:
+            graph2_match.append('y')
+        else:
+            graph2_match.append('b')
+    
+    
+    plt.figure(1)
+    plt.suptitle('Graph 0', fontsize=16)
+    nx.draw(graph1, with_labels=True, node_color='r')
+    plt.figure(2)
+    plt.suptitle('Graph 1', fontsize=16)
+    nx.draw(graph2, with_labels=True, node_color='b')
+    plt.figure(3)
+    plt.suptitle('Graph 0 match', fontsize=16)
+    nx.draw(graph1, with_labels=True, node_color=graph1_match)
+    plt.figure(4)
+    plt.suptitle('Graph 1 match', fontsize=16)
+    nx.draw(graph1, with_labels=True, node_color=graph2_match)
+    plt.show()
+    
+def draw_graph_similarity_same_image(graph1, graph2, result):
+    matplotlib.use('TKAgg')
+    
+    graph1_nodes = []
+    graph2_nodes = []
+    
+    graph1_match = []
+    graph2_match = []
+    
+    for i in result:
+        graph1_nodes.append(i[0])
+        graph2_nodes.append(i[1])
+    
+    for i in list(graph1.nodes()):
+        if i in graph1_nodes:
+            graph1_match.append('y')
+        else:
+            graph1_match.append('r')
+            
+    for i in list(graph2.nodes()):
+        if i in graph2_nodes:
+            graph2_match.append('y')
+        else:
+            graph2_match.append('b')
+    
+    fig, axes = plt.subplots(nrows=2, ncols=2)
+    ax = axes.flatten()
+    
+    ax[0].set_title('Graph 0')
+    nx.draw_networkx(graph1, ax=ax[0], with_labels=True, node_color='r')
+    ax[0].set_axis_off()
+    
+    ax[1].set_title('Graph 1')
+    nx.draw_networkx(graph2, ax=ax[1], with_labels=True, node_color='b')
+    ax[1].set_axis_off()
+    
+    ax[2].set_title('Graph 0 match')
+    nx.draw_networkx(graph1, ax=ax[2], with_labels=True, node_color=graph1_match)
+    ax[2].set_axis_off()
+    
+    ax[3].set_title('Graph 1 match')
+    nx.draw_networkx(graph2, ax=ax[3], with_labels=True, node_color=graph2_match)
+    ax[3].set_axis_off()
+
+    plt.show()
+
+
+
+
+
+
