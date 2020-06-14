@@ -55,6 +55,7 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
         temp_time_stamp = Time_stamp(i, date.today(), temp_emd_entry.map_url, temp_emd_entry.xml_url, temp_emd_entry.image_url)
         
         if image == 'Y' or descriptor == 'Y':
+            print("Download file")
             download_file(i)
 
         if image == 'Y':

@@ -2,18 +2,27 @@
 Created on 28 abr. 2019
 
 @author: luis98
+
+Last modification on 14 jun. 2020
+@author: dnnxl
 '''
 import os
 import os.path
 import requests
+from clint.textui import progress
 
 dir = ""
 
 def download_file(emd_id):
     URL = "http://ftp.wwpdb.org/pub/emdb/structures/EMD-{0}/map/emd_{0}.map.gz".format(emd_id)
-    response = requests.get(URL)
+    response = requests.get(URL, stream=True)
     with open('{0}temp/emd_{1}.map.gz'.format(dir, emd_id), 'wb') as file:
-        file.write(response.content)
+        total_length = int(response.headers.get('content-length'))
+        for chunk in progress.bar(response.iter_content(chunk_size = 8192), expected_size=(total_length/8192) + 1):
+            if chunk:
+                file.write(chunk)
+                file.flush()
+                os.fsync(file.fileno())
     os.system("gzip -d {0}temp/emd_{1}.map.gz".format(dir, emd_id))
 
 
