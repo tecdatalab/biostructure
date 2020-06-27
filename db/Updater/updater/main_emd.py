@@ -12,9 +12,11 @@ from classes.emd_entry import Emd_entry
 from connections.sql_connection import SQL_connection
 from connections.ftp_connection import FTP_connection
 
-from utilities.log import Log
-from constants.constants import *
 
+from constants.constants import *
+from utilities.binnacle import *
+from utilities.utility import *
+from utilities.log import Log
 '''
 Created on 31 mar. 2019
 @author: luis98
@@ -26,6 +28,7 @@ Date on 24 may 2020
 valg.dir = "../generators/"
 gifG.dir = "../generators/"
 log_file = None
+csv_file = 'emd.csv'
 
 def insert_update_descriptors(emd_entry_p, cursor_sql):
     result = get_emd_descriptors(
@@ -49,6 +52,10 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
 
     k = 1
     for i in emds:
+
+        ini_time = time()
+        ini_memory = memory()
+
         print("Actual execution : {0} with EMD: {1}".format(k, i))
         temp_emd_entry = Emd_entry()
         temp_emd_entry.create_by_ftp(i, connec_ftp.get_ftp())
@@ -61,30 +68,44 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
         if image == 'Y':
             try:
                 temp_emd_entry.create_gif()
+
             except Exception as e:
                 log_file.generate_error_message(TypeErrorEmd.EDG.value.format(i), TypeErrorEmd.EDG.name, e)
+
             try:
                 temp_emd_entry.insert_update_db(cursor_sql)
+
             except Exception as e:
                 log_file.generate_error_message(TypeErrorEmd.EIN.value.format(i), TypeErrorEmd.EIN.name, e)
         else:
             try:
                 temp_emd_entry.insert_without_images_db(cursor_sql)
+
             except Exception as e:
                 log_file.generate_error_message(TypeErrorEmd.EIN.value.format(i), TypeErrorEmd.EIN.name, e)
-        
+
         if descriptor == 'Y':
             if temp_emd_entry.map_countour_level is not None and temp_emd_entry.map_std is not None:
                 try:
                     insert_update_descriptors(temp_emd_entry, cursor_sql)
+
                 except Exception as e:
                     log_file.generate_error_message(TypeErrorEmd.EID.value.format(i), TypeErrorEmd.EID.name, e)
+
             else:
                 log_file.generate_error_message(TypeErrorEmd.ECS.value.format(i), TypeErrorEmd.ECS.name, None)
+
         try:
             temp_time_stamp.insert_update_db(cursor_sql)
         except Exception as e:
             log_file.generate_error_message(TypeErrorEmd.ETS.value.format(i), TypeErrorEmd.ETS.name, e)
+
+        end_time = time()
+        end_memory = memory()
+        ejec_memory = end_Memory - ini_memory
+        ejec_time = end_time - ini_time
+        row_content = [i, ejec_memory, ejec_time]
+        append_list_as_row(csv_file, row_content)
         
         remove_map(i)
         connec_sql.commit()
@@ -154,10 +175,10 @@ if __name__ == "__main__":
         required=True)
     args = parser.parse_args()
 
-    log_file = Log(args.log)  # open file in append mode
+    log_file = Log(args.log)  
     log_file.init_log_file(__file__)
     log_file.generate_info_message(TypeMessage.MS1.value, TypeMessage.MS1.name)
-    ini = time()
+    ini = time() # The initial execution time 
     main(args.initialEMD, args.mode, args.image, args.descriptor, args.finalEMD)
     final = time()
     ejec = final - ini
