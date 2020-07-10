@@ -17,12 +17,17 @@ Last modified: 16 may 2020
 
 log_file = None
 
-def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomic, atomicEmd):
+def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomic, atomicEmd, initialAtomic, finalAtomic):
     
     cursor_sql = connec_sql.get_cursor()
     #Create atomic structures
     if atomic == 'Y':
-        all_pdb = connec_ftp.get_all_pdb()
+        # Complete mode
+        if(int(initialAtomic) == 0 and float(finalAtomic) == float("inf")):
+            all_pdb = connec_ftp.get_all_pdb()
+        else:
+            all_pdb = connec_ftp.get_range_pdb(int(initialAtomic), float(finalAtomic))
+
         print("Total changes atomic structures", len(all_pdb))
         domain_dic = connec_ftp.get_all_cath_domain_boundarie_dic()
         k = 1
@@ -37,7 +42,7 @@ def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomi
                 log_file.generate_error_message(TypeErrorPdb.EEP.value.format(k, i.id_code), TypeErrorPdb.EEP.name, e)
             k += 1
             connec_sql.commit()
-    print("Despues del if atomic")
+
     #Create cathComplex
     if cathComplex == 'Y':
         all_cathChain = connec_ftp.get_all_cath_complex()
@@ -102,14 +107,14 @@ def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomi
     connec_sql.commit()
     cursor_sql.close()
 
-def main(cathComplex, cathChain, cathDomain, atomic, atomicEmd):
+def main(cathComplex, cathChain, cathDomain, atomic, initialAtomic, finalAtomic, atomicEmd):
     
     connec_ftp = FTP_connection()
     connec_ftp.init_connection()
     connec_sql = SQL_connection()
     connec_sql.init_connection()
 
-    update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomic, atomicEmd)
+    update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomic, atomicEmd, initialAtomic, finalAtomic)
 
     connec_sql.close_connection()
     connec_ftp.close_connection()
@@ -124,6 +129,18 @@ if __name__ == "__main__":
         '--log',
         help='Log file name.',
         default='log.txt')
+
+    parser.add_argument(
+        '-ia',
+        '--initialAtomic',
+        help='Initial Atomic for execution.',
+        default='0')
+    parser.add_argument(
+        '-fa',
+        '--finalAtomic',
+        help='Final Atomic for execution (use "inf" for a complete execution).',
+        default='inf')
+
     required_arguments = parser.add_argument_group('required arguments')
     required_arguments.add_argument(
         '-cco',
@@ -171,7 +188,8 @@ if __name__ == "__main__":
     log_file.init_log_file(__file__)
     log_file.generate_info_message(TypeMessage.MS1.value, TypeMessage.MS1.name)
     ini = time()
-    main(args.cathComplex, args.cathChain, args.cathDomain, args.atomic, args.atomicEmd)
+    print(args)
+    main(args.cathComplex, args.cathChain, args.cathDomain, args.atomic, args.initialAtomic, args.finalAtomic, args.atomicEmd)
     final = time()
     ejec = final - ini
     print('Execution time:', ejec)
