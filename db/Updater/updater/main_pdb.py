@@ -4,6 +4,8 @@ from time import time
 from connections.sql_connection import SQL_connection
 from connections.ftp_connection import FTP_connection
 from classes.atomic_structure import Atomic_structure
+from classes.binnacle import Binnacle
+from datetime import date
 
 from utilities.log import Log
 from constants.constants import *
@@ -32,6 +34,12 @@ def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomi
         domain_dic = connec_ftp.get_all_cath_domain_boundarie_dic()
         k = 1
         for i in all_pdb:
+
+            temp_binnacle = Binnacle(date.today())
+            temp_binnacle.set_pdb_id(i.id_code)
+            temp_binnacle.insert_binnacle_pdb(cursor_sql)
+            connec_sql.commit()
+            
             print("---------------------------------------------------------")
             print ("Actual execution {0} with PDB {1}".format(k, i.id_code))
             try:
