@@ -8,13 +8,13 @@ from generators.values_generator import get_emd_descriptors, remove_map, downloa
 from classes.time_stamp import Time_stamp
 from datetime import date
 from classes.update import Update
+from classes.binnacle import Binnacle
 from classes.emd_entry import Emd_entry
 from connections.sql_connection import SQL_connection
 from connections.ftp_connection import FTP_connection
 
 
 from constants.constants import *
-from utilities.binnacle import *
 from utilities.utility import *
 from utilities.log import Log
 '''
@@ -55,6 +55,11 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
 
         ini_time = time()
         ini_memory = memory()
+
+        temp_binnacle = Binnacle(date.today())
+        temp_binnacle.set_emd_id(int(i))
+        temp_binnacle.insert_binnacle_emd(cursor_sql)
+        connec_sql.commit()
 
         print("Actual execution : {0} with EMD: {1}".format(k, i))
         temp_emd_entry = Emd_entry()
@@ -102,7 +107,7 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
 
         end_time = time()
         end_memory = memory()
-        ejec_memory = end_Memory - ini_memory
+        ejec_memory = end_memory - ini_memory
         ejec_time = end_time - ini_time
         row_content = [i, ejec_memory, ejec_time]
         append_list_as_row(csv_file, row_content)
