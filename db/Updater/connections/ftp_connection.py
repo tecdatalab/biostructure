@@ -146,6 +146,13 @@ class FTP_connection(object):
         os.remove("pdb_entry_type.txt")
         return result
 
+    def get_pdb_by_index(self, id_code):
+        results = self.get_all_pdb()
+        for i in range(0, len(results)-1):
+            if results[i].get_id_code() == id_code:
+                return i
+            
+
     def get_range_pdb(
             self, 
             ini_pdb, 
