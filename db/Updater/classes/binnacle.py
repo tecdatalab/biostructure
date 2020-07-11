@@ -7,7 +7,7 @@ import datetime
 from datetime import date
 from psycopg2 import sql
 
-'''Format YYYY-MM-DD'''
+'''Format YYYY-MM-DD:hh:mm:ss'''
 
 class Binnacle(object):
     '''
@@ -45,6 +45,9 @@ class Binnacle(object):
             sql.SQL('CALL update_binnacle_emd({0}, \'{1}\', {2});'.format(self.__emd_id, self.__last_update, 1)))
 
     def update_binnacle_pdb(self, cur):
+        v = 'CALL update_binnacle_pdb(\'{0}\', \'{1}\', {2});'.format(self.__pdb_id, self.__last_update, 1)
+        print(v)
+
         cur.execute(
             sql.SQL('CALL update_binnacle_pdb(\'{0}\', \'{1}\', {2});'.format(self.__pdb_id, self.__last_update, 1)))
 
@@ -66,4 +69,12 @@ class Binnacle(object):
             sql.SQL('SELECT get_attempt_emd({0}, \'{1}\');'.format(self.__emd_id, self.__last_update)))
         return cur.fetchone()[0]
 
+    def get_last_emd_id_update(self, cur):
+        cur.execute(
+            sql.SQL('SELECT get_last_emd_id(\'{0}\');'.format(self.__last_update)))
+        return cur.fetchone()[0]
     
+    def get_last_pdb_id_update(self, cur):
+        cur.execute(
+            sql.SQL('SELECT get_last_pdb_id(\'{0}\');'.format(self.__last_update)))
+        return cur.fetchone()[0]
