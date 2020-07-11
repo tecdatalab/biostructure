@@ -87,3 +87,23 @@ BEGIN
     RETURN attempt_v;
 END;
 $$ language plpgsql;
+
+CREATE OR REPLACE FUNCTION get_last_emd_id(TIMESTAMP) returns INT as $$
+DECLARE
+    emd_id_v INTEGER;
+BEGIN
+    SELECT emd_id INTO emd_id_v FROM binnacle_emd WHERE last_update = $1
+	ORDER BY emd_id DESC; 
+    RETURN emd_id_v;
+END;
+$$ language plpgsql;
+
+CREATE OR REPLACE FUNCTION get_last_pdb_id(TIMESTAMP) returns TEXT as $$
+DECLARE
+    pdb_id_v TEXT;
+BEGIN
+    SELECT pdb_id INTO pdb_id_v FROM binnacle_pdb WHERE last_update = $1
+	ORDER BY pdb_id DESC; 
+    RETURN pdb_id_v;
+END;
+$$ language plpgsql;
