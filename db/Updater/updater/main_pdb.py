@@ -18,10 +18,15 @@ Last modified: 16 may 2020
 '''
 
 log_file = None
+attempt_pdb = 5
 
 def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomic, atomicEmd, initialAtomic, finalAtomic):
     
     cursor_sql = connec_sql.get_cursor()
+
+    temp_binnacle = Binnacle()
+    temp_binnacle.set_last_update(cursor_sql)
+
     #Create atomic structures
     if atomic == 'Y':
         # Complete mode
@@ -35,10 +40,17 @@ def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomi
         k = 1
         for i in all_pdb:
 
-            temp_binnacle = Binnacle(date.today())
-            temp_binnacle.set_pdb_id(i.id_code)
-            temp_binnacle.insert_binnacle_pdb(cursor_sql)
-            connec_sql.commit()
+            temp_binnacle.set_pdb_id(i)
+            temp_pdb_attempt = temp_binnacle.get_attempt_pdb(cursor_sql)
+            
+            if(temp_pdb_attempt == None):
+                temp_binnacle.insert_binnacle_pdb(cursor_sql)
+                connec_sql.commit()
+            elif(temp_pdb_attempt > attempt_pdb):
+                continue
+            else:
+                temp_binnacle.update_binnacle_pdb(cursor_sql)
+
             
             print("---------------------------------------------------------")
             print ("Actual execution {0} with PDB {1}".format(k, i.id_code))

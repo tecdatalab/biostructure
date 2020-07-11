@@ -29,6 +29,7 @@ valg.dir = "../generators/"
 gifG.dir = "../generators/"
 log_file = None
 csv_file = 'emd.csv'
+attempt_emd = 5
 
 def insert_update_descriptors(emd_entry_p, cursor_sql):
     result = get_emd_descriptors(
@@ -48,18 +49,27 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
     else:
         emds = connec_ftp.get_emds_higher_than_date(connec_sql.last_update(), initialEMD, finalEMD)
 
+    temp_binnacle = Binnacle()
+    temp_binnacle.set_last_update(cursor_sql)
+    
     print("Total changes", len(emds))
 
     k = 1
     for i in emds:
+        
+        temp_binnacle.set_emd_id(int(i))
+        temp_emd_attempt = temp_binnacle.get_attempt_emd(cursor_sql)
+        
+        if(temp_emd_attempt == None):
+            temp_binnacle.insert_binnacle_emd(cursor_sql)
+            connec_sql.commit()
+        elif(temp_emd_attempt > attempt_emd):
+            continue
+        else:
+            temp_binnacle.update_binnacle_emd(cursor_sql)
 
         ini_time = time()
         ini_memory = memory()
-
-        temp_binnacle = Binnacle(date.today())
-        temp_binnacle.set_emd_id(int(i))
-        temp_binnacle.insert_binnacle_emd(cursor_sql)
-        connec_sql.commit()
 
         print("Actual execution : {0} with EMD: {1}".format(k, i))
         temp_emd_entry = Emd_entry()
@@ -122,7 +132,6 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
     cursor_sql.close()
 
 def main(initialEMD, mode, image, descriptor, finalEMD):
-    
     connec_ftp = FTP_connection()
     connec_ftp.init_connection()
     connec_sql = SQL_connection()
