@@ -55,7 +55,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     UPDATE binnacle_emd   
-    SET attempt = (SELECT attempt FROM binnacle_emd WHERE (emd_id = $1 AND last_update = $2)) + $3
+    SET attempt = attempt + $3
     WHERE emd_id = $1 AND last_update = $2;
 END;
 $$;
@@ -65,7 +65,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     UPDATE binnacle_pdb   
-    SET attempt = (SELECT attempt FROM binnacle_pdb WHERE (pdb_id = $1 AND last_update = $2)) + $3
+    SET attempt = attempt + $3
     WHERE pdb_id = $1 AND last_update = $2;
 END;
 $$;
