@@ -1,6 +1,7 @@
 import sys, argparse, os
 sys.path.append('../')
 from time import time
+import datetime
 from generators import gif_generator as gifG
 from generators import values_generator as valg
 from classes.descriptor import Descriptor
@@ -12,7 +13,6 @@ from classes.binnacle import Binnacle
 from classes.emd_entry import Emd_entry
 from connections.sql_connection import SQL_connection
 from connections.ftp_connection import FTP_connection
-
 
 from constants.constants import *
 from utilities.utility import *
@@ -49,6 +49,10 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
     else:
         emds = connec_ftp.get_emds_higher_than_date(connec_sql.last_update(), initialEMD, finalEMD)
 
+    update_temp = Update(datetime.datetime.now())
+    update_temp.insert_update_db(connec_sql, cursor_sql)
+    connec_sql.commit()
+
     temp_binnacle = Binnacle()
     temp_binnacle.set_last_update(cursor_sql)
     
@@ -67,6 +71,7 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
             continue
         else:
             temp_binnacle.update_binnacle_emd(cursor_sql)
+            connec_sql.commit()
 
         ini_time = time()
         ini_memory = memory()
@@ -126,9 +131,6 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
         connec_sql.commit()
         k += 1
         
-    update_temp = Update(date.today())
-    update_temp.insert_update_db(connec_sql, cursor_sql)
-    connec_sql.commit()
     cursor_sql.close()
 
 def main(initialEMD, mode, image, descriptor, finalEMD):

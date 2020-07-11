@@ -1,4 +1,5 @@
 import sys, argparse, os
+import datetime
 sys.path.append('../')
 from time import time
 from connections.sql_connection import SQL_connection
@@ -6,6 +7,7 @@ from connections.ftp_connection import FTP_connection
 from classes.atomic_structure import Atomic_structure
 from classes.binnacle import Binnacle
 from datetime import date
+from classes.update import Update
 
 from utilities.log import Log
 from constants.constants import *
@@ -24,6 +26,10 @@ def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomi
     
     cursor_sql = connec_sql.get_cursor()
 
+    update_temp = Update(datetime.datetime.now())
+    update_temp.insert_update_db(connec_sql, cursor_sql)
+    connec_sql.commit()
+
     temp_binnacle = Binnacle()
     temp_binnacle.set_last_update(cursor_sql)
 
@@ -40,9 +46,8 @@ def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomi
         k = 1
         for i in all_pdb:
 
-            temp_binnacle.set_pdb_id(i)
+            temp_binnacle.set_pdb_id(i.id_code)
             temp_pdb_attempt = temp_binnacle.get_attempt_pdb(cursor_sql)
-            
             if(temp_pdb_attempt == None):
                 temp_binnacle.insert_binnacle_pdb(cursor_sql)
                 connec_sql.commit()
@@ -50,8 +55,8 @@ def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomi
                 continue
             else:
                 temp_binnacle.update_binnacle_pdb(cursor_sql)
+                connec_sql.commit()
 
-            
             print("---------------------------------------------------------")
             print ("Actual execution {0} with PDB {1}".format(k, i.id_code))
             try:
@@ -143,7 +148,7 @@ def main(cathComplex, cathChain, cathDomain, atomic, initialAtomic, finalAtomic,
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Calculation of data for EMD.')
+        description='Calculation of data for PDB.')
     parser.add_argument(
         '-l',
         '--log',
@@ -208,7 +213,6 @@ if __name__ == "__main__":
     log_file.init_log_file(__file__)
     log_file.generate_info_message(TypeMessage.MS1.value, TypeMessage.MS1.name)
     ini = time()
-    print(args)
     main(args.cathComplex, args.cathChain, args.cathDomain, args.atomic, args.initialAtomic, args.finalAtomic, args.atomicEmd)
     final = time()
     ejec = final - ini
