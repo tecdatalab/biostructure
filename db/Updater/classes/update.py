@@ -31,8 +31,7 @@ class Update(object):
                 self.__last_update])
         
     def insert_update_db(self, conec_sql, cur):
-        if (conec_sql.last_update() is None or conec_sql.last_update().date() != date.today()):
-            self.insert_db(cur)
+        self.insert_db(cur)
         
     def get_last_update(self):
         return self.__last_update
