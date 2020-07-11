@@ -23,7 +23,7 @@ def download_file(emd_id):
                 file.write(chunk)
                 file.flush()
                 os.fsync(file.fileno())
-    os.system("gzip -d {0}temp/emd_{1}.map.gz".format(dir, emd_id))
+    os.system("gzip -d -f {0}temp/emd_{1}.map.gz".format(dir, emd_id))
 
 
 def get_min_max_density(emd_id, contour):
