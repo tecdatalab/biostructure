@@ -133,7 +133,11 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
         
     cursor_sql.close()
 
-def main(initialEMD, mode, image, descriptor, finalEMD):
+def main(log, initialEMD, mode, image, descriptor, finalEMD):
+    log_file = Log(log)  
+    log_file.init_log_file(__file__)
+    log_file.generate_info_message(TypeMessage.MS1.value, TypeMessage.MS1.name)
+
     connec_ftp = FTP_connection()
     connec_ftp.init_connection()
     connec_sql = SQL_connection()
@@ -191,11 +195,8 @@ if __name__ == "__main__":
         required=True)
     args = parser.parse_args()
 
-    log_file = Log(args.log)  
-    log_file.init_log_file(__file__)
-    log_file.generate_info_message(TypeMessage.MS1.value, TypeMessage.MS1.name)
     ini = time() # The initial execution time 
-    main(args.initialEMD, args.mode, args.image, args.descriptor, args.finalEMD)
+    main(args.log, args.initialEMD, args.mode, args.image, args.descriptor, args.finalEMD)
     final = time()
     ejec = final - ini
     print('Execution time:', ejec)

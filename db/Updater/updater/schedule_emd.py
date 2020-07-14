@@ -26,9 +26,10 @@ def initial():
     connec_sql.commit()
     connec_sql.close_connection()
 
-def schedule(mode, image, descriptor, startEmd, hour, amount):
+def schedule(log, mode, image, descriptor, startEmd, hour, amount):
     cron = CronTab(user=True)
-    temp_command = "sudo python3 {}/script_emd.py -m {} -i {} -d {} -ie {} -a {}".format(directory, mode, image, descriptor, startEmd, amount)
+    temp_command = "sudo python3 {}/script_emd.py -l {} -m {} -i {} -d {} -ie {} -a {}".format(directory, log, mode, image, descriptor, startEmd, amount)
+    print(temp_command)
     job = cron.new(command=temp_command)
     job.every(hour).hours()
     cron.write()
@@ -36,6 +37,12 @@ def schedule(mode, image, descriptor, startEmd, hour, amount):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Scheduling the execution of updater')
+
+    parser.add_argument(
+        '-l',
+        '--log',
+        help='Log file name.',
+        default='updater.log')
     parser.add_argument(
         '-ho',
         '--hour',
@@ -82,4 +89,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args)
     initial()
-    schedule(args.mode, args.image, args.descriptor, args.initialEMD, args.hour, args.amount)
+    schedule(args.log, args.mode, args.image, args.descriptor, args.initialEMD, args.hour, args.amount)
