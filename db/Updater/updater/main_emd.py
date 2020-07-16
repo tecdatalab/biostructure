@@ -22,14 +22,13 @@ Created on 31 mar. 2019
 @author: luis98
 
 Last modified by @dnnxl
-Date on 24 may 2020
+Date on 16 jul 2020
 '''
 
 valg.dir = "../generators/"
 gifG.dir = "../generators/"
 log_file = None
 csv_file = 'emd.csv'
-attempt_emd = 5
 
 def insert_update_descriptors(emd_entry_p, cursor_sql):
     result = get_emd_descriptors(
@@ -41,7 +40,7 @@ def insert_update_descriptors(emd_entry_p, cursor_sql):
         des_temp = Descriptor(emd_entry_p.id, i + 1, result[i])
         des_temp.insert_update_db(cursor_sql)
 
-def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
+def update_emd(connec_ftp,connec_sql,initialEMD,attempt_emd, mode,image,descriptor,finalEMD):
     
     cursor_sql = connec_sql.get_cursor()
     if mode == 'c':
@@ -67,7 +66,7 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
         if(temp_emd_attempt == None):
             temp_binnacle.insert_binnacle_emd(cursor_sql)
             connec_sql.commit()
-        elif(temp_emd_attempt > attempt_emd):
+        elif(temp_emd_attempt > int(attempt_emd)):
             continue
         else:
             temp_binnacle.update_binnacle_emd(cursor_sql)
@@ -88,19 +87,15 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
         if image == 'Y':
             try:
                 temp_emd_entry.create_gif()
-
             except Exception as e:
                 log_file.generate_error_message(TypeErrorEmd.EDG.value.format(i), TypeErrorEmd.EDG.name, e)
-
             try:
                 temp_emd_entry.insert_update_db(cursor_sql)
-
             except Exception as e:
                 log_file.generate_error_message(TypeErrorEmd.EIN.value.format(i), TypeErrorEmd.EIN.name, e)
         else:
             try:
                 temp_emd_entry.insert_without_images_db(cursor_sql)
-
             except Exception as e:
                 log_file.generate_error_message(TypeErrorEmd.EIN.value.format(i), TypeErrorEmd.EIN.name, e)
 
@@ -108,13 +103,10 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
             if temp_emd_entry.map_countour_level is not None and temp_emd_entry.map_std is not None:
                 try:
                     insert_update_descriptors(temp_emd_entry, cursor_sql)
-
                 except Exception as e:
                     log_file.generate_error_message(TypeErrorEmd.EID.value.format(i), TypeErrorEmd.EID.name, e)
-
             else:
                 log_file.generate_error_message(TypeErrorEmd.ECS.value.format(i), TypeErrorEmd.ECS.name, None)
-
         try:
             temp_time_stamp.insert_update_db(cursor_sql)
         except Exception as e:
@@ -126,14 +118,13 @@ def update_emd(connec_ftp,connec_sql,initialEMD,mode,image,descriptor,finalEMD):
         ejec_time = end_time - ini_time
         row_content = [i, ejec_memory, ejec_time]
         append_list_as_row(csv_file, row_content)
-        
         remove_map(i)
         connec_sql.commit()
         k += 1
         
     cursor_sql.close()
 
-def main(log, initialEMD, mode, image, descriptor, finalEMD):
+def main(log, initialEMD, attempt_emd, mode, image, descriptor, finalEMD):
     log_file = Log(log)  
     log_file.init_log_file(__file__)
     log_file.generate_info_message(TypeMessage.MS1.value, TypeMessage.MS1.name)
@@ -143,12 +134,11 @@ def main(log, initialEMD, mode, image, descriptor, finalEMD):
     connec_sql = SQL_connection()
     connec_sql.init_connection()
 
-    update_emd(connec_ftp, connec_sql, initialEMD, mode, image, descriptor, finalEMD)
+    update_emd(connec_ftp, connec_sql, initialEMD, attempt_emd, mode, image, descriptor, finalEMD)
 
     connec_sql.close_connection()
     connec_ftp.close_connection()
     print("Finish")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -168,6 +158,11 @@ if __name__ == "__main__":
         '--finalEMD',
         help='Final EMD for execution (use "inf" for a complete execution).',
         default='inf')
+    parser.add_argument(
+        '-at',
+        '--attemptEmd',
+        help='Attempt Emd coefficient. The number of tries for each emd.',
+        default='2')
     required_arguments = parser.add_argument_group('required arguments')
     required_arguments.add_argument(
         '-m',
@@ -196,7 +191,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     ini = time() # The initial execution time 
-    main(args.log, args.initialEMD, args.mode, args.image, args.descriptor, args.finalEMD)
+    main(args.log, args.initialEMD, args.attemptEmd, args.mode, args.image, args.descriptor, args.finalEMD)
     final = time()
     ejec = final - ini
     print('Execution time:', ejec)

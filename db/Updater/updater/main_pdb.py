@@ -18,11 +18,9 @@ Created on 31 mar. 2019
 Last modified: 16 may 2020
 @By: dnnxl
 '''
-
 log_file = None
-attempt_pdb = 5
 
-def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomic, atomicEmd, initialAtomic, finalAtomic):
+def update_pdb(connec_ftp, connec_sql, attemptPdb, cathComplex, cathChain, cathDomain, atomic, atomicEmd, initialAtomic, finalAtomic):
     
     cursor_sql = connec_sql.get_cursor()
 
@@ -51,7 +49,7 @@ def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomi
             if(temp_pdb_attempt == None):
                 temp_binnacle.insert_binnacle_pdb(cursor_sql)
                 connec_sql.commit()
-            elif(temp_pdb_attempt > attempt_pdb):
+            elif(temp_pdb_attempt > int(attemptPdb)):
                 continue
             else:
                 temp_binnacle.update_binnacle_pdb(cursor_sql)
@@ -132,19 +130,21 @@ def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomi
     connec_sql.commit()
     cursor_sql.close()
 
-def main(cathComplex, cathChain, cathDomain, atomic, initialAtomic, finalAtomic, atomicEmd):
-    
+def main(log, attemptPdb, cathComplex, cathChain, cathDomain, atomic, initialAtomic, finalAtomic, atomicEmd):
+    log_file = Log(log)  # open file in append mode
+    log_file.init_log_file(__file__)
+    log_file.generate_info_message(TypeMessage.MS1.value, TypeMessage.MS1.name)
+
     connec_ftp = FTP_connection()
     connec_ftp.init_connection()
     connec_sql = SQL_connection()
     connec_sql.init_connection()
 
-    update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomic, atomicEmd, initialAtomic, finalAtomic)
+    update_pdb(connec_ftp, connec_sql, attemptPdb, cathComplex, cathChain, cathDomain, atomic, atomicEmd, initialAtomic, finalAtomic)
 
     connec_sql.close_connection()
     connec_ftp.close_connection()
     print("Finish")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -153,7 +153,7 @@ if __name__ == "__main__":
         '-l',
         '--log',
         help='Log file name.',
-        default='log.txt')
+        default='updater.log')
 
     parser.add_argument(
         '-ia',
@@ -165,7 +165,11 @@ if __name__ == "__main__":
         '--finalAtomic',
         help='Final Atomic for execution (use "inf" for a complete execution).',
         default='inf')
-
+    parser.add_argument(
+        '-at',
+        '--attemptPdb',
+        help='Attempt Pdb coefficient. The number of tries for each pdb.',
+        default='2')
     required_arguments = parser.add_argument_group('required arguments')
     required_arguments.add_argument(
         '-cco',
@@ -209,11 +213,8 @@ if __name__ == "__main__":
         required=True)
     args = parser.parse_args()
 
-    log_file = Log(args.log)  # open file in append mode
-    log_file.init_log_file(__file__)
-    log_file.generate_info_message(TypeMessage.MS1.value, TypeMessage.MS1.name)
     ini = time()
-    main(args.cathComplex, args.cathChain, args.cathDomain, args.atomic, args.initialAtomic, args.finalAtomic, args.atomicEmd)
+    main(args.log, args.attemptPdb, args.cathComplex, args.cathChain, args.cathDomain, args.atomic, args.initialAtomic, args.finalAtomic, args.atomicEmd)
     final = time()
     ejec = final - ini
     print('Execution time:', ejec)
