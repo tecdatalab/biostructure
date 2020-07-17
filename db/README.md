@@ -53,10 +53,10 @@ The following are the necessary parameters to run the script `schedule_pdb.py`.
 ## Code Examples
 * To run emd script:
 ``` bat
-$ sudo python3 schedule_emd.py -ho 1 -a 2 -m c -i N -d Y -ie 1
+$ sudo python3 schedule_emd.py -ho 1 -a 2 -m c -i N -d Y -ie 1 -at 2
 ```
 
 * To run pdb script: 
 ``` bat
-$ sudo python3 schedule_pdb.py -a Y -cco Y -cc Y -cd Y -a Y -ae Y -am 200 -ia 1 -ho 1
+$ sudo python3 schedule_pdb.py -a Y -cco Y -cc Y -cd Y -a Y -ae Y -am 200 -ia 1 -ho 1 -at 2
 ```
