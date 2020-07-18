@@ -128,7 +128,7 @@ def downloadModels(models_path):
 
     print("%d number of maps not present" % len(emdb_not_found))
     print(emdb_not_found)
-    print("%d number of pdbs not present" % len(pdb_not_found)))
+    print("%d number of pdbs not present" % len(pdb_not_found))
     print(pdb_not_found)
 
     
