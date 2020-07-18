@@ -23,7 +23,7 @@ def main():
     #mapReader.open("../maps/5017/EMD-5017.map") #level 17.3347
 
     ## Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off ratios.
-    myMolecule = molecule.Molecule("../maps/1010/EMD-1010.map", recommendedContour=7)
+    myMolecule = molecule.Molecule("../maps/1010/EMD-1010.map", recommendedContour=7, cutoffRatios=[1,0.5])
     ## Segment EM map with parameters steps (3) and sigma (1)
     myMolecule.generateSegments(3,1)
     ## Get generated dictionary, with contour ratio as keys and composited numpy array with segment masks and labels
@@ -54,6 +54,9 @@ def main():
         segments_zd[key] = zd
 
     print(segments_zd)
+
+    volume = myMolecule.getVolume()
+    print("Approximate molecule volume in A^3 for each cutoff level ratio: ", volume)
 
 
 
