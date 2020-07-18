@@ -95,23 +95,28 @@ def downloadModels(models_path):
     emdb_list = df["emdb_rsync"].tolist()
     pdb_list = df["pdb_rsync"].tolist()
 
+    emdb_not_found = []
+    pdb_not_found = []
+
     try:
         for item in emdb_list:
             command_emdb = 'rsync -rlpt -v -z --delete --port=33444 '+ item  +' '+ models_path+'/'
-            print(command_emdb)
             if os.system(command_emdb) != 0:
                 raise Exception('Command "%s" does not exist' % command_emdb)
     except:
+        emdb_not_found.append(item)
         print('Command "%s" does not work' % command_emdb)
+        
 
     try:
         for item in pdb_list:
             command_pdb = 'rsync -rlpt -v -z -L --delete --port=33444 '+  item  +' '+ models_path+'/'
-            print(command_pdb)
             if os.system(command_pdb) != 0:
                 raise Exception('Command "%s" does not exist' % command_emdb)
     except:
+        pdb_not_found.append(item)
         print('Command "%s" does not work' % command_emdb)
+        
     
     try:
         command = 'gunzip ' +models_path+'/*.gz'
@@ -121,7 +126,11 @@ def downloadModels(models_path):
         print('Command "%s" does not work' % command)
     
 
-   
+    print("%d number of maps not present" % len(emdb_not_found)))
+    print(emdb_not_found)
+    print("%d number of pdbs not present" % len(pdb_not_found)))
+    print(pdb_not_found)
+
     
 
 
