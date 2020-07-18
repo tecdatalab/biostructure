@@ -98,25 +98,27 @@ def downloadModels(models_path):
     emdb_not_found = []
     pdb_not_found = []
 
-    try:
-        for item in emdb_list:
-            command_emdb = 'rsync -rlpt -v -z --delete --port=33444 '+ item  +' '+ models_path+'/'
+    
+    for item in emdb_list:
+        command_emdb = 'rsync -rlpt -v -z --delete --port=33444 '+ item  +' '+ models_path+'/'
+        try:
             if os.system(command_emdb) != 0:
                 raise Exception('Command "%s" does not exist' % command_emdb)
-    except:
-        emdb_not_found.append(item)
-        print('Command "%s" does not work' % command_emdb)
-        
+        except:
+            emdb_not_found.append(item)
+            print('Command "%s" does not work' % command_emdb)
+            
 
-    try:
-        for item in pdb_list:
-            command_pdb = 'rsync -rlpt -v -z -L --delete --port=33444 '+  item  +' '+ models_path+'/'
+
+    for item in pdb_list:
+        command_pdb = 'rsync -rlpt -v -z -L --delete --port=33444 '+  item  +' '+ models_path+'/'
+        try:
             if os.system(command_pdb) != 0:
                 raise Exception('Command "%s" does not exist' % command_emdb)
-    except:
-        pdb_not_found.append(item)
-        print('Command "%s" does not work' % command_emdb)
-        
+        except:
+            pdb_not_found.append(item)
+            print('Command "%s" does not work' % command_emdb)
+            
     
     try:
         command = 'gunzip ' +models_path+'/*.gz'
