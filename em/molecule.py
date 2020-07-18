@@ -95,7 +95,13 @@ class Molecule():
             else:
                 self.contour_maks[i,:] = self.data[i].ascontiguousarray('C') 
 
-
+    def getVolume(self):
+        volume_contour_dict = dict()
+        voxel_vol = self.emMap.voxelVol()
+        for i,cutoffRatio in enumerate(self.cutoffRatios):
+            mask_at_level = self.contour_masks[i,:]
+            volume_contour_dict[cutoffRatio] = np.sum(mask_at_level)*voxel_vol
+        return volume_contour_dict
 
 
 
