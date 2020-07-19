@@ -39,10 +39,18 @@ export class BiomoleculeVizualizerComponent implements OnInit {
     );
 
     this.stage.signals.clicked.add(this.click);
+    console.log(this.stage);
   }
 
   private click(PickingProxy: NGL.pickingProxy) {
-    console.log(PickingProxy);
+    console.log(
+      PickingProxy.picker.surface.center,
+      PickingProxy.stage.compList[0].position
+    );
+    //PickingProxy.picker.surface.center.x = 0;
+    //PickingProxy.picker.surface.center.y = 0;
+    //PickingProxy.picker.surface.center.z = 0;
+
     if (PickingProxy.mouse.shiftKey) {
       const pos = document.getElementById("text") as HTMLElement;
       pos.textContent = `x:${PickingProxy.mouse.canvasPosition.x}, y:${PickingProxy.mouse.canvasPosition.y}`;
