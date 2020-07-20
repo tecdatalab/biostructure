@@ -101,7 +101,7 @@ def downloadModels(models_path):
     pdb_not_found = []
 
     
-    for uri,name in zip(emdb_list, emdb_id_list):
+    for uri,name in zip(emdb_ftp_list, emdb_id_list):
         command_emdb = 'rsync -rlpt -v -z --delete --port=33444 '+ uri  +' '+ models_path+'/'
         try:
             if os.system(command_emdb) != 0:
@@ -112,7 +112,7 @@ def downloadModels(models_path):
             
 
 
-    for uri,name in zip(pdb_list, pdb_id_list):
+    for uri,name in zip(pdb_ftp_list, pdb_id_list):
         command_pdb = 'rsync -rlpt -v -z -L --delete --port=33444 '+  uri  +' '+ models_path+'/'
         try:
             if os.system(command_pdb) != 0:
@@ -121,14 +121,14 @@ def downloadModels(models_path):
             pdb_not_found.append(name)
             print('Command "%s" does not work' % command_pdb)
             
-    
+    ''' 
     try:
         command = 'gunzip ' +models_path+'/*.gz'
         if os.system(command) != 0:
             raise Exception('Command "%s" does not exist' % command)
     except:
         print('Command "%s" does not work' % command)
-    
+    '''
     #Get entries with missing pdb or map
     df['map_found'] = df["id"].map(lambda map_id: True if map_id in emdb_not_found.keys() else False)
     df['pdb_found'] = df["fitted_entries"].map(lambda pdb_id: True if pdb_id in pdb_not_found.keys() else False)
@@ -136,8 +136,8 @@ def downloadModels(models_path):
     df_map_not_found = df[df["map_found"]==False]
     df_pdb_not_found = df[df["pdb_found"]==False]
 
-    df_map_not_found.to_csv(('emdb_not_found.csv', index=False))
-    df_pdb_not_found.to_csv(('pdb_not_found.csv', index=False))
+    df_map_not_found.to_csv('emdb_not_found.csv', index=False)
+    df_pdb_not_found.to_csv('pdb_not_found.csv', index=False)
     df.to_csv('dataset_metadata.csv', index=False)
 
     number_of_samples = len( df[ df['map_found'] == True & df['pdb_found'] == True ].index )
