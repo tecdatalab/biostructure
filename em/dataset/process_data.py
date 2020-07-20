@@ -154,7 +154,9 @@ def downloadModels(models_path):
 
 
 
-def generateMapAndCompareVolume(index, df):
+def generateMapAndCompareVolume(index, df, sim_model_path):
+    if not os.path.exists(sim_model_path):
+        os.makedirs(sim_model_path)
     map_filename = df.at[df.index[index], 'map_file']
     pdb_filename = df.at[df.index[index], 'pdb_file']
     res = df.at[df.index[index], 'resolution']
@@ -169,17 +171,19 @@ def generateMapAndCompareVolume(index, df):
     # Get map bounding box
     map_box = map_object.getCellDim()
 
+    simulated_filename = os.path.join(sim_model_path, 'sim_'+os.path.basename(map_filename))
     # Generate map
     try:
         command = 'e2pdb2mrc.py -A ' + str(voxel_volume)+ ' -R=' + str(res) + ' -B='+ str(map_box[2]) +','+ str(map_box[1])
-        + ','+ str(map_box[0]) + ' '+  pdb_filename +' sim_'+ map_filename
+        + ','+ str(map_box[0]) + ' '+  pdb_filename + ' ' + simulated_filename
+        print(command)
         if os.system(command) != 0:
             raise Exception('Command "%s" does not exist' % command)
     except:
         print('Command "%s" does not work' % command)
 
     # Get simulated map volume
-    map_object = molecule.Molecule('sim'+map_filename, recommendedContour=contourLevel, cutoffRatios=[1])
+    map_object = molecule.Molecule(simulated_filename, recommendedContour=contourLevel, cutoffRatios=[1])
     # Get dictionary of volumes, choose element with key 1 (corresponding to 100% recommended contour level)
     pdb_volume = map_object.getVolume()[1]
 
@@ -196,13 +200,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--d', required=True, default=False, help='True if want to resync emdb data')
     parser.add_argument('--v', required=True, default=False, help='True if want to compare map volume with its simulated counterpart')
-    parser.add_argument('--header_dir', default='header', required=True,help='output directory to store emdb headers') 
-    parser.add_argument('--models_dir', default='models', required=True, help='output directory to store emdb models') 
+    parser.add_argument('--header_dir', default='header', required=False,help='output directory to store emdb headers') 
+    parser.add_argument('--models_dir', default='models', required=False, help='output directory to store emdb models') 
+    parser.add_argument('--simulated_dir', default='simulated', required=False, help='output directory to store simulated maps') 
 
     opt = parser.parse_args()
     current_dir = os.getcwd()
     header_path = os.path.join(current_dir, opt.header_dir)
     models_path = os.path.join(current_dir, opt.models_dir)
+    simulated_path = os.path.join(current_dir, opt.simulated_dir)
     print(models_path)
     print(header_path)
     if int(opt.d):
@@ -214,13 +220,13 @@ def main():
         df = pd.read_csv('./dataset_metadata.csv')
         df_volume = df[['id', 'fitted_entries', 'resolution','contourLevel']].copy()
         #add filename columns for each downloaded file
-        df_volume["fitted_entries"] = df["fitted_entries"].map(lambda pdb_name: 'pdb'+pdb_name+'.ent')
-        df_volume["id"] = df["id"].map(lambda pdb_name: 'pdb'+pdb_name+'.ent')
+        df_volume["fitted_entries"] = df["fitted_entries"].map(lambda pdb_name: os.path.join(models_path,'pdb'+pdb_name+'.ent'))
+        df_volume["id"] = df["id"].map(lambda map_name: os.path.join(models_path,map_name.replace("-","_"))
         df_volume.rename(columns = {'fitted_entries':'pdb_file', 'id':'map_file'})
         index_list = df_volume.index.tolist()
         print("Spawn procecess...")
         with MPIPoolExecutor() as executor:
-            volume_ddict = executor.map(simulateMapAndCompareVolume, index_list, df_volume)
+            volume_ddict = executor.map(simulateMapAndCompareVolume, index_list, df_volume, simulated_path)
         df_volume['map_volume'] = df_volume.index.map(lambda index: volume_ddict[index]['map_volume'])
         df_volume['pdb_volume'] = df_volume.index.map(lambda index: volume_ddict[index]['pdb_volume'])
         df_volume.to_csv('dataset_volume.csv', index=False)
