@@ -3,6 +3,8 @@ import os
 from glob import glob
 from xml.etree import ElementTree
 import argparse
+import molecule
+from mpi4py.futures import MPIPoolExecutor
 
 
 
@@ -121,14 +123,14 @@ def downloadModels(models_path):
             pdb_not_found.append(name)
             print('Command "%s" does not work' % command_pdb)
             
-    ''' 
+    
     try:
         command = 'gunzip ' +models_path+'/*.gz'
         if os.system(command) != 0:
             raise Exception('Command "%s" does not exist' % command)
     except:
         print('Command "%s" does not work' % command)
-    '''
+    
     #Get entries with missing pdb or map
     df['map_found'] = df["id"].map(lambda map_id: True if map_id in emdb_not_found.keys() else False)
     df['pdb_found'] = df["fitted_entries"].map(lambda pdb_id: True if pdb_id in pdb_not_found.keys() else False)
@@ -138,9 +140,12 @@ def downloadModels(models_path):
 
     df_map_not_found.to_csv('emdb_not_found.csv', index=False)
     df_pdb_not_found.to_csv('pdb_not_found.csv', index=False)
+
+    indexes_to_remove = df[ df['map_found'] == False | df['pdb_found'] == False ].index
+    df = df.drop(indexes_to_remove)
     df.to_csv('dataset_metadata.csv', index=False)
 
-    number_of_samples = len( df[ df['map_found'] == True & df['pdb_found'] == True ].index )
+    number_of_samples = len( df.index )
    
     print("{} candidates for dataset".format(len(df.index)))
     print("{} maps not found".format( len(emdb_not_found)))
@@ -148,6 +153,37 @@ def downloadModels(models_path):
 
 
 
+
+def generateMapAndCompareVolume(index, df):
+    map_filename = df.at[df.index[index], 'map_file']
+    pdb_filename = df.at[df.index[index], 'pdb_file']
+    res = df.at[df.index[index], 'resolution']
+    contourLevel = df.at[df.index[index], 'contourLevel']
+
+    # Get map volume
+    map_object = molecule.Molecule(map_filename, recommendedContour=contourLevel, cutoffRatios=[1])
+    # Get dictionary of volumes, choose element with key 1 (corresponding to 100% recommended contour level)
+    map_volume = map_object.getVolume()[1]
+    # Get voxel volume to generate simulated map 
+    voxel_volume = map_object.getVoxelVol()
+    # Get map bounding box
+    map_box = map_object.getCellDim()
+
+    # Generate map
+    try:
+        command = 'e2pdb2mrc.py -A ' + str(voxel_volume)+ ' -R=' + str(res) + ' -B='+ str(map_box[2]) +','+ str(map_box[1])
+        + ','+ str(map_box[0]) + ' '+  pdb_filename +' sim_'+ map_filename
+        if os.system(command) != 0:
+            raise Exception('Command "%s" does not exist' % command)
+    except:
+        print('Command "%s" does not work' % command)
+
+    # Get simulated map volume
+    map_object = molecule.Molecule('sim'+map_filename, recommendedContour=contourLevel, cutoffRatios=[1])
+    # Get dictionary of volumes, choose element with key 1 (corresponding to 100% recommended contour level)
+    pdb_volume = map_object.getVolume()[1]
+
+    return {'map_volume':map_volume,'pdb_volume':pdb_volume}
 
     
 
@@ -159,6 +195,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--d', required=True, default=False, help='True if want to resync emdb data')
+    parser.add_argument('--v', required=True, default=False, help='True if want to compare map volume with its simulated counterpart')
     parser.add_argument('--header_dir', default='header', required=True,help='output directory to store emdb headers') 
     parser.add_argument('--models_dir', default='models', required=True, help='output directory to store emdb models') 
 
@@ -171,8 +208,28 @@ def main():
     if int(opt.d):
         get_headers(header_path)
         generate_dataframe(header_path)
-    processMetadata()
-    downloadModels(models_path)
+        processMetadata()
+        downloadModels(models_path)
+    elif int(opt.v)
+        df = pd.read_csv('./dataset_metadata.csv')
+        df_volume = df[['id', 'fitted_entries', 'resolution','contourLevel']].copy()
+        #add filename columns for each downloaded file
+        df_volume["fitted_entries"] = df["fitted_entries"].map(lambda pdb_name: 'pdb'+pdb_name+'.ent')
+        df_volume["id"] = df["id"].map(lambda pdb_name: 'pdb'+pdb_name+'.ent')
+        df_volume.rename(columns = {'fitted_entries':'pdb_file', 'id':'map_file'})
+        index_list = df_volume.index.tolist()
+
+        with MPIPoolExecutor() as executor:
+            volume_ddict = executor.map(simulateMapAndCompareVolume, index_list, df_volume)
+        df_volume['map_volume'] = df_volume.index.map(lambda index: volume_ddict[index]['map_volume'])
+        df_volume['pdb_volume'] = df_volume.index.map(lambda index: volume_ddict[index]['pdb_volume'])
+        df_volume.to_csv('dataset_volume.csv', index=False)
+
+
+            
+            
+
+
         
 
 
