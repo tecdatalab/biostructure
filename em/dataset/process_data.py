@@ -132,8 +132,8 @@ def downloadModels(models_path):
         print('Command "%s" does not work' % command)
     
     #Get entries with missing pdb or map
-    df['map_found'] = df["id"].map(lambda map_id: True if map_id in emdb_not_found.keys() else False)
-    df['pdb_found'] = df["fitted_entries"].map(lambda pdb_id: True if pdb_id in pdb_not_found.keys() else False)
+    df['map_found'] = df["id"].map(lambda map_id: True if map_id in emdb_not_found else False)
+    df['pdb_found'] = df["fitted_entries"].map(lambda pdb_id: True if pdb_id in pdb_not_found else False)
     
     df_map_not_found = df[df["map_found"]==False]
     df_pdb_not_found = df[df["pdb_found"]==False]
