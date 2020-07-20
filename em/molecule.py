@@ -103,6 +103,9 @@ class Molecule():
             volume_contour_dict[cutoffRatio] = np.sum(mask_at_level)*voxel_vol
         return volume_contour_dict
 
+    def getVoxelVol(self):
+        return self.emMap.voxelVol()
+
 
 
                 
