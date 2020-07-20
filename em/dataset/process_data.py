@@ -141,7 +141,7 @@ def downloadModels(models_path):
     df_map_not_found.to_csv('emdb_not_found.csv', index=False)
     df_pdb_not_found.to_csv('pdb_not_found.csv', index=False)
 
-    indexes_to_remove = df[ df['map_found'] == False | df['pdb_found'] == False ].index
+    indexes_to_remove = df[ (df['map_found'] == False) | (df['pdb_found'] == False) ].index
     df = df.drop(indexes_to_remove)
     df.to_csv('dataset_metadata.csv', index=False)
 
@@ -218,7 +218,7 @@ def main():
         df_volume["id"] = df["id"].map(lambda pdb_name: 'pdb'+pdb_name+'.ent')
         df_volume.rename(columns = {'fitted_entries':'pdb_file', 'id':'map_file'})
         index_list = df_volume.index.tolist()
-
+        print("Spawn procecess...")
         with MPIPoolExecutor() as executor:
             volume_ddict = executor.map(simulateMapAndCompareVolume, index_list, df_volume)
         df_volume['map_volume'] = df_volume.index.map(lambda index: volume_ddict[index]['map_volume'])
