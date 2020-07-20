@@ -3,9 +3,11 @@ import os
 from glob import glob
 from xml.etree import ElementTree
 import argparse
+import sys
+sys.path.append('..')
 import molecule
 from mpi4py.futures import MPIPoolExecutor
-
+import subprocess
 
 
 # Get headers into folder
@@ -154,7 +156,7 @@ def downloadModels(models_path):
 
 
 
-def generateMapAndCompareVolume(index, df, sim_model_path):
+def simulateMapAndCompareVolume(index, df, sim_model_path):
     if not os.path.exists(sim_model_path):
         os.makedirs(sim_model_path)
     map_filename = df.at[df.index[index], 'map_file']
@@ -174,7 +176,7 @@ def generateMapAndCompareVolume(index, df, sim_model_path):
     simulated_filename = os.path.join(sim_model_path, 'sim_'+os.path.basename(map_filename))
     # Generate map
     try:
-        command = 'e2pdb2mrc.py -A ' + str(voxel_volume)+ ' -R=' + str(res) + ' -B='+ str(map_box[2]) +','+ str(map_box[1])
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A ' + str(voxel_volume)+ ' -R=' + str(res) + ' -B='+ str(map_box[2]) +','+ str(map_box[1])
         + ','+ str(map_box[0]) + ' '+  pdb_filename + ' ' + simulated_filename
         print(command)
         if os.system(command) != 0:
@@ -187,7 +189,7 @@ def generateMapAndCompareVolume(index, df, sim_model_path):
     # Get dictionary of volumes, choose element with key 1 (corresponding to 100% recommended contour level)
     pdb_volume = map_object.getVolume()[1]
 
-    return {'map_volume':map_volume,'pdb_volume':pdb_volume}
+    return {'index':index, 'map_volume':map_volume, 'pdb_volume':pdb_volume}
 
     
 
@@ -216,26 +218,30 @@ def main():
         generate_dataframe(header_path)
         processMetadata()
         downloadModels(models_path)
-    elif int(opt.v)
+    elif int(opt.v):
         df = pd.read_csv('./dataset_metadata.csv')
         df_volume = df[['id', 'fitted_entries', 'resolution','contourLevel']].copy()
         #add filename columns for each downloaded file
         df_volume["fitted_entries"] = df["fitted_entries"].map(lambda pdb_name: os.path.join(models_path,'pdb'+pdb_name+'.ent'))
-        df_volume["id"] = df["id"].map(lambda map_name: os.path.join(models_path,map_name.replace("-","_"))
-        df_volume.rename(columns = {'fitted_entries':'pdb_file', 'id':'map_file'})
+        df_volume["id"] = df["id"].map(lambda map_name: os.path.join(models_path,map_name.replace("-","_")+'.map'))
+        df_volume.rename(columns = {'fitted_entries' : 'pdb_file', 'id' : 'map_file'}, inplace=True)
         index_list = df_volume.index.tolist()
         print("Spawn procecess...")
-        with MPIPoolExecutor() as executor:
-            volume_ddict = executor.map(simulateMapAndCompareVolume, index_list, df_volume, simulated_path)
-        df_volume['map_volume'] = df_volume.index.map(lambda index: volume_ddict[index]['map_volume'])
-        df_volume['pdb_volume'] = df_volume.index.map(lambda index: volume_ddict[index]['pdb_volume'])
-        df_volume.to_csv('dataset_volume.csv', index=False)
+        #with MPIPoolExecutor() as executor:
+        #    result = executor.map(simulateMapAndCompareVolume, index_list, df_volume, simulated_path)
+        #for d in result:
+        #    res_index = d['index']
+        #    pdb_volume = d['pdb_volume']
+        #    map_volume = d['map_volume']
+        #    df_volume[res_index]['map_volume'] = map_volume
+        #    df_volume[res_index]['pdb_volume'] = pdb_volume
+
+        res = simulateMapAndCompareVolume(index_list[0],df_volume,simulated_path)
+        print(res)
+        #df_volume.to_csv('dataset_volume.csv', index=False)
 
 
-            
-            
-
-
+       
         
 
 
