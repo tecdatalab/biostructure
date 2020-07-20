@@ -8,6 +8,7 @@ from process_graph.process_segment_faces import get_n_points_cube
 import networkx as nx
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 
 def generate_graph(segments, n_points_face, filter_value, max_distance, min_points):
     face_points = {}
@@ -126,6 +127,27 @@ def draw_graph_similarity_same_image(graph1, graph2, result):
 
     plt.show()
 
+def get_similarity_complete_cloud(graph1, graph2, similary):
+    list_points_graph1 = []
+    list_points_graph2 = []
+    for i in similary:
+        for k in graph1:
+            if k.id_segment == i[0]:
+                x,y,z = np.where(k.mask>0)
+                for w in range(len(x)):
+                    list_points_graph1.append([x[w],y[w],z[w]])
+                print(len(x))
+                break
+        for k in graph2:
+            if k.id_segment == i[1]:
+                x,y,z = np.where(k.mask>0)
+                for w in range(len(x)):
+                    list_points_graph2.append([x[w],y[w],z[w]])
+                break
+    
+    
+    
+    return (np.array(list_points_graph1),np.array(list_points_graph2))
 
 
 
