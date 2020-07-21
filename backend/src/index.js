@@ -15,6 +15,7 @@ const searchHistoryRoutes = require("./routes/searchHistory");
 const statistics = require("./routes/statistics");
 const parameters = require("./routes/parameters");
 const update = require("./routes/update");
+const visualizer = require("./routes/visualizer")
 
 //settings
 app.set("port", process.env.PORT || 3000);
@@ -49,6 +50,7 @@ app.use("/history", searchHistoryRoutes);
 app.use("/statistics", statistics);
 app.use("/parameters", parameters);
 app.use("/update", update);
+app.use("/visualizer", visualizer)
 
 //public routes
 app.use("/img", express.static("public/img"));

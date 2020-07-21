@@ -164,4 +164,9 @@
     margin: 2% 2%;
   }
 
+  .visualizer-fix{
+    position: relative;
+    right: 3%;
+  }
+
 }

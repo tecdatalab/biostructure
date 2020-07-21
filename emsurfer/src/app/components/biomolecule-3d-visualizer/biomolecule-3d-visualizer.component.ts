@@ -12,46 +12,38 @@ import { importExpr } from '@angular/compiler/src/output/output_ast';
 export class BiomoleculeVizualizerComponent implements OnInit {
 
   stage = null;
-  structuresToLoads = null;
-  structureToShow = [];
+  structureToShow = null;
 
-  constructor(private BiomoleculeVisualizerService: BiomoleculeVisualizerService) { 
-    // request for the structures file to be show
-    var optionToLoad = 7;
-    this.structuresToLoads = this.BiomoleculeVisualizerService.getTestStructures(optionToLoad);  // call to get the files
-    Object.keys(this.structuresToLoads).forEach(item => {
-      this.structureToShow.push(this.structuresToLoads[item]);
-    });
-    console.log(this.structureToShow);
-  }
+  constructor(private BiomoleculeVisualizerService: BiomoleculeVisualizerService) { }
 
   delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   ngOnInit() {
-
     var temp_delay = 400;   // delay time between loading files
     this.stage = new NGL.Stage("viewport", { theme: "dark" });    // stage where NGL will work
     this.stage.signals.clicked.add(this.click);   // definition of click Picking Proxy to interact
-    
-    // foreach to load and assaing properties
-    Object.keys(this.structuresToLoads).forEach(item => {
-      var structure = this.structuresToLoads[item];
-      this.stage.loadFile(structure.path)
-        .then(function (object) {
-          if (structure.file_type == 0) {
-            object.addRepresentation("cartoon", { color: structure.color });
-          } else {
-            object.addRepresentation("surface", { color: structure.color });
-          }
-          object.autoView();
-        });
-      this.delay(temp_delay)
-    })
-
-
-
+    // request for the structures file to be show
+    var optionToLoad = 7;
+    this.BiomoleculeVisualizerService.getTestStructures(optionToLoad)
+      .then((structures: Promise<any>) => {
+        this.structureToShow = structures;
+        // foreach to load and assaing properties
+        Object.keys(structures).forEach(item => {
+          var structure = structures[item];
+          this.stage.loadFile(structure.path)
+            .then(function (object) {
+              if (structure.file_type == 0) {
+                object.addRepresentation("cartoon", { color: structure.color });
+              } else {
+                object.addRepresentation("surface", { color: structure.color });
+              }
+              object.autoView();
+            });
+          this.delay(temp_delay)
+        })
+      });  // call to get the files
   }
 
   private click(PickingProxy: NGL.pickingProxy) {
@@ -66,7 +58,7 @@ export class BiomoleculeVizualizerComponent implements OnInit {
     var z = PickingProxy.controls.viewer.camera.far;
 
     var shape = new NGL.Shape("shape");
-    shape.addSphere([canvasPosition.x, canvasPosition.y, canvasPosition.z], [ 1, 0, 0 ], 10);
+    shape.addSphere([canvasPosition.x, canvasPosition.y, canvasPosition.z], [1, 0, 0], 10);
     var shapeComp = PickingProxy.stage.addComponentFromObject(shape);
     shapeComp.addRepresentation("buffer");
     shapeComp.autoView();
@@ -74,7 +66,7 @@ export class BiomoleculeVizualizerComponent implements OnInit {
   }
 
 
-  getBackgroundColor(item){
+  getBackgroundColor(item) {
     return item.color;
   }
 }
