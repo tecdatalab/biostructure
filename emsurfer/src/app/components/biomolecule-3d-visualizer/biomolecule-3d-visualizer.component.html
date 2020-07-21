@@ -1,3 +1,38 @@
 <div class="container">
-    <p> Welcome to the 3D Biomolecule Visualizer </p>
+    <div class="row row-fix">
+        <div class="col-12">
+            <div class="row">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-2">
+                                <img src="assets/img/surfer.png" width="55" height="55" class="rounded-circle"/>
+                            </div>
+                            <div class="col-10">
+                                <h3 class="text-primary header-text-fix">3D visualizer</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row panel_view">
+                            <div class="col-8" id="viewport"></div>
+                            <div class="col-4">
+                                <div class="segments_controls">
+                                    <div *ngFor="let item of structureToShow; let i = index">
+                                        <div class="segment_bar">
+                                            <div class="color_marker" [style.background-color]="getBackgroundColor(item)"></div>
+                                            
+                                            <div> {{item.name}} </div>
+
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
