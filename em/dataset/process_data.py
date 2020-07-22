@@ -6,7 +6,8 @@ import argparse
 import sys
 sys.path.append('..')
 import molecule
-from mpi4py.futures import MPIPoolExecutor
+from mpi4py import MPI
+from mpi4py.futures import MPICommExecutor
 import subprocess
 
 
@@ -226,16 +227,22 @@ def main():
         df_volume.rename(columns = {'fitted_entries' : 'pdb_file', 'id' : 'map_file'}, inplace=True)
         index_list = df_volume.index.tolist()
         print("Spawn procecess...")
-        with MPIPoolExecutor() as executor:
-            result = executor.map(simulateMapAndCompareVolume, index_list, df_volume, simulated_path)
-        for d in result:
-            res_index = d['index']
-            pdb_volume = d['pdb_volume']
-            map_volume = d['map_volume']
-            df_volume[res_index]['map_volume'] = map_volume
-            df_volume[res_index]['pdb_volume'] = pdb_volume
+        size = MPI.Comm.Get_size()
+        with MPICommExecutor(MPI.COMM_WORLD, root=0, worker_size=size) as executor:
+            if executor is not none:
+                
+                futures = []
+                for i in index:
+                    futures.append(executor.submit(simulateMapAndCompareVolume, i, df_volume, simulated_path))
+            
+                res_index = d['index']
+                pdb_volume = d['pdb_volume']
+                map_volume = d['map_volume']
+                df_volume[res_index]['map_volume'] = map_volume
+                df_volume[res_index]['pdb_volume'] = pdb_volume
+                df_volume.to_csv('dataset_volume.csv', index=False)
 
-        df_volume.to_csv('dataset_volume.csv', index=False)
+        
 
 
        
