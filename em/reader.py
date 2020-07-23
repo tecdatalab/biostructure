@@ -49,98 +49,61 @@
   57-256	LABEL(20,10) 10 80-character text labels
  
  '''
-
 import struct
 import array
 import numpy as np
 import os.path
 
 import emMap
+import mrcfile
 
 class Reader():
-    #Header size in bytes
-    HEADER_SIZE = 1024
     
-    def open(self, filename):
+    def open(self, filepath):
         try:
-            with open(filename, 'rb') as mrc_file:
-                mrc_buffer = mrc_file.read()
-        except IOError as err:
+            map_object = mrcfile.open(filepath)
+        except ValueError as err:
             print("[ERROR]: Could not open MRC file", err)
             raise err
-        self.mrc_header = mrc_buffer[0:self.HEADER_SIZE]
-        self.is_endianness_reversed = self.test_and_set_endianness()
-        self.mrc_data = mrc_buffer[self.HEADER_SIZE:]
-        self.filename = os.path.splitext(os.path.basename(filename))[0]
+        self.map = map_object
+        self.header = self.map.header.flat[0]
+
+        for h in self.header:
+            print(h)
+
+        self.filename = os.path.splitext(os.path.basename(filepath))[0]
         
     def read(self):
         #Read number of collumns(x), rows(y) and sections(z)
-        nx = self.read_header_word(self.mrc_header[0:4])
-        ny = self.read_header_word(self.mrc_header[4:8])
-        nz = self.read_header_word(self.mrc_header[8:12])
-        self.mode = self.read_header_word(self.mrc_header[12:16])
-        if (self.mode > 2):
-            print("Only map modes 0, 1 and 2 are supported. Mode %d found" % self.mode)
-            raise ValueError
+        nx = self.header[0]
+        ny = self.header[1]
+        nz = self.header[2]
+        self.mode = self.header[3]
         #Read start x, y, z positions
-        nxstart = self.read_header_word(self.mrc_header[16:20])
-        nystart = self.read_header_word(self.mrc_header[20:24])
-        nzstart = self.read_header_word(self.mrc_header[24:28])
+        nxstart = self.header[4]
+        nystart = self.header[5]
+        nzstart = self.header[6]
         #Read grid size
-        mx = self.read_header_word(self.mrc_header[28:32])
-        my = self.read_header_word(self.mrc_header[32:36])
-        mz = self.read_header_word(self.mrc_header[36:40])
+        mx = self.header[7]
+        my = self.header[8]
+        mz = self.header[9]
         #Read cell dimensions
-        xlen = self.read_header_float(self.mrc_header[40:44])
-        ylen = self.read_header_float(self.mrc_header[44:48])
-        zlen = self.read_header_float(self.mrc_header[48:52])
+        (xlen, ylen, zlen) = self.header[10]
         #Skip 3 cell angle words and the 3 words corresponding to axes
         #Read density ranges
-        dmin = self.read_header_float(self.mrc_header[76:80])
-        dmax = self.read_header_float(self.mrc_header[80:84])
-        dmean = self.read_header_float(self.mrc_header[84:88])
+        (dmin, dmax, dmean) = self.header[11]
+        #axis order
+        x = self.header[12]
+        y = self.header[13]
+        z = self.header[14]
         #Read origin
-        xorigin = self.read_header_float(self.mrc_header[196:200])
-        yorigin = self.read_header_float(self.mrc_header[200:204])
-        zorigin = self.read_header_float(self.mrc_header[204:208])
+        (xorigin, yorigin, zorigin) = self.header[24]
         #Read densities
-        densities = self.read_densities((nz, ny, nx))
+        densities = self.map.data
         #Generate Molecule object with parameters
-        return emMap.EMMap(self.mrc_header, densities,  (nz, ny, nx), (nzstart, nystart, nxstart), (mz, my, mx), (zlen, ylen, xlen), (dmin, dmax, dmean), (zorigin, yorigin, xorigin), self.filename)
+        return emMap.EMMap(self.header, densities,  (nz, ny, nx), (nzstart, nystart, nxstart), (mz, my, mx), (zlen, ylen, xlen), (dmin, dmax, dmean), (zorigin, yorigin, xorigin), (x,y,z), self.filename)
             
-    def test_and_set_endianness(self):
-        regular_nx = struct.unpack('<I', self.mrc_header[0:4])
-        reversed_nx = struct.unpack('>I', self.mrc_header[0:4])
-        return reversed_nx < regular_nx
-
-    def read_header_word(self,buffer):
-        if self.is_endianness_reversed:
-            return struct.unpack('>I', buffer)[0]
-        else: 
-            return struct.unpack('<I', buffer)[0]
-
-    def read_header_float(self,buffer):
-        if self.is_endianness_reversed:
-            return struct.unpack('>f', buffer)[0]
-        else: 
-            return struct.unpack('<f', buffer)[0]
-
-
-    def read_densities(self, shape):
-        if self.is_endianness_reversed:
-            endianness = '>'
-        else:
-            endianness = '<'
-        if self.mode == 0:
-            dt = np.dtype(np.int8)
-        if self.mode == 1:
-            dt = np.dtype(np.int16)
-        if self.mode == 2:
-            dt = np.dtype(np.float32)
-        dt = dt.newbyteorder(endianness)
-        density_array =  np.frombuffer(self.mrc_data, dtype=dt)
-        data_array = density_array.reshape(shape).transpose(2,1,0).astype(float)
-        return data_array
+   
 
 '''
 filename = "../../emd_2847.map"
