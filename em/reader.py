@@ -67,10 +67,6 @@ class Reader():
             raise err
         self.map = map_object
         self.header = self.map.header.flat[0]
-
-        for h in self.header:
-            print(h)
-
         self.filename = os.path.splitext(os.path.basename(filepath))[0]
         
     def read(self):
@@ -99,7 +95,7 @@ class Reader():
         #Read origin
         (xorigin, yorigin, zorigin) = self.header[24]
         #Read densities
-        densities = self.map.data
+        densities = np.copy(self.map.data)
         #Generate Molecule object with parameters
         return emMap.EMMap(self.header, densities,  (nz, ny, nx), (nzstart, nystart, nxstart), (mz, my, mx), (zlen, ylen, xlen), (dmin, dmax, dmean), (zorigin, yorigin, xorigin), (x,y,z), self.filename)
             
