@@ -55,15 +55,20 @@ def main():
 
     print(segments_zd)
 
+
+    #Get volume of molecule
     volume = myMolecule.getVolume()
     print("Approximate molecule volume in A^3 for each cutoff level ratio: ", volume)
+    #Get volume of segments
+    segments_volume = myMolecule.getSegmentsVolume()
+    print("Approximate molecule volume in A^3 for each cutoff level ratio, for each segment label: ", segments_volume)
 
 
 
     # Create visualizer with a map surface threshold level
     # Otherwise use otsu threshold
 
-    v1= visualizer.Visualizer(myMolecule.getEmMap().data(), 7, myMolecule.labels)
+    #v1= visualizer.Visualizer(myMolecule.getEmMap().data(), 7, myMolecule.labels)
     #
     # Watershed 
 
@@ -83,7 +88,7 @@ def main():
     #v2.add_structure("../maps/pdb6acf.ent")
     #v3.add_structure("../maps/pdb6acf.ent")
 
-    v1.show()
+    #v1.show()
     #v2.show()
     #v3.show()
 
