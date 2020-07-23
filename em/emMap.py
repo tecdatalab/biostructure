@@ -2,7 +2,7 @@ import numpy as np
 
 class EMMap():
 
-    def __init__(self, rawHeader, data, size, start, grid_size, cell_dim, density_ranges, origin, name):
+    def __init__(self, rawHeader, data, size, start, grid_size, cell_dim, density_ranges, origin, axis_order, name):
         self.rawHeader = rawHeader
         self.array = data
         self.name = name
@@ -12,6 +12,7 @@ class EMMap():
         (self.zlen, self.ylen, self.xlen) = cell_dim
         (self.zorigin, self.yorigin, self.xorigin) = origin
         (self.dmin, self.dmax, self.dmean) = density_ranges
+        self.axis_order = axis_order
         self.voxel_size = tuple(int(i/j) for i,j in zip(self.cell_dim(), self.grid_size()))
         
 
