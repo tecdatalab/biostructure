@@ -116,6 +116,9 @@ class Molecule():
     def getVoxelVol(self):
         return self.emMap.voxelVol()
 
+    def getVoxelSize(self):
+        return self.emMap.voxelSize()
+
 
 
                 
