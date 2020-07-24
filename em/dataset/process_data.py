@@ -169,6 +169,8 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
     map_volume = map_object.getVolume()[1]
     # Get voxel volume to generate simulated map 
     voxel_volume = map_object.getVoxelVol()
+    if voxel_volume == 0:
+        print("Map {} has voxel volume of 0, header is: \n {}".format(os.path.basename(map_filename), map_object.emMap.rawHeader))
     # Get map bounding box
     map_box = map_object.getCellDim()
 
