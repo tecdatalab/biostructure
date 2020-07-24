@@ -102,28 +102,23 @@ def downloadModels(models_path):
     emdb_id_list = df["id"].tolist()
     pdb_id_list = df["fitted_entries"].tolist()
 
-    emdb_not_found = []
-    pdb_not_found = []
-
     
     for uri,name in zip(emdb_ftp_list, emdb_id_list):
-        command_emdb = 'rsync -rlpt -v -z --delete --port=33444 '+ uri  +' '+ models_path+'/'
+        command_emdb = 'rsync -rlpt --ignore-existing -v -z --delete --port=33444 '+ uri  +' '+ models_path+'/'
         try:
             if os.system(command_emdb) != 0:
                 raise Exception('Command "%s" does not exist' % command_emdb)
         except:
-            emdb_not_found.append(name)
             print('Command "%s" does not work' % command_emdb)
             
 
 
     for uri,name in zip(pdb_ftp_list, pdb_id_list):
-        command_pdb = 'rsync -rlpt -v -z -L --delete --port=33444 '+  uri  +' '+ models_path+'/'
+        command_pdb = 'rsync -rlpt --ignore-existing -v -z -L --delete --port=33444 '+  uri  +' '+ models_path+'/'
         try:
             if os.system(command_pdb) != 0:
                 raise Exception('Command "%s" does not exist' % command_pdb)
         except:
-            pdb_not_found.append(name)
             print('Command "%s" does not work' % command_pdb)
             
     
@@ -134,9 +129,12 @@ def downloadModels(models_path):
     except:
         print('Command "%s" does not work' % command)
     
+    print("Scanning existing models..")
+    pdb_files = [os.path.basename(f) for f in glob(os.path.join(models_path,'*.ent'))]
+    map_files = [os.path.basename(f) for f in glob(os.path.join(models_path,'*.map'))]
     #Get entries with missing pdb or map
-    df['map_found'] = df["id"].map(lambda map_id: True if map_id in emdb_not_found else False)
-    df['pdb_found'] = df["fitted_entries"].map(lambda pdb_id: True if pdb_id in pdb_not_found else False)
+    df['map_found'] = df["id"].map(lambda map_id: True if map_id.replace('-','_')+'.map' in map_files else False)
+    df['pdb_found'] = df["fitted_entries"].map(lambda pdb_id: True if 'pdb'+pdb_id+'.ent' in pdb_files else False)
     
     df_map_not_found = df[df["map_found"]==False]
     df_pdb_not_found = df[df["pdb_found"]==False]
@@ -151,8 +149,8 @@ def downloadModels(models_path):
     number_of_samples = len( df.index )
    
     print("{} candidates for dataset".format(len(df.index)))
-    print("{} maps not found".format( len(emdb_not_found)))
-    print("{} pdbs not found".format(len(pdb_not_found)))
+    print("{} maps not found".format(len(df_map_not_found.index)))
+    print("{} pdbs not found".format(len(df_pdb_not_found.index)))
 
 
 
@@ -177,19 +175,27 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
     simulated_filename = os.path.join(sim_model_path, 'sim_'+os.path.basename(map_filename).replace('.map','.mrc'))
     # Generate map
     try:
-        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A ' + str(voxel_volume)+ ' -R=' + str(res) + ' -B='+ str(int(round(map_box[2]))) +','+ str(int(round(map_box[1])))+ ','+ str(int(round(map_box[0]))) + ' --center '+  pdb_filename + ' ' + simulated_filename
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=' + str(voxel_volume)+ ' -R=' + str(res) + ' -B='+ str(int(round(map_box[2]))) +','+ str(int(round(map_box[1])))+ ','+ str(int(round(map_box[0]))) + ' --center '+  pdb_filename + ' ' + simulated_filename
         print(command)
         if os.system(command) != 0:
             raise Exception('Command "%s" does not exist' % command)
     except:
         print('Command "%s" does not work' % command)
 
+    volume_result = dict()
+    volume_result['index']=index
+    volume_result['map_volume']=map_volume
+    
     # Get simulated map volume
-    map_object = molecule.Molecule(simulated_filename, recommendedContour=contourLevel, cutoffRatios=[1])
-    # Get dictionary of volumes, choose element with key 1 (corresponding to 100% recommended contour level)
-    pdb_volume = map_object.getVolume()[1]
+    if os.path.exists(simulated_filename):
+        map_object = molecule.Molecule(simulated_filename, recommendedContour=contourLevel, cutoffRatios=[1])
+        # Get dictionary of volumes, choose element with key 1 (corresponding to 100% recommended contour level)
+        pdb_volume = map_object.getVolume()[1]
+        volume_result['pdb_volume']=pdb_volume
+    else:
+        volume_result['pdb_volume']=-1
 
-    return {'index':index, 'map_volume':map_volume, 'pdb_volume':pdb_volume}
+    return volume_result
 
     
 
@@ -211,8 +217,6 @@ def main():
     header_path = os.path.join(current_dir, opt.header_dir)
     models_path = os.path.join(current_dir, opt.models_dir)
     simulated_path = os.path.join(current_dir, opt.simulated_dir)
-    print(models_path)
-    print(header_path)
     if int(opt.d):
         get_headers(header_path)
         generate_dataframe(header_path)
@@ -220,26 +224,33 @@ def main():
         downloadModels(models_path)
     elif int(opt.v):
         df = pd.read_csv('./dataset_metadata.csv')
+        print("Number of samples to process volume: ", len(df.index))
         df_volume = df[['id', 'fitted_entries', 'resolution','contourLevel']].copy()
         #add filename columns for each downloaded file
-        df_volume["fitted_entries"] = df["fitted_entries"].map(lambda pdb_name: os.path.join(models_path,'pdb'+pdb_name+'.ent'))
-        df_volume["id"] = df["id"].map(lambda map_name: os.path.join(models_path,map_name.replace("-","_")+'.map'))
-        df_volume.rename(columns = {'fitted_entries' : 'pdb_file', 'id' : 'map_file'}, inplace=True)
+        df_volume["pdb_file"] = df["fitted_entries"].map(lambda pdb_name: os.path.join(models_path,'pdb'+pdb_name+'.ent'))
+        df_volume["map_file"] = df["id"].map(lambda map_name: os.path.join(models_path, map_name.replace("-","_")+'.map'))
         index_list = df_volume.index.tolist()
         print("Spawn procecess...")
-        size = MPI.Comm.Get_size()
-        with MPICommExecutor(MPI.COMM_WORLD, root=0, worker_size=size) as executor:
-            if executor is not none:
+        comm = MPI.COMM_WORLD
+        size = comm.Get_size()
+        with MPICommExecutor(comm, root=0, worker_size=size) as executor:
+            if executor is not None:
                 
                 futures = []
-                for i in index:
+                for i in index_list:
                     futures.append(executor.submit(simulateMapAndCompareVolume, i, df_volume, simulated_path))
-            
-                res_index = d['index']
-                pdb_volume = d['pdb_volume']
-                map_volume = d['map_volume']
-                df_volume[res_index]['map_volume'] = map_volume
-                df_volume[res_index]['pdb_volume'] = pdb_volume
+                for f in futures:
+                    try:
+                        d = f.result()
+                        print("received vol dict: ",d)
+                        res_index = d['index']
+                        pdb_volume = d['pdb_volume']
+                        map_volume = d['map_volume']
+                        df_volume.loc[res_index, 'map_volume'] = map_volume
+                        df_volume.loc[res_index, 'pdb_volume'] = pdb_volume
+                    except ValueError as error:
+                        print("error %s" % error)
+                df_volume.drop(columns=['pdb_file', 'map_file'], inplace=True)
                 df_volume.to_csv('dataset_volume.csv', index=False)
 
         
