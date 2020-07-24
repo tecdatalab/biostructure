@@ -178,7 +178,6 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
     # Generate map
     try:
         command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=' + str(voxel_volume)+ ' -R=' + str(res) + ' -B='+ str(int(round(map_box[2]))) +','+ str(int(round(map_box[1])))+ ','+ str(int(round(map_box[0]))) + ' --center '+  pdb_filename + ' ' + simulated_filename
-        print(command)
         if os.system(command) != 0:
             raise Exception('Command "%s" does not exist' % command)
     except:
