@@ -168,7 +168,7 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
     # Get dictionary of volumes, choose element with key 1 (corresponding to 100% recommended contour level)
     map_volume = map_object.getVolume()[1]
     # Get voxel size in Angstroms to generate simulated map 
-    voxel_size = map_object.getVoxelSize()
+    voxel_size = map_object.getVoxelSize()[0] #using only one value, supose its the same for all axes
     if voxel_size == 0:
         print("Map {} has voxel volume of 0, header is: \n {}".format(os.path.basename(map_filename), map_object.emMap.rawHeader))
     # Get map bounding box
@@ -178,6 +178,7 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
     # Generate map
     try:
         command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=' + str(voxel_size)+ ' -R=' + str(res) + ' -B='+ str(int(round(map_box[2]))) +','+ str(int(round(map_box[1])))+ ','+ str(int(round(map_box[0]))) + ' --center '+  pdb_filename + ' ' + simulated_filename
+        print(command)
         if os.system(command) != 0:
             raise Exception('Command "%s" does not exist' % command)
     except:
