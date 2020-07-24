@@ -13,7 +13,7 @@ class EMMap():
         (self.zorigin, self.yorigin, self.xorigin) = origin
         (self.dmin, self.dmax, self.dmean) = density_ranges
         self.axis_order = axis_order
-        self.voxel_size = tuple(i/j) for i,j in zip(self.cell_dim(), self.grid_size()))
+        self.voxel_size = (tuple(i/j) for i,j in zip(self.cell_dim(), self.grid_size()))
         
 
 
