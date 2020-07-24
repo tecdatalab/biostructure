@@ -56,6 +56,9 @@ class EMMap():
     def voxelVol(self):
         return np.prod(self.voxel_size)
 
+    def voxelSize(self):
+        return self.voxel_size
+
     def origin(self):
         return (self.zorigin, self.yorigin, self.xorigin)
 
