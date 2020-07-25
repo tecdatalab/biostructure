@@ -34,7 +34,7 @@ class Molecule():
         for i,cutoffRatio in enumerate(self.cutoffRatios):
             lvl = cutoffRatio*self.contourLvl
             mask_at_contour = np.zeros(map_data.shape)
-            mask_at_contour[map_data<=lvl]=self.indicatorValue
+            mask_at_contour[map_data>=lvl]=self.indicatorValue
             contour_masks[i,:] = mask_at_contour
 
         self.contour_masks = contour_masks
