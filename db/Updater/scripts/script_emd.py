@@ -9,7 +9,7 @@ import datetime
 from connections.sql_connection import SQL_connection
 from classes.update import Update
 from classes.binnacle import Binnacle
-from main_emd import main
+from updater.main_emd import main
 
 '''
 @author dnnxl

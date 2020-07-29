@@ -10,7 +10,7 @@ from connections.ftp_connection import FTP_connection
 from connections.sql_connection import SQL_connection
 from classes.update import Update
 from classes.binnacle import Binnacle
-from main_pdb import main
+from updater.main_pdb import main
 
 '''
 @author dnnxl
