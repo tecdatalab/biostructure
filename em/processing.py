@@ -10,28 +10,21 @@ from functools import partial
 from multiprocessing import Pool
 import os.path
 
-import model
 
 
-
-def segment(model, step_sigma, steps):
-    countourLevels = model.getCutoffLevels()
-    dataLevels = model.getData()
-    voxel_size = tuple(int(i/j) for i,j in zip(model.molecule.cell_dim(), model.molecule.grid_size()))
-    task_args = [(data, contour, voxel_size) for data,contour in zip(dataLevels,countourLevels)]
+def segment(emMap, steps, sigma, countourLevels, numContours):
+    #voxel_size = tuple(int(i/j) for i,j in zip(emMap.cell_dim(), emMap.grid_size()))
     #parallel segmentation for each contour level
-    with Pool(len(countourLevels)) as p:
-        segmentation_func = partial(segmentation_pipeline, step_sigma=step_sigma, steps=steps)
-        data_labels_list = p.map(segmentation_func, task_args)
-    return data_labels_list   
+    with Pool(numContours) as p:
+        segmentation_func = partial(segmentation_pipeline, emMap=emMap, steps=steps, step_sigma=sigma)
+        labels_list = p.map(segmentation_func, countourLevels.values())
+    return labels_list   
         
 
-def segmentation_pipeline(task_args, step_sigma, steps):
-    data = task_args[0]
-    contourLevel = task_args[1]
-    voxel_size = task_args[2]
-    step_maps = scale_space_filtering(data, contourLevel, step_sigma, steps)
-    labels = watershed_segmentation(data, contourLevel, step_maps, steps)
+def segmentation_pipeline(contourLevel, emMap, steps, step_sigma):
+    image = emMap.data()
+    step_maps = scale_space_filtering(image, contourLevel, step_sigma, steps)
+    labels = watershed_segmentation(image, contourLevel, step_maps, steps)
     # Not accurate yet
     #data, labels = remove_noise_regions(data, labels, voxel_size, 10000) 
     regions = regionprops(labels)   
@@ -40,12 +33,12 @@ def segmentation_pipeline(task_args, step_sigma, steps):
     print("Number of segmented regions: %d" % len(regions))
     print("    step sigma = %.2f\n    steps = %.2f" % (step_sigma, steps))
     try:
-        with open(os.path.join("export/", molecule.name+".txt"), "w") as output_file:
+        with open(os.path.join("export/", emMap.name+".txt"), "w") as output_file:
             output_file.write("Number of segmented regions: %d\n" % len(regions))
             output_file.write("    step sigma = %.2f\n    steps = %.2f\n" % (step_sigma, steps))
     except Exception as e:
         print("Could not create output file, ", e)
-    return data,labels
+    return labels
 
 
 def remove_noise_regions(data, labels, voxel_size, area_th=100):
@@ -73,7 +66,7 @@ def watershed_segmentation(data, level, scale_maps, steps):
     t = time.process_time()
     threshold = data >= level
     mask = dilation(threshold)
-    data[data<level]=0
+    #data[data<level]=0
     preprocess_time = time.process_time() - t
     t = time.process_time()
     labels = watershed(-data, connectivity=26, mask=mask)

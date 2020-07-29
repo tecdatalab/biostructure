@@ -2,48 +2,95 @@
 import reader
 import visualizer
 import processing
-import model
+import molecule
 
 import configparser
 import argparse
 
+import numpy as np
 
 
 
 def main():
     #config = configparser.ConfigParser()
     #parser = argparse.ArgumentParser(description='Molecule Visualization and segmentation tool')
-    
-    #Read molecule map from file
-    mapReader = reader.Reader()
+
     #Open file
-    mapReader.open("../maps/EMD-9590.map") #level 2.2479
+    #mapReader.open("../maps/1010/EMD-1010.map") #level 2.2479
     # #mapReader.open("../maps/EMD-2596.map") #level 0.1462
     #mapReader.open("../maps/1010/EMD-1010.map") #level 23
     #mapReader.open("../maps/1364/EMD-1364.map") #level 39.0086
     #mapReader.open("../maps/5017/EMD-5017.map") #level 17.3347
 
+    ## Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off ratios.
+    myMolecule = molecule.Molecule("../maps/1010/EMD-1010.map", recommendedContour=7, cutoffRatios=[1,0.5])
+    ## Segment EM map with parameters steps (3) and sigma (1)
+    myMolecule.generateSegments(3,1)
+    ## Get generated dictionary, with contour ratio as keys and composited numpy array with segment masks and labels
+    segments_at_contour_dict = myMolecule.getSegmentsMasks()
+    ## To get density array for each segment, we can use mask array indexing
+    ## What contour ratios do we have?
+    print(segments_at_contour_dict.keys())
+    ## Get segments masks at default contour ratio (which is 1)
+    segments_masks = segments_at_contour_dict[1]
+    ## Print segment labels
+    print (segments_masks.keys())
+    ## Lets create a list to store a copy of densities for each segment
+    segment_dict = {}
+    for key in segments_masks:
+        ## Create a copy of map densities
+        densities = np.copy(myMolecule.getEmMap().data())
+        ## Set voxels outside segment to 0 
+        densities[np.logical_not(segments_masks[key])] = 0
+        segment_dict[key] = densities
 
-    #Get map object
-    myMap = mapReader.read()
+    ## then you can compute zernike descriptors for each segment, lets create a dict to store descriptors for each segment
+    ## lets import the module
+    import utils._zernike as z
+    ## lets create a dictionary to store descriptors for each segment
+    segments_zd = {}
+    for key in segment_dict:
+        zd = z.computeDescriptors(segment_dict[key])
+        segments_zd[key] = zd
+
+    print(segments_zd)
+
+
+    #Get volume of molecule
+    volume = myMolecule.getVolume()
+    print("Approximate molecule volume in A^3 for each cutoff level ratio: ", volume)
+    #Get volume of segments
+    segments_volume = myMolecule.getSegmentsVolume()
+    print("Approximate molecule volume in A^3 for each cutoff level ratio, for each segment label: ", segments_volume)
+
+
+
     # Create visualizer with a map surface threshold level
     # Otherwise use otsu threshold
-    #v= visualizer.Visualizer(myMap, level=0.05)
+
+    #v1= visualizer.Visualizer(myMolecule.getEmMap().data(), 7, myMolecule.labels)
     #
     # Watershed 
-    contourRatioLvl = [1, 0.75,0.5]
-    myModel = model.Model(myMap, 0.05, contourRatioLvl)
-    data_labels_list = processing.segment(myModel, step_sigma=1, steps=5)
-    #v.add_structure("../maps/pdb6acf.ent")
-    #v.map_structure_to_domain("../maps/pdb6acf.ent")
-    countourLvl = myModel.getCutoffLevels()
-    v1 = visualizer.Visualizer(data_labels_list[0][0], countourLvl[0], data_labels_list[0][1])
-    v2 = visualizer.Visualizer(data_labels_list[1][0], countourLvl[1], data_labels_list[1][1])
-    v3 = visualizer.Visualizer(data_labels_list[2][0], countourLvl[2], data_labels_list[2][1])
 
-    v1.show()
-    v2.show()
-    v3.show()
+
+    
+
+
+    #precomputed_descriptors = [6.00485,9.20974e-16,8.0491,1.96306,2.0434,1.52559,5.27135,4.58634,1.6972,3.12813,1.8177,1.5765,1.47143,6.2866,2.85751,1.24786,3.25437,2.00659,2.18337,1.35591,0.369011,5.01783,3.68149,1.2648,1.21123,2.71391,1.6935,2.89683,1.71589,1.11724,0.154151,2.49272,3.25498,1.80037,1.1011,1.08982,1.79274,1.74014,3.02078,2.16811,1.11224,0.989201,0.800181,2.05593,2.20992,2.07055,1.13324,1.01053,0.934,1.01314,1.89837,2.64202,1.93436,1.58645,0.767435,0.874263,0.939151,2.07539,2.01024,1.94173,1.05544,1.3689,0.698616,0.809511,0.870718,1.45429,2.21419,1.85029,1.4274,1.04587,0.557376,0.760452,0.946489,1.055,1.60476,1.50551,1.43065,1.2094,1.10033,0.501099,0.704349,0.77951,1.07687,1.76099,1.56281,1.43962,0.984525,0.773406,0.415912,0.654815,0.259077,0.811758,1.48604,1.14667,1.42665,1.6946,0.9882,0.831599,0.384764,0.610353,0.910067,0.884391,1.418,1.53506,0.853752,1.12984,0.71894,0.743243,0.343151,0.565689,0.551233,0.463538,0.908726,1.17644,1.31264,0.904315,1.30646,0.870354,0.619409,0.324997,0.526729]
+    #import utils._zernike as z 
+    #zd = z.computeDescriptors(myModel.getData()[0])
+
+    #print(np.linalg.norm(precomputed_descriptors - zd/10))
+ 
+
+
+    #v1.add_structure("../maps/pdb6acf.ent")
+    #v2.add_structure("../maps/pdb6acf.ent")
+    #v3.add_structure("../maps/pdb6acf.ent")
+
+    #v1.show()
+    #v2.show()
+    #v3.show()
 
 
     # add corresponding atomic structure
