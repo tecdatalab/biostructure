@@ -31,7 +31,6 @@ def generate_dataframe(header_path):
     df["id"] = df["path"].map(id_path_dict.get)
 
     df['fitted_entries']=None
-    df['subunit_count']=None
     df['method']= None
     df['resolution']=None
     df['contourLevel']=None
@@ -46,17 +45,12 @@ def generate_dataframe(header_path):
             for pdbe_entry in tree.findall('.//deposition/fittedPDBEntryIdList/fittedPDBEntryId'):
                 pdbe_fitted_entries.append(pdbe_entry.text)
             
-            subunit_count = 0
-            for element in tree.findall('.//sample/sampleComponentList/sampleComponent/entry'):
-                if element.text == 'protein':
-                    subunit_count=subunit_count+1
             processing_method_node = tree.find('.//processing/method')
             resolution_node = tree.find('.//processing/reconstruction/resolutionByAuthor')
             contour_node = tree.find('.//map/contourLevel')
      
         if len(pdbe_fitted_entries)>0:    
             df.loc[ df.id == id_path_dict[meta], ['fitted_entries'] ] =  ','.join(pdbe_fitted_entries)
-        df.loc[ df.id == id_path_dict[meta], ['subunit_count'] ] =  subunit_count
         if processing_method_node is not None:
             df.loc[ df.id == id_path_dict[meta], ['method'] ]  =  processing_method_node.text
         if resolution_node is not None:
@@ -77,13 +71,11 @@ def processMetadata():
     non_enough_subunit = len(df.index) - len(df[df.subunit_count<2].index)
 
     df = df.dropna(subset=['fitted_entries', 'resolution', 'subunit_count'])
-    df = df[df.subunit_count>=2]
     df = df[(df.resolution>=4.5) & (df.resolution<=10)]
 
     print("{} entries without fitted structure".format(non_fitted))
     print("{} entries without reported resolution".format(non_res))
     print("{} entries outside resolution gap".format(non_res))
-    print("{} entries with less than 2 subunits".format(non_enough_subunit))
     print("{} candidates for dataset".format(len(df.index)))
 
     df["pdb_rsync"] = df["fitted_entries"].map(lambda pdb_id: "rsync.rcsb.org::ftp_data/structures/all/pdb/pdb"+pdb_id+".ent.gz")
