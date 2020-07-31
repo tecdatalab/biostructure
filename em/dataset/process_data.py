@@ -127,15 +127,18 @@ def downloadModels(models_path):
     df.to_csv('dataset_metadata.csv', index=False)
 
 
-def processfiles(models_path):
-    df = pd.read_csv('./dataset_metadata.csv')
-
+def removeNonExistingModels(models_path):
     print("Scanning existing models..")
     pdb_files = [f for f in glob(os.path.join(models_path,'*.ent'))]
     map_files = [f for f in glob(os.path.join(models_path,'*.map'))]
 
     pdb_filenames = [os.path.basename(f) for f in pdb_files]
     map_filenames = [os.path.basename(f) for f in map_files]
+
+    print("{} pdbs and {} maps found".format(len(pdb_files), len(map_files)))
+
+    df = pd.read_csv('./dataset_metadata.csv')
+
     #Get entries with missing pdb or map
     df['map_found'] = df["id"].map(lambda map_id: True if map_id.replace('-','_')+'.map' in map_filenames else False)
     df['pdb_found'] = df["fitted_entries"].map(lambda pdb_id: True if 'pdb'+pdb_id+'.ent' in pdb_filenames else False)
@@ -148,7 +151,11 @@ def processfiles(models_path):
 
     indexes_to_remove = df[ (df['map_found'] == False) | (df['pdb_found'] == False) ].index
     df = df.drop(indexes_to_remove)
+    df.to_csv('dataset_metadata.csv', index=False)
 
+
+def processfiles(models_path):
+    
     # Define function to get number of chains in structure
     def pdb_num_chain_mapper(chain, filepath):
         parser = PDBParser(PERMISSIVE = True, QUIET = True)
@@ -244,6 +251,7 @@ def main():
         generate_dataframe(header_path)
         processMetadata()
         downloadModels(models_path)
+        removeNonExistingModels(models_path)
         processfiles(models_path)
     elif int(opt.v):
         df = pd.read_csv('./dataset_metadata.csv')
