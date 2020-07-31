@@ -8,6 +8,7 @@ sys.path.append('..')
 import molecule
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
+from Bio.PDB import PDBParser
 import subprocess
 
 
@@ -123,12 +124,21 @@ def downloadModels(models_path):
     except:
         print('Command "%s" does not work' % command)
     
+    df.to_csv('dataset_metadata.csv', index=False)
+
+
+def processfiles(models_path):
+    df = pd.read_csv('./dataset_metadata.csv')
+
     print("Scanning existing models..")
-    pdb_files = [os.path.basename(f) for f in glob(os.path.join(models_path,'*.ent'))]
-    map_files = [os.path.basename(f) for f in glob(os.path.join(models_path,'*.map'))]
+    pdb_files = [f for f in glob(os.path.join(models_path,'*.ent'))]
+    map_files = [f for f in glob(os.path.join(models_path,'*.map'))]
+
+    pdb_filenames = [os.path.basename(f) for f in pdb_files]
+    map_filenames = [os.path.basename(f) for f in map_files]
     #Get entries with missing pdb or map
-    df['map_found'] = df["id"].map(lambda map_id: True if map_id.replace('-','_')+'.map' in map_files else False)
-    df['pdb_found'] = df["fitted_entries"].map(lambda pdb_id: True if 'pdb'+pdb_id+'.ent' in pdb_files else False)
+    df['map_found'] = df["id"].map(lambda map_id: True if map_id.replace('-','_')+'.map' in map_filenames else False)
+    df['pdb_found'] = df["fitted_entries"].map(lambda pdb_id: True if 'pdb'+pdb_id+'.ent' in pdb_filenames else False)
     
     df_map_not_found = df[df["map_found"]==False]
     df_pdb_not_found = df[df["pdb_found"]==False]
@@ -138,17 +148,30 @@ def downloadModels(models_path):
 
     indexes_to_remove = df[ (df['map_found'] == False) | (df['pdb_found'] == False) ].index
     df = df.drop(indexes_to_remove)
-    df.to_csv('dataset_metadata.csv', index=False)
 
+    # Define function to get number of chains in structure
+    def pdb_num_chain_mapper(chain, filepath):
+        parser = PDBParser(PERMISSIVE = True, QUIET = True)
+        pbd_obj = parser.get_structure(chain, filepath)
+        return len(list(pbd_obj.get_chains()))
+
+    # Get pdb id from files in disk
+    pdb_id_from_files = [f[2:-4] for f in pdb_filenames]
+    # Create dict to map pdb id and filepath
+    pdb_id_file_dict = dict(zip(pdb_id_from_files,pdb_files))
+
+    df['subunit_count'] = df["fitted_entries"].map(lambda pdb_id: pdb_num_chain_mapper(pdb_id, pdb_id_file_dict[pdb_id]))
+
+    non_enough_subunit = len(df.index) - len(df[df.subunit_count<2].index)
+    # Remove entries with less than 2 subunits
+    df = df[df.subunit_count>=2]
+    
     number_of_samples = len( df.index )
    
-    print("{} candidates for dataset".format(len(df.index)))
     print("{} maps not found".format(len(df_map_not_found.index)))
     print("{} pdbs not found".format(len(df_pdb_not_found.index)))
-
-
-def processPDBfiles(models_path):
-    df = pd.read_csv('./dataset_metadata.csv')
+    print("{} entries with less than 2 subunits".format(non_enough_subunit))
+    print("{} candidates for dataset".format(len(df.index)))
 
 
 
@@ -220,7 +243,7 @@ def main():
         generate_dataframe(header_path)
         processMetadata()
         downloadModels(models_path)
-        processPDBfiles(models_path)
+        processfiles(models_path)
     elif int(opt.v):
         df = pd.read_csv('./dataset_metadata.csv')
         print("Number of samples to process volume: ", len(df.index))
