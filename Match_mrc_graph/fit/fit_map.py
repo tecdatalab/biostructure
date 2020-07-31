@@ -9,43 +9,54 @@ from tempfile import TemporaryFile
 import shutil
 from fit.fitMapResult import FitMapResult
 
+
 def get_out(*args):
     with TemporaryFile() as t:
         try:
             out = check_output(args, stderr=t)
-            return  0, out
+            return 0, out
         except CalledProcessError as e:
             t.seek(0)
             return e.returncode, t.read()
 
-#Fit map0 into map1
-def fit_map_in_map(map0_path, map1_path, map0_level = None, map1_level = None):
+
+# Fit map0 into map1
+def fit_map_in_map(map0_path, map1_path, path_exit_folder, map0_level=None, map1_level=None):
     path = "./temp_map"
+    map0_exit_name = map0_path.split('.')[-2]
+    map0_exit_name = map0_exit_name.split('/')[-1]
+    map0_exit_name += "_fit.mrc"
+    complete_exit_path = os.path.abspath(path_exit_folder)
+    path_exit_folder = complete_exit_path + "/" + map0_exit_name
+
+    if not os.path.exists(complete_exit_path):
+        os.makedirs(complete_exit_path)
+
     try:
         shutil.rmtree(path)
     except:
         pass
     os.mkdir(path)
-    f = open(path+"/fit.cmd","w+")
+    f = open(path + "/fit.cmd", "w+")
+
+    if map0_level is not None:
+        f.write("volume #0 level " + str(map0_level).replace(".", ",") + "\r\n")
+
+    if map1_level is not None:
+        f.write("volume #1 level " + str(map1_level).replace(".", ",") + "\r\n")
+
     f.write("fitmap #0 #1 \r\n")
-    
-    if map0_level !=None:
-        f.write("volume #0 level "+str(map0_level).replace(".", ",")+"\r\n")
-    
-    if map1_level !=None:
-        f.write("volume #1 level "+str(map1_level).replace(".", ",")+"\r\n")
-    
+    f.write("close #1 \r\n")
+    f.write("save {0}\r\n".format(path_exit_folder))
     f.close()
-    
+
     map0_real_path = os.path.abspath(map0_path)
     map1_real_path = os.path.abspath(map1_path)
-    commands_real_path = os.path.abspath(path+"/fit.cmd")
-    
-    _error, exit = get_out("chimera","--nogui", map0_real_path, map1_real_path, commands_real_path)
+    commands_real_path = os.path.abspath(path + "/fit.cmd")
 
-    shutil.rmtree(path)
-    text = exit.decode("utf-8") 
+    _error, exit_binary_text = get_out("chimera", "--nogui", map0_real_path, map1_real_path, commands_real_path)
+
+    #shutil.rmtree(path)
+    text = exit_binary_text.decode("utf-8")
+    #print(text)
     return FitMapResult(text)
-    
-    
-    

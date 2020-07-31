@@ -1,6 +1,0 @@
-#!/home/luis98/Documents/git-proyects/biostructure/Match_mrc_graph/pdb_mrc/EMAN2_py2/extlib/bin/python
-"""Terminal-based IPython entry point.
-"""
-
-from IPython import start_ipython
-start_ipython()

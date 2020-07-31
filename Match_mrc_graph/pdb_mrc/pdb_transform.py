@@ -1,49 +1,100 @@
-#!EMAN2_py2/extlib/bin/python
 import os
-import argparse
 import shutil
+import urllib
+from subprocess import check_output, CalledProcessError
+from tempfile import TemporaryFile
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-if","--input_file", type=str, help="PDB file.")
-parser.add_argument("-od","--output_dir", type=str, help="Out dir create directory with name of pdb.")
-parser.add_argument("-r","--resolution", type=str, help="Map resolution.")
-parser.add_argument("-c","--chains", help="Create mrc file for all chains in pdb", action="store_true")
-parser.add_argument("-v","--verbose", help="increase output verbosity", action="store_true")
 
-args = parser.parse_args()
-name_of_pdb = os.path.splitext(args.input_file)[0]
-out_file =  name_of_pdb + ".mrc"
+def get_out(*args):
+    with TemporaryFile() as t:
+        try:
+            out = check_output(args, stderr=t)
+            return 0, out
+        except CalledProcessError as e:
+            t.seek(0)
+            return e.returncode, t.read()
 
-dir = args.output_dir+"/"+name_of_pdb
-if os.path.exists(dir):
-    shutil.rmtree(dir)
-os.makedirs(dir)
-complete_file_path = dir+"/"+str(out_file)
 
-stream = os.popen("EMAN2_py2/bin/e2pdb2mrc.py -R "+str(args.resolution)+" "+str(args.input_file)+" "+complete_file_path)
-output = stream.read()
-if args.verbose:
-	print(output)
+def download_pdb(id_code, exit_path):
+    exit_path_full = os.path.abspath(exit_path)
+    file_url = "https://files.rcsb.org/download/{0}.pdb".format(str(id_code))
+    urllib.request.urlretrieve(file_url, exit_path_full)
 
-if args.chains:
-    
-    with open(args.input_file) as origin_file:
+
+def get_chains(input_file):
+    input_file = os.path.abspath(input_file)
+    list_result = []
+    with open(input_file) as origin_file:
         actual_chain = ''
         for line in origin_file:
-            if line[0:4]=="ATOM":
+            if line[0:4] == "ATOM":
                 if actual_chain == '':
                     actual_chain = line[21:22]
-                elif actual_chain!= line[21:22]:
-                    command = "EMAN2_py2/bin/e2pdb2mrc.py -R "+str(args.resolution)+" "+"--chains "+"'"+actual_chain+"' "+str(args.input_file)+" "+ dir+"/"+name_of_pdb+"_"+actual_chain+".mrc"
-                    stream = os.popen(command)
-                    output = stream.read()
-                    if args.verbose:
-                    	print(output)
-                    actual_chain= line[21:22]
-                    
-        command = "EMAN2_py2/bin/e2pdb2mrc.py -R "+str(args.resolution)+" "+"--chains "+"'"+actual_chain+"' "+str(args.input_file)+" "+ dir+"/"+name_of_pdb+"_"+actual_chain+".mrc"
-        stream = os.popen(command)
-        output = stream.read()
-        if args.verbose:
-        	print(output)
-print("Finish")
+                elif actual_chain != line[21:22]:
+                    list_result.append(actual_chain)
+                    actual_chain = line[21:22]
+        list_result.append(actual_chain)
+    return list_result
+
+
+def pdb_to_mrc_chains(create_original, verbose, resolution, input_file, output_dir, chains, div_can):
+    div_can = min(div_can, len(chains))
+    input_file = os.path.abspath(input_file)
+    output_dir = os.path.abspath(output_dir)
+
+    name_of_pdb = input_file.split('.')[-2]
+    name_of_pdb = name_of_pdb.split('/')[-1]
+    out_file = "{0}.mrc".format(name_of_pdb)
+
+    directory = output_dir + "/" + name_of_pdb
+    if os.path.exists(directory):
+        shutil.rmtree(directory)
+    os.makedirs(directory)
+    complete_file_path = directory + "/" + str(out_file)
+
+    if create_original:
+        _exit, output = get_out('e2pdb2mrc.py', '-R', str(resolution), str(input_file), complete_file_path)
+
+        if verbose:
+            print(output)
+
+    count = 0
+    before_count = 0
+    increase = len(chains) // div_can
+
+    while count < div_can:
+        before_count = count
+        if count + increase > len(chains):
+            count = len(chains)
+        else:
+            count += increase
+
+        lines = []
+
+        with open(input_file) as origin_file:
+            actual_chain = ''
+            for line in origin_file:
+                if line[0:4] == "ATOM":
+                    if actual_chain == '':
+                        actual_chain = line[21:22]
+                    elif actual_chain != line[21:22]:
+                        actual_chain = line[21:22]
+
+                    if actual_chain in chains[before_count:count]:
+                        lines.append(line)
+
+            final_text = "".join(lines)
+
+            pdb_path = directory + "/" + name_of_pdb + "_" + ''.join(chains[before_count:count]) + ".pdb"
+            f = open(pdb_path, "w+")
+            f.write(final_text)
+            f.close()
+
+            exit_mrc_path = directory + "/" + name_of_pdb + "_" + ''.join(chains[before_count:count]) + ".mrc"
+
+            _exit, output = get_out('e2pdb2mrc.py', '-R', str(resolution), str(pdb_path), exit_mrc_path)
+
+            os.remove(pdb_path)
+
+            if verbose:
+                print(output.decode("utf-8"))
