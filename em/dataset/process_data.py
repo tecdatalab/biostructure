@@ -49,8 +49,10 @@ def generate_dataframe(header_path):
             resolution_node = tree.find('.//processing/reconstruction/resolutionByAuthor')
             contour_node = tree.find('.//map/contourLevel')
      
-        if len(pdbe_fitted_entries)>0:    
-            df.loc[ df.id == id_path_dict[meta], ['fitted_entries'] ] =  ','.join(pdbe_fitted_entries)
+        if len(pdbe_fitted_entries)>0:
+            if len(pdbe_fitted_entries)>1:
+                print("Model {} has more than one fitted structures, using the first one.")
+            df.loc[ df.id == id_path_dict[meta], ['fitted_entries'] ] =  pdbe_fitted_entries[0]
         if processing_method_node is not None:
             df.loc[ df.id == id_path_dict[meta], ['method'] ]  =  processing_method_node.text
         if resolution_node is not None:
@@ -145,6 +147,9 @@ def downloadModels(models_path):
     print("{} pdbs not found".format(len(df_pdb_not_found.index)))
 
 
+def processPDBfiles(models_path):
+    df = pd.read_csv('./dataset_metadata.csv')
+
 
 
 def simulateMapAndCompareVolume(index, df, sim_model_path):
@@ -215,6 +220,7 @@ def main():
         generate_dataframe(header_path)
         processMetadata()
         downloadModels(models_path)
+        processPDBfiles(models_path)
     elif int(opt.v):
         df = pd.read_csv('./dataset_metadata.csv')
         print("Number of samples to process volume: ", len(df.index))
