@@ -12,6 +12,14 @@ def get_float_betwen(tex, a, b):
     return float(tex[pos_a + len(a):pos_b])
 
 
+def get_float_betwen_ss(tex, a, b):
+    pos_a = tex.find(a)
+    tex = tex[pos_a+len(a):-1]
+    pos_b = tex.find(b)
+
+    return float(tex[0:pos_b])
+
+
 def get_vector_betwen(tex, a, b):
     pos_a = tex.find(a)
     pos_b = tex.find(b)
@@ -49,20 +57,34 @@ class FitMapResult(object):
     classdocs
     '''
 
-    def __init__(self, text):
+    def __init__(self, text, type_c):
         #print(text)
-        self.num_poins = int(get_float_betwen(text, "using", " points"))
-        self.correlation = get_float_betwen(text, "correlation =", ", correlation about")
-        self.correlation_about_mean = get_float_betwen(text, ", correlation about mean =", ", overlap")
-        self.overlap = get_float_betwen(text, " overlap =", "\n  steps =")
-        self.steps = int(get_float_betwen(text, "steps =", ", shift = "))
-        self.shift = get_float_betwen(text, " shift =", ", angle = ")
-        self.angle = get_float_betwen(text, ", angle =", " degrees\n\n")
-        self.matrix_rt = get_matriz_betwen(text, "  Matrix rotation and translation\n", "\n  Axis")
-        self.axis = get_vector_betwen(text, "  Axis", "\n  Axis point")
-        self.axis_point = get_vector_betwen(text, "  Axis point", "\n  Rotation angle (degrees)")
-        self.rotation_angle = get_float_betwen(text, "  Rotation angle (degrees)", "\n  Shift along axis")
-        self.shift_along_axis = get_float_betwen(text, "Shift along axis", "\n\n, correlation")
+        if type_c == 'n':
+            self.num_poins = int(get_float_betwen(text, "using", " points"))
+            self.correlation = get_float_betwen(text, "correlation =", ", correlation about")
+            self.correlation_about_mean = get_float_betwen(text, ", correlation about mean =", ", overlap")
+            self.overlap = get_float_betwen(text, " overlap =", "\n  steps =")
+            self.steps = int(get_float_betwen(text, "steps =", ", shift = "))
+            self.shift = get_float_betwen(text, " shift =", ", angle = ")
+            self.angle = get_float_betwen(text, ", angle =", " degrees\n\n")
+            self.matrix_rt = get_matriz_betwen(text, "  Matrix rotation and translation\n", "\n  Axis")
+            self.axis = get_vector_betwen(text, "  Axis", "\n  Axis point")
+            self.axis_point = get_vector_betwen(text, "  Axis point", "\n  Rotation angle (degrees)")
+            self.rotation_angle = get_float_betwen(text, "  Rotation angle (degrees)", "\n  Shift along axis")
+            self.shift_along_axis = get_float_betwen(text, "Shift along axis", "\n\n, correlation")
+        elif type_c == 'x':
+            self.num_poins = int(get_float_betwen(text, "using", " points"))
+            self.correlation = get_float_betwen(text, "correlation =", ", correlation about")
+            self.correlation_about_mean = get_float_betwen(text, ", correlation about mean =", ", overlap")
+            self.overlap = get_float_betwen(text, " overlap =", "\n  steps =")
+            self.steps = int(get_float_betwen(text, "steps =", ", shift = "))
+            self.shift = get_float_betwen(text, " shift =", ", angle = ")
+            self.angle = get_float_betwen(text, ", angle =", " degrees\n\n")
+            self.matrix_rt = get_matriz_betwen(text, "  Matrix rotation and translation\n", "\n  Axis")
+            self.axis = get_vector_betwen(text, "  Axis", "\n  Axis point")
+            self.axis_point = get_vector_betwen(text, "  Axis point", "\n  Rotation angle (degrees)")
+            self.rotation_angle = get_float_betwen(text, "  Rotation angle (degrees)", "\n  Shift along axis")
+            self.shift_along_axis = get_float_betwen_ss(text, "Shift along axis", "\n\n")
 
     def get_num_poins(self):
         return self.num_poins

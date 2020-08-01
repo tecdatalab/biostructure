@@ -37,7 +37,7 @@ def fit_map_in_map(map0_path, map1_path, path_exit_folder, map0_level=None, map1
     except:
         pass
     os.mkdir(path)
-    f = open(path + "/fit.cmd", "w+")
+    f = open(path + "/fit.cxc", "w+")
 
     if map0_level is not None:
         f.write("volume #0 level " + str(map0_level).replace(".", ",") + "\r\n")
@@ -45,18 +45,18 @@ def fit_map_in_map(map0_path, map1_path, path_exit_folder, map0_level=None, map1
     if map1_level is not None:
         f.write("volume #1 level " + str(map1_level).replace(".", ",") + "\r\n")
 
-    f.write("fitmap #0 #1 \r\n")
-    f.write("close #1 \r\n")
-    f.write("save {0}\r\n".format(path_exit_folder))
+    f.write("fitmap #1 in_map #2 \r\n")
+    f.write("save {0} #1\r\n".format(path_exit_folder))
+    f.write("exit")
     f.close()
 
     map0_real_path = os.path.abspath(map0_path)
     map1_real_path = os.path.abspath(map1_path)
-    commands_real_path = os.path.abspath(path + "/fit.cmd")
+    commands_real_path = os.path.abspath(path + "/fit.cxc")
 
-    _error, exit_binary_text = get_out("chimera", "--nogui", map0_real_path, map1_real_path, commands_real_path)
+    _error, exit_binary_text = get_out("chimerax", "--nogui", map0_real_path, map1_real_path, commands_real_path)
 
     #shutil.rmtree(path)
     text = exit_binary_text.decode("utf-8")
     #print(text)
-    return FitMapResult(text)
+    return FitMapResult(text, 'x')

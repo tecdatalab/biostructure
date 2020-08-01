@@ -12,6 +12,7 @@ import os
 
 from process_mrc.miscellaneous import get_center_point
 from utils_match.list_processing import get_element_list
+import numpy as np
 
 
 # segments = get_mrc_segments("../../maps/1010/EMD-1010.map", 7, 3, 1)
@@ -104,17 +105,19 @@ def main_1():
     graph1_match_index = get_element_list(0, result)
     graph2_match_index = get_element_list(1, result)
 
-    #Puntos centricos
-    #print(graph1_match_index)
-    #print(graph2_match_index)
+    # Puntos centricos
+    # print(graph1_match_index)
+    # print(graph2_match_index)
 
     center_point1 = get_center_point(graph1_match_index, segments_graph1, 0)
     center_point2 = get_center_point(graph2_match_index, segments_graph2, 0)
 
     print("Center point 1:", center_point1)
     print("Center point 2:", center_point2)
-    # result = fit_map_in_map('./temp_data/6m03/6m03.mrc', './temp_data/175d/175d.mrc', './exit_fit')
-    # result.print_data()
+
+    # Fit map in map
+    result = fit_map_in_map('./temp_data/6m03/6m03.mrc', './temp_data/175d/175d.mrc', './exit_fit')
+    result.print_data()
 
 
 if __name__ == '__main__':
