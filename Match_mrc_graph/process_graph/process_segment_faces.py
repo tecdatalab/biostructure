@@ -40,8 +40,8 @@ def get_funtional_points(cube, filter_value):
     pos = (np.where(cube > filter_value))
 
     clear_0 = np.unique(np.array([[0, pos[1][i], pos[2][i]] for i in range(len(pos[0]))]), axis=0)
-    clear_1 = np.unique(np.array([[pos[0][i], 0, pos[2][i]] for i in range(len(pos[0]))]), axis=0)
-    clear_2 = np.unique(np.array([[pos[0][i], pos[1][i], 0] for i in range(len(pos[0]))]), axis=0)
+    clear_1 = np.unique(np.array([[pos[0][i], 0, pos[2][i]] for i in range(len(pos[1]))]), axis=0)
+    clear_2 = np.unique(np.array([[pos[0][i], pos[1][i], 0] for i in range(len(pos[2]))]), axis=0)
     return [clear_0, clear_1, clear_2]
 
 

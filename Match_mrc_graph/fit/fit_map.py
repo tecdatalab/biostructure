@@ -21,7 +21,7 @@ def get_out(*args):
 
 
 # Fit map0 into map1
-def fit_map_in_map(map0_path, map1_path, path_exit_folder, map0_level=None, map1_level=None):
+def fit_map_in_map(map0_path, map1_path, path_exit_folder, map0_vector_move=None, map0_level=None, map1_level=None):
     path = "./temp_map"
     map0_exit_name = map0_path.split('.')[-2]
     map0_exit_name = map0_exit_name.split('/')[-1]
@@ -40,10 +40,17 @@ def fit_map_in_map(map0_path, map1_path, path_exit_folder, map0_level=None, map1
     f = open(path + "/fit.cxc", "w+")
 
     if map0_level is not None:
-        f.write("volume #0 level " + str(map0_level).replace(".", ",") + "\r\n")
+        # f.write("volume #1 level " + str(map0_level).replace(".", ",") + "\r\n")
+        f.write("volume #1 level " + str(map0_level) + "\r\n")
 
     if map1_level is not None:
-        f.write("volume #1 level " + str(map1_level).replace(".", ",") + "\r\n")
+        # f.write("volume #2 level " + str(map1_level).replace(".", ",") + "\r\n")
+        f.write("volume #2 level " + str(map1_level) + "\r\n")
+
+    if map0_vector_move is not None:
+        f.write("move x {0} models #1".format(map0_vector_move[0]) + "\r\n")
+        f.write("move y {0} models #1".format(map0_vector_move[1]) + "\r\n")
+        f.write("move z {0} models #1".format(map0_vector_move[2]) + "\r\n")
 
     f.write("fitmap #1 in_map #2 \r\n")
     f.write("save {0} #1\r\n".format(path_exit_folder))
@@ -56,7 +63,7 @@ def fit_map_in_map(map0_path, map1_path, path_exit_folder, map0_level=None, map1
 
     _error, exit_binary_text = get_out("chimerax", "--nogui", map0_real_path, map1_real_path, commands_real_path)
 
-    #shutil.rmtree(path)
+    # shutil.rmtree(path)
     text = exit_binary_text.decode("utf-8")
-    #print(text)
+    # print(text)
     return FitMapResult(text, 'x')

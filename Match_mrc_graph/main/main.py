@@ -10,7 +10,7 @@ from fit.fit_map import fit_map_in_map
 from pdb_mrc.pdb_transform import download_pdb, get_chains, pdb_to_mrc_chains
 import os
 
-from process_mrc.miscellaneous import get_center_point
+from process_mrc.miscellaneous import get_center_point, transform_points_sscale, get_vector_move_1to2
 from utils_match.list_processing import get_element_list
 import numpy as np
 
@@ -80,10 +80,10 @@ def main_1():
 
     # Creacion de los mapas
     chains = get_chains('./temp_data/175d.pdb')
-    pdb_to_mrc_chains(True, False, 5.0, './temp_data/175d.pdb', './temp_data', chains, 1)
+    pdb_to_mrc_chains(True, False, 5.0, './temp_data/175d.pdb', './temp_data', chains, 5)
 
     chains = get_chains('./temp_data/6m03.pdb')
-    pdb_to_mrc_chains(True, False, 5.0, './temp_data/6m03.pdb', './temp_data', chains, 1)
+    pdb_to_mrc_chains(True, False, 5.0, './temp_data/6m03.pdb', './temp_data', chains, 5)
 
     # Generacion de grafos a partir de la segmentacion de los mapas
     # segments_graph1 = get_mrc_synthetic_segments_pdb("./temp_data/175d", 7)
@@ -115,8 +115,23 @@ def main_1():
     print("Center point 1:", center_point1)
     print("Center point 2:", center_point2)
 
+    print("Points in same scale")
+
+    center_point1_t, center_point2_t = transform_points_sscale(center_point1, center_point2,
+                                                               segments_graph1[0].mask.shape,
+                                                               segments_graph2[0].mask.shape)
+
+    print("Center point t 1:", center_point1_t)
+    print("Center point t 2:", center_point2_t)
+
+    move_vector = get_vector_move_1to2(center_point1_t, center_point2_t)
+    print("Move vector:", move_vector)
+
     # Fit map in map
-    result = fit_map_in_map('./temp_data/6m03/6m03.mrc', './temp_data/175d/175d.mrc', './exit_fit')
+    result = fit_map_in_map('./temp_data/175d/175d.mrc', './temp_data/6m03/6m03.mrc', './exit_fit',
+                            map0_vector_move=move_vector,
+                            map0_level=6.7, map1_level=6.7)
+    #result = fit_map_in_map('./temp_data/175d/175d.mrc', './temp_data/6m03/6m03.mrc', './exit_fit')
     result.print_data()
 
 
