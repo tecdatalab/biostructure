@@ -50,3 +50,7 @@ Thumbs.db
 # Temporal Files
 /db/Updater/generators/temp
 *.pyc
+
+emsurfer/src/assets/example-files/1crn
+emsurfer/src/assets/example-files/1crn_mrc
+emsurfer/src/assets/example-files/175d
