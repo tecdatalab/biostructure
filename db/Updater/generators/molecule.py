@@ -1,64 +1,117 @@
 import numpy as np
+from skimage.measure import regionprops
+from skimage.transform import resize
 
+from reader import Reader
+import processing
+
+## This module represents the molecule object with its properties and different data representations for each contour level. 
 
 class Molecule():
 
-    def __init__(
-            self,
-            rawHeader,
-            data,
-            size,
-            start,
-            grid_size,
-            cell_dim,
-            density_ranges,
-            origin):
-        self.rawHeader = rawHeader
-        self.array = data
-        (self.nz, self.ny, self.nx) = size
-        (self.nzstart, self.nystart, self.nxstart) = start
-        (self.mz, self.my, self.mx) = grid_size
-        (self.zlen, self.ylen, self.xlen) = cell_dim
-        (self.zorigin, self.yorigin, self.xorigin) = origin
-        # Assert volume info match header values
-        d_mean = np.mean(self.array)
-        d_min = np.min(self.array)
-        d_max = np.max(self.array)
-        if density_ranges != (d_min, d_max, d_mean):
-            print("File density range does not match with data")
-            (self.dmin, self.dmax, self.dmean) = (d_min, d_max, d_mean)
-        else:
-            (self.dmin, self.dmax, self.dmean) = density_ranges
+    defaultValue = 0
+    indicatorValue = 1
 
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            hasSameData = ~(~np.isclose(other.array, self.array)).sum()
-            return hasSameData
-        return False
+    ## Initialize molecule object with a filename, recomended contour value, and a list of cut-off ratios.
+    def __init__(self, filename, recommendedContour=None, cutoffRatios=[1]):
+        ## Call reader module, a exception is expected to reaise if filename is not valid. 
+        try:
+            reader = Reader()
+            reader.open(filename)
+            molecule_map = reader.read()
+        except IOError:
+            print("[ERROR]: Could not create Molecule object")
+            exit()
+        map_data = molecule_map.data()
+        contoursNum= len(cutoffRatios)
+        contour_masks = np.ndarray((contoursNum,*molecule_map.grid_size()))
+        
+        self.emMap=molecule_map
+        self.contourLvl=recommendedContour
+        self.cutoffRatios=cutoffRatios
+        self.contoursNum= contoursNum
 
-    def set_origin(self, new_origin):
-        (self.xorigin, self.yorigin, self.zorigin) = new_origin
+        for i,cutoffRatio in enumerate(self.cutoffRatios):
+            lvl = cutoffRatio*self.contourLvl
+            mask_at_contour = np.zeros(map_data.shape)
+            mask_at_contour[map_data>=lvl]=self.indicatorValue
+            contour_masks[i,:] = mask_at_contour
 
-    def data(self):
-        return self.array
+        self.contour_masks = contour_masks
+        self.seg_masks=None
+        self.labels=None
+        self.atoms=None
+        self.zDescriptors=None
 
-    def set_data(self, newData):
-        self.array = newData
+    # step and sigma are input arguments, set seg_masks which stores a collection of segment maks as composited numpy array for each countour level. 
+    # Returns a dictionary where key is level ratio and value is the composited numpy array
+    def generateSegments(self, steps, sigma):
+        cutoffLvls = self.getCutoffLevels()
+        labels = processing.segment(self.emMap, steps, sigma, cutoffLvls, self.contoursNum)
+        volume_reg_lvl = []
+        voxel_vol = self.emMap.voxelVol()
+        molecule_masks = {}
+        for lvl,labels in zip(self.cutoffRatios,labels):
+            volume_reg_dict = {}
+            level_masks = {}
+            regprops = regionprops(labels)
+            for i,reg in enumerate(regprops):
+                segment_mask = np.zeros(self.emMap.grid_size(), dtype=np.int)
+                segment_indexes=reg.coords
+                segment_mask[segment_indexes[:,0],segment_indexes[:,1],segment_indexes[:,2]] = 1
+                volume_reg_dict[reg.label] = voxel_vol*reg.area
+                level_masks[reg.label]=segment_mask
+            volume_reg_lvl.append(volume_reg_dict)
+            molecule_masks[lvl]= level_masks
+        self.labels = labels
+        self.seg_masks = molecule_masks
 
-    def shape(self):
-        return (self.nz, self.ny, self.nx)
+    def getContourMasks(self):
+        return self.contour_masks   
 
-    def start_point(self):
-        return (self.nzstart, self.nystart, self.nxstart)
+    def getEmMap(self):
+        return self.emMap
 
-    def grid_size(self):
-        return (self.mz, self.my, self.mx)
+    def getCutoffLevels(self):
+        return {cutoffRatio: cutoffRatio*self.contourLvl for cutoffRatio in self.cutoffRatios}
 
-    def cell_dim(self):
-        return (self.zlen, self.ylen, self.xlen)
+    def getGridSize(self):
+        return self.emMap.grid_size()
 
-    def density_range(self):
-        return (self.dmin, self.dmax, self.dmean)
+    def getCellDim(self):
+        return self.emMap.cell_dim()
 
-    def origin(self):
-        return (self.zorigin, self.yorigin, self.xorigin)
+    def getSegmentsMasks(self):
+        return self.seg_masks
+
+
+    def getZernikeDescriptors(self):
+        self.zDescriptors = np.ndarray(((self.contoursNum, zernike_vec_len)))
+        for i in range(self.contoursNum):
+            if self.contour_maks[i].flags['C_CONTIGUOUS']:
+                pass
+            else:
+                self.contour_maks[i,:] = self.data[i].ascontiguousarray('C') 
+
+    def getVolume(self):
+        volume_contour_dict = dict()
+        voxel_vol = self.emMap.voxelVol()
+        for i,cutoffRatio in enumerate(self.cutoffRatios):
+            mask_at_level = self.contour_masks[i,:]
+            volume_contour_dict[cutoffRatio] = np.sum(mask_at_level)*voxel_vol
+        return volume_contour_dict
+
+    def getSegmentsVolume(self):
+        volume_contour_dict = dict()
+        voxel_vol = self.emMap.voxelVol()
+        segment_masks = self.getSegmentsMasks()
+        for cutoffRatio in self.cutoffRatios:
+            mask_at_level = segment_masks[cutoffRatio]
+            volume_contour_dict[cutoffRatio] = {label_id : np.sum(mask_at_level[label_id])*voxel_vol for label_id in mask_at_level.keys()}
+        return volume_contour_dict
+
+    def getVoxelVol(self):
+        return self.emMap.voxelVol()
+
+    def getVoxelSize(self):
+        return self.emMap.voxelSize()
