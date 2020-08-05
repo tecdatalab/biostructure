@@ -145,6 +145,37 @@ class FTP_connection(object):
         file.close()
         os.remove("pdb_entry_type.txt")
         return result
+
+    def get_pdb_by_index(self, id_code):
+        results = self.get_all_pdb()
+        for i in range(0, len(results)-1):
+            if results[i].get_id_code() == id_code:
+                return i
+            
+
+    def get_range_pdb(
+            self, 
+            ini_pdb, 
+            end_pdb, 
+            url="http://ftp.wwpdb.org/pub/pdb/derived_data/pdb_entry_type.txt"):
+        urllib.request.urlretrieve(url, 'pdb_entry_type.txt')
+        file = open("pdb_entry_type.txt", "r")
+        result = []
+        for line in file:
+            fields = line.split("\t")
+            data1 = fields[0]
+            data2 = fields[1]
+            data3 = fields[2]
+            result.append(Pdb_result(data1, data2, data3))
+        file.close()
+        os.remove("pdb_entry_type.txt")
+        size = len(result)-1
+        if(ini_pdb > size):
+            return []
+        elif(end_pdb > size):
+            return result [ini_pdb:]
+        return result[ini_pdb:int(end_pdb)]
+    
     
     def get_all_cath_complex(
             self,

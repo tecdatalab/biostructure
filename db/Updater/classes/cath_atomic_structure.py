@@ -92,7 +92,6 @@ class Cath_atomic_structure(object):
                 self.__id_code])
             result = [record[0] for record in cur]
             self.__atomic_structure_id= result[0]
-        
         cur.execute(
             sql.SQL("SELECT * FROM cath_atomic_structure WHERE atomic_structure_id = %s;"),[
                 self.__atomic_structure_id])

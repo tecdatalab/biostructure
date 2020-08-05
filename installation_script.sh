@@ -121,6 +121,12 @@ sudo python3 -m pip install -U psycopg2-binary
 # Requests
 sudo python3 -m pip install -U requests
 
+# Psutil
+sudo python3 -m pip install -U psutil
+
+# Clint
+sudo python3 -m pip install -U clint
+
 # Tabulate
 sudo python3 -m pip install tabulate
 

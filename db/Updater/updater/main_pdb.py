@@ -1,9 +1,13 @@
 import sys, argparse, os
+import datetime
 sys.path.append('../')
 from time import time
 from connections.sql_connection import SQL_connection
 from connections.ftp_connection import FTP_connection
 from classes.atomic_structure import Atomic_structure
+from classes.binnacle import Binnacle
+from datetime import date
+from classes.update import Update
 
 from utilities.log import Log
 from constants.constants import *
@@ -14,19 +18,43 @@ Created on 31 mar. 2019
 Last modified: 16 may 2020
 @By: dnnxl
 '''
-
 log_file = None
 
-def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomic, atomicEmd):
+def update_pdb(connec_ftp, connec_sql, attemptPdb, cathComplex, cathChain, cathDomain, atomic, atomicEmd, initialAtomic, finalAtomic):
     
     cursor_sql = connec_sql.get_cursor()
+
+    update_temp = Update(datetime.datetime.now())
+    update_temp.insert_update_db(connec_sql, cursor_sql)
+    connec_sql.commit()
+
+    temp_binnacle = Binnacle()
+    temp_binnacle.set_last_update(cursor_sql)
+
     #Create atomic structures
     if atomic == 'Y':
-        all_pdb = connec_ftp.get_all_pdb()
+        # Complete mode
+        if(int(initialAtomic) == 0 and float(finalAtomic) == float("inf")):
+            all_pdb = connec_ftp.get_all_pdb()
+        else:
+            all_pdb = connec_ftp.get_range_pdb(int(initialAtomic), float(finalAtomic))
+
         print("Total changes atomic structures", len(all_pdb))
         domain_dic = connec_ftp.get_all_cath_domain_boundarie_dic()
         k = 1
         for i in all_pdb:
+
+            temp_binnacle.set_pdb_id(i.id_code)
+            temp_pdb_attempt = temp_binnacle.get_attempt_pdb(cursor_sql)
+            if(temp_pdb_attempt == None):
+                temp_binnacle.insert_binnacle_pdb(cursor_sql)
+                connec_sql.commit()
+            elif(temp_pdb_attempt > int(attemptPdb)):
+                continue
+            else:
+                temp_binnacle.update_binnacle_pdb(cursor_sql)
+                connec_sql.commit()
+
             print("---------------------------------------------------------")
             print ("Actual execution {0} with PDB {1}".format(k, i.id_code))
             try:
@@ -37,7 +65,7 @@ def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomi
                 log_file.generate_error_message(TypeErrorPdb.EEP.value.format(k, i.id_code), TypeErrorPdb.EEP.name, e)
             k += 1
             connec_sql.commit()
-    print("Despues del if atomic")
+
     #Create cathComplex
     if cathComplex == 'Y':
         all_cathChain = connec_ftp.get_all_cath_complex()
@@ -102,28 +130,46 @@ def update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomi
     connec_sql.commit()
     cursor_sql.close()
 
-def main(cathComplex, cathChain, cathDomain, atomic, atomicEmd):
-    
+def main(log, attemptPdb, cathComplex, cathChain, cathDomain, atomic, initialAtomic, finalAtomic, atomicEmd):
+    log_file = Log(log)  # open file in append mode
+    log_file.init_log_file(__file__)
+    log_file.generate_info_message(TypeMessage.MS1.value, TypeMessage.MS1.name)
+
     connec_ftp = FTP_connection()
     connec_ftp.init_connection()
     connec_sql = SQL_connection()
     connec_sql.init_connection()
 
-    update_pdb(connec_ftp, connec_sql, cathComplex, cathChain, cathDomain, atomic, atomicEmd)
+    update_pdb(connec_ftp, connec_sql, attemptPdb, cathComplex, cathChain, cathDomain, atomic, atomicEmd, initialAtomic, finalAtomic)
 
     connec_sql.close_connection()
     connec_ftp.close_connection()
     print("Finish")
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Calculation of data for EMD.')
+        description='Calculation of data for PDB.')
     parser.add_argument(
         '-l',
         '--log',
         help='Log file name.',
-        default='log.txt')
+        default='updater.log')
+
+    parser.add_argument(
+        '-ia',
+        '--initialAtomic',
+        help='Initial Atomic for execution.',
+        default='0')
+    parser.add_argument(
+        '-fa',
+        '--finalAtomic',
+        help='Final Atomic for execution (use "inf" for a complete execution).',
+        default='inf')
+    parser.add_argument(
+        '-at',
+        '--attemptPdb',
+        help='Attempt Pdb coefficient. The number of tries for each pdb.',
+        default='2')
     required_arguments = parser.add_argument_group('required arguments')
     required_arguments.add_argument(
         '-cco',
@@ -167,11 +213,8 @@ if __name__ == "__main__":
         required=True)
     args = parser.parse_args()
 
-    log_file = Log(args.log)  # open file in append mode
-    log_file.init_log_file(__file__)
-    log_file.generate_info_message(TypeMessage.MS1.value, TypeMessage.MS1.name)
     ini = time()
-    main(args.cathComplex, args.cathChain, args.cathDomain, args.atomic, args.atomicEmd)
+    main(args.log, args.attemptPdb, args.cathComplex, args.cathChain, args.cathDomain, args.atomic, args.initialAtomic, args.finalAtomic, args.atomicEmd)
     final = time()
     ejec = final - ini
     print('Execution time:', ejec)
