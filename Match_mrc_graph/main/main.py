@@ -70,30 +70,30 @@ import numpy as np
 
 
 def main_1():
-    path = 'temp_data'
+    path = 'maps_pdb'
     try:
         os.mkdir(path)
-        download_pdb('175d', './temp_data/175d.pdb')
-        download_pdb('6m03', './temp_data/6m03.pdb')
+        download_pdb('175d', './maps_pdb/175d.pdb')
+        download_pdb('6m03', './maps_pdb/6m03.pdb')
     except:
         pass
 
     # Creacion de los mapas
-    chains = get_chains('./temp_data/175d.pdb')
-    pdb_to_mrc_chains(True, False, 5.0, './temp_data/175d.pdb', './temp_data', chains, 5)
+    chains = get_chains('./maps_pdb/175d.pdb')
+    pdb_to_mrc_chains(True, False, 5.0, './maps_pdb/175d.pdb', './maps_pdb', chains, 5)
 
-    chains = get_chains('./temp_data/6m03.pdb')
-    pdb_to_mrc_chains(True, False, 5.0, './temp_data/6m03.pdb', './temp_data', chains, 5)
+    chains = get_chains('./maps_pdb/6m03.pdb')
+    pdb_to_mrc_chains(True, False, 5.0, './maps_pdb/6m03.pdb', './maps_pdb', chains, 5)
 
     # Generacion de grafos a partir de la segmentacion de los mapas
-    # segments_graph1 = get_mrc_synthetic_segments_pdb("./temp_data/175d", 7)
-    # segments_graph2 = get_mrc_synthetic_segments_pdb("./temp_data/6m03", 7)
+    # segments_graph1 = get_mrc_synthetic_segments_pdb("./maps_pdb/175d", 7)
+    # segments_graph2 = get_mrc_synthetic_segments_pdb("./maps_pdb/6m03", 7)
 
-    segments_graph1 = get_mrc_segments("./temp_data/175d/175d.mrc", 7, 3, 1)
-    segments_graph2 = get_mrc_segments("./temp_data/6m03/6m03.mrc", 7, 3, 1)
+    segments_graph1, figure1_shape = get_mrc_segments("./maps_pdb/175d/175d.mrc", 7, 3, 1)
+    segments_graph2, figure2_shape = get_mrc_segments("./maps_pdb/6m03/6m03.mrc", 7, 3, 1)
 
-    print("Segments 1 shape", segments_graph1[0].mask.shape)
-    print("Segments 2 shape", segments_graph2[0].mask.shape)
+    print("Segments 1 shape", figure1_shape)
+    print("Segments 2 shape", figure2_shape)
 
     graph1 = generate_graph(segments_graph1, 50, 0, 6, 1)
     graph2 = generate_graph(segments_graph2, 50, 0, 6, 1)
@@ -118,8 +118,8 @@ def main_1():
     print("Points in same scale")
 
     center_point1_t, center_point2_t = transform_points_sscale(center_point1, center_point2,
-                                                               segments_graph1[0].mask.shape,
-                                                               segments_graph2[0].mask.shape)
+                                                               figure1_shape,
+                                                               figure2_shape)
 
     print("Center point t 1:", center_point1_t)
     print("Center point t 2:", center_point2_t)
@@ -128,10 +128,10 @@ def main_1():
     print("Move vector:", move_vector)
 
     # Fit map in map
-    result = fit_map_in_map('./temp_data/175d/175d.mrc', './temp_data/6m03/6m03.mrc', './exit_fit',
+    result = fit_map_in_map('./maps_pdb/175d/175d.mrc', './maps_pdb/6m03/6m03.mrc', './exit_fit', 100,
                             map0_vector_move=move_vector,
                             map0_level=6.7, map1_level=6.7)
-    #result = fit_map_in_map('./temp_data/175d/175d.mrc', './temp_data/6m03/6m03.mrc', './exit_fit')
+    #result = fit_map_in_map('./maps_pdb/175d/175d.mrc', './maps_pdb/6m03/6m03.mrc', './exit_fit', 100)
     result.print_data()
 
 

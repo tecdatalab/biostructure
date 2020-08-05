@@ -21,7 +21,7 @@ def get_out(*args):
 
 
 # Fit map0 into map1
-def fit_map_in_map(map0_path, map1_path, path_exit_folder, map0_vector_move=None, map0_level=None, map1_level=None):
+def fit_map_in_map(map0_path, map1_path, path_exit_folder, attempts, map0_vector_move=None, map0_level=None, map1_level=None):
     path = "./temp_map"
     map0_exit_name = map0_path.split('.')[-2]
     map0_exit_name = map0_exit_name.split('/')[-1]
@@ -52,8 +52,10 @@ def fit_map_in_map(map0_path, map1_path, path_exit_folder, map0_vector_move=None
         f.write("move y {0} models #1".format(map0_vector_move[1]) + "\r\n")
         f.write("move z {0} models #1".format(map0_vector_move[2]) + "\r\n")
 
-    f.write("fitmap #1 in_map #2 \r\n")
-    f.write("save {0} #1\r\n".format(path_exit_folder))
+    f.write("fitmap #1 in_map #2 search {0} placement r\r\n".format(attempts))
+    #f.write("fitmap #1 in_map #2\r\n")
+    f.write("vop resample #1 ongrid #2 \r\n")
+    f.write("save {0} #3\r\n".format(path_exit_folder))
     f.write("exit")
     f.close()
 
@@ -63,7 +65,7 @@ def fit_map_in_map(map0_path, map1_path, path_exit_folder, map0_vector_move=None
 
     _error, exit_binary_text = get_out("chimerax", "--nogui", map0_real_path, map1_real_path, commands_real_path)
 
-    # shutil.rmtree(path)
+    shutil.rmtree(path)
     text = exit_binary_text.decode("utf-8")
     # print(text)
     return FitMapResult(text, 'x')
