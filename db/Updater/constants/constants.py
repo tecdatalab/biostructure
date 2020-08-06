@@ -1,7 +1,10 @@
 '''
-file constant.py
-@author Danny Xie 
-This file will keep all the static values of the files.
+ file constant.py
+ 
+ @author Danny Xie 
+ 
+ This file will keep all the static 
+ values of the files.
 '''
 
 import enum 
@@ -19,7 +22,7 @@ class App(enum.Enum):
 # Description: The following class contain all the message of error of the main_emd.py for the logging file.
 # By: Danny Xie Li
 # Created: 16/05/2020
-# Last modification: 16/05/2020
+# Last modification: 06/08/2020
 
 class TypeErrorEmd(enum.Enum):
     DFE = "DFE" # Not a error, default value.
@@ -29,6 +32,10 @@ class TypeErrorEmd(enum.Enum):
     EIN = "Error in the insertion of EMD {0}" # Error in the insertion.
     EID = "Error in the descriptor generation of EMD {0}" # Error in the descriptor generation.
     ETS = "Error in the time stamp generation of EMD {0}" # Error in the time stamp generation.
+    EGS = "Error in the generation of segments EMD {0}" # Error in the generation of segments.
+    ECE = "Error in the calculation of the volume of the EMD {0}" # Error in the calculation of the volume of the EMD.
+    ECV = "Error in the calculation of the volume of the segments in EMD {0}" # Error in the calculation of the volume of the segments in EMD.
+    EIS = "Error in the insertion of segments in EMD {0}" # Error in the insertion of segments in EMD.
 
 # class TypeErrorPdb enum
 # Description: The following class contain all the message of error of the main_pdb.py for the logging file.
