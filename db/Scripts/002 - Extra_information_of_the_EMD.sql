@@ -40,7 +40,8 @@ CREATE TABLE map_information(
 	pixel_y JSON,
 	pixel_z JSON,
 	countour_level FLOAT8,
-	annotation_details TEXT
+	annotation_details TEXT,
+	volume TEXT[]
 );
 
 COMMENT ON TABLE map_information IS 'Stores the map information of an EMD.';
