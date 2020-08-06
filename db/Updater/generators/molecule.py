@@ -1,9 +1,12 @@
+import sys
+sys.path.append('../')
+
 import numpy as np
 from skimage.measure import regionprops
 from skimage.transform import resize
 
-from reader import Reader
-import processing
+from generators.reader import Reader
+from generators import processing
 
 ## This module represents the molecule object with its properties and different data representations for each contour level. 
 

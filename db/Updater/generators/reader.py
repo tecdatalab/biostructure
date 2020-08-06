@@ -49,12 +49,15 @@
   57-256	LABEL(20,10) 10 80-character text labels
  
  '''
+import sys
+sys.path.append('../')
+
 import struct
 import array
 import numpy as np
 import os.path
 
-import emMap
+from generators import emMap
 import mrcfile
 
 class Reader():

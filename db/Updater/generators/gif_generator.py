@@ -1,13 +1,17 @@
 '''
 Created on 22 may. 2019
-
 @author: luis98
+
+Last modification on 6 aug. 2020
+@author: dnnxl
 '''
+import sys
+sys.path.append('../')
 from PIL import Image
 import glob
 import os
 import shutil
-from generators import reader
+from generators.reader import Reader
 from generators.visualizer import Visualizer
 from glumpy import app
 import os
@@ -19,7 +23,7 @@ gif_path = "https://biostructure.s3.us-east-2.amazonaws.com/gif/{0}.gif"
 
 
 def generateGif(emd_id, levelp):
-    mapReader = reader.Reader()
+    mapReader = Reader()
     mapReader.open("{0}temp/emd_{1}.map".format(dir, emd_id))
     # Get map object
     myMap = mapReader.read()
