@@ -10,6 +10,8 @@ import os
 import os.path
 import requests
 from clint.textui import progress
+from generators.molecule import Molecule
+from utilities import utility
 
 dir = ""
 
@@ -103,6 +105,10 @@ def get_emd_descriptors(emd_id, contour, std):
 
     return result
 
+def get_volume_map(emd_id, recommendedContour, cutoffRatios):
+    temp_molecule = Molecule("{0}temp/emd_{1}.map".format(dir, emd_id), recommendedContour=recommendedContour, cutoffRatios=cutoffRatios)
+    map_volume = utility.format_volume_map(temp_molecule.getVolume())
+    return map_volume
 
 # download_file("0001")
 # print(get_min_max_density("0001",0.018))
