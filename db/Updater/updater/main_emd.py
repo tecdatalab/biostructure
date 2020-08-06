@@ -5,7 +5,7 @@ import datetime
 from generators import gif_generator as gifG
 from generators import values_generator as valg
 from classes.descriptor import Descriptor
-from generators.values_generator import get_emd_descriptors, remove_map, download_file
+from generators.values_generator import get_emd_descriptors, remove_map, download_file, get_volume_map
 from classes.time_stamp import Time_stamp
 from datetime import date
 from classes.update import Update
@@ -22,7 +22,7 @@ Created on 31 mar. 2019
 @author: luis98
 
 Last modified by @dnnxl
-Date on 16 jul 2020
+Date on 6 Aug. 2020
 '''
 
 valg.dir = "../generators/"
@@ -42,6 +42,9 @@ def insert_update_descriptors(emd_entry_p, cursor_sql):
 
 def update_emd(connec_ftp,connec_sql,initialEMD,attempt_emd, mode,image,descriptor,finalEMD):
     
+    # Volume map yes
+    volume_map = "Y"
+
     cursor_sql = connec_sql.get_cursor()
     if mode == 'c':
         emds = connec_ftp.get_all_emds_id(initialEMD, finalEMD)
@@ -80,8 +83,7 @@ def update_emd(connec_ftp,connec_sql,initialEMD,attempt_emd, mode,image,descript
         temp_emd_entry.create_by_ftp(i, connec_ftp.get_ftp())
         temp_time_stamp = Time_stamp(i, date.today(), temp_emd_entry.map_url, temp_emd_entry.xml_url, temp_emd_entry.image_url)
         
-        if image == 'Y' or descriptor == 'Y':
-            print("Download file")
+        if image == 'Y' or descriptor == 'Y' or volume_map == 'Y':
             download_file(i)
 
         if image == 'Y':
@@ -107,6 +109,14 @@ def update_emd(connec_ftp,connec_sql,initialEMD,attempt_emd, mode,image,descript
                     log_file.generate_error_message(TypeErrorEmd.EID.value.format(i), TypeErrorEmd.EID.name, e)
             else:
                 log_file.generate_error_message(TypeErrorEmd.ECS.value.format(i), TypeErrorEmd.ECS.name, None)
+        
+        if volume_map == "Y":
+            try:
+                temp_emd_entry.set_map_volume(get_volume_map(i ,7, [1,0.5]))
+                temp_emd_entry.insert_update_db(cursor_sql)
+            except Exception as e:
+                log_file.generate_error_message(TypeErrorEmd.ECE.value.format(i), TypeErrorEmd.ECE.name, e)
+
         try:
             temp_time_stamp.insert_update_db(cursor_sql)
         except Exception as e:
