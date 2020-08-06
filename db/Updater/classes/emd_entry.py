@@ -1,7 +1,9 @@
 '''
 Created on 22 feb. 2019
-
 @author: luis98
+
+Last modification on 6 Aug. 2020
+@author: dnnxl
 '''
 from psycopg2 import sql
 import requests
@@ -9,6 +11,8 @@ import json
 from os import remove
 from xml.dom import minidom
 from generators import gif_generator as gifG
+from generators.molecule import Molecule
+from utilities import utility
 
 class Map_information(object):
     '''
@@ -49,6 +53,7 @@ class Map_information(object):
     __map_pixel_z = None
     __map_countour_level = None
     __map_annotation_details = None
+    __map_volume = None
 
     def __init__(
             self,
@@ -86,7 +91,8 @@ class Map_information(object):
             map_pixel_y,
             map_pixel_z,
             map_countour_level,
-            map_annotation_details):
+            map_annotation_details,
+            map_volume):
         self.__map_id = map_id
         self.__map_file_information = map_file_information
         self.__map_data_type = map_data_type
@@ -122,6 +128,7 @@ class Map_information(object):
         self.__map_pixel_z = map_pixel_z
         self.__map_countour_level = map_countour_level
         self.__map_annotation_details = map_annotation_details
+        self.__map_volume = map_volume
 
     def create_map_by_file(self, file):
         doc = minidom.parse(file)
@@ -454,6 +461,9 @@ class Map_information(object):
     def get_map_annotation_details(self):
         return self.__map_annotation_details
 
+    def get_map_volume(self):
+        return self.__map_volume
+
     def set_map_id(self, value):
         self.__map_id = value
 
@@ -559,6 +569,9 @@ class Map_information(object):
     def set_map_annotation_details(self, value):
         self.__map_annotation_details = value
 
+    def set_map_volume(self, value):
+        self.__map_volume = value
+
     def del_map_id(self):
         del self.__map_id
 
@@ -663,6 +676,9 @@ class Map_information(object):
 
     def del_map_annotation_details(self):
         del self.__map_annotation_details
+    
+    def del_map_volume(self):
+        del self.__map_volume
 
     map_id = property(get_map_id, set_map_id, del_map_id, "map_id's docstring")
     map_file_information = property(
@@ -835,6 +851,11 @@ class Map_information(object):
         set_map_annotation_details,
         del_map_annotation_details,
         "map_annotation_details's docstring")
+    map_volume = property(
+        get_map_volume,
+        set_map_volume,
+        del_map_volume,
+        "map_volume's docstring")
 
 
 class Emd_entry(Map_information):
@@ -899,6 +920,7 @@ class Emd_entry(Map_information):
             map_pixel_z=None,
             map_countour_level=None,
             map_annotation_details=None,
+            map_volume=None,
             emd_url="http://ftp.ebi.ac.uk/pub/databases/emdb"):
         Map_information.__init__(
             self,
@@ -936,7 +958,8 @@ class Emd_entry(Map_information):
             map_pixel_y,
             map_pixel_z,
             map_countour_level,
-            map_annotation_details)
+            map_annotation_details,
+            map_volume)
         self.__id = id
         self.__full_name = full_name
         self.__acronym = acronym
@@ -1014,7 +1037,7 @@ class Emd_entry(Map_information):
 
     def __insert_map_db(self, cur):
         cur.execute(
-            sql.SQL("INSERT INTO map_information (id,file_information,data_type,num_columns,num_rows,num_sections,origin_col,origin_row,origin_sec,limit_col,limit_row,limit_sec,spacing_col,spacing_row,spacing_sec,cell_a,cell_b,cell_c,cell_alpha,cell_beta,cell_gamma,axis_order_fast,axis_order_medium,axis_order_slow,minimum,maximum,average,std,space_group_number,details,pixel_x,pixel_y,pixel_z,countour_level,annotation_details) VALUES (DEFAULT,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id;"), [
+            sql.SQL("INSERT INTO map_information (id,file_information,data_type,num_columns,num_rows,num_sections,origin_col,origin_row,origin_sec,limit_col,limit_row,limit_sec,spacing_col,spacing_row,spacing_sec,cell_a,cell_b,cell_c,cell_alpha,cell_beta,cell_gamma,axis_order_fast,axis_order_medium,axis_order_slow,minimum,maximum,average,std,space_group_number,details,pixel_x,pixel_y,pixel_z,countour_level,annotation_details, volume) VALUES (DEFAULT,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id;"), [
                 json.dumps(
                     self.map_file_information), self.map_data_type, self.map_num_columns, self.map_num_rows, self.map_num_sections, self.map_origin_col, self.map_origin_row, self.map_origin_sec, self.map_limit_col, self.map_limit_row, self.map_limit_sec, self.map_spacing_col, self.map_spacing_row, self.map_spacing_sec, json.dumps(
                     self.map_cell_a), json.dumps(
@@ -1025,12 +1048,13 @@ class Emd_entry(Map_information):
                                     self.map_cell_gamma), self.map_axis_order_fast, self.map_axis_order_medium, self.map_axis_order_slow, self.map_minimum, self.map_maximum, self.map_average, self.map_std, self.map_space_group_number, self.map_details, json.dumps(
                                         self.map_pixel_x), json.dumps(
                                             self.map_pixel_y), json.dumps(
-                                                self.map_pixel_z), self.map_countour_level, self.map_annotation_details])
+                                                self.map_pixel_z), self.map_countour_level, self.map_annotation_details, self.map_volume])
         self.map_id = [record for record in cur][0]
+        print(self.map_id)
 
     def __update_map_db(self, cur):
         cur.execute(
-            sql.SQL("UPDATE map_information SET file_information = %s, data_type = %s, num_columns = %s, num_rows = %s, num_sections = %s, origin_col = %s, origin_row = %s, origin_sec = %s, limit_col = %s, limit_row = %s, limit_sec = %s, spacing_col = %s, spacing_row = %s, spacing_sec = %s, cell_a = %s, cell_b = %s, cell_c = %s, cell_alpha = %s, cell_beta = %s, cell_gamma = %s, axis_order_fast = %s, axis_order_medium = %s, axis_order_slow = %s, minimum = %s, maximum = %s, average = %s, std = %s, space_group_number = %s, details = %s, pixel_x = %s, pixel_y = %s, pixel_z = %s, countour_level = %s, annotation_details = %s WHERE id = %s;"), [
+            sql.SQL("UPDATE map_information SET file_information = %s, data_type = %s, num_columns = %s, num_rows = %s, num_sections = %s, origin_col = %s, origin_row = %s, origin_sec = %s, limit_col = %s, limit_row = %s, limit_sec = %s, spacing_col = %s, spacing_row = %s, spacing_sec = %s, cell_a = %s, cell_b = %s, cell_c = %s, cell_alpha = %s, cell_beta = %s, cell_gamma = %s, axis_order_fast = %s, axis_order_medium = %s, axis_order_slow = %s, minimum = %s, maximum = %s, average = %s, std = %s, space_group_number = %s, details = %s, pixel_x = %s, pixel_y = %s, pixel_z = %s, countour_level = %s, annotation_details = %s, volume = %s WHERE id = %s;"), [
                 json.dumps(
                     self.map_file_information), self.map_data_type, self.map_num_columns, self.map_num_rows, self.map_num_sections, self.map_origin_col, self.map_origin_row, self.map_origin_sec, self.map_limit_col, self.map_limit_row, self.map_limit_sec, self.map_spacing_col, self.map_spacing_row, self.map_spacing_sec, json.dumps(
                     self.map_cell_a), json.dumps(
@@ -1041,7 +1065,7 @@ class Emd_entry(Map_information):
                                     self.map_cell_gamma), self.map_axis_order_fast, self.map_axis_order_medium, self.map_axis_order_slow, self.map_minimum, self.map_maximum, self.map_average, self.map_std, self.map_space_group_number, self.map_details, json.dumps(
                                         self.map_pixel_x), json.dumps(
                                             self.map_pixel_y), json.dumps(
-                                                self.map_pixel_z), self.map_countour_level, self.map_annotation_details, self.map_id])
+                                                self.map_pixel_z), self.map_countour_level, self.map_annotation_details, self.map_volume, self.map_id])
 
     def __insert_emd_entry(self, cur):
         cur.execute(sql.SQL("INSERT INTO emd_entry(id,full_name,acronym,volume,resolution,image_url,png_img_3d,gif_img_3d,xml_url,map_url,map_information_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"), [
@@ -1232,7 +1256,8 @@ class Emd_entry(Map_information):
             and self.map_pixel_y == emd_entry.map_pixel_y \
             and self.map_pixel_z == emd_entry.map_pixel_z \
             and self.map_countour_level == emd_entry.map_countour_level \
-            and self.map_annotation_details == emd_entry.map_annotation_details
+            and self.map_annotation_details == emd_entry.map_annotation_details \
+            and self.map_volume == emd_entry.map_volume
 
     id = property(get_id, set_id, del_id, "id's docstring")
     full_name = property(
