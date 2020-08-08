@@ -259,9 +259,102 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
         volume_result['pdb_volume']=-1
 
     return volume_result
+
+# Function to get symmetry information from pdb file
+def getSymmetryFromPDB(models_path):
+    import __main__
+    __main__.pymol_argv = ['pymol','-qc']
+    import pymol
+    from pymol import cmd, stored
+    pymol.finish_launching()
+
+    def hasSymmetry(filename):
+        cmd.reinitialize()
+        cmd.load(filename)
+        res = cmd.get_symmetry()
+        if res is None:
+            res = []
+        return res
+        
+
+    
+
+    list_pdb = df['pdb_path'] = df["fitted_entries"].map(lambda pdb_id:'/home/manzumbado/Development/Asistencia/BECA-TEC/biostructure/em/dataset/models/pdb'+pdb_id+'.ent').tolist()
+    df['symm'] = df['pdb_path'].map(lambda x: True if (hasSymmetry(x)[0:-1] != [1.0, 1.0, 1.0, 90.0, 90.0, 90.0]) else False)
+
+    df.to_csv('mv.csv')
+    
+# Function to get stats from data and outlier detection
+def getDatasetStats(result_dir, percentil_boundaries_tuple=None):
+    # Open result csv from volume calculation
+    df = pd.read_csv('dataset_volume.csv')
+    # Replace missing volumes (produced by e2pdb2mrc failure to generate map from pdb)
+    df['pdb_volume'].replace('', np.nan, inplace=True)
+    df['map_volume'].replace('', np.nan, inplace=True)
+    df.dropna(inplace=True)
+
+    # Computing vol_capture which is the volume percent of the generated map respecto to the original one
+    df['vol_capture'] = ((df['pdb_volume']*100)/df['map_volume'])/100
+    # Cleaning infinite values (Some entries report 0 in volume, NEED TO CHECK)
+    df['vol_capture'].replace(np.inf, np.nan, inplace=True)
+    df.dropna(inplace=True)
+
+    # Plot hist
+    df.hist(column='vol_capture', grid=True, bins=30)
+    plt.title('Ratio of simulated volume to em map volume at recommended contour')
+    plt.xlabel('Bins')  
+    plt.ylabel('Number of Samples')
+    plt.savefig(os.path.join(result_dir,'volume_capture_hist.png'))
+    # Computing basic stats
+    num_samples = len(df)
+    avg = df['vol_capture'].mean()
+    med = df['vol_capture'].median()
+    std = df['vol_capture'].std()
+    print("Number of samples: {}".format(num_samples))
+    print("Volume ratio avg: {}".format(avg))
+    print("Volume ratio median: {}".format(med))
+    print("Volume ratio std: {}".format(std))
+    # Get column values to list
+    values = df['vol_capture'].tolist()
+
+    # Compute quartiles and plot box chart
+    q1 = np.percentile(values, 25, interpolation = 'midpoint')
+    q3 = np.percentile(values, 75, interpolation = 'midpoint')
+    print("Quartile Q1: {}".format(q1))
+    print("Quartile Q3: {}".format(q3))
+    print("IQR: {}".format(q3-q1))
+
+    low_boundary = q1-(q3-q1)*1.5 
+    upper_boundary = q3+(q3-q1)*1.5 
+
+    print("Lower boundary: {}".format(low_boundary))
+    print("Upper boundary: {}".format(upper_boundary))
+
+    print("Number of samples below lower boundary: {} and over upper boundary: {}".format(len( df[df.vol_capture < low_boundary] ), len( df[df.vol_capture >upper_boundary] )))
+
+    percentilA = df.vol_capture.quantile(27/100, interpolation = 'midpoint')
+    percentilB = df.vol_capture.quantile(48/100,  interpolation = 'midpoint')
+
+    if percentil_boundaries_tuple != None:
+        numMuestras = len( df[ (df.vol_capture > percentil_boundaries_tuple[0]) & (df.vol_capture < percentil_boundaries_tuple[1])])
+        print("Número de muestras entre percentiles {} y {}: {}".format(percentil_boundaries_tuple[0],percentil_boundaries_tuple[1], numMuestras))
+
+    # Printing outlier candidates
+    id_outliers_suspect = df[(df.vol_capture < low_boundary) | (df.vol_capture >upper_boundary) ].index
+    print("Getting outliers...")
+    print(df.loc[id_outliers_suspect, ['id','fitted_entries']])
+
+    # Gerete boxplot
+    res = df.boxplot(column='vol_capture', grid=True)
+    plt.title('Ratio of simulated volume to em map volume at recommended contour')
+    plt.xlabel('Volume ratio')  
+    plt.ylabel('A/A')
+    plt.savefig('volume_capture_barplot.png')
+
     
 
 
+    
 
 def main():
     global current_dir
@@ -270,9 +363,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--d', required=True, default=False, help='True if want to resync emdb data')
     parser.add_argument('--v', required=True, default=False, help='True if want to compare map volume with its simulated counterpart')
+    parser.add_argument('--s', required=True, default=None, nargs=2, help='Please provida lower and upper percentil boundaries if want to compute dataset stats')  
     parser.add_argument('--header_dir', default='header', required=False,help='output directory to store emdb headers') 
     parser.add_argument('--models_dir', default='models', required=False, help='output directory to store emdb models') 
     parser.add_argument('--simulated_dir', default='simulated', required=False, help='output directory to store simulated maps') 
+    parser.add_argument('--result_dir', default='./', required=False, help='output directory to store stats') 
 
     opt = parser.parse_args()
     current_dir = os.getcwd()
@@ -315,6 +410,10 @@ def main():
                     except ValueError as error:
                         print("Error calculating volume for simulated {}: {}".format(df_volume.loc[i,'fitted_entries'],error))
                 df_volume.to_csv('dataset_volume.csv', index=False)
+    elif opt.s != None:
+        getDatasetStats(result_dir, percentil_boundaries_tuple=opt.s)
+
+
 
        
 
