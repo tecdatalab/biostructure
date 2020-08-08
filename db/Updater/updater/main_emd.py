@@ -5,12 +5,13 @@ import datetime
 from generators import gif_generator as gifG
 from generators import values_generator as valg
 from classes.descriptor import Descriptor
-from generators.values_generator import get_emd_descriptors, remove_map, download_file, get_volume_map
+from generators.values_generator import get_emd_descriptors, remove_map, download_file, get_volume_map, get_molecule, generate_segments
 from classes.time_stamp import Time_stamp
 from datetime import date
 from classes.update import Update
 from classes.binnacle import Binnacle
 from classes.emd_entry import Emd_entry
+from classes.algorithm import Algorithm_entry
 from connections.sql_connection import SQL_connection
 from connections.ftp_connection import FTP_connection
 
@@ -44,6 +45,7 @@ def update_emd(connec_ftp,connec_sql,initialEMD,attempt_emd, mode,image,descript
     
     # Volume map yes
     volume_map = "Y"
+    segments = "Y"
 
     cursor_sql = connec_sql.get_cursor()
     if mode == 'c':
@@ -62,7 +64,8 @@ def update_emd(connec_ftp,connec_sql,initialEMD,attempt_emd, mode,image,descript
 
     k = 1
     for i in emds:
-        
+        i = 1364
+
         temp_binnacle.set_emd_id(int(i))
         temp_emd_attempt = temp_binnacle.get_attempt_emd(cursor_sql)
         
@@ -83,7 +86,7 @@ def update_emd(connec_ftp,connec_sql,initialEMD,attempt_emd, mode,image,descript
         temp_emd_entry.create_by_ftp(i, connec_ftp.get_ftp())
         temp_time_stamp = Time_stamp(i, date.today(), temp_emd_entry.map_url, temp_emd_entry.xml_url, temp_emd_entry.image_url)
         
-        if image == 'Y' or descriptor == 'Y' or volume_map == 'Y':
+        if image == 'Y' or descriptor == 'Y' or volume_map == 'Y' or segments == 'Y':
             download_file(i)
 
         if image == 'Y':
@@ -117,6 +120,16 @@ def update_emd(connec_ftp,connec_sql,initialEMD,attempt_emd, mode,image,descript
             except Exception as e:
                 log_file.generate_error_message(TypeErrorEmd.ECE.value.format(i), TypeErrorEmd.ECE.name, e)
 
+        if segments == "Y":
+            try:
+                algorithm_id = Algorithm_entry().get_algorithm_id(cursor_sql, Algorithm_segmentation.DEFAULT.value)
+                map_id = temp_emd_entry.get_map_id()
+                molecule = get_molecule(i, 7, [1,0.5])
+                segments = generate_segments(molecule, i, map_id, algorithm_id)
+                segments.insert_update_db(cursor_sql)
+            except Exception as e:
+                log_file.generate_error_message(TypeErrorEmd.EGS.value.format(i), TypeErrorEmd.EGS.name, e)
+
         try:
             temp_time_stamp.insert_update_db(cursor_sql)
         except Exception as e:
@@ -148,6 +161,8 @@ def main(log, initialEMD, attempt_emd, mode, image, descriptor, finalEMD):
 
     connec_sql.close_connection()
     connec_ftp.close_connection()
+    
+    log_file.generate_info_message(TypeMessage.MS2.value, TypeMessage.MS2.name)
     print("Finish")
 
 if __name__ == "__main__":
@@ -205,4 +220,3 @@ if __name__ == "__main__":
     final = time()
     ejec = final - ini
     print('Execution time:', ejec)
-    log_file.generate_info_message(TypeMessage.MS2.value, TypeMessage.MS2.name)
