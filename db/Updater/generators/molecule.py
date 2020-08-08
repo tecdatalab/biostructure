@@ -6,7 +6,7 @@ from skimage.measure import regionprops
 from skimage.transform import resize
 
 from generators.reader import Reader
-from generators import processing
+import generators.processing as processing
 
 ## This module represents the molecule object with its properties and different data representations for each contour level. 
 
