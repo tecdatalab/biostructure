@@ -136,13 +136,16 @@
   }
 
   .segments_controls{
-    border-radius: 20px;
-    border-color: rgba(128, 128, 128, 0.205);
-    border-style: solid;
     padding: 5%;
     height: 500px;
     overflow: scroll;
     overflow-x: unset;
+  }
+
+  .segments_controls_fix{
+    margin-left: 2%;
+    height: 91%;
+    overflow: hidden;
   }
 
   .segment_bar{
@@ -169,4 +172,14 @@
     right: 3%;
   }
 
+  .controls{
+    margin-top: -3%;
+  }
+
+  .btn-custom{
+    background-color: gray;
+    height: 50%;
+    width: 50%;
+  }
+  
 }

@@ -6,7 +6,7 @@
                     <div class="card-header">
                         <div class="row">
                             <div class="col-2">
-                                <img src="assets/img/surfer.png" width="55" height="55" class="rounded-circle"/>
+                                <img src="assets/img/surfer.png" width="55" height="55" class="rounded-circle" />
                             </div>
                             <div class="col-10">
                                 <h3 class="text-primary header-text-fix">3D visualizer</h3>
@@ -17,14 +17,76 @@
                         <div class="row panel_view">
                             <div class="col-8" id="viewport"></div>
                             <div class="col-4">
-                                <div class="segments_controls">
-                                    <div *ngFor="let item of structureToShow; let i = index">
-                                        <div class="segment_bar">
-                                            <div class="color_marker" [style.background-color]="getBackgroundColor(item)"></div>
-                                            
-                                            <div> {{item.name}} </div>
-
-                                            
+                                <div class="card segments_controls_fix">
+                                    <div class="card-header">
+                                        <div class="row">
+                                            Segments Controls
+                                        </div>
+                                    </div>
+                                    <div class="card-body segments_controls">
+                                        <div *ngFor="let item of structureToShow; let i = index">
+                                            <div class="segment_bar">
+                                                <div class="row">
+                                                    <div class="col-2" style="margin-top: 10px;">
+                                                        <div class="color_marker" [style.background-color]="getBackgroundColor(item)"></div>
+                                                    </div>
+                                                    <div class="col-8" style="margin-top: 10px;">
+                                                        <div> {{item.name}} </div>
+                                                    </div>
+                                                    <div class="col-2">
+                                                        <button class="btn btn-dark"><span
+                                                            class="fa fa-plus"></span></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row controls">
+                            <div class="col-6 load_controls">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <div class="row">
+                                            Load section
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <input type="file" name="segment_to_load" id="segment_input">
+                                            </div>
+                                            <div class="col-3"></div>
+                                            <div class="col-1">
+                                                <button class="btn btn-success" disabled><span
+                                                        class="fa fa-check"></span></button>
+                                            </div>
+                                            <div class="col-1">
+                                                <button class="btn btn-danger" disabled><span
+                                                        class="fa fa-trash"></span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 export_controls">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <div class="row">
+                                            Export section
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-5">
+                                                <p> File_name.tag.gz</p>
+                                            </div>
+                                            <div class="col-3"></div>
+                                            <div class="col-4">
+                                                <button class="btn btn-primary" type="submit"
+                                                    onclick="">Download</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
