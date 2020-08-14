@@ -136,7 +136,7 @@
   }
 
   .segments_controls{
-    padding: 5%;
+    padding: 0%;
     height: 500px;
     overflow: scroll;
     overflow-x: unset;
@@ -149,12 +149,21 @@
   }
 
   .segment_bar{
-    border-radius: 10px;
-    border-color: rgba(128, 128, 128, 0.205);
-    border-style: solid;
-    padding: 2% 5%;
-    margin-bottom: 5%;
-    display: flex;
+    display: block;
+    height: auto;
+    margin-left: -5px;
+    margin-right: 5px;
+    padding: 5px;
+    padding-right: 100px;
+    background-color:  rgba(255, 255, 255, 0.74);
+  }
+
+  .segment_bar div{
+    padding-left: 20px;
+  }
+
+  .segment_bar div .btn{
+    margin-left: 50px;
   }
 
   .color_marker{
@@ -177,9 +186,91 @@
   }
 
   .btn-custom{
-    background-color: gray;
+    float: right;
     height: 50%;
     width: 50%;
+  }
+
+  /* Sidebar - Dropdown menu */
+
+  .sidenav {
+    height: auto;
+    width: 100%;
+    position: relative;
+    z-index: 0;
+    top: 0;
+    left: 0;
+    background-color: rgba(247, 245, 234, 0.534);
+    overflow-x: hidden;
+  }
+  
+  /* Style the sidenav links and the dropdown button */
+  .sidenav a, .dropdown-btn, .dropdown-item {
+    padding: 0px 19px 0px 5px;
+    text-decoration: none;
+    font-size: 20px;
+    color: #000000;
+    display: block;
+    border: none;
+    background: none;
+    width:100%;
+    text-align: left;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .dropdown-btn-fix{
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+  
+  /* On mouse-over */
+  .sidenav a:hover, .dropdown-btn:hover, .dropdown-item:hover {
+    color: #e7d918;
+  }
+  
+  /* Add an active class to the active dropdown button */
+  .active {
+    background-color: rgba(133, 124, 9, 0.623);
+    color: white;
+  }
+
+  .active-item {
+    background-color: rgba(192, 180, 12, 0.623);
+    color: white;
+  }
+  
+  /* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
+  .dropdown-container {
+    display: none;
+    background-color:  rgba(124, 124, 124, 0.644);
+    padding-left: 8px;
+  }
+  
+  /* Optional: Style the caret down icon */
+  .fa-caret-down {
+    float: right;
+    padding-right: 8px;
+  }
+
+  .dropdown-item-container {
+    display: none;
+    background-color:  rgba(168, 168, 168, 0.644);
+    margin-left: 10px;
+  }
+
+  .point{
+    margin-left: 20px;
+    display: block;
+  }
+
+  .point .col-8{
+    margin-left: 30px;
+  }
+
+  .point input{
+    width: 100px;
+    margin-bottom: 5px;
   }
   
 }

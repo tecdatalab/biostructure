@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { BiomoleculeVisualizerService } from "../../services/biomolecule-visualizer.service"
 import * as NGL from "ngl/dist/ngl.esm.js";
 import { importExpr } from '@angular/compiler/src/output/output_ast';
+import { reduce } from 'rxjs/operators';
 
 @Component({
   selector: 'app-biomolecule-3d-visualizer',
@@ -13,6 +14,19 @@ export class BiomoleculeVizualizerComponent implements OnInit {
 
   stage = null;
   structureToShow = null;
+  manualPoints = [
+    {
+      name: "Group_1", color: "red", points: [
+        { x: 0.0, y: 0.0, z: 0.0 },
+        { x: 1.0, y: 1.0, z: 1.0 },
+      ]
+    },
+    {
+      name: "Group_2", color: "red", points: [
+        { x: 0.0, y: 0.0, z: 0.0 }
+      ]
+    },
+  ]
 
   constructor(private BiomoleculeVisualizerService: BiomoleculeVisualizerService) { }
 
@@ -21,6 +35,7 @@ export class BiomoleculeVizualizerComponent implements OnInit {
   }
 
   ngOnInit() {
+
     var temp_delay = 400;   // delay time between loading files
     this.stage = new NGL.Stage("viewport", { theme: "dark" });    // stage where NGL will work
     this.stage.signals.clicked.add(this.click);   // definition of click Picking Proxy to interact
@@ -41,9 +56,9 @@ export class BiomoleculeVizualizerComponent implements OnInit {
               }
               object.autoView();
             });
-          this.delay(temp_delay)
         })
       });  // call to get the files
+    this.confSideNav("dropdown-btn", null);
   }
 
   private click(PickingProxy: NGL.pickingProxy) {
@@ -65,8 +80,24 @@ export class BiomoleculeVizualizerComponent implements OnInit {
 
   }
 
-
   getBackgroundColor(item) {
     return item.color;
   }
+
+  confSideNav(class_: string, $event) {
+    var dropdown = document.getElementsByClassName(class_);
+    for (var i = 0; i < dropdown.length; i++) {
+      dropdown[i].addEventListener("click", function () {
+        this.classList.toggle("active-item");
+        var dropdownContent = this.nextElementSibling;
+        if (dropdownContent.style.display === "block") {
+          dropdownContent.style.display = "none";
+        } else {
+          dropdownContent.style.display = "block";
+        }
+      });
+    }
+  }
+
+
 }
