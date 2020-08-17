@@ -15,7 +15,8 @@
                     </div>
                     <div class="card-body">
                         <div class="row panel_view">
-                            <div class="col-8" id="viewport"></div>
+                            <div class="col-8" id="viewport" onmouseover="document.body.style.overflow='hidden';"
+                                onmouseout="document.body.style.overflow='auto';"></div>
                             <div class="col-4">
                                 <div class="card segments_controls_fix">
                                     <div class="card-header">
@@ -72,7 +73,7 @@
                                             </button>
 
                                             <div class="dropdown-container">
-                                                <div class="sidenav" *ngFor="let item of manualPoints; let i = index">
+                                                <div class="sidenav" *ngFor="let item of manualPoints; let g = index">
                                                     <button class="dropdown-item"
                                                         (click)="confSideNav('dropdown-item', $event)">
                                                         <div class="row">
@@ -88,26 +89,49 @@
                                                                 style="margin-top: 16px;"></i>
                                                         </div>
                                                     </button>
-
                                                     <div class="dropdown-item-container">
                                                         <div class="row">
                                                             <div class="col-4">Color</div>
                                                         </div>
                                                         <div class="row">
                                                             <div class="col-4">Points:</div>
+                                                            <div class="col-4"></div>
+                                                            <div class="col-4">
+                                                                <button class="btn" (click)="createNewPoint(g)">
+                                                                    <i class="fa fa-plus"></i>
+                                                                </button>
+                                                            </div>
                                                         </div>
-
-                                                        <div class="row point"
-                                                            *ngFor="let point of item.points; let i = index">
-                                                            Point {{i}}
-                                                            <div class="col-8">x: 
-                                                                <input type="number" value={{point.x}}>
-                                                            </div>
-                                                            <div class="col-8">y: 
-                                                                <input type="number" value={{point.y}}>
-                                                            </div>
-                                                            <div class="col-8">z: 
-                                                                <input type="number" value={{point.z}}>
+                                                        <div class="row point sidenav"
+                                                            *ngFor="let point of item.points; let p = index">
+                                                            <button class="dropdown-item"
+                                                                (click)="confSideNav('dropdown-item', $event)">
+                                                                <div class="row">
+                                                                    <div class="col-7" style="margin-top: 10px;">
+                                                                        <div> Point {{point.name}} </div>
+                                                                    </div>
+                                                                    <div class="col-2">
+                                                                        <button class="btn" (click)="deletePoint(g, p)">
+                                                                            <i class="fa fa-trash-o"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                    <i class="col-2 fa fa-caret-down"
+                                                                        style="margin-top: 16px;"></i>
+                                                                </div>
+                                                            </button>
+                                                            <div class="row dropdown-item-container">
+                                                                <div class="col-8">x:
+                                                                    <input type="number" step="0.1" value={{point.x}}
+                                                                        (input)="onPointCoordinateChange(g, p, 0, $event.target.value)">
+                                                                </div>
+                                                                <div class="col-8">y:
+                                                                    <input type="number" step="0.1" value={{point.y}}
+                                                                        (input)="onPointCoordinateChange(g, p, 1, $event.target.value)">
+                                                                </div>
+                                                                <div class="col-8">z:
+                                                                    <input type="number" step="0.1" value={{point.z}}
+                                                                        (input)="onPointCoordinateChange(g, p, 2, $event.target.value)">
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
