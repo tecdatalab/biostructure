@@ -50,14 +50,26 @@
                                                     </button>
 
                                                     <div class="dropdown-item-container">
-                                                        <div class="row">
-                                                            <div class="col-4">Color</div>
+                                                        <div class="row segment-content">
+                                                            <div class="col-4">Color:</div>
+                                                            <div class="col-4">
+                                                                <input type="color" value="{{item.color}}" (change)="onColorChange(item.name, $event, i)">
+                                                            </div>
                                                         </div>
-                                                        <div class="row">
-                                                            <div class="col-4">Iso Level</div>
+                                                        <div class="row segment-content">
+                                                            <div class="col-4">Iso Level:</div>
+                                                            <div class="col-4">
+                                                                <input type="number" step="0.1" min="0" value={{item.iso}} (change)="onIsoLevelChange(item.name, $event, i)">
+                                                            </div>
                                                         </div>
-                                                        <div class="row">
-                                                            <div class="col-4">...</div>
+                                                        <div class="row segment-content">
+                                                            <div class="col-4" style="padding-top: 2%;">Visibility:</div>
+                                                            <div class="col-4">
+                                                                <button class="btn"
+                                                                    (click)="changeVisibility(item.name, $event)">
+                                                                    <i class="fa fa-eye"></i>
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -90,11 +102,14 @@
                                                         </div>
                                                     </button>
                                                     <div class="dropdown-item-container">
-                                                        <div class="row">
-                                                            <div class="col-4">Color</div>
+                                                        <div class="row segment-content">
+                                                            <div class="col-4">Color:</div>
+                                                            <div class="col-4">
+                                                                <input type="color" value="{{item.color}}">
+                                                            </div>
                                                         </div>
-                                                        <div class="row">
-                                                            <div class="col-4">Points:</div>
+                                                        <div class="row segment-content">
+                                                            <div class="col-4" style="padding-top: 2%;">Points:</div>
                                                             <div class="col-4"></div>
                                                             <div class="col-4">
                                                                 <button class="btn" (click)="createNewPoint(g)">
@@ -102,7 +117,7 @@
                                                                 </button>
                                                             </div>
                                                         </div>
-                                                        <div class="row point sidenav"
+                                                        <div class="row point sidenav segment-content"
                                                             *ngFor="let point of item.points; let p = index">
                                                             <button class="dropdown-item"
                                                                 (click)="confSideNav('dropdown-item', $event)">
@@ -120,22 +135,21 @@
                                                                 </div>
                                                             </button>
                                                             <div class="row dropdown-item-container">
-                                                                <div class="col-8">x:
+                                                                <div class="col-8 coord-fix">x:
                                                                     <input type="number" step="0.1" value={{point.x}}
                                                                         (input)="onPointCoordinateChange(g, p, 0, $event.target.value)">
                                                                 </div>
-                                                                <div class="col-8">y:
+                                                                <div class="col-8 coord-fix">y:
                                                                     <input type="number" step="0.1" value={{point.y}}
                                                                         (input)="onPointCoordinateChange(g, p, 1, $event.target.value)">
                                                                 </div>
-                                                                <div class="col-8">z:
+                                                                <div class="col-8 coord-fix">z:
                                                                     <input type="number" step="0.1" value={{point.z}}
                                                                         (input)="onPointCoordinateChange(g, p, 2, $event.target.value)">
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
-
                                                     <div class="divider dropdown-divider"></div>
                                                 </div>
                                             </div>
@@ -156,16 +170,39 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
-                                            <div class="col-6">
-                                                <input type="file" name="segment_to_load" id="segment_input">
+                                            Segments:
+                                            <div class="col-5">
+                                                <input type="file" name="segments_to_load" id="segment_input"
+                                                    accept=".map, .mrc" (change)="onFileSelected($event)">
                                             </div>
                                             <div class="col-3"></div>
                                             <div class="col-1">
-                                                <button class="btn btn-success" disabled><span
+                                                <button class="btn btn-success" disabled name="segments_load_btn"
+                                                    (click)="onLoadConfrim('segment_input')"><span
                                                         class="fa fa-check"></span></button>
                                             </div>
                                             <div class="col-1">
-                                                <button class="btn btn-danger" disabled><span
+                                                <button class="btn btn-danger" disabled name="segments_del_btn"
+                                                    (click)="onLoadCancel('segment_input')"><span
+                                                        class="fa fa-trash"></span></button>
+                                            </div>
+                                        </div>
+                                        <div class="divider dropdown-divider"></div>
+                                        <div class="row">
+                                            Points:
+                                            <div class="col-5" style="margin-right: 5%;">
+                                                <input type="file" name="points_to_load" id="points_input"
+                                                    accept=".json" (change)="onFileSelected($event)">
+                                            </div>
+                                            <div class="col-3"></div>
+                                            <div class="col-1">
+                                                <button class="btn btn-success" disabled name="points_load_btn"
+                                                    (click)="onLoadConfrim('points_input')"><span
+                                                        class="fa fa-check"></span></button>
+                                            </div>
+                                            <div class="col-1">
+                                                <button class="btn btn-danger" disabled name="points_del_btn"
+                                                    (click)="onLoadCancel('points_input')"><span
                                                         class="fa fa-trash"></span></button>
                                             </div>
                                         </div>
@@ -182,12 +219,23 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-5">
-                                                <p> File_name.tag.gz</p>
+                                                <p>Segments.tag.gz</p>
                                             </div>
                                             <div class="col-3"></div>
                                             <div class="col-4">
                                                 <button class="btn btn-primary" type="submit"
-                                                    onclick="">Download</button>
+                                                    (click)="exportSegments()">Download</button>
+                                            </div>
+                                        </div>
+                                        <div class="divider dropdown-divider"></div>
+                                        <div class="row" style="margin-top: 2%;">
+                                            <div class="col-5">
+                                                <p>Points.txt</p>
+                                            </div>
+                                            <div class="col-3"></div>
+                                            <div class="col-4">
+                                                <button class="btn btn-primary" type="submit"
+                                                (click)="exportPoints()">Download</button>
                                             </div>
                                         </div>
                                     </div>

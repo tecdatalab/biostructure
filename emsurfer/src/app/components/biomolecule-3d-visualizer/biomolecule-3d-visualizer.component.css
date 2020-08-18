@@ -191,6 +191,22 @@
     width: 50%;
   }
 
+  .segment-content{
+    margin-left: 2%;
+    margin-top: 1%;
+    padding: 2% 0 2% 2%;
+    background-color: white;
+  }
+
+  .segment-content input{
+    width: 100px;
+    text-align: right;
+  }
+
+  .coord-fix{
+    padding-top: 2%;
+  }
+
   /* Sidebar - Dropdown menu */
 
   .sidenav {

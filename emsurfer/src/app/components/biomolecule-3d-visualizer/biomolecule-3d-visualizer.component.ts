@@ -3,6 +3,7 @@ import { BiomoleculeVisualizerService } from "../../services/biomolecule-visuali
 import * as NGL from "ngl/dist/ngl.esm.js";
 import Color from "olical-color";
 import * as THREE from 'three';
+import { $ } from 'protractor';
 
 @Component({
   selector: 'app-biomolecule-3d-visualizer',
@@ -15,6 +16,8 @@ export class BiomoleculeVizualizerComponent implements OnInit {
   stage = null;
   structureToShow = null;
   radius = 1;
+  segment_file_selected = null;
+  points_file_selected = null;
   manualPoints = [
     {
       name: "Group_1", color: "red", points: [
@@ -51,6 +54,7 @@ export class BiomoleculeVizualizerComponent implements OnInit {
 
   protected createInitPoints() {
     this.manualPoints.forEach(group => {
+      group.color = Color.toHex(group.color);
       var color = group.color;
       group.points.forEach(point => {
         this.addPointToStage(group.name + "_" + point.name, point.x, point.y, point.z, Color.toArray(color), this.radius); // test add point
@@ -125,10 +129,18 @@ export class BiomoleculeVizualizerComponent implements OnInit {
               } else {
                 object.addRepresentation("surface", { color: structure.color });
               }
+
+              // console.log(object);
+
+              structure.name = object.name;
+              structure.iso = object.reprList[0].repr.isolevel;
+              structure.color = Color.toHex(structure.color);
+
               object.autoView();
             });
         })
       });  // call to get the files
+    // console.log(this.stage);
   }
 
   private click(PickingProxy: NGL.pickingProxy) {
@@ -151,6 +163,31 @@ export class BiomoleculeVizualizerComponent implements OnInit {
 
   }
 
+  protected onIsoLevelChange(name:string, $event, index:number){
+    var component = this.stage.getComponentsByName(name).list[0].reprList[0].repr;
+    component.setParameters({ isolevel: $event.target.value })
+    this.structureToShow[index].iso = $event.target.value;
+  }
+
+  protected onColorChange(name:string, $event, index:number){
+    var component = this.stage.getComponentsByName(name).list[0].reprList[0];
+    component.setColor($event.target.value);
+    this.structureToShow[index].color = $event.target.value;
+  }
+
+  protected changeVisibility(name: string, $event) {
+    var component = this.stage.getComponentsByName(name).list[0];
+    var temp_visibility = component.visible;
+    component.setVisibility(!temp_visibility);
+    if ($event.target.classList.contains("fa-eye") && !component.visible) {
+      $event.target.classList.remove("fa-eye");
+      $event.target.classList.add("fa-eye-slash");
+    } else if ($event.target.classList.contains("fa-eye-slash") && component.visible) {
+      $event.target.classList.remove("fa-eye-slash");
+      $event.target.classList.add("fa-eye");
+    }
+  }
+
   protected getBackgroundColor(item) {
     return item.color;
   }
@@ -170,5 +207,76 @@ export class BiomoleculeVizualizerComponent implements OnInit {
     }
   }
 
+  protected onFileSelected(event) {
+    if (event !== undefined) {
+      var load_btn, del_btn;
+      if (event.target.id === "segment_input") {
+        this.segment_file_selected = event.target.files[0];
+        load_btn = document.getElementsByName("segments_load_btn")[0];
+        del_btn = document.getElementsByName("segments_del_btn")[0];
+      } if (event.target.id === "points_input") {
+        this.points_file_selected = event.target.files[0];
+        load_btn = document.getElementsByName("points_load_btn")[0];
+        del_btn = document.getElementsByName("points_del_btn")[0];
+      }
+      if (load_btn !== undefined || del_btn !== undefined) {
+        load_btn.disabled = false;
+        del_btn.disabled = false;
+      }
+    }
+  }
+
+  protected onLoadCancel(id: string) {
+    var input_file = document.getElementById(id);
+    input_file.value = null;
+    var load_btn, del_btn;
+    if (id === "segment_input") {
+      this.segment_file_selected = null;
+      load_btn = document.getElementsByName("segments_load_btn")[0];
+      del_btn = document.getElementsByName("segments_del_btn")[0];
+    } if (id === "points_input") {
+      this.points_file_selected = null;
+      load_btn = document.getElementsByName("points_load_btn")[0];
+      del_btn = document.getElementsByName("points_del_btn")[0];
+    }
+    if (load_btn !== undefined || del_btn !== undefined) {
+      load_btn.disabled = true;
+      del_btn.disabled = true;
+    }
+  }
+
+  protected onLoadConfrim(id: string) {
+    var input_file = document.getElementById(id);
+    input_file.value = null;
+    var load_btn, del_btn;
+    if (id === "segment_input") {
+      load_btn = document.getElementsByName("segments_load_btn")[0];
+      del_btn = document.getElementsByName("segments_del_btn")[0];
+      // Load new structure give it
+      this.stage.removeAllComponents();
+      this.createInitPoints();
+      this.stage.loadFile(this.segment_file_selected)
+        .then(function (object) {
+          object.addRepresentation("surface", {});
+          object.autoView();
+        });
+    } if (id === "points_input") {
+      load_btn = document.getElementsByName("points_load_btn")[0];
+      del_btn = document.getElementsByName("points_del_btn")[0];
+
+    }
+    if (load_btn !== undefined || del_btn !== undefined) {
+      load_btn.disabled = true;
+      del_btn.disabled = true;
+    }
+  }
+
+  protected exportSegments(){
+    console.log("Segments export");
+  }
+
+  protected exportPoints(){
+    console.log("Points export");
+  }
 
 }
