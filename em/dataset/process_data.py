@@ -94,7 +94,7 @@ def processMetadata():
 
     df.to_csv('dataset_metadata.csv', index=False)
 
-# Download candidate models from database
+# Download candidate experimental models from database
 def downloadModels(models_path):
     if not os.path.exists(models_path):
         os.makedirs(models_path)
@@ -149,7 +149,41 @@ def downloadModels(models_path):
             raise Exception('Command "%s" does not exist' % command)
     except:
         print('Command "%s" does not work' % command)
+
+
+# Download candidate experimental models from database
+def downloadModelsPDB(pdb_path):
+    if not os.path.exists(pdb_path):
+        os.makedirs(pdb_path)
+
+    # Copy pdb files from database
+    print("Copying pdbs to generate simulated dataset...")
+    command_emdb = 'rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/pdb/'  +' '+ pdb_path
+    try:
+        if os.system(command_emdb) != 0:
+            raise Exception('Command "%s" does not exist' % command_emdb)
+    except:
+        print('Command "%s" does not work' % command_emdb)
     
+    # Unziping files 
+
+    try:
+        command = 'gunzip -f ' +pdb_path+'/*.gz'
+        if os.system(command) != 0:
+            raise Exception('Command "%s" does not exist' % command)
+    except:
+        print('Command "%s" does not work' % command)
+
+    pdb_files = [f for f in glob(os.path.join(pdb_path,'*.ent'))]
+
+    pdb_entries = [os.path.basename(f)[3:-4] for f in pdb_files]
+
+    df_simulated = pd.DataFrame( [pdb_entries, pdb_files], columns= ['entries','path'] )
+
+    df_simulated.to_csv('metadata_synthetic.csv')
+
+    print("{} pdbs downloaded".format(len(pdb_files)))
+   
 
 # Remove models without atom structure
 def removeNonExistingModels(models_path):
@@ -199,6 +233,8 @@ def processfiles(models_path):
         print("Pdb {} has {} chains".format(chain,len(list(pbd_obj.get_chains()))))
         return len(list(pbd_obj.get_chains()))
 
+    print("Processing experimental samples")
+
     df = pd.read_csv('./dataset_metadata.csv')
     # Create dictionary from dataframe
     pdb_id_path_dict = pd.Series(df.pdb_path.values,index=df.fitted_entries).to_dict()
@@ -213,8 +249,27 @@ def processfiles(models_path):
     
     number_of_samples = len( df.index )
    
-    print("{} entries with less than 2 subunits".format(non_enough_subunit))
-    print("{} candidates for dataset".format(number_of_samples))
+    print("{} experimental entries with less than 2 subunits".format(non_enough_subunit))
+    print("{} experimental candidates for dataset".format(number_of_samples))
+
+    print("Processing simulated samples")
+    df_simulated = pd.read_csv('./metadata_synthetic.csv')
+    # Create dictionary from dataframe
+    pdb_id_path_dict = pd.Series(df_simulated.path.values,index=df_simulated.entries).to_dict()
+    # Compute number of subunits
+    df_simulated['subunit_count'] = df_simulated["entries"].map(lambda pdb_id: pdb_num_chain_mapper(pdb_id, pdb_id_path_dict[pdb_id]))
+    # Get number of models with less than 2 subunits
+    non_enough_subunit = len(df_simulated[df_simulated.subunit_count<2].index)
+    # Remove entries with less than 2 subunits
+    df_simulated = df_simulated[df_simulated.subunit_count>=2]
+    number_of_samples = len( df_simulated.index )
+   
+    print("{} pdb entries with less than 2 subunits".format(non_enough_subunit))
+    print("{} pdb candidates for simulated dataset".format(number_of_samples))
+
+    df_simulated.to_csv('./metadata_synthetic.csv')
+
+
 
 
 # Simulate map from pdb structure and calculate volume 
@@ -262,6 +317,37 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
 
     return volume_result
 
+
+# Function to generateSimulated samples from pdb
+def generateSimulatedDataset(index, df, sim_model_path):
+    if not os.path.exists(sim_model_path):
+        os.makedirs(sim_model_path)
+    pdb_filepath = df.at[df.index[index], 'pdb_path']
+    pdb_entry = df.at[df.index[index], 'entries']
+
+    # Choose random resolution over 5 and below 10 A
+    upper_res = 10
+    bottom_res = 5
+    res = (upper_res-bottom_res) * np.random.random_sample() + bottom_res
+
+    simulated_filename = os.path.join(sim_model_path, 'sim_'+pdb_entry+'.mrc')
+
+    result = dict()
+    result['index'] = index
+    result['resolution']=res
+    result['path'] = simulated_filename
+    # Generate map
+    try:
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=1.0 -R=' + str(res) + ' --center '+  pdb_filepath + ' ' + simulated_filename
+        print(command)
+        if os.system(command) != 0:
+            result['resolution']=-1
+            raise Exception('Command "%s" does not exist' % command)
+    except:
+        print('Command "%s" does not work' % command)
+        result['resolution']=-1
+    return result
+
 # Function to get symmetry information from pdb file
 def getSymmetryFromPDB(models_path):
     import __main__
@@ -278,16 +364,13 @@ def getSymmetryFromPDB(models_path):
             res = []
         return res
         
-
-    
-
     list_pdb = df['pdb_path'] = df["fitted_entries"].map(lambda pdb_id:'/home/manzumbado/Development/Asistencia/BECA-TEC/biostructure/em/dataset/models/pdb'+pdb_id+'.ent').tolist()
     df['symm'] = df['pdb_path'].map(lambda x: True if (hasSymmetry(x)[0:-1] != [1.0, 1.0, 1.0, 90.0, 90.0, 90.0]) else False)
 
     df.to_csv('mv.csv')
     
-# Function to get stats from data and outlier detection
-def getDatasetStats(result_dir, percentil_boundaries_tuple=None):
+# Function to select experimental data acording percentil distribution of volume capture ratio
+def selectExperimentalDataset(result_dir, percentil_boundaries_tuple=None):
     # Open result csv from volume calculation
     df = pd.read_csv('dataset_volume.csv')
     # Replace missing volumes (produced by e2pdb2mrc failure to generate map from pdb)
@@ -366,7 +449,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--d', required=True, default=False, help='True if want to resync emdb data')
     parser.add_argument('--v', required=True, default=False, help='True if want to compare map volume with its simulated counterpart')
-    parser.add_argument('--s', required=True, default=None, nargs=2, help='Please provida lower and upper percentil boundaries if want to compute dataset stats')  
+    parser.add_argument('--s', required=True, default=None, nargs=2, help='Please provide lower and upper experimental data percentil distribution to be included in final dataset')  
+    parser.add_argument('--g', required=True, default=None, help='Please provide percent of simulated data to be included in final dataset')
     parser.add_argument('--header_dir', default='header', required=False,help='output directory to store emdb headers') 
     parser.add_argument('--models_dir', default='models', required=False, help='output directory to store emdb models') 
     parser.add_argument('--simulated_dir', default='simulated', required=False, help='output directory to store simulated maps') 
@@ -378,12 +462,14 @@ def main():
     models_path = os.path.join(current_dir, opt.models_dir)
     simulated_path = os.path.join(current_dir, opt.simulated_dir)
     results_path = os.path.join(current_dir, opt.result_dir)
+    pdb_path = os.path.join(models_path,'pdb')
     # Download and process data
     if int(opt.d):
         get_headers(header_path)
         generate_dataframe(header_path)
         processMetadata()
         downloadModels(models_path)
+        downloadModelsPDB(pdb_path)
         removeNonExistingModels(models_path)
         processfiles(models_path)
     #Calculate volume
@@ -415,7 +501,42 @@ def main():
                         print("Error calculating volume for simulated {}: {}".format(df_volume.loc[i,'fitted_entries'],error))
                 df_volume.to_csv('dataset_volume.csv', index=False)
     if opt.s != None:
-        getDatasetStats(results_path, percentil_boundaries_tuple=opt.s)
+        selectExperimentalDataset(results_path, percentil_boundaries_tuple=opt.s)
+    # Generate simulated data to be included in final dataset
+    if opt.s != None:
+        # Open candidates to compute simulated map 
+        df_synthetic = pd.read_csv('metadata_synthetic.csv')
+        df_experimental = pd.read_csv('dataset_selected.csv')
+        num_experimental = len(df_experimental)
+        print("Number of candidate synthetic models: ", len(df.index))
+        proportion = int(opt.s)/100
+        num_samples_to_pick = int(round(proportion*num_experimental/1-proportion))
+        print("A proportion of {} synthetic data in final dataset requires {} simulated and {} experimental samples : ".format(proportion,num_samples_to_pick,num_experimental )))
+        df_synthetic_selected = df_synthetic.sample(num_samples_to_pick)
+        # Get index list to schedule processess 
+        index_list = df_synthetic_selected.index.tolist()
+        print("Spawn procecess...")
+        comm = MPI.COMM_WORLD
+        size = comm.Get_size()
+        with MPICommExecutor(comm, root=0, worker_size=size) as executor:
+            if executor is not None:
+                futures = []
+                for i in index_list:
+                    futures.append(executor.submit(generateSimulatedDataset, i, df_synthetic_selected, simulated_path))
+                for f in futures:
+                    try:
+                        d = f.result()
+                        print("received res dict: ",d)
+                        res_index = d['index']
+                        res = d['resolution']
+                        path = d['path']
+                        df_synthetic_selected.loc[res_index, 'resolution'] = res
+                        df_voldf_synthetic_selectedume.loc[res_index, 'path'] = path
+                    except ValueError as error:
+                        print("Error calculating volume for simulated {}: {}".format(df_volume.loc[i,'fitted_entries'],error))
+                df_synthetic_selected.to_csv('dataset_synthetic.csv', index=False)
+
+
 
 
 
