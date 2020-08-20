@@ -6,10 +6,12 @@ import argparse
 import sys
 sys.path.append('..')
 import molecule
+import matplotlib 
+import matplotlib.pyplot as plt
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 from Bio.PDB import PDBParser
-import subprocess
+import numpy as np
 
 
 # Sync headers to folder
@@ -332,17 +334,18 @@ def getDatasetStats(result_dir, percentil_boundaries_tuple=None):
 
     print("Number of samples below lower boundary: {} and over upper boundary: {}".format(len( df[df.vol_capture < low_boundary] ), len( df[df.vol_capture >upper_boundary] )))
 
-    percentilA = df.vol_capture.quantile(27/100, interpolation = 'midpoint')
-    percentilB = df.vol_capture.quantile(48/100,  interpolation = 'midpoint')
+    percentilA = df.vol_capture.quantile(int(percentil_boundaries_tuple[0])/100, interpolation = 'midpoint')
+    percentilB = df.vol_capture.quantile(int(percentil_boundaries_tuple[1])/100,  interpolation = 'midpoint')
 
     if percentil_boundaries_tuple != None:
-        numMuestras = len( df[ (df.vol_capture > percentil_boundaries_tuple[0]) & (df.vol_capture < percentil_boundaries_tuple[1])])
-        print("Número de muestras entre percentiles {} y {}: {}".format(percentil_boundaries_tuple[0],percentil_boundaries_tuple[1], numMuestras))
-
-    # Printing outlier candidates
-    id_outliers_suspect = df[(df.vol_capture < low_boundary) | (df.vol_capture >upper_boundary) ].index
-    print("Getting outliers...")
-    print(df.loc[id_outliers_suspect, ['id','fitted_entries']])
+        selected_samples = df[ (df.vol_capture > percentilA) & (df.vol_capture < percentilB)]
+        numMuestras = len( selected_samples)
+        print("Number of samples between percentil {} and {}: {}".format(percentil_boundaries_tuple[0],percentil_boundaries_tuple[1], numMuestras))
+    else: 
+        selected_samples = df[(df.vol_capture < low_boundary) | (df.vol_capture >upper_boundary) ]
+        print("Getting outliers following IQR...")
+    # Save csv with selected samples
+    selected_samples.to_csv('dataset_selected.csv')
 
     # Gerete boxplot
     res = df.boxplot(column='vol_capture', grid=True)
@@ -367,13 +370,14 @@ def main():
     parser.add_argument('--header_dir', default='header', required=False,help='output directory to store emdb headers') 
     parser.add_argument('--models_dir', default='models', required=False, help='output directory to store emdb models') 
     parser.add_argument('--simulated_dir', default='simulated', required=False, help='output directory to store simulated maps') 
-    parser.add_argument('--result_dir', default='./', required=False, help='output directory to store stats') 
+    parser.add_argument('--result_dir', default='', required=False, help='output directory to store stats') 
 
     opt = parser.parse_args()
     current_dir = os.getcwd()
     header_path = os.path.join(current_dir, opt.header_dir)
     models_path = os.path.join(current_dir, opt.models_dir)
     simulated_path = os.path.join(current_dir, opt.simulated_dir)
+    results_path = os.path.join(current_dir, opt.result_dir)
     # Download and process data
     if int(opt.d):
         get_headers(header_path)
@@ -383,10 +387,10 @@ def main():
         removeNonExistingModels(models_path)
         processfiles(models_path)
     #Calculate volume
-    elif int(opt.v):
+    if int(opt.v):
         df = pd.read_csv('./dataset_metadata.csv')
         print("Number of samples to process volume: ", len(df.index))
-        df_volume = df[['id', 'fitted_entries', 'resolution','contourLevel']].copy()
+        df_volume = df[['id', 'fitted_entries', 'subunit_count', 'resolution','contourLevel']].copy()
         # Get index list to schedule processess 
         index_list = df_volume.index.tolist()
         print("Spawn procecess...")
@@ -410,8 +414,8 @@ def main():
                     except ValueError as error:
                         print("Error calculating volume for simulated {}: {}".format(df_volume.loc[i,'fitted_entries'],error))
                 df_volume.to_csv('dataset_volume.csv', index=False)
-    elif opt.s != None:
-        getDatasetStats(result_dir, percentil_boundaries_tuple=opt.s)
+    if opt.s != None:
+        getDatasetStats(results_path, percentil_boundaries_tuple=opt.s)
 
 
 
