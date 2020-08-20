@@ -131,7 +131,7 @@ def main_1():
     result = fit_map_in_map('./maps_pdb/175d/175d.mrc', './maps_pdb/6m03/6m03.mrc', './exit_fit', 100,
                             map0_vector_move=move_vector,
                             map0_level=6.7, map1_level=6.7)
-    #result = fit_map_in_map('./maps_pdb/175d/175d.mrc', './maps_pdb/6m03/6m03.mrc', './exit_fit', 100)
+    # result = fit_map_in_map('./maps_pdb/175d/175d.mrc', './maps_pdb/6m03/6m03.mrc', './exit_fit', 100)
     result.print_data()
 
 

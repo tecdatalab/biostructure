@@ -23,8 +23,9 @@ def get_out(*args):
 # Fit map0 into map1
 def fit_map_in_map(map0_path, map1_path, path_exit_folder, attempts, map0_vector_move=None, map0_level=None, map1_level=None):
     path = "./temp_map"
-    map0_exit_name = map0_path.split('.')[-2]
-    map0_exit_name = map0_exit_name.split('/')[-1]
+    map0_exit_name = map0_path.split('/')[-1]
+    map0_exit_name = map0_exit_name.split('.')[:-1]
+    map0_exit_name = ".".join(map0_exit_name)
     map0_exit_name += "_fit.mrc"
     complete_exit_path = os.path.abspath(path_exit_folder)
     path_exit_folder = complete_exit_path + "/" + map0_exit_name
