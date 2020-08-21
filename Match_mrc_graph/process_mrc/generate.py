@@ -47,14 +47,14 @@ def get_mrc_segments(mrc_path, recommendedContour_p, steps, sigma):
         zd = z.computeDescriptors(i.mask)
         i.zd_descriptors = zd
 
-    #print("Can_points", len(np.where(myMolecule.getEmMap().data() > 0)[0]))
+    # print("Can_points", len(np.where(myMolecule.getEmMap().data() > 0)[0]))
 
     return result, myMolecule.getEmMap().data().shape
 
 
 def get_mrc_synthetic_segments_pdb(folder_segments, recommendedContour_p):
     segments_paths = list(glob.glob(folder_segments + "/*_*.mrc"))
-    print(segments_paths)
+    # print(segments_paths)
     actual_id = 1
     result = []
     len_X = 0
@@ -77,6 +77,30 @@ def get_mrc_synthetic_segments_pdb(folder_segments, recommendedContour_p):
         i.zd_descriptors = zd
 
     return result, (len_X, len_Y, len_Z)
+
+
+def get_mrc_one(mrc_path, recommendedContour_p):
+    # Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off
+    # ratios.
+    actual_id = 1
+    result = []
+    myMolecule = molecule.Molecule(mrc_path, recommendedContour=recommendedContour_p)
+    densities = np.copy(myMolecule.getEmMap().data())
+    # Set voxels outside segment to 0
+    densitie = np.copy(myMolecule.getEmMap().data())
+    result.append(Segment(actual_id, densitie, None))
+
+    # then you can compute zernike descriptors for each segment, lets create a dict to store descriptors for each
+    # segment # lets import the module
+    import utils._zernike as z
+    # lets create a dictionary to store descriptors for each segment
+    for i in result:
+        zd = z.computeDescriptors(i.mask)
+        i.zd_descriptors = zd
+
+    # print("Can_points", len(np.where(myMolecule.getEmMap().data() > 0)[0]))
+
+    return result, myMolecule.getEmMap().data().shape
 
 # result = get_mrc_segments("../pdb_mrc/exit_pdb/175d/175d.mrc", 7, 3, 1)
 # result = get_mrc_synthetic_segments_pdb("../pdb_mrc/exit_pdb/175d", 7)
