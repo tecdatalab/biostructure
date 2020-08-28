@@ -77,21 +77,34 @@ def fitting_process(verbose, path_map1, path_map2, segments_graph1, segments_gra
         print("Fit process start\n\n")
 
     # Graphs generation
-    graph1 = generate_graph(segments_graph1, n_points_face, filter_value, max_distance, min_points)
-    graph2 = generate_graph(segments_graph2, n_points_face, filter_value, max_distance, min_points)
+    try:
+        graph1 = generate_graph(segments_graph1, n_points_face, filter_value, max_distance, min_points)
+        graph2 = generate_graph(segments_graph2, n_points_face, filter_value, max_distance, min_points)
+    except Exception as e:
+        raise Exception('Error to generate graph, the error is : {0}'.format(str(e)))
 
     # Match graphs
-    result = graph_aligning(graph1, graph2, 1, False)
+    try:
+        result = graph_aligning(graph1, graph2, 1, False)
+    except Exception as e:
+        raise Exception('Error to graph aligning, the error is : {0}'.format(str(e)))
+
     if verbose:
         print("Result match graph", result)
 
     # Get match segments index
-    graph1_match_index = get_element_list(0, result)
-    graph2_match_index = get_element_list(1, result)
+    try:
+        graph1_match_index = get_element_list(0, result)
+        graph2_match_index = get_element_list(1, result)
+    except Exception as e:
+        raise Exception('Error to generate graph indexs, the error is : {0}'.format(str(e)))
 
     # Centers points
-    center_point1 = get_center_point(graph1_match_index, segments_graph1, 0)
-    center_point2 = get_center_point(graph2_match_index, segments_graph2, 0)
+    try:
+        center_point1 = get_center_point(graph1_match_index, segments_graph1, 0)
+        center_point2 = get_center_point(graph2_match_index, segments_graph2, 0)
+    except Exception as e:
+        raise Exception('Error to calculate centers points, the error is : {0}'.format(str(e)))
 
     return fitting_process_aux(attempts, center_point1, center_point2, figure1_shape, figure2_shape, path_exit_folder,
                                path_map1, path_map2, verbose)
@@ -103,12 +116,18 @@ def fitting_process_all_file(verbose, path_map1, path_map2, segments_graph1, seg
         print("Fit process start\n\n")
 
     # Get match segments index
-    graph1_match_index = get_element_list(0, [[1, 1]])
-    graph2_match_index = get_element_list(1, [[1, 1]])
+    try:
+        graph1_match_index = get_element_list(0, [[1, 1]])
+        graph2_match_index = get_element_list(1, [[1, 1]])
+    except Exception as e:
+        raise Exception('Error to generate graph indexs, the error is : {0}'.format(str(e)))
 
     # Centers points
-    center_point1 = get_center_point(graph1_match_index, segments_graph1, 0)
-    center_point2 = get_center_point(graph2_match_index, segments_graph2, 0)
+    try:
+        center_point1 = get_center_point(graph1_match_index, segments_graph1, 0)
+        center_point2 = get_center_point(graph2_match_index, segments_graph2, 0)
+    except Exception as e:
+        raise Exception('Error to calculate centers points, the error is : {0}'.format(str(e)))
 
     return fitting_process_aux(attempts, center_point1, center_point2, figure1_shape, figure2_shape, path_exit_folder,
                                path_map1, path_map2, verbose)
@@ -118,33 +137,56 @@ def fitting_process_aux(attempts, center_point1_o, center_point2_o, figure1_shap
                         path_map1, path_map2, verbose):
     center_point1 = center_point1_o.copy()
     center_point2 = center_point2_o.copy()
+
     if verbose:
         print("Center point map1 grid:", center_point1)
         print("Center point map2 grid:", center_point2)
+
     # Repair error in 'y' dimension on grid of chimeraX
     center_point1[1] = figure1_shape[1] - center_point1[1]
     center_point2[1] = figure2_shape[1] - center_point2[1]
+
     if verbose:
         print("Center point map1 grid with y ok:", center_point1)
         print("Center point map2 grid with y ok:", center_point2)
+
     # Get Angstrom shape
-    real_shape_cube1 = get_cube_len(path_map1)
-    real_shape_cube2 = get_cube_len(path_map2)
+    try:
+        real_shape_cube1 = get_cube_len(path_map1)
+        real_shape_cube2 = get_cube_len(path_map2)
+    except Exception as e:
+        raise Exception('Error to calculate real shape cube, the error is : {0}'.format(str(e)))
+
     if verbose:
         print("Angstrom shape map1:", real_shape_cube1)
         print("Angstrom shape map2:", real_shape_cube2)
+
     # Transformation by a rule of 3 from the central point of the grid to the Angstroms cube
-    center_point1_a = chance_basec(center_point1, figure1_shape, real_shape_cube1)
-    center_point2_a = chance_basec(center_point2, figure2_shape, real_shape_cube2)
+    try:
+        center_point1_a = chance_basec(center_point1, figure1_shape, real_shape_cube1)
+        center_point2_a = chance_basec(center_point2, figure2_shape, real_shape_cube2)
+    except Exception as e:
+        raise Exception('Error to transform center points by rule of 3, the error is : {0}'.format(str(e)))
+
     if verbose:
         print("Center point in Angstrom cube of map1:", center_point1_a)
         print("Center point in Angstrom cube of map2:", center_point2_a)
+
     # Obtain the move vector from a 3d point to another 3d point
-    move_vector = get_vector_move_1to2(center_point1_a, center_point2_a)
+    try:
+        move_vector = get_vector_move_1to2(center_point1_a, center_point2_a)
+    except Exception as e:
+        raise Exception('Error to calculate move vector, the error is : {0}'.format(str(e)))
+
     if verbose:
         print("Move vector of map1:", move_vector)
+
     # Fit map in map
-    result = fit_map_in_map(path_map1, path_map2, path_exit_folder, attempts, map0_vector_move=move_vector)
+    try:
+        result = fit_map_in_map(path_map1, path_map2, path_exit_folder, attempts, map0_vector_move=move_vector)
+    except Exception as e:
+        raise Exception('Error to calculate fit map in map, the error is : {0}'.format(str(e)))
+
     result.shape_cube1 = figure1_shape
     result.shape_cube2 = figure2_shape
     result.center_point1_o = center_point1_o
@@ -157,9 +199,11 @@ def fitting_process_aux(attempts, center_point1_o, center_point2_o, figure1_shap
     result.center_point2_a = center_point2_a
     result.move_vector_map1 = move_vector
     result.percentage_of_overlap = (min(get_mass(path_map1), get_mass(path_map2)))/result.overlap
+
     if verbose:
         print("Data for result fit are:")
         result.print_data()
+
     return result
 
 
