@@ -5,6 +5,8 @@ import os
 from subprocess import check_output, CalledProcessError
 from tempfile import TemporaryFile
 
+from fit.fitMapResult import FitMapResult
+
 
 def get_out(*args):
     with TemporaryFile() as t:
@@ -109,3 +111,30 @@ def chance_basec(point, actual_shape, new_shape):
     result[2] = new_shape[2] * (point[2] / actual_shape[2])
 
     return result
+
+
+def get_mass(map_path):
+    map_real_path = os.path.abspath(map_path)
+    path = "./temp_map_mass"
+    try:
+        shutil.rmtree(path)
+    except:
+        pass
+    os.mkdir(path)
+
+    f = open(path + "/fit.cxc", "w+")
+    f.write("volume #1 origin 0,0,0 \r\n")
+    f.write("volume #2 origin 0,0,0 \r\n")
+    f.write("fitmap #1 in_map #2 metric correlation \r\n")
+    f.write("exit")
+    f.close()
+
+    commands_real_path = os.path.abspath(path + "/fit.cxc")
+
+    error, exit_binary_text = get_out("chimerax", "--nogui", map_real_path, map_real_path, commands_real_path)
+    if error != 0:
+        raise Exception("Error on try to get mass")
+    text = exit_binary_text.decode("utf-8")
+    result = FitMapResult(text, 'x')
+    shutil.rmtree(path)
+    return result.overlap

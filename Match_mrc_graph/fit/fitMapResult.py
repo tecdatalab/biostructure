@@ -98,6 +98,7 @@ class FitMapResult(object):
         self.center_point2_a = None
         self.move_vector_map1 = [0, 0, 0]
         self.move_vector_map2 = [0, 0, 0]
+        self.percentage_of_overlap = 0
 
     def get_num_points(self):
         return self.num_points
@@ -138,7 +139,7 @@ class FitMapResult(object):
         return self.shift_along_axis
 
     def print_data(self):
-        print("Num_poins: ", self.num_poins)
+        print("Num_poins: ", self.num_points)
         print("Correlation: ", self.correlation)
         print("Correlation_about_mean: ", self.correlation_about_mean)
         print("Overlap: ", self.overlap)
