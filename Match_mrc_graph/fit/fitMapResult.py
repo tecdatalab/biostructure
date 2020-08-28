@@ -84,7 +84,8 @@ class FitMapResult(object):
             self.axis = get_vector_betwen(text, "  Axis", "\n  Axis point")
             self.axis_point = get_vector_betwen(text, "  Axis point", "\n  Rotation angle (degrees)")
             self.rotation_angle = get_float_betwen(text, "  Rotation angle (degrees)", "\n  Shift along axis")
-            self.shift_along_axis = get_float_betwen_ss(text, "Shift along axis", "\n\n")
+            self.shift_along_axis = get_float_betwen_ss(text, "Shift along axis", "\n")
+            self.overlap_mass = get_float_betwen_ss(text, "Enclosed volume for surface (#4.1) =", "\n")
 
         self.shape_cube1 = None
         self.shape_cube2 = None
@@ -151,3 +152,4 @@ class FitMapResult(object):
         print("Axis_point: ", self.axis_point)
         print("Rotation_angle: ", self.rotation_angle)
         print("Shift_along_axis: ", self.shift_along_axis)
+        print("Percentage of overlap: ", self.percentage_of_overlap)

@@ -52,6 +52,8 @@ def create_execute_file(path, map0_level, map1_level, map0_vector_move, map1_vec
     # f.write("fitmap #1 in_map #2\r\n")
     f.write("vop resample #1 ongrid #2 \r\n")
     f.write("save {0} #3\r\n".format(path_exit_folder))
+    f.write("volume mask #1 surface #2\r\n")
+    f.write("measure volume #4\r\n")
     f.write("exit")
     f.close()
 

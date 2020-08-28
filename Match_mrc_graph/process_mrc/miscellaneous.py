@@ -124,17 +124,16 @@ def get_mass(map_path):
 
     f = open(path + "/fit.cxc", "w+")
     f.write("volume #1 origin 0,0,0 \r\n")
-    f.write("volume #2 origin 0,0,0 \r\n")
-    f.write("fitmap #1 in_map #2 metric correlation \r\n")
+    f.write("measure volume #1\r\n")
     f.write("exit")
     f.close()
 
     commands_real_path = os.path.abspath(path + "/fit.cxc")
-
-    error, exit_binary_text = get_out("chimerax", "--nogui", map_real_path, map_real_path, commands_real_path)
+    mass = 0
+    error, exit_binary_text = get_out("chimerax", "--nogui", map_real_path, commands_real_path)
     if error != 0:
         raise Exception("Error on try to get mass")
     text = exit_binary_text.decode("utf-8")
-    result = FitMapResult(text, 'x')
+    mass = get_float_betwen_ss(text, "Enclosed volume for surface (#1.1) =", "\n")
     shutil.rmtree(path)
-    return result.overlap
+    return mass

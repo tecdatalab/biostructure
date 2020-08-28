@@ -198,7 +198,7 @@ def fitting_process_aux(attempts, center_point1_o, center_point2_o, figure1_shap
     result.center_point1_a = center_point1_a
     result.center_point2_a = center_point2_a
     result.move_vector_map1 = move_vector
-    result.percentage_of_overlap = (min(get_mass(path_map1), get_mass(path_map2)))/result.overlap
+    result.percentage_of_overlap = result.overlap_mass/(min(get_mass(path_map1), get_mass(path_map2)))
 
     if verbose:
         print("Data for result fit are:")
