@@ -71,14 +71,11 @@ def get_float_betwen_ss(tex, a, b):
 
 def get_float_value(tex, a, b):
     r = 0
-    try:
-        r = get_float_betwen_ss(tex, a, b)
-    except:
-        r = 0
+    r = get_float_betwen_ss(tex, a, b)
     return r
 
 
-def get_mcenter_cube_load(map_path):
+def get_cube_len(map_path):
     map_real_path = os.path.abspath(map_path)
     path = "./temp_map_center"
     try:
@@ -95,10 +92,20 @@ def get_mcenter_cube_load(map_path):
 
     _error, exit_binary_text = get_out("chimerax", "--nogui", map_real_path, commands_real_path)
     text = exit_binary_text.decode("utf-8")
-    x = get_float_value(text, 'ncstart =', '\n')
-    y = get_float_value(text, 'nrstart =', '\n')
-    z = get_float_value(text, 'nsstart =', '\n')
+    x = get_float_value(text, 'xlen =', '\n')
+    y = get_float_value(text, 'ylen =', '\n')
+    z = get_float_value(text, 'zlen =', '\n')
 
     shutil.rmtree(path)
 
-    return [x*-1, y*-1, z*-1,]
+    return [x, y, z]
+
+
+def chance_basec(point, actual_shape, new_shape):
+    result = [0, 0, 0]
+
+    result[0] = new_shape[0] * (point[0] / actual_shape[0])
+    result[1] = new_shape[1] * (point[1] / actual_shape[1])
+    result[2] = new_shape[2] * (point[2] / actual_shape[2])
+
+    return result

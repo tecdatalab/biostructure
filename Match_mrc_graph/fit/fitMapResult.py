@@ -60,7 +60,7 @@ class FitMapResult(object):
     def __init__(self, text, type_c):
         #print(text)
         if type_c == 'n':
-            self.num_poins = int(get_float_betwen(text, "using", " points"))
+            self.num_points = int(get_float_betwen(text, "using", " points"))
             self.correlation = get_float_betwen(text, "correlation =", ", correlation about")
             self.correlation_about_mean = get_float_betwen(text, ", correlation about mean =", ", overlap")
             self.overlap = get_float_betwen(text, " overlap =", "\n  steps =")
@@ -73,7 +73,7 @@ class FitMapResult(object):
             self.rotation_angle = get_float_betwen(text, "  Rotation angle (degrees)", "\n  Shift along axis")
             self.shift_along_axis = get_float_betwen(text, "Shift along axis", "\n\n, correlation")
         elif type_c == 'x':
-            self.num_poins = int(get_float_betwen_ss(text, "using", " points"))
+            self.num_points = int(get_float_betwen_ss(text, "using", " points"))
             self.correlation = get_float_betwen(text, "correlation =", ", correlation about")
             self.correlation_about_mean = get_float_betwen(text, ", correlation about mean =", ", overlap")
             self.overlap = get_float_betwen(text, " overlap =", "\n  steps =")
@@ -86,8 +86,21 @@ class FitMapResult(object):
             self.rotation_angle = get_float_betwen(text, "  Rotation angle (degrees)", "\n  Shift along axis")
             self.shift_along_axis = get_float_betwen_ss(text, "Shift along axis", "\n\n")
 
-    def get_num_poins(self):
-        return self.num_poins
+        self.shape_cube1 = None
+        self.shape_cube2 = None
+        self.center_point1_o = None
+        self.center_point2_o = None
+        self.center_point1 = None
+        self.center_point2 = None
+        self.real_shape_cube1 = None
+        self.real_shape_cube2 = None
+        self.center_point1_a = None
+        self.center_point2_a = None
+        self.move_vector_map1 = [0, 0, 0]
+        self.move_vector_map2 = [0, 0, 0]
+
+    def get_num_points(self):
+        return self.num_points
 
     def get_correlation(self):
         return self.correlation

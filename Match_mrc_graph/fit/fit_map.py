@@ -23,6 +23,8 @@ def get_out(*args):
 def create_execute_file(path, map0_level, map1_level, map0_vector_move, map1_vector_move, attempts, path_exit_folder,
                         is_global):
     f = open(path + "/fit.cxc", "w+")
+    f.write("volume #1 origin 0,0,0 \r\n")
+    f.write("volume #2 origin 0,0,0 \r\n")
 
     if map0_level is not None:
         # f.write("volume #1 level " + str(map0_level).replace(".", ",") + "\r\n")
@@ -42,9 +44,11 @@ def create_execute_file(path, map0_level, map1_level, map0_vector_move, map1_vec
         f.write("move y {0} models #2".format(map1_vector_move[1]) + "\r\n")
         f.write("move z {0} models #2".format(map1_vector_move[2]) + "\r\n")
     if is_global:
-        f.write("fitmap #1 in_map #2 search {0} placement r\r\n".format(attempts))
+        # f.write("fitmap #1 in_map #2 search {0} placement r\r\n".format(attempts))
+        f.write("fitmap #1 in_map #2 metric correlation search {0} placement r\r\n".format(attempts))
     else:
-        f.write("fitmap #1 in_map #2\r\n")
+        # f.write("fitmap #1 in_map #2 metric correlation \r\n")
+        f.write("fitmap #1 in_map #2 metric correlation \r\n")
     # f.write("fitmap #1 in_map #2\r\n")
     f.write("vop resample #1 ongrid #2 \r\n")
     f.write("save {0} #3\r\n".format(path_exit_folder))

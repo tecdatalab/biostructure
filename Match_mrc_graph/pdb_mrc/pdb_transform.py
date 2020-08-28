@@ -83,7 +83,7 @@ def pdb_to_mrc_chains(create_original, verbose, resolution, input_file, output_d
                                 str(input_file), complete_file_path)
 
         if verbose:
-            print(output)
+            print(output.decode("utf-8"))
 
     if chains is not None:
         div_can = min(div_can, len(chains))
@@ -121,10 +121,9 @@ def pdb_to_mrc_chains(create_original, verbose, resolution, input_file, output_d
 
                 exit_mrc_path = directory + "/" + name_of_pdb + "_" + ''.join(chains[before_count:count]) + ".mrc"
 
-                _exit, output = get_out('e2pdb2mrc.py', '-R', '-B', '{0},{1},{2}'.format(cube_dimentions[0],
-                                                                                         cube_dimentions[1],
-                                                                                         cube_dimentions[2]),
-                                        str(resolution), str(pdb_path), exit_mrc_path)
+                _exit, output = get_out('e2pdb2mrc.py', '-R', str(resolution), '-B',
+                                        '{0},{1},{2}'.format(cube_dimentions[0], cube_dimentions[1],
+                                                             cube_dimentions[2]), str(pdb_path), exit_mrc_path)
 
                 os.remove(pdb_path)
 
