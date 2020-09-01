@@ -75,13 +75,13 @@ def fit_map_in_map(map0_path, map1_path, path_exit_folder, attempts, map0_vector
 
     error, exit_binary_text = get_out("chimerax", "--nogui", map0_real_path, map1_real_path, commands_real_path)
     if error == 0:
-        text = exit_binary_text.decode("utf-8")
+        text = exit_binary_text
         if text.find('Found 0 fits') != -1:
             create_execute_file(path, map0_level, map1_level, map0_vector_move, map1_vector_move, attempts,
                                 path_exit_folder,
                                 False)
             error, exit_binary_text = get_out("chimerax", "--nogui", map0_real_path, map1_real_path, commands_real_path)
-            text = exit_binary_text.decode("utf-8")
+            text = exit_binary_text
 
         shutil.rmtree(path)
         # print(text)

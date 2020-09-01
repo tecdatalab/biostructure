@@ -37,7 +37,7 @@ def get_cube_len_angstrom(map_path):
     commands_real_path = os.path.abspath(path + "/fit.cxc")
 
     _error, exit_binary_text = get_out("chimerax", "--nogui", map_real_path, commands_real_path)
-    text = exit_binary_text.decode("utf-8")
+    text = exit_binary_text
     x = get_float_value(text, 'xlen =', '\n')
     y = get_float_value(text, 'ylen =', '\n')
     z = get_float_value(text, 'zlen =', '\n')
@@ -65,7 +65,7 @@ def get_mass_angstrom(map_path):
     error, exit_binary_text = get_out("chimerax", "--nogui", map_real_path, commands_real_path)
     if error != 0:
         raise Exception("Error on try to get mass")
-    text = exit_binary_text.decode("utf-8")
+    text = exit_binary_text
     mass = get_float_between_ss(text, "Enclosed volume for surface (#1.1) =", "\n")
     shutil.rmtree(path)
     return mass
