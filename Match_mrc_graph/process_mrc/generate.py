@@ -98,5 +98,5 @@ def get_mrc_one(mrc_path, recommendedContour_p):
 
     return result, myMolecule.getEmMap().data().shape
 
-# result = get_mrc_segments("../pdb_mrc/exit_pdb/175d/175d.mrc", 7, 3, 1)
-# result = get_mrc_synthetic_segments_pdb("../pdb_mrc/exit_pdb/175d", 7)
+# result = get_mrc_segments("../pdb_to_mrc/exit_pdb/175d/175d.mrc", 7, 3, 1)
+# result = get_mrc_synthetic_segments_pdb("../pdb_to_mrc/exit_pdb/175d", 7)

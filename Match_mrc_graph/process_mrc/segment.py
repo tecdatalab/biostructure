@@ -4,6 +4,7 @@ Created on Jun 9, 2020
 @author: luis98
 '''
 
+
 class Segment(object):
     '''
     classdocs
@@ -16,4 +17,3 @@ class Segment(object):
         self.id_segment = id_segment
         self.mask = mask
         self.zd_descriptors = zd_descriptors
-        

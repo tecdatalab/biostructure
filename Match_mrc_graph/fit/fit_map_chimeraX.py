@@ -4,20 +4,10 @@ Created on Jul 19, 2020
 @author: luis98
 '''
 import os
-from subprocess import check_output, CalledProcessError
-from tempfile import TemporaryFile
 import shutil
-from fit.fitMapResult import FitMapResult
 
-
-def get_out(*args):
-    with TemporaryFile() as t:
-        try:
-            out = check_output(args, stderr=t)
-            return 0, out
-        except CalledProcessError as e:
-            t.seek(0)
-            return e.returncode, t.read()
+from fit.fit_result_chimeraX import FitMapResult
+from general_utils.terminal_utils import get_out
 
 
 def create_execute_file(path, map0_level, map1_level, map0_vector_move, map1_vector_move, attempts, path_exit_folder,
@@ -72,10 +62,9 @@ def fit_map_in_map(map0_path, map1_path, path_exit_folder, attempts, map0_vector
     if not os.path.exists(complete_exit_path):
         os.makedirs(complete_exit_path)
 
-    try:
+    if os.path.exists(path):
         shutil.rmtree(path)
-    except:
-        pass
+
     os.mkdir(path)
     create_execute_file(path, map0_level, map1_level, map0_vector_move, map1_vector_move, attempts, path_exit_folder,
                         True)

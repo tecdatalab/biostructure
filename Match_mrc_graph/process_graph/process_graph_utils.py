@@ -3,12 +3,13 @@ Created on Jun 9, 2020
 
 @author: luis98
 '''
-from sklearn.neighbors import KDTree
-from process_graph.process_segment_faces import get_n_points_cube
-import networkx as nx
 import matplotlib
 import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
+from sklearn.neighbors import KDTree
+
+from process_graph.process_segment_faces import get_n_points_cube
 
 
 def generate_graph(segments, n_points_face, filter_value, max_distance, min_points):

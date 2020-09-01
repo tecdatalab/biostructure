@@ -1,5 +1,3 @@
-from random import seed
-from random import randint
 import numpy as np
 
 
@@ -10,7 +8,7 @@ def get_point_face(cube, original_point, move, filter_value):
             original_point[1] += move[1]
             original_point[2] += move[2]
         return original_point
-    except:
+    except ValueError:
         return False
 
 
@@ -36,7 +34,7 @@ def get_n_points_face(cube, points, n_points, move, filter_value, face, new_val)
     return result
 
 
-def get_funtional_points(cube, filter_value):
+def get_functional_points(cube, filter_value):
     pos = (np.where(cube > filter_value))
 
     clear_0 = np.unique(np.array([[0, pos[1][i], pos[2][i]] for i in range(len(pos[0]))]), axis=0)
@@ -47,7 +45,7 @@ def get_funtional_points(cube, filter_value):
 
 def get_n_points_cube(cube, n_points_face, filter_value):
     values_cube = cube.shape
-    points = get_funtional_points(cube, filter_value)
+    points = get_functional_points(cube, filter_value)
     result = []
     np.random.shuffle(points[2])
     result += get_n_points_face(cube, points[2], n_points_face, [0, 0, 1], filter_value, 2, 0)

@@ -1,21 +1,19 @@
-import shutil
-
-from process_mrc.generate import get_mrc_segments, \
-    get_mrc_synthetic_segments_pdb, get_mrc_one
-from process_graph.process_graph_utils import generate_graph, \
-    draw_graph_similarity, draw_graph_similarity_same_image, \
-    get_similarity_complete_cloud
-from process_graph.graph_algorithm import graph_aligning
-from fit.fit_map import fit_map_in_map
-from pdb_mrc.pdb_transform import download_pdb, get_chains, pdb_to_mrc_chains
 import os
 
-from process_mrc.miscellaneous import get_center_point, get_vector_move_1to2, \
-    get_cube_len, chance_basec, get_mass
-from utils_match.csv_writer import write_in_file
-from utils_match.list_processing import get_element_list
-
-import numpy as np
+from fit.fit_map_chimeraX import fit_map_in_map
+from writers.csv_writer import write_in_file
+from general_utils.list_utils import get_element_list
+from general_utils.math_utils import chance_base_point, get_vector_move_1to2
+from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
+from pdb_to_mrc.miscellaneous import get_chains
+from general_utils.download_utils import download_pdb, download_emd
+from process_graph.graph_algorithm import graph_aligning
+from process_graph.process_graph_utils import generate_graph
+from process_mrc.generate import get_mrc_segments, \
+    get_mrc_synthetic_segments_pdb, get_mrc_one
+from process_mrc.miscellaneous import get_center_point, \
+    get_cube_len_angstrom, get_mass_angstrom
+from globals.global_values import maps_with_pdb_origin, maps_with_pdb_origin_problems
 
 
 # segments = get_mrc_segments("../../maps/1010/EMD-1010.map", 7, 3, 1)
@@ -24,7 +22,7 @@ import numpy as np
 # segments_graph2 = segments
 # 
 # print(segments[0].mask.shape)
-# ##segments = get_mrc_synthetic_segments_pdb("../pdb_mrc/exit_pdb/175d", 7)
+# ##segments = get_mrc_synthetic_segments_pdb("../pdb_to_mrc/exit_pdb/175d", 7)
 # graph1 = generate_graph(segments_graph1, 50, 0, 6, 1) #Preguntar con los no conectados y sub grafos
 # graph2 = generate_graph(segments_graph2, 50, 0, 6, 1) #Preguntar con los no conectados y sub grafos
 # 
@@ -152,8 +150,8 @@ def fitting_process_aux(attempts, center_point1_o, center_point2_o, figure1_shap
 
     # Get Angstrom shape
     try:
-        real_shape_cube1 = get_cube_len(path_map1)
-        real_shape_cube2 = get_cube_len(path_map2)
+        real_shape_cube1 = get_cube_len_angstrom(path_map1)
+        real_shape_cube2 = get_cube_len_angstrom(path_map2)
     except Exception as e:
         raise Exception('Error to calculate real shape cube, the error is : {0}'.format(str(e)))
 
@@ -163,8 +161,8 @@ def fitting_process_aux(attempts, center_point1_o, center_point2_o, figure1_shap
 
     # Transformation by a rule of 3 from the central point of the grid to the Angstroms cube
     try:
-        center_point1_a = chance_basec(center_point1, figure1_shape, real_shape_cube1)
-        center_point2_a = chance_basec(center_point2, figure2_shape, real_shape_cube2)
+        center_point1_a = chance_base_point(center_point1, figure1_shape, real_shape_cube1)
+        center_point2_a = chance_base_point(center_point2, figure2_shape, real_shape_cube2)
     except Exception as e:
         raise Exception('Error to transform center points by rule of 3, the error is : {0}'.format(str(e)))
 
@@ -198,7 +196,8 @@ def fitting_process_aux(attempts, center_point1_o, center_point2_o, figure1_shap
     result.center_point1_a = center_point1_a
     result.center_point2_a = center_point2_a
     result.move_vector_map1 = move_vector
-    result.percentage_of_overlap = result.overlap_mass/(min(get_mass(path_map1), get_mass(path_map2)))
+    result.percentage_of_overlap = result.overlap_mass / (
+        min(get_mass_angstrom(path_map1), get_mass_angstrom(path_map2)))
 
     if verbose:
         print("Data for result fit are:")
@@ -250,54 +249,18 @@ def main_2():
 
 
 def main_3():
-    files_list = ['emd_0009.map', 'emd_0244.map', 'emd_0293.map', 'emd_0355.map', 'emd_0362.map', 'emd_0366.map',
-                  'emd_0367.map', 'emd_0404.map', 'emd_0434.map', 'emd_0493.map', 'emd_0646.map', 'emd_0647.map',
-                  'emd_0648.map', 'emd_0695.map', 'emd_0728.map', 'emd_0729.map', 'emd_0777.map', 'emd_0778.map',
-                  'emd_0790.map', 'emd_0901.map', 'emd_0979.map', 'emd_10132.map', 'emd_10194.map', 'emd_10373.map',
-                  'emd_10464.map', 'emd_10699.map', 'emd_1181.map', 'emd_1261.map', 'emd_1263.map', 'emd_1884.map',
-                  'emd_1918.map', 'emd_1983.map', 'emd_1988.map', 'emd_1989.map', 'emd_1990.map', 'emd_2005.map',
-                  'emd_20267.map', 'emd_20287.map', 'emd_20493.map', 'emd_20511.map', 'emd_2071.map', 'emd_2072.map',
-                  'emd_20721.map', 'emd_20813.map', 'emd_20924.map', 'emd_20931.map', 'emd_21121.map', 'emd_21335.map',
-                  'emd_21585.map', 'emd_21602.map', 'emd_2233.map', 'emd_2528.map', 'emd_2594.map', 'emd_2595.map',
-                  'emd_2605.map', 'emd_2676.map', 'emd_2706.map', 'emd_2751.map', 'emd_2752.map', 'emd_2786.map',
-                  'emd_2813.map', 'emd_2845.map', 'emd_2860.map', 'emd_2917.map', 'emd_2925.map', 'emd_30036.map',
-                  'emd_3101.map', 'emd_3133.map', 'emd_3164.map', 'emd_3165.map', 'emd_3166.map', 'emd_3167.map',
-                  'emd_3168.map', 'emd_3169.map', 'emd_3170.map', 'emd_3235.map', 'emd_3241.map', 'emd_3305.map',
-                  'emd_3329.map', 'emd_3352.map', 'emd_3355.map', 'emd_3356.map', 'emd_3433.map', 'emd_3445.map',
-                  'emd_3467.map', 'emd_3468.map', 'emd_3469.map', 'emd_3470.map', 'emd_3471.map', 'emd_3472.map',
-                  'emd_3473.map', 'emd_3474.map', 'emd_3475.map', 'emd_3477.map', 'emd_3478.map', 'emd_3479.map',
-                  'emd_3480.map', 'emd_3481.map', 'emd_3482.map', 'emd_3483.map', 'emd_3484.map', 'emd_3522.map',
-                  'emd_3527.map', 'emd_3529.map', 'emd_3530.map', 'emd_3604.map', 'emd_3634.map', 'emd_3669.map',
-                  'emd_3696.map', 'emd_3706.map', 'emd_3778.map', 'emd_3803.map', 'emd_3850.map', 'emd_3894.map',
-                  'emd_3896.map', 'emd_3954.map', 'emd_4021.map', 'emd_4025.map', 'emd_4057.map', 'emd_4078.map',
-                  'emd_4100.map', 'emd_4154.map', 'emd_4318.map', 'emd_4515.map', 'emd_4671.map', 'emd_4680.map',
-                  'emd_4707.map', 'emd_4708.map', 'emd_4710.map', 'emd_4742.map', 'emd_4743.map', 'emd_4744.map',
-                  'emd_4764.map', 'emd_4918.map', 'emd_4940.map', 'emd_4975.map', 'emd_5002.map', 'emd_5100.map',
-                  'emd_5258.map', 'emd_5335.map', 'emd_5391.map', 'emd_5395.map', 'emd_5423.map', 'emd_5607.map',
-                  'emd_5609.map', 'emd_5610.map', 'emd_6102.map', 'emd_6284.map', 'emd_6285.map', 'emd_6286.map',
-                  'emd_6369.map', 'emd_6476.map', 'emd_6779.map', 'emd_6781.map', 'emd_6782.map', 'emd_6783.map',
-                  'emd_6823.map', 'emd_6826.map', 'emd_6850.map', 'emd_7065.map', 'emd_7090.map', 'emd_7305.map',
-                  'emd_7328.map', 'emd_7463.map', 'emd_7529.map', 'emd_7896.map', 'emd_7939.map', 'emd_7940.map',
-                  'emd_8132.map', 'emd_8133.map', 'emd_8134.map', 'emd_8148.map', 'emd_8149.map', 'emd_8190.map',
-                  'emd_8427.map', 'emd_8513.map', 'emd_8539.map', 'emd_8579.map', 'emd_8886.map', 'emd_8898.map',
-                  'emd_8981.map', 'emd_9043.map', 'emd_9134.map', 'emd_9147.map', 'emd_9163.map', 'emd_9272.map',
-                  'emd_9302.map', 'emd_9303.map', 'emd_9378.map', 'emd_9387.map', 'emd_9388.map', 'emd_9594.map',
-                  'emd_9621.map', 'emd_9714.map', 'emd_9715.map', 'emd_9716.map', 'emd_9757.map', 'emd_9841.map',
-                  'emd_9881.map', 'emd_9882.map', 'emd_10944.map', 'emd_10960.map', 'emd_10748.map', 'emd_10754.map',
-                  'emd_11173.map']
-    files_problems_list = ["3235", "3706", "4680"]
     con = 0
-    len_file = len(files_list)
+    len_file = len(maps_with_pdb_origin)
     headers_csv = ['map_name', 'center_p1A', 'center_p2A', 'move_v1', 'move_v2', 'map1_level', 'map2_level',
                    'Num_poins',
                    'Correlation', 'Correlation_about_mean', 'Overlap', 'Steps', 'Shift', 'Angle', 'Matrix_rt', 'Axis',
                    'Axis_point', 'Rotation_angle', 'Shift_along_axis', 'map1_path', 'map2_path']
     initial_flag = False
-    for i in files_list:
+    for i in maps_with_pdb_origin:
         con += 1
         name = i[4:-1]
         name = name[:-3]
-        if name in files_problems_list:
+        if name in maps_with_pdb_origin_problems:
             continue
         if name == '0009':
             initial_flag = True
@@ -353,8 +316,13 @@ def main_4():
     print("Fin")
 
 
+def main_5():
+    download_emd("0009", './exit_fit/0009.map', True)
+
+
 if __name__ == '__main__':
     # main_1()
     # main_2()
     # main_3()
     main_4()
+    # main_5()
