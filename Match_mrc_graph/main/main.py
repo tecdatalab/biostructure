@@ -14,7 +14,7 @@ from process_mrc.generate import get_mrc_segments, \
 from process_mrc.miscellaneous import get_center_point, \
     get_cube_len_angstrom, get_mass_angstrom
 from globals.global_values import maps_with_pdb_origin, maps_with_pdb_origin_problems
-
+from metric.metrics_mrc import get_geometric_overlap_p
 
 # segments = get_mrc_segments("../../maps/1010/EMD-1010.map", 7, 3, 1)
 # 
@@ -320,9 +320,20 @@ def main_5():
     download_emd("0009", './exit_fit/0009.map', True)
 
 
+def main_6():
+    import mrcfile
+
+    file1 = mrcfile.open('/home/lcastillo98/Documents/git_projects/sim_emd_9882_fit.mrc')
+    file2 = mrcfile.open('/home/lcastillo98/Documents/git_projects/emd_9882.map')
+    
+    percentage_overlap = get_geometric_overlap_p(file1.data, file2.data)
+    print("Percentage of overlap:", percentage_overlap)
+
+
 if __name__ == '__main__':
     # main_1()
     # main_2()
     # main_3()
-    main_4()
+    # main_4()
     # main_5()
+    main_6()
