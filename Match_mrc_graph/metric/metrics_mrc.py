@@ -14,3 +14,9 @@ def get_geometric_overlap_p(mrc_data1, mrc_data2):
     mass_overlap = all_points.shape[0] - unique_points.shape[0]
     result = mass_overlap / min(mass1, mass2)
     return mass1, mass2, mass_overlap, result
+
+
+def get_cross_correlation(mrc_data1, mrc_data2):
+    CC = np.corrcoef(mrc_data1.ravel(), mrc_data2.ravel())
+    result = CC[0, 1]
+    return result
