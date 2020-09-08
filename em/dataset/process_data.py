@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import subprocess
 from glob import glob
 from xml.etree import ElementTree
 import argparse
@@ -18,9 +19,9 @@ def execute_command(cmd):
     try:
         if os.system(cmd) != 0:
             raise Exception('Command "%s" does not exist' % command_emdb)
-    except:
-        print('Command "%s" does not work' % cmd
-)
+    except Exception as exc:
+        raise RuntimeError('Command "%s" does not work' % cmd) from exc
+
 # Sync headers to folder
 def get_headers(header_path):
     if not os.path.exists(header_path):
@@ -271,31 +272,37 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
     # Get map volume
     map_object = molecule.Molecule(map_filename, recommendedContour=contourLevel, cutoffRatios=[1])
     # Get dictionary of volumes, choose element with key 1 (corresponding to 100% recommended contour level)
+    map_box = map_object.getGridSize()
+    map_box_max_dim = np.max(map_box)
+    if map_box_max_dim != np.min(map_box):
+        # Change map extension to mrc due to compatibility with EMAN
+        new_map_filename = map_filename.replace('.map','.mrc')
+        df.at[df.index[index], 'map_path'] = new_map_filename
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py '+ map_filename + ' ' + new_map_filename +' --clip='+str(map_box_max_dim)+','+str(map_box_max_dim)+','+str(map_box_max_dim)
+        print(command)
+        execute_command(command)
+    
     map_volume = map_object.getVolume()[1]
     # Get voxel size in Angstroms to generate simulated map 
     voxel_size = map_object.getVoxelSize()[0] #using only one value, supose its the same for all axes
     if voxel_size == 0:
         print("Map {} has voxel volume of 0, header is: \n {}".format(os.path.basename(map_filename), map_object.emMap.rawHeader))
     # Get map bounding box
-    map_box = map_object.getCellDim()
 
-    simulated_filename = os.path.join(sim_model_path, 'sim_'+os.path.basename(map_filename).replace('.map','.mrc'))
+    simulated_path = os.path.join(sim_model_path, 'sim_'+os.path.basename(map_filename).replace('.map','.mrc'))
     # Generate map
-    try:
-        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=' + str(voxel_size)+ ' -R=' + str(res) + ' -B='+ str(int(round(map_box[2]))) +','+ str(int(round(map_box[1])))+ ','+ str(int(round(map_box[0]))) + ' --center '+  pdb_filename + ' ' + simulated_filename
-        print(command)
-        if os.system(command) != 0:
-            raise Exception('Command "%s" does not exist' % command)
-    except:
-        print('Command "%s" does not work' % command)
+    command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=' + str(voxel_size)+ ' -R=' + str(res) + ' -B='+ str(map_box[2]) +','+ str(map_box[1])+ ','+ str(map_box[0]) +' '+  pdb_filename + ' ' + simulated_path
+    print(command)
+    execute_command(command)
 
     volume_result = dict()
     volume_result['index']=index
+    volume_result['simulated_path'] = simulated_path
     volume_result['map_volume']=map_volume
     
     # Get simulated map volume
-    if os.path.exists(simulated_filename):
-        map_object = molecule.Molecule(simulated_filename, recommendedContour=contourLevel, cutoffRatios=[1])
+    if os.path.exists(simulated_path):
+        map_object = molecule.Molecule(simulated_path, recommendedContour=contourLevel, cutoffRatios=[1])
         # Get dictionary of volumes, choose element with key 1 (corresponding to 100% recommended contour level)
         pdb_volume = map_object.getVolume()[1]
         volume_result['pdb_volume']=pdb_volume
@@ -317,23 +324,79 @@ def generateSimulatedDataset(index, df, sim_model_path):
     bottom_res = 5
     res = (upper_res-bottom_res) * np.random.random_sample() + bottom_res
 
-    simulated_filename = os.path.join(sim_model_path, 'sim_'+pdb_entry+'.mrc')
+    simulated_path = os.path.join(sim_model_path, 'sim_'+pdb_entry+'.mrc')
 
     result = dict()
     result['index'] = index
     result['resolution']=res
-    result['path'] = simulated_filename
+    result['path'] = simulated_path
     # Generate map
     try:
-        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=1.0 -R=' + str(res) + ' --center '+  pdb_filepath + ' ' + simulated_filename
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=1.0 -R=' + str(res) + ' --center '+  pdb_filepath + ' ' + simulated_path
         print(command)
-        if os.system(command) != 0:
-            result['resolution']=-1
-            raise Exception('Command "%s" does not exist' % command)
+        execute_command(command)
     except:
-        print('Command "%s" does not work' % command)
         result['resolution']=-1
     return result
+
+# Function to fit experimental map to match simulated map from pdb structure
+def fitMaptoSim_Map(index, df, models_path):
+    map_path = df.at[df.index[index], 'map_path']
+    simulated_path = df.at[df.index[index], 'simulated_path']
+    contourLvl = df.at[df.index[index], 'contourLevel']
+    # Get filenames    
+    map_filename = os.path.basename(map_path)
+    mask_filename = 'mask_'+map_filename[:-4]+'.mrc'
+    simulated_filename = os.path.basename(simulated_path)
+    mask_sim_filename = 'mask_'+simulated_filename
+    aligned_map_filename = 'aligned_'+map_filename[:-4]+'.mrc'
+    mask_aligned_filename = 'mask_'+aligned_map_filename
+
+    # Compute absolute paths
+    aligned_map_path = os.path.join(models_path, aligned_map_filename)
+    mask_sim_path = os.path.join(os.path.dirname(simulated_path), mask_sim_filename)
+    mask_path = os.path.join(models_path, mask_filename)    
+    mask_aligned_path = os.path.join(models_path, mask_aligned_filename)
+
+    # Compute binary mask for simulated and original map
+    command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py ' + map_path + ' '+ mask_path +' --process threshold.binary:value=' + str(contourLvl)
+    print(command)
+    execute_command(command)
+    #command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py ' + simulated_path + ' '+ mask_sim_path +' --process threshold.binary:value=' + str(contourLvl)
+    #print(command)
+    #execute_command(command)
+    
+    # Compute similarity before alignment
+    command =  ['/work/mzumbado/EMAN2/bin/python', '/work/mzumbado/EMAN2/bin/sximgstat.py', map_path, simulated_path, mask_path, '--ccc']
+    print(' '.join(command))
+    result = subprocess.run(command, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, universal_newlines=True)
+    print("Command output: {}".format(result.stdout))
+    correlation_before = result.stdout.split()[-1] if result.stdout != None else 0
+    
+    # Compute alignment
+    command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py  --align=rotate_translate_3d_tree:verbose=True --alignref='+simulated_path+' --multfile='+ mask_path +' '+map_path+' '+aligned_map_path
+    print(command)
+    try:
+        execute_command(command)
+    except RuntimeError as e:
+        print(e)
+    # Compute mask for aligned map
+    command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py ' + aligned_map_path + ' '+ mask_aligned_path +' --process threshold.binary:value=' + str(contourLvl)
+    print(command)
+    try:
+        execute_command(command)
+    except RuntimeError as e:
+        print(e)
+
+    # Compute similarity for aligned map
+    command =  ['/work/mzumbado/EMAN2/bin/python', '/work/mzumbado/EMAN2/bin/sximgstat.py', aligned_map_path, simulated_path, mask_path, '--ccc']
+    print(' '.join(command))
+    result = subprocess.run(command,  stderr=subprocess.STDOUT, stdout=subprocess.PIPE, universal_newlines=True)
+    print("Command output: {}".format(result.stdout))
+    correlation_after = result.stdout.split()[-1] if result.stdout != None else 0
+
+    return {'index':index, 'similarity':correlation_before, 'aligned_path':aligned_map_path, 'similarity_aligned':correlation_after}
+     
 
 # Function to get symmetry information from pdb file
 def getSymmetryFromPDB(models_path):
@@ -377,6 +440,7 @@ def selectExperimentalDataset(result_dir, percentil_boundaries_tuple=None):
     plt.xlabel('Bins')  
     plt.ylabel('Number of Samples')
     plt.savefig(os.path.join(result_dir,'volume_capture_hist.png'))
+    plt.clf()
     # Computing basic stats
     num_samples = len(df)
     avg = df['vol_capture'].mean()
@@ -403,6 +467,10 @@ def selectExperimentalDataset(result_dir, percentil_boundaries_tuple=None):
     print("Upper boundary: {}".format(upper_boundary))
 
     print("Number of samples below lower boundary: {} and over upper boundary: {}".format(len( df[df.vol_capture < low_boundary] ), len( df[df.vol_capture >upper_boundary] )))
+    
+    # Printing percentile values
+    for i in range(0,100):
+        print("Percentile {} value: {}".format(i, df.vol_capture.quantile(i/100, interpolation = 'midpoint')))
 
     percentilA = df.vol_capture.quantile(int(percentil_boundaries_tuple[0])/100, interpolation = 'midpoint')
     percentilB = df.vol_capture.quantile(int(percentil_boundaries_tuple[1])/100,  interpolation = 'midpoint')
@@ -438,6 +506,7 @@ def main():
     parser.add_argument('--v', required=False, default=False, help='True if want to compare map volume with its simulated counterpart')
     parser.add_argument('--s', required=False, default=None, nargs=2, help='Please provide lower and upper experimental data percentil distribution to be included in final dataset')  
     parser.add_argument('--g', required=False, default=None, help='Please provide percent of simulated data to be included in final dataset')
+    parser.add_argument('--f', required=False, default=False, help='True if want to align experimental data to simulated counterpart')
     parser.add_argument('--header_dir', default='header', required=False,help='output directory to store emdb headers') 
     parser.add_argument('--models_dir', default='models', required=False, help='output directory to store emdb models') 
     parser.add_argument('--simulated_dir', default='simulated', required=False, help='output directory to store simulated maps') 
@@ -452,18 +521,18 @@ def main():
     pdb_path = os.path.join(models_path,'pdb')
     # Download and process data
     if int(opt.d):
-        #get_headers(header_path)
-        #generate_dataframe(header_path)
-        #processMetadata()
-        #downloadModels(models_path)
+        get_headers(header_path)
+        generate_dataframe(header_path)
+        processMetadata()
+        downloadModels(models_path)
         downloadModelsPDB(pdb_path)
-        #removeNonExistingModels(models_path)
+        removeNonExistingModels(models_path)
         processfiles(models_path)
     #Calculate volume
     if int(opt.v):
         df = pd.read_csv('./dataset_metadata.csv')
         print("Number of samples to process volume: ", len(df.index))
-        df_volume = df[['id', 'fitted_entries', 'subunit_count', 'resolution','contourLevel']].copy()
+        df_volume = df[['id','map_path', 'fitted_entries', 'subunit_count', 'resolution','contourLevel']].copy()
         # Get index list to schedule processess 
         index_list = df_volume.index.tolist()
         print("Spawn procecess...")
@@ -482,8 +551,10 @@ def main():
                         res_index = d['index']
                         pdb_volume = d['pdb_volume']
                         map_volume = d['map_volume']
+                        sim_path = d['simulated_path']
                         df_volume.loc[res_index, 'map_volume'] = map_volume
                         df_volume.loc[res_index, 'pdb_volume'] = pdb_volume
+                        df_volume.loc[res_index, 'simulated_path'] = sim_path
                     except ValueError as error:
                         print("Error calculating volume for simulated {}: {}".format(df_volume.loc[i,'fitted_entries'],error))
                 df_volume.to_csv('dataset_volume.csv', index=False)
@@ -523,10 +594,35 @@ def main():
                     except ValueError as error:
                         print("Error calculating volume for simulated {}: {}".format(df_volume.loc[i,'fitted_entries'],error))
                 df_synthetic_selected.to_csv('synthetic_selected.csv', index=False)
-    '''
-    if opt.f !=None:
+    
+    if int(opt.f):
         # Fitting de los mapas
-        print("Fitting selected maps to tag data")
+        print("Fitting experimental maps to match simulated counterpart")
+        df_selected = pd.read_csv('dataset_selected.csv')
+        index_list = df_selected.index.tolist()
+        print("Spawn procecess...")
+        comm = MPI.COMM_WORLD
+        size = comm.Get_size()
+        with MPICommExecutor(comm, root=0, worker_size=size) as executor:
+            if executor is not None:
+                futures = []
+                for i in index_list:
+                    futures.append(executor.submit(fitMaptoSim_Map, i, df_selected, models_path))
+                for f in futures:
+                    try:
+                        d = f.result()
+                        print("received res dict: ",d)
+                        res_index = d['index']
+                        corr = d['similarity']
+                        corr_aligned = d['similarity_aligned']
+                        path = d['aligned_path']
+                        df_selected.loc[res_index, 'similarity'] = corr
+                        df_selected.loc[res_index, 'similarity_aligned'] = corr_aligned
+                        df_selected.loc[res_index, 'aligned_path'] = path
+                    except ValueError as error:
+                        print("Error fitting map {} to simulated counterpart: {}".format(df_volume.loc[i,'ID'],error))
+                df_selected.to_csv('dataset_selected_sim.csv', index=False)
+    '''
     if opt.p !=None:
         # Partir en pedazos, generar ground truth
         print("Tagging data")
