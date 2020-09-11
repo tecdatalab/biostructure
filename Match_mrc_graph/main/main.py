@@ -1,8 +1,9 @@
 import os
 
 from fit.fit_map_chimeraX import fit_map_in_map
+from reconstruction.semi_exact_cover import get_semi_exact_s
 from writers.csv_writer import write_in_file
-from general_utils.list_utils import get_element_list
+from general_utils.list_utils import get_element_list, generate_binary_matrix
 from general_utils.math_utils import chance_base_point, get_vector_move_1to2
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from pdb_to_mrc.miscellaneous import get_chains
@@ -329,12 +330,27 @@ def main_6():
 
     # file1 = mrcfile.open('/home/lcastillo98/Documents/git_projects/cube50x50x50.map')
     # file2 = mrcfile.open('/home/lcastillo98/Documents/git_projects/cube100x100x100.map')
-    
+
     percentage_overlap = get_geometric_overlap_p(file1.data, file2.data)
     print("Percentage of overlap:", percentage_overlap)
 
     cross_correlation = get_cross_correlation(file1.data, file2.data)
     print("Cross_correlation:", cross_correlation)
+
+
+def main_7():
+    initial_matrix = [[1, 0, 0, 0],
+                      [1, 1, 0, 0],
+                      [0, 0, 1, 1],
+                      [1, 1, 0, 0],
+                      [0, 0, 0, 1],
+                      [1, 0, 1, 0],
+                      [1, 1, 1, 1]
+                      ]
+    top = 100
+    binary_matrix = generate_binary_matrix(initial_matrix)
+    combinations = get_semi_exact_s(binary_matrix, 4, top)
+    print("Combinations: ", combinations)
 
 
 if __name__ == '__main__':
@@ -343,4 +359,5 @@ if __name__ == '__main__':
     # main_3()
     # main_4()
     # main_5()
-    main_6()
+    # main_6()
+    main_7()

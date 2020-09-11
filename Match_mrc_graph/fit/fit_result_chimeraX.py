@@ -34,6 +34,8 @@ class FitMapResult(object):
             self.steps = int(get_float_between(text, "steps =", ", shift = "))
             self.shift = get_float_between(text, " shift =", ", angle = ")
             self.angle = get_float_between_ss(text, ", angle =", " degrees\n")
+            '''Information about this matrix'''
+
             self.matrix_rt = get_matrix_between(text, "  Matrix rotation and translation\n", "\n  Axis")
             self.axis = get_vector_between(text, "  Axis", "\n  Axis point")
             self.axis_point = get_vector_between(text, "  Axis point", "\n  Rotation angle (degrees)")

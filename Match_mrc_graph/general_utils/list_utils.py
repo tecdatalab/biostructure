@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def get_element_list(index, list_elements):
     result = []
     for i in list_elements:
@@ -5,3 +8,9 @@ def get_element_list(index, list_elements):
     return result
 
 
+def generate_binary_matrix(matrix):
+    result = []
+    for i in matrix:
+        val = '0b' + ''.join([str(x) for x in i])
+        result.append(int(val, 2))
+    return np.array(result)
