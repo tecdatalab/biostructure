@@ -1,6 +1,7 @@
 import numpy as np
 from skimage.measure import regionprops
 from skimage.transform import resize
+from scipy.ndimage import correlate
 
 from reader import Reader
 import processing
@@ -24,18 +25,19 @@ class Molecule():
             exit()
         map_data = molecule_map.data()
         contoursNum= len(cutoffRatios)
-        contour_masks = np.ndarray((contoursNum,*molecule_map.grid_size()))
-        
+        # Use dictionary instead
+        #contour_masks = np.ndarray((contoursNum,*molecule_map.grid_size()))
+        contour_masks = {}
         self.emMap=molecule_map
         self.contourLvl=recommendedContour
         self.cutoffRatios=cutoffRatios
         self.contoursNum= contoursNum
 
-        for i,cutoffRatio in enumerate(self.cutoffRatios):
+        for cutoffRatio in self.cutoffRatios:
             lvl = cutoffRatio*self.contourLvl
             mask_at_contour = np.zeros(map_data.shape)
             mask_at_contour[map_data>=lvl]=self.indicatorValue
-            contour_masks[i,:] = mask_at_contour
+            contour_masks[cutoffRatio] = mask_at_contour
 
         self.contour_masks = contour_masks
         self.seg_masks=None
@@ -118,6 +120,28 @@ class Molecule():
 
     def getVoxelSize(self):
         return self.emMap.voxelSize()
+
+    def getCorrelation(self, molecule):
+        if(self.getGridSize()!=molecule.getGridSize()):
+            raise ValueError("Both maps must have same dimensions")
+        else:
+            return correlate(self.emMap.data(), molecule.emMap.data())
+
+    def getOverlap(self, molecule, levels=[1]):
+        if(self.getGridSize()!=molecule.getGridSize()):
+            raise ValueError("Both maps must have same dimensions")
+        else:
+            result = []
+            moleculeA_masks = self.getContourMasks()
+            moleculeB_masks = molecule.getContourMasks()
+
+            for level in levels:
+                mask_A = moleculeA_masks[level]
+                mask_B = moleculeB_masks[level]
+                overlap = np.sum(np.einsum("ijk, ijk -> ijk", mask_A, mask_B))
+                result.append(overlap)
+            return result 
+         
 
 
 
