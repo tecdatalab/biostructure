@@ -11,6 +11,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
+from concurrent.futures import wait
 from Bio.PDB import PDBParser
 import numpy as np
 
@@ -274,24 +275,32 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
     # Get dictionary of volumes, choose element with key 1 (corresponding to 100% recommended contour level)
     map_box = map_object.getGridSize()
     map_box_max_dim = np.max(map_box)
-    if map_box_max_dim != np.min(map_box):
+    if map_box_max_dim != np.min(map_box) or map_box_max_dim % 2 != 0:
         # Change map extension to mrc due to compatibility with EMAN
-        new_map_filename = map_filename.replace('.map','.mrc')
-        df.at[df.index[index], 'map_path'] = new_map_filename
-        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py '+ map_filename + ' ' + new_map_filename +' --clip='+str(map_box_max_dim)+','+str(map_box_max_dim)+','+str(map_box_max_dim)
+        old_map_filename = map_filename
+        map_filename = map_filename.replace('.map','.mrc')
+        map_box_max_dim = map_box_max_dim if map_box_max_dim % 2 == 0 else map_box_max_dim+1
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py '+ old_map_filename + ' ' + map_filename +' --clip='+str(map_box_max_dim)+','+str(map_box_max_dim)+','+str(map_box_max_dim)
         print(command)
-        execute_command(command)
-    
+        try:
+            execute_command(command)
+        except Exception as e:
+            with open('error.txt', 'a') as error_file:
+                error_file.write("Error resizing map {}: {}".format(os.path.basename(old_map_filename), e))
+        old_box = map_box
+        map_object = molecule.Molecule(map_filename, recommendedContour=contourLevel, cutoffRatios=[1])
+        map_box = map_object.getGridSize() 
+        with open("rezised.txt", 'a') as txt:
+            txt.write("Map {} with size {} has been resized to {} and saved as {}\n".format(os.path.basename(old_map_filename), old_box, map_box, os.path.basename(map_filename)))
+
     map_volume = map_object.getVolume()[1]
-    # Get voxel size in Angstroms to generate simulated map 
-    voxel_size = map_object.getVoxelSize()[0] #using only one value, supose its the same for all axes
-    if voxel_size == 0:
-        print("Map {} has voxel volume of 0, header is: \n {}".format(os.path.basename(map_filename), map_object.emMap.rawHeader))
-    # Get map bounding box
+    # Get voxel size to generate simulated map 
+    voxel_size = map_object.getVoxelSize()
 
     simulated_path = os.path.join(sim_model_path, 'sim_'+os.path.basename(map_filename).replace('.map','.mrc'))
     # Generate map
-    command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=' + str(voxel_size)+ ' -R=' + str(res) + ' -B='+ str(map_box[2]) +','+ str(map_box[1])+ ','+ str(map_box[0]) +' '+  pdb_filename + ' ' + simulated_path
+    #command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=1' + ' -R=' + str(res) + ' -B='+ str(map_box[2]) +','+ str(map_box[1])+ ','+ str(map_box[0]) +' '+  pdb_filename + ' ' + simulated_path
+    command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py --center --quiet -B='+ str(map_box[2]) +','+ str(map_box[1])+ ','+ str(map_box[0]) +' '+  pdb_filename + ' ' + simulated_path
     print(command)
     execute_command(command)
 
@@ -299,15 +308,20 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
     volume_result['index']=index
     volume_result['simulated_path'] = simulated_path
     volume_result['map_volume']=map_volume
+    volume_result['map_path']=map_filename
     
     # Get simulated map volume
     if os.path.exists(simulated_path):
-        map_object = molecule.Molecule(simulated_path, recommendedContour=contourLevel, cutoffRatios=[1])
+        # Simulated map contour must be a small number but not zero becouse eman sometimes generates a cube at 0 contour value
+        map_object = molecule.Molecule(simulated_path, recommendedContour=0.001, cutoffRatios=[1])
         # Get dictionary of volumes, choose element with key 1 (corresponding to 100% recommended contour level)
         pdb_volume = map_object.getVolume()[1]
+        # Simulated volume at contour level 0 sometimes gives a cube, so shuld use an epsilon instead.
         volume_result['pdb_volume']=pdb_volume
     else:
         volume_result['pdb_volume']=-1
+        with open('error.txt', 'a') as error_file:
+            error_file.write("Error generating map {}: {}".format(os.path.basename(simulated_path), e))
 
     return volume_result
 
@@ -332,11 +346,28 @@ def generateSimulatedDataset(index, df, sim_model_path):
     result['path'] = simulated_path
     # Generate map
     try:
-        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=1.0 -R=' + str(res) + ' --center '+  pdb_filepath + ' ' + simulated_path
+        #command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=1.0 -R=' + str(res) + ' --center '+  pdb_filepath + ' ' + simulated_path
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py  --center '+  pdb_filepath + ' ' + simulated_path
         print(command)
         execute_command(command)
-    except:
+        map_object = molecule.Molecule(simulated_path, recommendedContour=0.001, cutoffRatios=[1])
+        map_box = map_object.getGridSize()
+        map_box_max_dim = np.max(map_box)
+        if map_box_max_dim % 2 != 0:
+            # Change map extension to mrc due to compatibility with EMAN
+            map_box_max_dim = map_box_max_dim if map_box_max_dim % 2 == 0 else map_box_max_dim+1
+            command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py '+ simulated_path + ' ' + simulated_path +' --clip='+str(map_box_max_dim)+','+str(map_box_max_dim)+','+str(map_box_max_dim)        
+            print(command)
+            execute_command(command)
+            old_box = map_box
+            map_object = molecule.Molecule(simulated_path, recommendedContour=0.001, cutoffRatios=[1])
+            map_box = map_object.getGridSize()
+        with open("generated.txt", 'a') as txt:
+            txt.write("Map {} with size {} has been generated from {} \n".format(os.path.basename(simulated_path), map_box, os.path.basename(pdb_filepath)))
+    except Exception as e:
         result['resolution']=-1
+        with open('error.txt', 'a') as error_file:
+            error_file.write("Error generating map {}: {}".format(os.path.basename(pdb_filepath), e))
     return result
 
 # Function to fit experimental map to match simulated map from pdb structure
@@ -359,43 +390,55 @@ def fitMaptoSim_Map(index, df, models_path):
     mask_aligned_path = os.path.join(models_path, mask_aligned_filename)
 
     # Compute binary mask for simulated and original map
-    command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py ' + map_path + ' '+ mask_path +' --process threshold.binary:value=' + str(contourLvl)
+    #command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py ' + map_path + ' '+ mask_path +' --process threshold.binary:value=' + str(contourLvl)
+    command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py ' + map_path + ' '+ mask_path +' --process=mask.auto3d:nmaxseed=12:nshells=3:nshellsgauss=3:return_mask=1:threshold='+str(contourLvl)
     print(command)
     execute_command(command)
-    #command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py ' + simulated_path + ' '+ mask_sim_path +' --process threshold.binary:value=' + str(contourLvl)
-    #print(command)
-    #execute_command(command)
+    command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py ' + simulated_path + ' '+ mask_sim_path +' --process=mask.auto3d:nmaxseed=12:nshells=3:nshellsgauss=3:return_mask=1:threshold=0.001'
+    print(command)
+    execute_command(command)
     
     # Compute similarity before alignment
-    command =  ['/work/mzumbado/EMAN2/bin/python', '/work/mzumbado/EMAN2/bin/sximgstat.py', map_path, simulated_path, mask_path, '--ccc']
-    print(' '.join(command))
-    result = subprocess.run(command, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, universal_newlines=True)
-    print("Command output: {}".format(result.stdout))
-    correlation_before = result.stdout.split()[-1] if result.stdout != None else 0
-    
-    # Compute alignment
-    command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py  --align=rotate_translate_3d_tree:verbose=True --alignref='+simulated_path+' --multfile='+ mask_path +' '+map_path+' '+aligned_map_path
-    print(command)
+    #command =  ['/work/mzumbado/EMAN2/bin/python', '/work/mzumbado/EMAN2/bin/sximgstat.py', map_path, simulated_path, '--ccc']
+    #print(' '.join(command))
+    #result = subprocess.run(command, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, universal_newlines=True)
+    #print("Command output: {}".format(result.stdout))
+    #correlation_before = result.stdout.split()[-1] if result.stdout != None else 0
     try:
+        map_object = molecule.Molecule(map_path, recommendedContour=contourLvl, cutoffRatios=[1])
+        simulated_object = molecule.Molecule(simulated_path, recommendedContour=0.001, cutoffRatios=[1])
+        overlap_before = map_object.getOverlap(simulated_object)[1]
+        corr_before = map_object.getCorrelation(simulated_object)[1]
+        #map_object = molecule.Molecule(map_path, recommendedContour=contourLvl, cutoffRatios=[1])
+        #map_box = map_object.getGridSize()
+        #map_box_max_shift = int(np.max(map_box))
+        # Compute alignment
+        #command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py  --align=translational:maxshift='+ str(map_box_max_shift) +' --alignref='+simulated_path+' --multfile='+ mask_path +' '+map_path+' '+aligned_map_path
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py  --align=rotate_translate_3d_tree --alignref='+simulated_path+' --multfile='+ mask_path +' '+map_path+' '+aligned_map_path
+        print(command)
         execute_command(command)
+        map_object = molecule.Molecule(aligned_map_path, recommendedContour=contourLvl, cutoffRatios=[1])
+        overlap_after = map_object.getOverlap(simulated_object)[1]
+        corr_after = map_object.getCorrelation(simulated_object)[1]
     except RuntimeError as e:
-        print(e)
+        with open('error.txt', 'a') as error_file:
+            error_file.write("Error aligning map {}: {}".format(os.path.basename(map_path), e))
     # Compute mask for aligned map
-    command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py ' + aligned_map_path + ' '+ mask_aligned_path +' --process threshold.binary:value=' + str(contourLvl)
-    print(command)
-    try:
-        execute_command(command)
-    except RuntimeError as e:
-        print(e)
+    #command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py ' + aligned_map_path + ' '+ mask_aligned_path +' --process=mask.auto3d:nmaxseed=12:nshells=3:nshellsgauss=3:return_mask=1:threshold='+str(contourLvl)  
+    #print(command)
+    #try:
+    #    execute_command(command)
+    #except RuntimeError as e:
+    #    print(e)
 
     # Compute similarity for aligned map
-    command =  ['/work/mzumbado/EMAN2/bin/python', '/work/mzumbado/EMAN2/bin/sximgstat.py', aligned_map_path, simulated_path, mask_path, '--ccc']
-    print(' '.join(command))
-    result = subprocess.run(command,  stderr=subprocess.STDOUT, stdout=subprocess.PIPE, universal_newlines=True)
-    print("Command output: {}".format(result.stdout))
-    correlation_after = result.stdout.split()[-1] if result.stdout != None else 0
+    #command =  ['/work/mzumbado/EMAN2/bin/python', '/work/mzumbado/EMAN2/bin/sximgstat.py', aligned_map_path, simulated_path, '--ccc']
+    #print(' '.join(command))
+    #result = subprocess.run(command,  stderr=subprocess.STDOUT, stdout=subprocess.PIPE, universal_newlines=True)
+    #print("Command output: {}".format(result.stdout))
+    #correlation_after = result.stdout.split()[-1] if result.stdout != None else 0
 
-    return {'index':index, 'similarity':correlation_before, 'aligned_path':aligned_map_path, 'similarity_aligned':correlation_after}
+    return {'index':index, 'aligned_path':aligned_map_path, 'overlap_before':overlap_before, 'overlap_after':overlap_after, 'corr_before':corr_before, 'corr_after':corr_after}
      
 
 # Function to get symmetry information from pdb file
@@ -429,7 +472,7 @@ def selectExperimentalDataset(result_dir, percentil_boundaries_tuple=None):
     df.dropna(inplace=True)
 
     # Computing vol_capture which is the volume percent of the generated map respecto to the original one
-    df['vol_capture'] = ((df['pdb_volume']*100)/df['map_volume'])/100
+    df['vol_capture'] = df.pdb_volume/df.map_volume
     # Cleaning infinite values (Some entries report 0 in volume, NEED TO CHECK)
     df['vol_capture'].replace(np.inf, np.nan, inplace=True)
     df.dropna(inplace=True)
@@ -544,6 +587,7 @@ def main():
                 futures = []
                 for i in index_list:
                     futures.append(executor.submit(simulateMapAndCompareVolume, i, df, simulated_path))
+                wait(futures)
                 for f in futures:
                     try:
                         d = f.result()
@@ -551,7 +595,9 @@ def main():
                         res_index = d['index']
                         pdb_volume = d['pdb_volume']
                         map_volume = d['map_volume']
+                        map_path = d['map_path']
                         sim_path = d['simulated_path']
+                        df_volume.loc[res_index, 'map_path'] = map_path
                         df_volume.loc[res_index, 'map_volume'] = map_volume
                         df_volume.loc[res_index, 'pdb_volume'] = pdb_volume
                         df_volume.loc[res_index, 'simulated_path'] = sim_path
@@ -582,6 +628,7 @@ def main():
                 futures = []
                 for i in index_list:
                     futures.append(executor.submit(generateSimulatedDataset, i, df_synthetic_selected, simulated_path))
+                wait(futures)
                 for f in futures:
                     try:
                         d = f.result()
@@ -608,19 +655,25 @@ def main():
                 futures = []
                 for i in index_list:
                     futures.append(executor.submit(fitMaptoSim_Map, i, df_selected, models_path))
+                wait(futures)
                 for f in futures:
                     try:
                         d = f.result()
                         print("received res dict: ",d)
                         res_index = d['index']
-                        corr = d['similarity']
-                        corr_aligned = d['similarity_aligned']
+                        overlap_before = d['overlap_before']
+                        overlap_after = d['overlap_after']
+                        corr_before = d['corr_before']
+                        corr_after = d['corr_after']
                         path = d['aligned_path']
-                        df_selected.loc[res_index, 'similarity'] = corr
-                        df_selected.loc[res_index, 'similarity_aligned'] = corr_aligned
                         df_selected.loc[res_index, 'aligned_path'] = path
+                        df_selected.loc[res_index, 'overlap_before'] = overlap_before
+                        df_selected.loc[res_index, 'overlap_after'] = overlap_after
+                        df_selected.loc[res_index, 'corr_before'] = corr_before
+                        df_selected.loc[res_index, 'corr_after'] = corr_after
                     except ValueError as error:
-                        print("Error fitting map {} to simulated counterpart: {}".format(df_volume.loc[i,'ID'],error))
+                        print("Error fitting map to simulated counterpart: {}".format(error))
+                        
                 df_selected.to_csv('dataset_selected_sim.csv', index=False)
     '''
     if opt.p !=None:
