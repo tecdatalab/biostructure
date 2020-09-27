@@ -1,7 +1,6 @@
 import numpy as np
 from skimage.measure import regionprops
 from skimage.transform import resize
-from scipy.ndimage import correlate
 
 from reader import Reader
 import processing
@@ -100,8 +99,8 @@ class Molecule():
     def getVolume(self):
         volume_contour_dict = dict()
         voxel_vol = self.emMap.voxelVol()
-        for i,cutoffRatio in enumerate(self.cutoffRatios):
-            mask_at_level = self.contour_masks[i,:]
+        for cutoffRatio in self.cutoffRatios:
+            mask_at_level = self.contour_masks[cutoffRatio]
             volume_contour_dict[cutoffRatio] = np.sum(mask_at_level)*voxel_vol
         return volume_contour_dict
 
@@ -121,17 +120,31 @@ class Molecule():
     def getVoxelSize(self):
         return self.emMap.voxelSize()
 
-    def getCorrelation(self, molecule):
+    def getCorrelation(self, molecule, levels=[1]):
         if(self.getGridSize()!=molecule.getGridSize()):
             raise ValueError("Both maps must have same dimensions")
         else:
-            return correlate(self.emMap.data(), molecule.emMap.data())
-
+            result = {}
+            moleculeA_masks = self.getContourMasks()
+            moleculeB_masks = molecule.getContourMasks()
+         
+            for level in levels:
+                mask_A = moleculeA_masks[level]
+                mask_B = moleculeB_masks[level]
+                data_A = np.multiply(self.emMap.data(), mask_A)
+                data_B = np.multiply(self.emMap.data(), mask_B)
+                mean_A = np.mean(data_A)
+                mean_B = np.mean(data_B)
+                corr_numerator = np.sum(np.einsum("ijk, ijk -> ijk", (data_A - mean_A), (data_B - mean_B)))
+                corr_denominator =  np.sqrt( np.sum(np.power((data_A - mean_A), 2)) * np.sum(np.power((data_B - mean_B), 2)))
+                result[level] = corr_numerator/corr_denominator
+            return result
+            
     def getOverlap(self, molecule, levels=[1]):
         if(self.getGridSize()!=molecule.getGridSize()):
             raise ValueError("Both maps must have same dimensions")
         else:
-            result = []
+            result = {} 
             moleculeA_masks = self.getContourMasks()
             moleculeB_masks = molecule.getContourMasks()
 
@@ -139,7 +152,7 @@ class Molecule():
                 mask_A = moleculeA_masks[level]
                 mask_B = moleculeB_masks[level]
                 overlap = np.sum(np.einsum("ijk, ijk -> ijk", mask_A, mask_B))
-                result.append(overlap)
+                result[level] = overlap
             return result 
          
 
