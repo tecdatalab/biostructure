@@ -224,8 +224,11 @@ def main_1():
     pdb_to_mrc_chains(True, False, 5.0, '{0}/6m03.pdb'.format(path), path, chains, 5)
 
     # Segments generation
-    segments_graph1, figure1_shape = get_mrc_segments("{0}/175d/175d.mrc".format(path), 7, 3, 1)
-    segments_graph2, figure2_shape = get_mrc_segments("{0}/6m03/6m03.mrc".format(path), 7, 3, 1)
+    segments_graph1, original_structure1 = get_mrc_segments("{0}/175d/175d.mrc".format(path), 7, 3, 1)
+    segments_graph2, original_structure2 = get_mrc_segments("{0}/6m03/6m03.mrc".format(path), 7, 3, 1)
+
+    figure1_shape = original_structure1.mask.shape
+    figure2_shape = original_structure2.mask.shape
 
     result = fitting_process(True, "{0}/175d/175d.mrc".format(path), "{0}/6m03/6m03.mrc".format(path), segments_graph1,
                              segments_graph2, figure1_shape, figure2_shape, 50, 0, 6, 1, './exit_fit', 50)
@@ -243,8 +246,9 @@ def main_2():
     pdb_to_mrc_chains(True, False, 5.0, '{0}/175d.pdb'.format(path), path, chains, len(chains))
 
     # Segments generation
-    segments_graph1, figure1_shape = get_mrc_synthetic_segments_pdb("{0}/175d/175d.mrc".format(path),
-                                                                    "{0}/175d".format(path), 7)
+    segments_graph1, original_structure1 = get_mrc_synthetic_segments_pdb("{0}/175d/175d.mrc".format(path),
+                                                                          "{0}/175d".format(path), 7)
+    figure1_shape = original_structure1.mask.shape
 
     result = fitting_process(True, "{0}/175d/175d.mrc".format(path), "{0}/175d/175d.mrc".format(path), segments_graph1,
                              segments_graph1, figure1_shape, figure1_shape, 50, 0, 6, 1, './exit_fit', 50)
@@ -273,10 +277,12 @@ def main_3():
 
         # Creation of segments in this case of only 1 element
         try:
-            segments_graph1, figure1_shape = \
+            segments_graph1, original_structure1 = \
                 get_mrc_one("/mnt/hgfs/Project_files/selected_sim/sim_emd_{0}.mrc".format(name), 7)
-            segments_graph2, figure2_shape = \
+            segments_graph2, original_structure2 = \
                 get_mrc_one("/mnt/hgfs/Project_files/original_maps/original_maps/emd_{0}.map".format(name), 7)
+            figure1_shape = original_structure1.mask.shape
+            figure2_shape = original_structure2.mask.shape
         except Exception as e:
             f = open('log.txt', "a+")
             f.write('Error to open file: {0}'.format(name))
@@ -307,8 +313,11 @@ def main_3():
 
 
 def main_4():
-    segments_graph1, figure1_shape = get_mrc_one("/home/lcastillo98/Documents/git_projects/sim_emd_9882.mrc", 7)
-    segments_graph2, figure2_shape = get_mrc_one("/home/lcastillo98/Documents/git_projects/emd_9882.map", 7)
+    segments_graph1, original_structure1 = get_mrc_one("/home/lcastillo98/Documents/git_projects/sim_emd_9882.mrc", 7)
+    segments_graph2, original_structure2 = get_mrc_one("/home/lcastillo98/Documents/git_projects/emd_9882.map", 7)
+
+    figure1_shape = original_structure1.mask.shape
+    figure2_shape = original_structure2.mask.shape
 
     # Fit map in map
     result = fitting_process_all_file(True, "/home/lcastillo98/Documents/git_projects/sim_emd_9882.mrc",
@@ -342,63 +351,44 @@ def main_7():
     initial_matrix = [[1, 0, 0, 0, 0, 0, 0],
                       [1, 1, 0, 0, 1, 0, 0],
                       [0, 0, 1, 1, 0, 1, 1],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 0, 1, 0, 0, 1],
-                      [1, 0, 1, 0, 0, 1, 0],
-                      [1, 1, 1, 1, 1, 1, 1],
-                      [1, 0, 0, 0, 0, 0, 0],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 0, 1, 1],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 0, 1, 0, 0, 1],
-                      [1, 0, 1, 0, 0, 1, 0],
-                      [1, 1, 1, 1, 1, 1, 1],
-                      [1, 0, 0, 0, 0, 0, 0],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 0, 1, 1],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 0, 1, 0, 0, 1],
-                      [1, 0, 1, 0, 0, 1, 0],
-                      [1, 1, 1, 1, 1, 1, 1],
-                      [1, 0, 0, 0, 0, 0, 0],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 0, 1, 1],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 0, 1, 0, 0, 1],
-                      [1, 0, 1, 0, 0, 1, 0],
-                      [1, 1, 1, 1, 1, 1, 1],
-                      [1, 0, 0, 0, 0, 0, 0],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 0, 1, 1],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 0, 1, 0, 0, 1],
-                      [1, 0, 1, 0, 0, 1, 0],
-                      [1, 1, 1, 1, 1, 1, 1],
-                      [1, 0, 0, 0, 0, 0, 0],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 0, 1, 1],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 0, 1, 0, 0, 1],
-                      [1, 0, 1, 0, 0, 1, 0],
-                      [1, 1, 1, 1, 1, 1, 1],
-                      [1, 0, 0, 0, 0, 0, 0],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 0, 1, 1],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 0, 1, 0, 0, 1],
-                      [1, 0, 1, 0, 0, 1, 0],
-                      [1, 1, 1, 1, 1, 1, 1],
-                      [1, 0, 0, 0, 0, 0, 0],
-                      [1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 0, 1, 1],
-                      [1, 1, 0, 0, 1, 0, 0],
                       [0, 0, 0, 1, 0, 0, 1],
                       [1, 0, 1, 0, 0, 1, 0],
                       [1, 1, 1, 1, 1, 1, 1]
                       ]
+    top = 12
+    binary_matrix = generate_binary_matrix(initial_matrix)
+    combinations = get_semi_exact_s(binary_matrix, top, 1)
+    print("Combinations: ", combinations)
+
+
+def main_8():
+    path = './maps_pdb'
+    if not os.path.isdir(path):
+        os.mkdir(path)
+
+    download_pdb('175d', '{0}/175d.pdb'.format(path))
+
+    # Maps creation
+    chains = get_chains('{0}/175d.pdb'.format(path))
+    pdb_to_mrc_chains(True, False, 5.0, '{0}/175d.pdb'.format(path), path, chains, len(chains))
+
+    # Segments generation
+    segments_graph1, original_structure1 = get_mrc_synthetic_segments_pdb("{0}/175d/175d.mrc".format(path),
+                                                                          "{0}/175d".format(path), 7)
+    initial_matrix = []
+    for i in segments_graph1:
+        flat_data = i.mask.ravel()
+        flat_data[flat_data > 0] = 1
+        flat_data = flat_data.astype(int)
+        flat_data = flat_data.tolist()
+
+        initial_matrix.append(flat_data)
+    print("Can elements ", len(initial_matrix))
+    print(initial_matrix)
+
     top = 10
     binary_matrix = generate_binary_matrix(initial_matrix)
-    combinations = get_semi_exact_s(binary_matrix, 4, top)
+    combinations = get_semi_exact_s(binary_matrix, len(initial_matrix[0]), top, 80)
     print("Combinations: ", combinations)
 
 
@@ -410,3 +400,4 @@ if __name__ == '__main__':
     # main_5()
     # main_6()
     main_7()
+    # main_8()

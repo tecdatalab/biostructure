@@ -47,7 +47,7 @@ def download_pdb(id_code, exit_path, create_progress_bar=False):
     exit_path_full = os.path.abspath(exit_path)
     file_url = "https://files.rcsb.org/download/{0}.pdb".format(str(id_code))
 
-    if create_progress_bar:
+    if not create_progress_bar:
         urllib.request.urlretrieve(file_url, exit_path_full)
     else:
         urllib.request.urlretrieve(file_url, exit_path_full, MyProgressBar())

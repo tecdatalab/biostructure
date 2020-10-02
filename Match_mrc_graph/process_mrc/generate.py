@@ -3,6 +3,7 @@ import pathlib
 
 pathlib.Path(__file__).parent.absolute()
 from process_mrc.segment import Segment
+from process_mrc.biomolecular_structure import Biomolecular_structure
 import glob
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../../em")
@@ -48,12 +49,14 @@ def get_mrc_segments(mrc_path, recommendedContour_p, steps, sigma):
         i.zd_descriptors = zd
 
     # print("Can_points", len(np.where(myMolecule.getEmMap().data() > 0)[0]))
+    original_structure = \
+        Biomolecular_structure(myMolecule.getEmMap().data(), z.computeDescriptors(myMolecule.getEmMap().data()))
 
-    return result, myMolecule.getEmMap().data().shape
+    return result, original_structure
 
 
 def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour_p):
-    myMolecule = molecule.Molecule(mrc_path, recommendedContour=recommendedContour_p)
+    myMolecule_complete = molecule.Molecule(mrc_path, recommendedContour=recommendedContour_p)
     segments_paths = list(glob.glob(folder_segments + "/*_*.mrc"))
     # print(segments_paths)
     actual_id = 1
@@ -72,7 +75,11 @@ def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour
         zd = z.computeDescriptors(i.mask)
         i.zd_descriptors = zd
 
-    return result, myMolecule.getEmMap().data().shape
+    original_structure = \
+        Biomolecular_structure(myMolecule_complete.getEmMap().data(),
+                               z.computeDescriptors(myMolecule_complete.getEmMap().data()))
+
+    return result, original_structure
 
 
 def get_mrc_one(mrc_path, recommendedContour_p):
@@ -95,8 +102,11 @@ def get_mrc_one(mrc_path, recommendedContour_p):
         i.zd_descriptors = zd
 
     # print("Can_points", len(np.where(myMolecule.getEmMap().data() > 0)[0]))
+    original_structure = \
+        Biomolecular_structure(myMolecule.getEmMap().data(),
+                               z.computeDescriptors(myMolecule.getEmMap().data()))
 
-    return result, myMolecule.getEmMap().data().shape
+    return result, original_structure
 
 # result = get_mrc_segments("../pdb_to_mrc/exit_pdb/175d/175d.mrc", 7, 3, 1)
 # result = get_mrc_synthetic_segments_pdb("../pdb_to_mrc/exit_pdb/175d", 7)

@@ -13,4 +13,5 @@ def generate_binary_matrix(matrix):
     for i in matrix:
         val = '0b' + ''.join([str(x) for x in i])
         result.append(int(val, 2))
-    return np.array(result)
+    result = np.array(result)
+    return result
