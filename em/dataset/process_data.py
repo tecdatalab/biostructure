@@ -19,7 +19,7 @@ import numpy as np
 def execute_command(cmd):
     try:
         if os.system(cmd) != 0:
-            raise Exception('Command "%s" does not exist' % command_emdb)
+            raise Exception('Command "%s" does not exist' % cmd)
     except Exception as exc:
         raise RuntimeError('Command "%s" does not work' % cmd) from exc
 
@@ -117,15 +117,13 @@ def downloadModels(models_path):
     pdb_filenames = [os.path.basename(f) for f in pdb_files]
     map_filenames = [os.path.basename(f) for f in map_files]
 
-    pdb_id_path_dict = dict(zip(pdb_filenames,pdb_files))
-    map_id_path_dict = dict(zip(map_filenames,map_files))
-
     print("{} pdbs and {} maps found".format(len(pdb_files), len(map_files)))
 
     #Get entries with missing pdb or map
     df['map_found'] = df["id"].map(lambda map_id: True if map_id.replace('-','_')+'.map' in map_filenames else False)
     df['pdb_found'] = df["fitted_entries"].map(lambda pdb_id: True if 'pdb'+pdb_id+'.ent' in pdb_filenames else False)
 
+    print(df.sample())
     # Choose only non existing files to download
     df_maps = df[df['map_found'] == False] 
     df_pdbs = df[df['pdb_found'] == False] 
@@ -133,18 +131,31 @@ def downloadModels(models_path):
     pdb_ftp_list = df_pdbs["pdb_rsync"].tolist()
     emdb_id_list = df_maps["id"].tolist()
     pdb_id_list = df_pdbs["fitted_entries"].tolist()
-        
+    
     for uri,name in zip(emdb_ftp_list, emdb_id_list):
-        command_emdb = 'rsync -rlpt --ignore-existing -v -z --delete --port=33444 '+ uri  +' '+ models_path+'/'
-        execute_command(command_emdb) 
-
+        command = 'rsync -rlpt --ignore-existing -v -z --delete --port=33444 '+ uri  +' '+ models_path+'/'
+        try:
+            execute_command(command) 
+        except Exception as e:
+            with open('error.txt', 'a') as error_file:
+                error_file.write("Error excecuting command {}".format(command))
     
     for uri,name in zip(pdb_ftp_list, pdb_id_list):
-        command_pdb = 'rsync -rlpt --ignore-existing -v -z -L --delete --port=33444 '+  uri  +' '+ models_path+'/'
-        execute_command(command_pdb)    
-    
+        command = 'rsync -rlpt --ignore-existing -v -z -L --delete --port=33444 '+  uri  +' '+ models_path+'/'
+        try:
+            execute_command(command)    
+        except Exception as e:
+            with open('error.txt', 'a') as error_file:
+                error_file.write("Error excecuting command {}".format(command))
+        
     command = 'gunzip -f ' +models_path+'/*.gz'
-    execute_command(command)
+    try:
+        execute_command(command)
+    except Exception as e:
+        with open('error.txt', 'a') as error_file:
+            error_file.write("Error excecuting command {}".format(command))
+
+
 
 # Download candidate experimental models from database
 def downloadModelsPDB(pdb_path):
@@ -154,15 +165,15 @@ def downloadModelsPDB(pdb_path):
     # Copy pdb files from database
     print("Copying pdbs to generate simulated dataset...")
     command = 'rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/pdb/'  +' '+ pdb_path
-    #execute_command(command)
+    execute_command(command)
  
     # Unziping files 
     command = 'gunzip -f -r '+ pdb_path 
-    #execute_command(command)
+    execute_command(command)
     
     # Move files from tree dir to pdb folder
     command = 'find '+pdb_path+' -name \'*.ent\' -exe mv {} '+pdb_path+' \;' 
-    #execute_command(command)
+    execute_command(command)
     pdb_files = [f for f in glob(os.path.join(pdb_path,'*.ent'))]
 
     pdb_entries = [os.path.basename(f)[3:-4] for f in pdb_files]
@@ -322,6 +333,7 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
         corr = map_object.getCorrelation(sim_object)[1]
         volume_result['overlap_before'] = overlap
         volume_result['correlation_before'] = corr
+        volume_result['vol_capture'] = pdb_volume/map_volume
 
     else:
         volume_result['pdb_volume']=-1
@@ -450,14 +462,13 @@ def selectExperimentalDataset(result_dir, percentil_boundaries_tuple=None):
     df['overlap_before'].replace('', np.nan, inplace=True)
     df['correlation_after'].replace('', np.nan, inplace=True)
     df['overlap_after'].replace('', np.nan, inplace=True)
+    df['vol_capture'].replace('', np.nan, inplace=True)
     df.dropna(inplace=True)
 
     # Computing vol_capture which is the volume percent of the generated map respecto to the original one
-    df['vol_capture'] = df.pdb_volume/df.map_volume
     df['corr_enhancement'] = df.correlation_after/df.correlation_before
     df['overlap_enhancement'] = df.overlap_after/df.overlap_before
     # Cleaning infinite values (Some entries report 0 in volume, NEED TO CHECK)
-    df['vol_capture'].replace(np.inf, np.nan, inplace=True)
     df['corr_enhancement'].replace(np.inf, np.nan, inplace=True)    
     df['overlap_enhancement'].replace(np.inf, np.nan, inplace=True)
 
