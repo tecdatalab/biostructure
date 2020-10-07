@@ -80,8 +80,9 @@ def generate_dataframe(header_path):
 
 
 # Process initial metadata, drop records that don't satisfy criteria
-def processMetadata():
+def processMetadata(output_txt_path):
     df = pd.read_csv('./dataset_metadata.csv')
+    total_num = len(df.index) 
     # Get number of null elements to be removed
     non_fitted= len(df.index) - len(df.dropna(subset=['fitted_entries']).index)
     non_res = len(df.index) - len(df.dropna(subset=['resolution']).index)
@@ -93,10 +94,13 @@ def processMetadata():
     # Keep only samples within resolution gap
     df = df[(df.resolution>=4.5) & (df.resolution<=10)]
 
-    print("{} entries without fitted structure".format(non_fitted))
-    print("{} entries without reported resolution".format(non_res))
-    print("{} entries out of resolution gap".format(outside_gap))
-    print("{} candidates for dataset".format(len(df.index)))
+    # Print stats to output file
+    with open(output_txt_path, 'a') as out:
+        out.write("{} total entries in EMDB\n".format(total_num))
+        out.write("{} entries without fitted structure\n".format(non_fitted))
+        out.write("{} entries without reported resolution\n".format(non_res))
+        out.write("{} entries out of resolution gap\n".format(outside_gap))
+        out.write("This leads to {} candidates for dataset\n".format(len(df.index)))
 
     df["pdb_rsync"] = df["fitted_entries"].map(lambda pdb_id: "rsync.rcsb.org::ftp_data/structures/all/pdb/pdb"+pdb_id+".ent.gz")
     df["emdb_rsync"] = df["id"].map(lambda map_id: "rsync.rcsb.org::emdb/structures/"+str.upper(map_id)+"/map/"+map_id.replace("-","_")+".map.gz")
@@ -104,41 +108,44 @@ def processMetadata():
     df.to_csv('dataset_metadata.csv', index=False)
 
 # Download candidate experimental models from database
-def downloadModels(models_path):
+def downloadModels(models_path, output_txt_path):
     if not os.path.exists(models_path):
         os.makedirs(models_path)
     df = pd.read_csv('./dataset_metadata.csv')
     
     # Check existing models
-    print("Check existing files to download new models only..")
+    with open(output_txt_path, 'a') as out:
+        out.write("Check existing files to download new models only..\n")
     pdb_files = [f for f in glob(os.path.join(models_path,'*.ent'))]
     map_files = [f for f in glob(os.path.join(models_path,'*.map'))]
 
     pdb_filenames = [os.path.basename(f) for f in pdb_files]
     map_filenames = [os.path.basename(f) for f in map_files]
 
-    print("{} pdbs and {} maps found".format(len(pdb_files), len(map_files)))
+    with open(output_txt_path, 'a') as out:
+        out.write("{} pdbs and {} maps found\n".format(len(pdb_files), len(map_files)))
 
     #Get entries with missing pdb or map
     df['map_found'] = df["id"].map(lambda map_id: True if map_id.replace('-','_')+'.map' in map_filenames else False)
     df['pdb_found'] = df["fitted_entries"].map(lambda pdb_id: True if 'pdb'+pdb_id+'.ent' in pdb_filenames else False)
 
-    print(df.sample())
     # Choose only non existing files to download
     df_maps = df[df['map_found'] == False] 
     df_pdbs = df[df['pdb_found'] == False] 
+    with open(output_txt_path, 'a') as out:
+        out.write("Downloading {} pdbs and {} maps \n".format(len(df_pdbs), len(df_maps)))
     emdb_ftp_list = df_maps["emdb_rsync"].tolist()
     pdb_ftp_list = df_pdbs["pdb_rsync"].tolist()
     emdb_id_list = df_maps["id"].tolist()
     pdb_id_list = df_pdbs["fitted_entries"].tolist()
-    
+     
     for uri,name in zip(emdb_ftp_list, emdb_id_list):
         command = 'rsync -rlpt --ignore-existing -v -z --delete --port=33444 '+ uri  +' '+ models_path+'/'
         try:
             execute_command(command) 
         except Exception as e:
             with open('error.txt', 'a') as error_file:
-                error_file.write("Error excecuting command {}".format(command))
+                error_file.write("Error excecuting command {}\n".format(command))
     
     for uri,name in zip(pdb_ftp_list, pdb_id_list):
         command = 'rsync -rlpt --ignore-existing -v -z -L --delete --port=33444 '+  uri  +' '+ models_path+'/'
@@ -146,19 +153,20 @@ def downloadModels(models_path):
             execute_command(command)    
         except Exception as e:
             with open('error.txt', 'a') as error_file:
-                error_file.write("Error excecuting command {}".format(command))
-        
-    command = 'gunzip -f ' +models_path+'/*.gz'
+                error_file.write("Error excecuting command {}\n".format(command))
+    
+    print("Extracting donwloaded models from emdb")
+    command = 'find '+models_path+' -maxdepth 1 -name \'*.gz\' -exec gunzip -f -n {}  \;'
     try:
         execute_command(command)
     except Exception as e:
         with open('error.txt', 'a') as error_file:
-            error_file.write("Error excecuting command {}".format(command))
-
+            error_file.write("Error excecuting command {}\n".format(command))
+    
 
 
 # Download candidate experimental models from database
-def downloadModelsPDB(pdb_path):
+def downloadModelsPDB(pdb_path, models_path, out_txt_path):
     if not os.path.exists(pdb_path):
         os.makedirs(pdb_path)
 
@@ -166,28 +174,31 @@ def downloadModelsPDB(pdb_path):
     print("Copying pdbs to generate simulated dataset...")
     command = 'rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/pdb/'  +' '+ pdb_path
     execute_command(command)
- 
+    print("Copying downloaded pdbs to models dir")
+    # Copying downloaded files to models directory
+    command = 'find '+pdb_path+' -name \'*.gz\' -exec cp -n {} '+models_path+' \;'
+    execute_command(command)
+    print("Unziping copyed models")
     # Unziping files 
-    command = 'gunzip -f -r '+ pdb_path 
+    command = 'find '+models_path+' -maxdepth 1 -name \'*.ent.gz\' -exec gunzip -f -n {}  \;' 
     execute_command(command)
     
-    # Move files from tree dir to pdb folder
-    command = 'find '+pdb_path+' -name \'*.ent\' -exe mv {} '+pdb_path+' \;' 
-    execute_command(command)
-    pdb_files = [f for f in glob(os.path.join(pdb_path,'*.ent'))]
+    pdb_files = [f for f in glob(os.path.join(models_path,'*.ent'))]
 
     pdb_entries = [os.path.basename(f)[3:-4] for f in pdb_files]
 
     df_simulated = pd.DataFrame( list(zip(pdb_entries, pdb_files)), columns= ['entries','path'] )
 
     df_simulated.to_csv('metadata_synthetic.csv')
-
-    print("{} pdbs downloaded".format(len(pdb_files)))
+    with open(out_txt_path, 'a') as out:
+        out.write("{} pdbs downloaded\n".format(len(pdb_files)))
    
 
 # Remove models without atom structure
-def removeNonExistingModels(models_path):
-    print("Scanning existing models..")
+def removeNonExistingModels(models_path, out_txt_path):
+
+    with open(out_txt_path, 'a') as out:
+        out.write("Detecting non downloaded models..\n")
     pdb_files = [f for f in glob(os.path.join(models_path,'*.ent'))]
     map_files = [f for f in glob(os.path.join(models_path,'*.map'))]
 
@@ -196,8 +207,9 @@ def removeNonExistingModels(models_path):
 
     pdb_id_path_dict = dict(zip(pdb_filenames,pdb_files))
     map_id_path_dict = dict(zip(map_filenames,map_files))
-
-    print("{} pdbs and {} maps found".format(len(pdb_files), len(map_files)))
+    
+    with open(out_txt_path, 'a') as out:
+        out.write("{} pdbs and {} maps found\n".format(len(pdb_files), len(map_files)))
 
     df = pd.read_csv('./dataset_metadata.csv')
 
@@ -215,8 +227,9 @@ def removeNonExistingModels(models_path):
     df['map_path'] = df["id"].map(lambda map_id: map_id_path_dict[map_id.replace('-','_')+'.map'])
     df['pdb_path'] = df["fitted_entries"].map(lambda pdb_id: pdb_id_path_dict['pdb'+pdb_id+'.ent'])
     
-    print("{} maps not found".format(len(df_map_not_found.index)))
-    print("{} pdbs not found".format(len(df_pdb_not_found.index)))
+    with open(out_txt_path, 'a') as out:
+        out.write("{} maps are missing\n".format(len(df_map_not_found.index)))
+        out.write("{} pdbs are missing\n".format(len(df_pdb_not_found.index)))
 
     df_map_not_found.to_csv('emdb_not_found.csv', index=False)
     df_pdb_not_found.to_csv('pdb_not_found.csv', index=False)
@@ -224,7 +237,7 @@ def removeNonExistingModels(models_path):
     df.to_csv('dataset_metadata.csv', index=False)
 
 # Get chains in structure and compute number of subunits
-def processfiles(models_path):
+def processfiles(models_path, out_txt_path):
     
     # Define function to get number of chains in structure
     def pdb_num_chain_mapper(chain, filepath):
@@ -233,7 +246,9 @@ def processfiles(models_path):
         print("Pdb {} has {} chains".format(chain,len(list(pbd_obj.get_chains()))))
         return len(list(pbd_obj.get_chains()))
 
-    print("Processing experimental samples")
+    
+    with open(out_txt_path, 'a') as out:
+        out.write("Processing experimental samples\n")
 
     df = pd.read_csv('./dataset_metadata.csv')
     # Create dictionary from dataframe
@@ -249,10 +264,12 @@ def processfiles(models_path):
     
     number_of_samples = len( df.index )
    
-    print("{} experimental entries with less than 2 subunits".format(non_enough_subunit))
-    print("{} experimental candidates for dataset".format(number_of_samples))
-
-    print("Processing simulated samples")
+    with open(out_txt_path, 'a') as out:
+        out.write("Removing {} experimental entries with less than 2 subunits\n".format(non_enough_subunit))
+        out.write("{} experimental candidates for dataset\n".format(number_of_samples))
+    
+    with open(out_txt_path, 'a') as out:
+        out.write("Processing simulated samples\n")
     df_simulated = pd.read_csv('./metadata_synthetic.csv')
     # Create dictionary from dataframe
     pdb_id_path_dict = pd.Series(df_simulated.path.values,index=df_simulated.entries).to_dict()
@@ -264,8 +281,9 @@ def processfiles(models_path):
     df_simulated = df_simulated[df_simulated.subunit_count>=2]
     number_of_samples = len( df_simulated.index )
    
-    print("{} pdb entries with less than 2 subunits".format(non_enough_subunit))
-    print("{} pdb candidates for simulated dataset".format(number_of_samples))
+    with open(out_txt_path, 'a') as out:
+        out.write("Removing {} pdb entries with less than 2 subunits\n".format(non_enough_subunit))
+        out.write("{} pdb candidates for simulated dataset\n".format(number_of_samples))
 
     df_simulated.to_csv('./metadata_synthetic.csv')
 
@@ -297,7 +315,7 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
             execute_command(command)
         except Exception as e:
             with open('error.txt', 'a') as error_file:
-                error_file.write("Error resizing map {}: {}".format(os.path.basename(old_map_filename), e))
+                error_file.write("Error resizing map {}: {}\n".format(os.path.basename(old_map_filename), e))
         old_box = map_box
         map_object = molecule.Molecule(map_filename, recommendedContour=contourLevel, cutoffRatios=[1])
         map_box = map_object.getGridSize() 
@@ -328,17 +346,12 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
         pdb_volume = sim_object.getVolume()[1]
         # Simulated volume at contour level 0 sometimes gives a cube, so shuld use an epsilon instead.
         volume_result['pdb_volume']=pdb_volume
-        # Compute overlap and correlation between map and simulated counterpart
-        overlap = map_object.getOverlap(sim_object)[1]
-        corr = map_object.getCorrelation(sim_object)[1]
-        volume_result['overlap_before'] = overlap
-        volume_result['correlation_before'] = corr
         volume_result['vol_capture'] = pdb_volume/map_volume
 
     else:
         volume_result['pdb_volume']=-1
         with open('error.txt', 'a') as error_file:
-            error_file.write("Error generating map {}: {}".format(os.path.basename(simulated_path), e))
+            error_file.write("Error generating map {}: {}\n".format(os.path.basename(simulated_path), e))
 
     return volume_result
 
@@ -384,7 +397,7 @@ def generateSimulatedDataset(index, df, sim_model_path):
     except Exception as e:
         result['resolution']=-1
         with open('error.txt', 'a') as error_file:
-            error_file.write("Error generating map {}: {}".format(os.path.basename(pdb_filepath), e))
+            error_file.write("Error generating map {}: {}\n".format(os.path.basename(pdb_filepath), e))
 
     return result
 
@@ -416,6 +429,10 @@ def fitMaptoSim_Map(index, df, models_path):
     
     try:
         simulated_object = molecule.Molecule(simulated_path, recommendedContour=0.001, cutoffRatios=[1])
+        # Compute correlation and overlap after alignment
+        map_object = molecule.Molecule(map_path, recommendedContour=contourLvl, cutoffRatios=[1])
+        overlap_before = map_object.getOverlap(simulated_object)[1]
+        corr_before = map_object.getCorrelation(simulated_object)[1]
         # Compute alignment
         command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py  --align=rotate_translate_3d_tree --alignref='+simulated_path+' --multfile='+ mask_path +' '+map_path+' '+aligned_map_path
         print(command)
@@ -425,9 +442,9 @@ def fitMaptoSim_Map(index, df, models_path):
         corr_after = map_object.getCorrelation(simulated_object)[1]
     except RuntimeError as e:
         with open('error.txt', 'a') as error_file:
-            error_file.write("Error aligning map {}: {}".format(os.path.basename(map_path), e))
+            error_file.write("Error aligning map {}: {}\n".format(os.path.basename(map_path), e))
 
-    return {'index':index, 'aligned_path':aligned_map_path, 'overlap_after':overlap_after, 'corr_after':corr_after}
+    return {'index':index, 'aligned_path':aligned_map_path,'overlap_before': overlap_before, 'corr_before':corr_before, 'overlap_after':overlap_after, 'corr_after':corr_after}
      
 
 # Function to get symmetry information from pdb file
@@ -452,26 +469,13 @@ def getSymmetryFromPDB(models_path):
     df.to_csv('mv.csv')
     
 # Function to select experimental data acording percentil distribution of volume capture ratio
-def selectExperimentalDataset(result_dir, percentil_boundaries_tuple=None):
+def selectExperimentalDataset(result_dir, out_txt_path, percentil_boundaries_tuple=None):
     # Open result csv from volume calculation
     df = pd.read_csv('dataset_volume.csv')
     # Replace missing volumes (produced by e2pdb2mrc failure to generate map from pdb)
     df['pdb_volume'].replace('', np.nan, inplace=True)
     df['map_volume'].replace('', np.nan, inplace=True)
-    df['correlation_before'].replace('', np.nan, inplace=True)
-    df['overlap_before'].replace('', np.nan, inplace=True)
-    df['correlation_after'].replace('', np.nan, inplace=True)
-    df['overlap_after'].replace('', np.nan, inplace=True)
     df['vol_capture'].replace('', np.nan, inplace=True)
-    df.dropna(inplace=True)
-
-    # Computing vol_capture which is the volume percent of the generated map respecto to the original one
-    df['corr_enhancement'] = df.correlation_after/df.correlation_before
-    df['overlap_enhancement'] = df.overlap_after/df.overlap_before
-    # Cleaning infinite values (Some entries report 0 in volume, NEED TO CHECK)
-    df['corr_enhancement'].replace(np.inf, np.nan, inplace=True)    
-    df['overlap_enhancement'].replace(np.inf, np.nan, inplace=True)
-
     df.dropna(inplace=True)
 
     # Plot hist
@@ -486,10 +490,6 @@ def selectExperimentalDataset(result_dir, percentil_boundaries_tuple=None):
     avg = df['vol_capture'].mean()
     med = df['vol_capture'].median()
     std = df['vol_capture'].std()
-    print("Number of samples: {}".format(num_samples))
-    print("Volume ratio avg: {}".format(avg))
-    print("Volume ratio median: {}".format(med))
-    print("Volume ratio std: {}".format(std))
     # Get column values to list
     values = df['vol_capture'].tolist()
 
@@ -508,33 +508,128 @@ def selectExperimentalDataset(result_dir, percentil_boundaries_tuple=None):
 
     print("Number of samples below lower boundary: {} and over upper boundary: {}".format(len( df[df.vol_capture < low_boundary] ), len( df[df.vol_capture >upper_boundary] )))
     
-    # Printing percentile values
-    for i in range(0,100):
-        print("Percentile {} value: {}".format(i, df.vol_capture.quantile(i/100, interpolation = 'midpoint')))
-
     percentilA = df.vol_capture.quantile(int(percentil_boundaries_tuple[0])/100, interpolation = 'midpoint')
     percentilB = df.vol_capture.quantile(int(percentil_boundaries_tuple[1])/100,  interpolation = 'midpoint')
+
+    # Print to file
+    with open(out_txt_path, 'a') as out:
+        out.write("Processing emdb data\n")
+        out.write("Number of samples: {}\n".format(num_samples))
+        out.write("Volume ratio avg: {}\n".format(avg))
+        out.write("Volume ratio median: {}\n".format(med))
+        out.write("Volume ratio std: {}\n".format(std))
+        out.write("Printing vol capture distribution in percentiles\n")
+        # Printing percentile values
+        for i in range(0,100):
+            out.write("Percentile {} value: {}\n".format(i, df.vol_capture.quantile(i/100, interpolation = 'midpoint')))
+        out.write("Quartile Q1: {}\n".format(q1))
+        out.write("Quartile Q3: {}\n".format(q3))
+        out.write("IQR: {}\n".format(q3-q1))
+        out.write("Lower boundary: {}\n".format(low_boundary))
+        out.write("Upper boundary: {}\n".format(upper_boundary))
+        out.write("Number of samples below lower boundary: {} and over upper boundary: {}\n".format(len( df[df.vol_capture < low_boundary] ), len( df[df.vol_capture >upper_boundary] )))
 
     if percentil_boundaries_tuple != None:
         selected_samples = df[ (df.vol_capture > percentilA) & (df.vol_capture < percentilB)]
         numMuestras = len( selected_samples)
-        print("Number of samples between percentil {} and {}: {}".format(percentil_boundaries_tuple[0],percentil_boundaries_tuple[1], numMuestras))
+        with open(out_txt_path, 'a') as out:
+            out.write("Number of samples between percentil {} and {}: {}\n".format(percentil_boundaries_tuple[0],percentil_boundaries_tuple[1], numMuestras))
     else: 
         selected_samples = df[(df.vol_capture < low_boundary) | (df.vol_capture >upper_boundary) ]
-        print("Getting outliers following IQR...")
+        with open(out_txt_path, 'a') as out:
+            out.write("Getting outliers following IQR...\n")
     # Save csv with selected samples
-    selected_samples.to_csv('dataset_selected.csv')
+    selected_samples.to_csv('dataset_selected.csv', index = False)
 
-    # Gerete boxplot
-    
-    res = df.boxplot(column='vol_capture', grid=True, figsize=(3.5,6))
+    # Gerete boxplot    
+    df.hist(column='resolution', grid=True, bins=10)
     plt.title('Ratio of simulated volume to em map volume at recommended contour')
-    plt.xlabel('Volume ratio')  
-    plt.ylabel('A/A')
-    plt.savefig('volume_capture_barplot.png')
+    plt.xlabel('Num Samples')  
+    plt.ylabel('Bins')
+    plt.savefig('resolution_hist.png')
+    plt.clf()
 
+    df.hist(column='subunit_count', grid=True, bins=10)
+    plt.title('Number of subunits per map in data')
+    plt.xlabel('Bins')
+    plt.ylabel('Number of Samples')
+    plt.savefig(os.path.join(result_dir,'subunit_hist.png'))
+    plt.clf()
+
+    df.hist(column='map_volume', grid=True, bins=10)
+    plt.title('Map volume distribution in data')
+    plt.xlabel('Bins')
+    plt.ylabel('Number of Samples')
+    plt.savefig(os.path.join(result_dir,'map_volume_hist.png'))
+    plt.clf()
     
+    df.hist(column='pdb_volume', grid=True, bins=10)
+    plt.title('Simulated volume distribution in data')
+    plt.xlabel('Bins')
+    plt.ylabel('Number of Samples')
+    plt.savefig(os.path.join(result_dir,'simulated_volume_hist.png'))
+    plt.clf()
 
+
+def generateStatsFromSelectedData(selected_samples, result_dir):
+
+    # Generate charts from selected data
+    # Generate resolution histogram from EMDB data
+    selected_samples.hist(column='resolution', grid=True, bins=10)
+    plt.title('Map resolution distribution in dataset')
+    plt.xlabel('Bins')
+    plt.ylabel('Number of Samples')
+    plt.savefig(os.path.join(result_dir,'resolution_selected_hist.png'))
+    plt.clf()
+    
+    selected_samples.hist(column='subunit_count', grid=True, bins=10)
+    plt.title('Number of subunits per map in dataset')
+    plt.xlabel('Bins')
+    plt.ylabel('Number of Samples')
+    plt.savefig(os.path.join(result_dir,'subunit_selected_hist.png'))
+    plt.clf()
+
+    selected_samples.hist(column='map_volume', grid=True, bins=10)
+    plt.title('Volume distribution in dataset')
+    plt.xlabel('Bins')
+    plt.ylabel('Number of Samples')
+    plt.savefig(os.path.join(result_dir,'map_volume_selected_hist.png'))
+    plt.clf()
+    
+    selected_samples.hist(column='pdb_volume', grid=True, bins=10)
+    plt.title('Simulated volume distribution in dataset')
+    plt.xlabel('Bins')
+    plt.ylabel('Number of Samples')
+    plt.savefig(os.path.join(result_dir,'simulated_volume_selected_hist.png'))
+    plt.clf()
+    
+    selected_samples.hist(column='corr_before', grid=True, bins=10)
+    plt.title('Simulated and original density correlation in dataset before alignment')
+    plt.xlabel('Bins')
+    plt.ylabel('Number of Samples')
+    plt.savefig(os.path.join(result_dir,'corr_before_selected_hist.png'))
+    plt.clf()
+
+    selected_samples.hist(column='corr_after', grid=True, bins=10)
+    plt.title('Simulated and original density correlation in dataset before alignment')
+    plt.xlabel('Bins')
+    plt.ylabel('Number of Samples')
+    plt.savefig(os.path.join(result_dir,'corr_after_selected_hist.png'))
+    plt.clf()
+    
+    selected_samples.hist(column='overlap_before', grid=True, bins=10)
+    plt.title('Simulated and original volume overlap in dataset before alignment')
+    plt.xlabel('Bins')
+    plt.ylabel('Number of Samples')
+    plt.savefig(os.path.join(result_dir,'overlap_before_selected_hist.png'))
+    plt.clf()
+
+    selected_samples.hist(column='overlap_after', grid=True, bins=10)
+    plt.title('Simulated and original volume overlap in dataset before alignment')
+    plt.xlabel('Bins')
+    plt.ylabel('Number of Samples')
+    plt.savefig(os.path.join(result_dir,'overlap_after_selected_hist.png'))
+    plt.clf()
 
     
 
@@ -548,10 +643,11 @@ def main():
     parser.add_argument('--s', required=False, default=None, nargs=2, help='Please provide lower and upper experimental data percentil distribution to be included in final dataset')  
     parser.add_argument('--g', required=False, default=None, help='Please provide percent of simulated data to be included in final dataset')
     parser.add_argument('--f', required=False, default=False, help='True if want to align experimental data to simulated counterpart')
+    parser.add_argument('--p', required=False, default=False, help='Generate segments')
     parser.add_argument('--header_dir', default='header', required=False,help='output directory to store emdb headers') 
     parser.add_argument('--models_dir', default='models', required=False, help='output directory to store emdb models') 
     parser.add_argument('--simulated_dir', default='simulated', required=False, help='output directory to store simulated maps') 
-    parser.add_argument('--result_dir', default='', required=False, help='output directory to store stats') 
+    parser.add_argument('--result_dir', default='output', required=False, help='output directory to store stats') 
 
     opt = parser.parse_args()
     current_dir = os.getcwd()
@@ -559,20 +655,22 @@ def main():
     models_path = os.path.join(current_dir, opt.models_dir)
     simulated_path = os.path.join(current_dir, opt.simulated_dir)
     results_path = os.path.join(current_dir, opt.result_dir)
+    output_txt_path = os.path.join(results_path, 'output.txt')
     pdb_path = os.path.join(models_path,'pdb')
     # Download and process data
     if int(opt.d):
         get_headers(header_path)
         generate_dataframe(header_path)
-        processMetadata()
-        downloadModels(models_path)
-        downloadModelsPDB(pdb_path)
-        removeNonExistingModels(models_path)
-        processfiles(models_path)
+        processMetadata(output_txt_path)
+        downloadModels(models_path, output_txt_path)
+        downloadModelsPDB(pdb_path, models_path, output_txt_path)
+        removeNonExistingModels(models_path, output_txt_path)
+        processfiles(models_path, output_txt_path)
     #Calculate volume
     if int(opt.v):
         df = pd.read_csv('./dataset_metadata.csv')
-        print("Number of samples to process volume: ", len(df.index))
+        with open(output_txt_path, 'a') as out:
+            out.write("Number of samples to process volume: {}\n".format( len(df.index)))
         df_volume = df[['id','map_path', 'fitted_entries', 'subunit_count', 'resolution','contourLevel']].copy()
         # Get index list to schedule processess 
         index_list = df_volume.index.tolist()
@@ -594,8 +692,6 @@ def main():
                         pdb_volume = d['pdb_volume']
                         map_volume = d['map_volume']
                         capture_ratio = d['vol_capture']
-                        corr_before = d['correlation_before'] 
-                        overlap_before = d['overlap_before'] 
                         map_path = d['map_path']
                         sim_path = d['simulated_path']
                         df_volume.loc[res_index, 'simulated_path'] = sim_path
@@ -603,15 +699,15 @@ def main():
                         df_volume.loc[res_index, 'map_volume'] = map_volume
                         df_volume.loc[res_index, 'pdb_volume'] = pdb_volume
                         df_volume.loc[res_index, 'vol_capture'] = capture_ratio
-                        df_volume.loc[res_index, 'correlation_before'] = corr_before
-                        df_volume.loc[res_index, 'overlap_before'] = overlap_before
                     except ValueError as error:
                         print("Error calculating volume for simulated {}: {}".format(df_volume.loc[i,'fitted_entries'],error))
                 df_volume.to_csv('dataset_volume.csv', index=False)
+    if opt.s != None:
+        selectExperimentalDataset(results_path, output_txt_path, percentil_boundaries_tuple=opt.s)
     if int(opt.f):
         # Fitting de los mapas
         print("Fitting experimental maps to match simulated counterpart")
-        df_volume = pd.read_csv('dataset_volume.csv')
+        df_selected = pd.read_csv('dataset_selected.csv')
         index_list = df_selected.index.tolist()
         print("Spawn procecess...")
         comm = MPI.COMM_WORLD
@@ -620,36 +716,41 @@ def main():
             if executor is not None:
                 futures = []
                 for i in index_list:
-                    futures.append(executor.submit(fitMaptoSim_Map, i, df_volume, models_path))
+                    futures.append(executor.submit(fitMaptoSim_Map, i, df_selected, models_path))
                 wait(futures)
                 for f in futures:
                     try:
                         d = f.result()
                         print("received res dict: ",d)
                         res_index = d['index']
+                        overlap_before = d['overlap_before']
+                        corr_before = d['corr_before']
                         overlap_after = d['overlap_after']
                         corr_after = d['corr_after']
                         path = d['aligned_path']
-                        df_volume.loc[res_index, 'aligned_path'] = path
-                        df_volume.loc[res_index, 'overlap_after'] = overlap_after
-                        df_volume.loc[res_index, 'corr_after'] = corr_after
+                        df_selected.loc[res_index, 'aligned_path'] = path
+                        df_selected.loc[res_index, 'overlap_before'] = overlap_before
+                        df_selected.loc[res_index, 'corr_before'] = corr_before
+                        df_selected.loc[res_index, 'overlap_after'] = overlap_after
+                        df_selected.loc[res_index, 'corr_after'] = corr_after
                     except ValueError as error:
                         print("Error fitting map to simulated counterpart: {}".format(error))
 
-                df_selected.to_csv('dataset_volume.csv', index=False)
+                df_selected.to_csv('dataset_selected.csv', index=False)
+        # Generate selected data stats
+        generateStatsFromSelectedData(df_selected, results_path)
 
-    if opt.s != None:
-        selectExperimentalDataset(results_path, percentil_boundaries_tuple=opt.s)
     # Generate simulated data to be included in final dataset
     if opt.g != None:
         # Open candidates to compute simulated map 
         df_synthetic = pd.read_csv('metadata_synthetic.csv')
         df_experimental = pd.read_csv('dataset_selected.csv')
         num_experimental = len(df_experimental)
-        print("Number of candidate synthetic models: ", len(df_synthetic.index))
         proportion = int(opt.g)/100
         num_samples_to_pick = int(round(proportion*num_experimental/1-proportion))
-        print("A proportion of {} synthetic data in final dataset requires {} simulated and {} experimental samples.".format(proportion,num_samples_to_pick,num_experimental ))
+        with open(output_txt_path, 'a') as out:
+            out.write("Number of candidate synthetic models: {}\n".format(len(df_synthetic.index)))
+            out.write("A proportion of {} synthetic data in final dataset requires {} simulated and {} experimental samples.\n".format(proportion,num_samples_to_pick,num_experimental ))
         df_synthetic_selected = df_synthetic.sample(num_samples_to_pick)
         # Get index list to schedule processess
         df_synthetic_selected.reset_index(inplace=True, drop=True)  
@@ -676,11 +777,11 @@ def main():
                         print("Error calculating volume for simulated {}: {}".format(df_volume.loc[i,'fitted_entries'],error))
                 df_synthetic_selected.to_csv('synthetic_selected.csv', index=False)
     
-    '''
-    if opt.p !=None:
-        # Partir en pedazos, generar ground truth
+    
+    if int(opt.p):
+        # Merge data from experimental and synthetic sources, extract subunits from maps and save them in output directory
         print("Tagging data")
-    '''
+    
 
 
        
