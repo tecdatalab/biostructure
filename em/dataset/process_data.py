@@ -15,6 +15,7 @@ from concurrent.futures import wait
 from Bio.PDB import PDBParser
 import numpy as np
 
+
 # Excecute command
 def execute_command(cmd):
     try:
@@ -236,16 +237,23 @@ def removeNonExistingModels(models_path, out_txt_path):
 
     df.to_csv('dataset_metadata.csv', index=False)
 
+# Define function to get number of chains in structure
+def pdb_num_chain_mapper(chain, filepath):
+    parser = PDBParser(PERMISSIVE = True, QUIET = True)
+    pbd_obj = parser.get_structure(chain, filepath)
+    print("Pdb {} has {} chains".format(chain,len(list(pbd_obj.get_chains()))))
+    return len(list(pbd_obj.get_chains()))
+
+# Define function to get number of chains in structure
+def pdb_get_chain_id_label_list(chain, filepath):
+    parser = PDBParser(PERMISSIVE = True, QUIET = True)
+    pbd_obj = parser.get_structure(chain, filepath)
+    chain_id_list = [chain._id for chain in pbd_obj.get_chains()]
+    chain_label_list = [i for i in range(1,len(chain_id_list)+1)]
+    return (chain_id_list,chain_label_list)
+
 # Get chains in structure and compute number of subunits
 def processfiles(models_path, out_txt_path):
-    
-    # Define function to get number of chains in structure
-    def pdb_num_chain_mapper(chain, filepath):
-        parser = PDBParser(PERMISSIVE = True, QUIET = True)
-        pbd_obj = parser.get_structure(chain, filepath)
-        print("Pdb {} has {} chains".format(chain,len(list(pbd_obj.get_chains()))))
-        return len(list(pbd_obj.get_chains()))
-
     
     with open(out_txt_path, 'a') as out:
         out.write("Processing experimental samples\n")
@@ -579,56 +587,56 @@ def generateStatsFromSelectedData(selected_samples, result_dir):
     plt.title('Map resolution distribution in dataset')
     plt.xlabel('Bins')
     plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'resolution_selected_hist.png'))
+    plt.savefig(os.path.join(result_dir,'resolution_dataset_hist.png'))
     plt.clf()
     
     selected_samples.hist(column='subunit_count', grid=True, bins=10)
     plt.title('Number of subunits per map in dataset')
     plt.xlabel('Bins')
     plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'subunit_selected_hist.png'))
+    plt.savefig(os.path.join(result_dir,'subunit_dataset_hist.png'))
     plt.clf()
 
     selected_samples.hist(column='map_volume', grid=True, bins=10)
     plt.title('Volume distribution in dataset')
     plt.xlabel('Bins')
     plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'map_volume_selected_hist.png'))
+    plt.savefig(os.path.join(result_dir,'map_volume_dataset_hist.png'))
     plt.clf()
     
     selected_samples.hist(column='pdb_volume', grid=True, bins=10)
     plt.title('Simulated volume distribution in dataset')
     plt.xlabel('Bins')
     plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'simulated_volume_selected_hist.png'))
+    plt.savefig(os.path.join(result_dir,'simulated_volume_dataset_hist.png'))
     plt.clf()
     
     selected_samples.hist(column='corr_before', grid=True, bins=10)
     plt.title('Simulated and original density correlation in dataset before alignment')
     plt.xlabel('Bins')
     plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'corr_before_selected_hist.png'))
+    plt.savefig(os.path.join(result_dir,'corr_before_dataset_hist.png'))
     plt.clf()
 
     selected_samples.hist(column='corr_after', grid=True, bins=10)
     plt.title('Simulated and original density correlation in dataset before alignment')
     plt.xlabel('Bins')
     plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'corr_after_selected_hist.png'))
+    plt.savefig(os.path.join(result_dir,'corr_after_dataset_hist.png'))
     plt.clf()
     
     selected_samples.hist(column='overlap_before', grid=True, bins=10)
     plt.title('Simulated and original volume overlap in dataset before alignment')
     plt.xlabel('Bins')
     plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'overlap_before_selected_hist.png'))
+    plt.savefig(os.path.join(result_dir,'overlap_before_dataset_hist.png'))
     plt.clf()
 
     selected_samples.hist(column='overlap_after', grid=True, bins=10)
     plt.title('Simulated and original volume overlap in dataset before alignment')
     plt.xlabel('Bins')
     plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'overlap_after_selected_hist.png'))
+    plt.savefig(os.path.join(result_dir,'overlap_after_dataset_hist.png'))
     plt.clf()
 
     
@@ -780,8 +788,46 @@ def main():
     
     if int(opt.p):
         # Merge data from experimental and synthetic sources, extract subunits from maps and save them in output directory
-        print("Tagging data")
-    
+	
+        with open(output_txt_path, 'a') as out:
+            out.write("Generating segments with EMAN..\n")
+        dataset_cryoem = pd.read_csv('dataset_selected.csv')
+        dataset_synthetic = pd.read_csv('synthetic_selected.csv')
+
+        # Create output directory for simulated segmetns
+        if not(os.path.exists('simulated/subunits')):
+            os.system('mkdir simulated/subunits')
+        
+        dataset_cryoem_segments = pd.DataFrame(columns=dataset_cryoem.columns.values.tolist())
+        result = []
+        # Get Molecule segments from pdb lecture with lib 
+        chain_df_to_merge = pd.DataFrame(columns=['fitted_entries','chain_label'])
+        for index, row in dataset_cryoem.iterrows():
+            entryid = row['fitted_entries']
+            filepath = os.path.join(models_path, 'pdb'+entryid+'.ent')
+            subunit_id_list, subunit_labels = pdb_get_chain_id_label_list(entryid, filepath)
+            list_entry_name = [entryid for i in subunit_id_list]
+            chain_df_to_merge = pd.DataFrame({'fitted_entries':list_entry_name,'chain_id':subunit_id_list, 'chain_label':subunit_labels})
+            dataset_df_to_merge = dataset_cryoem[dataset_cryoem['fitted_entries']==entryid]
+            cross_join = pd.merge(dataset_df_to_merge, chain_df_to_merge, on='fitted_entries', how='outer')
+            dataset_cryoem_segments = dataset_cryoem_segments.append(cross_join, sort=False)
+        
+        dataset_cryoem_segments.to_csv('test.csv', index = False)
+            
+            
+        # Simulate give segment with EMAN and save file following pdbid_segment.mrc fale notation
+      
+        # Create Dataframe
+
+        # Do segment annotation by multiplying the given mask the by int of each region
+      
+        # Check for voxel locality with exact and flexible localitty with a metric
+
+        # Complete 
+        # Save as files as .map 
+
+
+         
 
 
        
