@@ -33,6 +33,6 @@ def get_cube_pdb(input_file):
                 x_actual = max(x, x_actual)
                 y_actual = max(y, y_actual)
                 z_actual = max(z, z_actual)
-    max_val = max(math.ceil(x_actual), y_actual, z_actual)
+    max_val = 2 * max(math.ceil(x_actual), y_actual, z_actual)
     max_val += 10
     return [max_val, max_val, max_val]

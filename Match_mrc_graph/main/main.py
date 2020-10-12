@@ -357,7 +357,7 @@ def main_7():
                       ]
     top = 12
     binary_matrix = generate_binary_matrix(initial_matrix)
-    combinations = get_semi_exact_s(binary_matrix, top, 1)
+    combinations = get_semi_exact_s(binary_matrix, top, 2)
     print("Combinations: ", combinations)
 
 
@@ -392,6 +392,44 @@ def main_8():
     print("Combinations: ", combinations)
 
 
+def main_9():
+    import itertools
+    import time
+    import matplotlib.pyplot as plt
+    times = []
+    cans = []
+
+    for i in range(2, 11):
+        initial_matrix = list(itertools.product([0, 1], repeat=i))
+        top = 10000
+        binary_matrix = generate_binary_matrix(initial_matrix)
+        can_elements = len(initial_matrix)
+        start_time = time.time()
+        combinations = get_semi_exact_s(binary_matrix, top, 20)
+        total_seconds = (time.time() - start_time)
+        print("--- {0} seconds --- can elements: {1}".format(total_seconds, can_elements))
+        times.append(total_seconds)
+        cans.append(can_elements)
+
+    plt.plot(cans, times)
+    plt.ylabel('Time in seconds')
+    plt.xlabel('Can elements')
+    plt.show()
+
+
+def main_10():
+    path = './maps_pdb'
+    if not os.path.isdir(path):
+        os.mkdir(path)
+
+    download_pdb('2b24', '{0}/2b24.pdb'.format(path))
+
+    # Maps creation
+    chains = get_chains('{0}/2b24.pdb'.format(path))
+    print(chains)
+    pdb_to_mrc_chains(True, False, 5.0, '{0}/2b24.pdb'.format(path), path, chains, len(chains))
+
+
 if __name__ == '__main__':
     # main_1()
     # main_2()
@@ -399,5 +437,7 @@ if __name__ == '__main__':
     # main_4()
     # main_5()
     # main_6()
-    main_7()
+    # main_7()
     # main_8()
+    # main_9()
+    main_10()

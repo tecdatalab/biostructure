@@ -38,108 +38,89 @@ def create_result(list_key, dic, result_global, cover, actual_result=[]):
         create_result(list_key[1:], dic, result_global, cover, actual_result + [i])
 
 
-def lower_in_possibilities(actual_pos, can_pos, matrix_p, max_len, pos, result_list, work_list):
-    global semaphore_run
-    if can_pos != 0:
-        for i in range(can_pos):
-            delete_items = np.where(np.bitwise_and(matrix_p, matrix_p[pos[i]]) != 0)[0]
-            delete_items = delete_items[delete_items != pos[i]]
-            matrix_aux = np.delete(matrix_p, delete_items)
-            # Data to work thread list
-            semaphore_run.acquire()
-            work_list.append([actual_pos + 1, matrix_aux, max_len, result_list])
-            semaphore_run.release()
-
-        matrix_aux = np.delete(matrix_p, pos)
-        if matrix_aux.size != 0:
-            # Data to work thread list
-            semaphore_run.acquire()
-            work_list.append([actual_pos + 1, matrix_aux, max_len, result_list])
-            semaphore_run.release()
-    else:
-        # Data to work thread list
-        semaphore_run.acquire()
-        work_list.append([actual_pos + 1, matrix_p, max_len, result_list])
-        semaphore_run.release()
-
-
-def get_semi_exact_s_aux_thread(work_list):
-    global semaphore_run, semaphore_append, condition, current_workers
-    with condition:
-
-        while True:
-            semaphore_run.acquire()
-            if len(work_list) > 0:
-                actual_pos, matrix_p, max_len, result_list = work_list.pop(0)
-                current_workers -= 1
-            else:
-                if current_workers == 0 and len(work_list) == 0:
-                    semaphore_run.release()
-                    return
-
-                condition.acquire()
-                semaphore_run.release()
-                condition.wait()
-                condition.release()
-
-                semaphore_run.acquire()
-                if current_workers == 0 and len(work_list) == 0:
-                    semaphore_run.release()
-                    return
-                else:
-                    semaphore_run.release()
-                    continue
-            semaphore_run.release()
-
-            if actual_pos == max_len:
-                semaphore_append.acquire()
-                result_list.append([[count_set_bits(np.sum(matrix_p))] + matrix_p.tolist()])
-                semaphore_append.release()
-
-                semaphore_run.acquire()
-                current_workers += 1
-                semaphore_run.release()
-                continue
-
-            mask = get_binary_mask(actual_pos, max_len)
-            pos = np.where(np.bitwise_and(matrix_p, mask) == mask)[0]
-            can_pos = pos.shape[0]
-
-            lower_in_possibilities(actual_pos, can_pos, matrix_p, max_len, pos, result_list, work_list)
-
-            semaphore_run.acquire()
-            current_workers += 1
-            condition.acquire()
-            condition.notifyAll()
-            condition.release()
-            semaphore_run.release()
-
-
 # Function determines the neighbors of a given vertex
 def neighbors(vertex, graph):
     return np.where(graph[vertex] == 1)[0]
 
 
 # The Bron-Kerbosch algorithm
-def bron_kerbosch(r, p, x, result, graph, matrix_p):
-    if len(p) == 0 and len(x) == 0:
-        return
-    for vertex in p[:]:
-        r_new = r[::]
-        r_new.append(vertex)
-        all_neighbors = neighbors(vertex, graph)
-        p_new = np.intersect1d(p, all_neighbors)  # p intersects N(vertex)
-        x_new = np.intersect1d(x, all_neighbors) # x intersects N(vertex)
-        result.append([bin(np.sum(matrix_p[r_new])).count("1"), matrix_p[r_new]])
-        bron_kerbosch(r_new, p_new, x_new, result, graph, matrix_p)
-        p = np.delete(p, np.where(p == vertex))
-        x = np.append(x, [vertex])
+def bron_kerbosch_thread(work_list, result, graph, matrix_p):
+    global semaphore_run, semaphore_append, condition, current_workers
+    while True:
+        semaphore_run.acquire()
+        if len(work_list) > 0:
+            r, p, x = work_list.pop(0)
+            current_workers -= 1
+            # print(threading.get_ident(), "work")
+        else:
+            if current_workers == 0 and len(work_list) == 0:
+                semaphore_run.release()
+                return
+
+            condition.acquire()
+            semaphore_run.release()
+            condition.wait()
+            condition.release()
+
+            semaphore_run.acquire()
+            if current_workers == 0 and len(work_list) == 0:
+                semaphore_run.release()
+                return
+            else:
+                semaphore_run.release()
+                continue
+        semaphore_run.release()
+
+        if len(p) == 0 and len(x) == 0:
+            semaphore_run.acquire()
+            current_workers += 1
+            semaphore_run.release()
+            continue
+
+        for vertex in p[:]:
+            r_new = r[::]
+            r_new.append(vertex)
+            all_neighbors = neighbors(vertex, graph)
+            p_new = np.intersect1d(p, all_neighbors)  # p intersects N(vertex)
+            x_new = np.intersect1d(x, all_neighbors)  # x intersects N(vertex)
+            can_ones = bin(np.sum(matrix_p[r_new])).count("1")
+
+            # Add new result
+            semaphore_append.acquire()
+            result.append([can_ones, matrix_p[r_new]])
+            semaphore_append.release()
+
+            # Add new possibility
+            semaphore_run.acquire()
+            work_list.append([r_new, p_new, x_new])
+            semaphore_run.release()
+
+            p = np.delete(p, np.where(p == vertex))
+            x = np.append(x, [vertex])
+
+        semaphore_run.acquire()
+        current_workers += 1
+        condition.acquire()
+        condition.notifyAll()
+        condition.release()
+        semaphore_run.release()
+
+
+# The Bron-Kerbosch algorithm
+def bron_kerbosch(r, p, x, result, graph, matrix_p, max_thread_number):
+    work_list = [[r, p, x]]
+    me_threads = list()
+
+    for i in range(max_thread_number):
+        thread = threading.Thread(target=bron_kerbosch_thread, args=(work_list, result, graph, matrix_p,))
+        me_threads.append(thread)
+        thread.start()
+
+    for i in me_threads:
+        i.join()
 
 
 def get_semi_exact_s_aux(matrix_p, result_list, max_thread_number):
-    global semaphore_run, semaphore_append, condition
-    work_list = []
-
     can_candidates = matrix_p.shape[0]
     adjacency_matrix = np.zeros((can_candidates, can_candidates), dtype=np.bool)
 
@@ -148,20 +129,7 @@ def get_semi_exact_s_aux(matrix_p, result_list, max_thread_number):
             adjacency_matrix[item[0]][item[1]] = 1
             adjacency_matrix[item[1]][item[0]] = 1
 
-    print(matrix_p)
-    bron_kerbosch([], np.arange(can_candidates), [], result_list, adjacency_matrix, matrix_p)
-
-    '''me_threads = list()
-
-    lower_in_possibilities(actual_pos, can_pos, matrix_p, max_len, pos, result_list, work_list)
-
-    for i in range(max_thread_number):
-        thread = threading.Thread(target=get_semi_exact_s_aux_thread, args=(work_list,))
-        me_threads.append(thread)
-        thread.start()
-
-    for i in me_threads:
-        i.join()'''
+    bron_kerbosch([], np.arange(can_candidates), [], result_list, adjacency_matrix, matrix_p, max_thread_number)
 
 
 def get_semi_exact_s(matrix, top, max_threads=12):
@@ -183,7 +151,7 @@ def get_semi_exact_s(matrix, top, max_threads=12):
 
     result = []
     get_semi_exact_s_aux(matrix, result, max_threads)
-    # result = sorted(result, key=get_key_value)  # Change
+    result = sorted(result, key=get_key_value)  # Change
 
     combinations = []
     len_result = len(result)
