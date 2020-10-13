@@ -6,20 +6,20 @@ from general_utils.string_utils import get_float_between_ss, get_float_value
 
 
 def get_center_point(index_segments, segments, filter_val):
-    x_pos = np.array([])
-    y_pos = np.array([])
-    z_pos = np.array([])
+    points_pos = None
 
     for i in index_segments:
         for j in segments:
             if j.id_segment == i:
                 actual_segment = j
                 temp_points = np.where(actual_segment.mask > filter_val)
-                x_pos = np.concatenate((x_pos, temp_points[0]), axis=0)
-                y_pos = np.concatenate((y_pos, temp_points[1]), axis=0)
-                z_pos = np.concatenate((z_pos, temp_points[2]), axis=0)
+                if points_pos is None:
+                    points_pos = np.column_stack(temp_points)
+                else:
+                    points_pos = np.concatenate((points_pos, np.column_stack(temp_points)), axis=0)
 
-    return [int(np.median(x_pos)), int(np.median(y_pos)), int(np.median(z_pos))]
+    center_point = np.mean(points_pos, axis=0)
+    return [int(center_point[0]), int(center_point[1]), int(center_point[2])]
 
 
 def get_cube_len_angstrom(map_path):

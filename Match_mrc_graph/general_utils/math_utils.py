@@ -1,3 +1,6 @@
+import math
+
+
 def points_same_scale_aux(point, shape, shape_other, pos):
     if max(shape[pos], shape_other[pos]) == shape[pos]:
         return point[pos]
@@ -33,3 +36,8 @@ def chance_base_point(point, actual_shape, new_shape):
     result[2] = new_shape[2] * (point[2] / actual_shape[2])
 
     return result
+
+
+def distance_3d_points(point1, point2):
+    dist = math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2 + (point1[2] - point2[2]) ** 2)
+    return dist

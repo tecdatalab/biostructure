@@ -431,10 +431,10 @@ def main_10():
 
 
 def experiment_1():
-    from experiment.experiment_1 import generate_test_data, do_test
+    from experiment.experiment_1 import generate_test_data_a, do_test_a
 
-    # generate_test_data("./data_experiment_1", 5.0, 2)
-    do_test("./data_experiment_1", "result.csv")
+    generate_test_data_a("./data_experiment_1_a", 5.0, 2)
+    do_test_a("./data_experiment_1_a", "result.csv")
 
 
 if __name__ == '__main__':
