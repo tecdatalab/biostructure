@@ -345,6 +345,8 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
     volume_result['simulated_path'] = simulated_path
     volume_result['map_volume']=map_volume
     volume_result['map_path']=map_filename
+    volume_result['pdb_path'] = pdb_filename
+    volume_result['map_length'] = map_box[0]
     
     # Get simulated map volume
     if os.path.exists(simulated_path):
@@ -454,6 +456,36 @@ def fitMaptoSim_Map(index, df, models_path):
 
     return {'index':index, 'aligned_path':aligned_map_path,'overlap_before': overlap_before, 'corr_before':corr_before, 'overlap_after':overlap_after, 'corr_after':corr_after}
      
+# Generate simulated segments using EMAN
+def generateSimulatedSegments(index, df, models_path):
+    if not os.path.exists(sim_model_path):
+        os.makedirs(sim_model_path)
+    pdb_filename = df.at[df.index[index], 'pdb_path']
+    simulated_path = df.at[df.index[index], 'simulated_path']
+    chain_id = df.at[df.index[index], 'chain_id']
+    generated_segment_path = simulated_path.replace('.mrc','_'+chain_id+'.mrc')
+    map_box_length = str(df.at[df.index[index], 'map_length'])
+
+    result = {}
+    try:
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py --center --quiet -B='+ map_box_length +','+ map_box_length+ ','+ map_box_length +' --chains=\''+  chain_id+ '\' '+ pdb_filename + ' ' + generated_segment_path
+        execute_command(command)
+        result['index'] = index
+        result['subunit_path'] = generated_segment_path
+
+        # Get segment object and compute volume
+        segment_obj = molecule.Molecule(generated_segment_path, recommendedContour=0.001, cutoffRatios=[1])
+        segment_volume = segment_obj.getVolume()
+        result['segment_volume'] = segment_volume
+    except Exception as e:
+        with open('error.txt', 'a') as error_file:
+            segment_volume = -1
+            error_file.write("Error generating segment map {} for pdb {}\n".format(chain_id,os.path.basename(pdb_filename)))
+    return result
+    
+
+
+
 
 # Function to get symmetry information from pdb file
 def getSymmetryFromPDB(models_path):
@@ -549,6 +581,12 @@ def selectExperimentalDataset(result_dir, out_txt_path, percentil_boundaries_tup
     # Save csv with selected samples
     selected_samples.to_csv('dataset_selected.csv', index = False)
 
+    plt.figure(figsize=(15,8))
+    sns.set_context("paper")
+    sns.set_style("ticks")
+
+    sns.distplot(df.resolution)
+    
     # Gerete boxplot    
     df.hist(column='resolution', grid=True, bins=10)
     plt.title('Ratio of simulated volume to em map volume at recommended contour')
@@ -701,9 +739,13 @@ def main():
                         map_volume = d['map_volume']
                         capture_ratio = d['vol_capture']
                         map_path = d['map_path']
+                        pdb_path = d['pdb_path']
+                        map_length = d['map_length']
                         sim_path = d['simulated_path']
                         df_volume.loc[res_index, 'simulated_path'] = sim_path
                         df_volume.loc[res_index, 'map_path'] = map_path
+                        df_volume.loc[res_index, 'pdb_path'] = pdb_path
+                        df_volume.loc[res_index, 'map_length'] = map_length
                         df_volume.loc[res_index, 'map_volume'] = map_volume
                         df_volume.loc[res_index, 'pdb_volume'] = pdb_volume
                         df_volume.loc[res_index, 'vol_capture'] = capture_ratio
@@ -794,26 +836,52 @@ def main():
         dataset_cryoem = pd.read_csv('dataset_selected.csv')
         dataset_synthetic = pd.read_csv('synthetic_selected.csv')
 
+        subunits_path = os.path.join(simulated_path, 'subunits')
+
         # Create output directory for simulated segmetns
-        if not(os.path.exists('simulated/subunits')):
-            os.system('mkdir simulated/subunits')
+        if not(os.path.exists(subunits_path)):
+            os.system('mkdir '+subunits_path)
         
+        # Result dataset
         dataset_cryoem_segments = pd.DataFrame(columns=dataset_cryoem.columns.values.tolist())
-        result = []
         # Get Molecule segments from pdb lecture with lib 
         chain_df_to_merge = pd.DataFrame(columns=['fitted_entries','chain_label'])
         for index, row in dataset_cryoem.iterrows():
             entryid = row['fitted_entries']
-            filepath = os.path.join(models_path, 'pdb'+entryid+'.ent')
+            filepath = row['pdb_path']
             subunit_id_list, subunit_labels = pdb_get_chain_id_label_list(entryid, filepath)
             list_entry_name = [entryid for i in subunit_id_list]
             chain_df_to_merge = pd.DataFrame({'fitted_entries':list_entry_name,'chain_id':subunit_id_list, 'chain_label':subunit_labels})
             dataset_df_to_merge = dataset_cryoem[dataset_cryoem['fitted_entries']==entryid]
             cross_join = pd.merge(dataset_df_to_merge, chain_df_to_merge, on='fitted_entries', how='outer')
             dataset_cryoem_segments = dataset_cryoem_segments.append(cross_join, sort=False)
-        
-        dataset_cryoem_segments.to_csv('test.csv', index = False)
-            
+
+        # Get index list to schedule processess 
+        index_list = dataset_cryoem_segments.index.tolist()
+        print("Spawn procecess...")
+        comm = MPI.COMM_WORLD
+        size = comm.Get_size()
+        with MPICommExecutor(comm, root=0, worker_size=size) as executor:
+            if executor is not None:
+                
+                futures = []
+                for i in index_list:
+                    futures.append(executor.submit(generateSimulatedSegments, i, dataset_cryoem_segments, simulated_path))
+                wait(futures)
+                for f in futures:
+                    try:
+                        d = f.result()
+                        print("received simulated segments dict: ",d)
+                        res_index = d['index']
+                        subunit_path = d['subunit_path']
+                        segment_volume = d['segment_volume']
+                        dataset_cryoem_segments.loc[res_index, 'subunit_path'] = subunit_path
+                        dataset_cryoem_segments.loc[res_index, 'segment_volume'] = segment_volume
+                        
+                    except ValueError as error:
+                        print("Error calculating volume for simulated {}: {}".format(df_volume.loc[i,'fitted_entries'],error))
+                dataset_cryoem_segments.to_csv('dataset_volume.csv', index=False)
+                    
             
         # Simulate give segment with EMAN and save file following pdbid_segment.mrc fale notation
       
