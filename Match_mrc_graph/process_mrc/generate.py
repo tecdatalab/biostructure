@@ -82,6 +82,33 @@ def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour
     return result, original_structure
 
 
+def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour_p, list_segments):
+    myMolecule_complete = molecule.Molecule(mrc_path, recommendedContour=recommendedContour_p)
+    segments_paths = [folder_segments+i for i in list_segments]
+    # print(segments_paths)
+    actual_id = 1
+    result = []
+    for path in segments_paths:
+        # print(path)
+        ## Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off ratios.
+        myMolecule = molecule.Molecule(path, recommendedContour=recommendedContour_p)
+        densitie = np.copy(myMolecule.getEmMap().data())
+        result.append(Segment(actual_id, densitie, None))
+        actual_id += 1
+        # print(myMolecule.contour_masks.shape)
+
+    import utils._zernike as z
+    for i in result:
+        zd = z.computeDescriptors(i.mask)
+        i.zd_descriptors = zd
+
+    original_structure = \
+        Biomolecular_structure(myMolecule_complete.getEmMap().data(),
+                               z.computeDescriptors(myMolecule_complete.getEmMap().data()))
+
+    return result, original_structure
+
+
 def get_mrc_one(mrc_path, recommendedContour_p):
     # Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off
     # ratios.

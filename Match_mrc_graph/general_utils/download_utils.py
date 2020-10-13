@@ -51,3 +51,19 @@ def download_pdb(id_code, exit_path, create_progress_bar=False):
         urllib.request.urlretrieve(file_url, exit_path_full)
     else:
         urllib.request.urlretrieve(file_url, exit_path_full, MyProgressBar())
+
+
+def get_all_pdb_name():
+    from ftplib import FTP
+    ftp = FTP()
+    ftp.connect("ftp.wwpdb.org")
+    ftp.login()
+    ftp.cwd("/pub/pdb/data/structures/all/pdb/")
+    files_list = ftp.nlst()
+
+    result = []
+
+    for filename in files_list:
+        result.append(filename[3:-7])
+
+    return result

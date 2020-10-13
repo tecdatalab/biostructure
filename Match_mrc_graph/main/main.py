@@ -430,6 +430,13 @@ def main_10():
     pdb_to_mrc_chains(True, False, 5.0, '{0}/2b24.pdb'.format(path), path, chains, len(chains))
 
 
+def experiment_1():
+    from experiment.experiment_1 import generate_test_data, do_test
+
+    # generate_test_data("./data_experiment_1", 5.0, 2)
+    do_test("./data_experiment_1", "result.csv")
+
+
 if __name__ == '__main__':
     # main_1()
     # main_2()
@@ -440,4 +447,5 @@ if __name__ == '__main__':
     # main_7()
     # main_8()
     # main_9()
-    main_10()
+    # main_10()
+    experiment_1()
