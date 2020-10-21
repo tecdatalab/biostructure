@@ -435,8 +435,8 @@ def experiment_1():
   from experiment.experiment_1 import generate_test_data_a, do_test_a
   local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction"
 
-  generate_test_data_a("{0}/data_experiment_1_a".format(local_path), 5.0, 2)
-  do_test_a("{0}/data_experiment_1_a".format(local_path), "result.csv")
+  # generate_test_data_a("{0}/data_experiment_1_a".format(local_path), 5.0, 2)
+  # do_test_a("{0}/data_experiment_1_a".format(local_path), "result.csv")
   # generate_test_data_b("{0}/data_experiment_1_b".format(local_path), 2)
   # do_test_b("{0}/data_experiment_1_b".format(local_path), "result.csv")
   print("Hola mundo")
