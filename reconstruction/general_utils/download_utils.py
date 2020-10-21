@@ -67,3 +67,19 @@ def get_all_pdb_name():
         result.append(filename[3:-7])
 
     return result
+
+
+def get_all_emd_name():
+    from ftplib import FTP
+    ftp = FTP()
+    ftp.connect("ftp.wwpdb.org")
+    ftp.login()
+    ftp.cwd("/pub/emdb/structures/")
+    files_list = ftp.nlst()
+
+    result = []
+
+    for filename in files_list:
+        result.append(filename[4:])
+
+    return result

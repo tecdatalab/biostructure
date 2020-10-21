@@ -69,3 +69,25 @@ def get_mass_angstrom(map_path):
     mass = get_float_between_ss(text, "Enclosed volume for surface (#1.1) =", "\n")
     shutil.rmtree(path)
     return mass
+
+
+def get_mrc_level(map_path):
+    map_real_path = os.path.abspath(map_path)
+    path = "./temp_map_mass"
+    if os.path.exists(path):
+        shutil.rmtree(path)
+    os.mkdir(path)
+
+    f = open(path + "/fit.cxc", "w+")
+    f.write("exit")
+    f.close()
+
+    commands_real_path = os.path.abspath(path + "/fit.cxc")
+    level = 0
+    error, exit_binary_text = get_out("chimerax", "--nogui", map_real_path, commands_real_path)
+    if error != 0:
+        raise Exception("Error on try to get mass")
+    text = exit_binary_text
+    level = get_float_between_ss(text, "at level", ",")
+    shutil.rmtree(path)
+    return level

@@ -1,5 +1,6 @@
 import os
 
+from experiment.experiment_1 import generate_test_data_b, do_test_b
 from fit.fit_map_chimeraX import fit_map_in_map
 from reconstruction.semi_exact_cover import get_semi_exact_s
 from writers.csv_writer import write_in_file
@@ -13,7 +14,7 @@ from process_graph.process_graph_utils import generate_graph
 from process_mrc.generate import get_mrc_segments, \
     get_mrc_synthetic_segments_pdb, get_mrc_one
 from process_mrc.miscellaneous import get_center_point, \
-    get_cube_len_angstrom, get_mass_angstrom
+    get_cube_len_angstrom, get_mass_angstrom, get_mrc_level
 from globals.global_values import maps_with_pdb_origin, maps_with_pdb_origin_problems
 from metric.metrics_mrc import get_geometric_overlap_p, get_cross_correlation
 
@@ -433,8 +434,11 @@ def main_10():
 def experiment_1():
     from experiment.experiment_1 import generate_test_data_a, do_test_a
 
-    generate_test_data_a("./data_experiment_1_a", 5.0, 2)
-    do_test_a("./data_experiment_1_a", "result.csv")
+    # generate_test_data_a("./data_experiment_1_a", 5.0, 2)
+    # do_test_a("./data_experiment_1_a", "result.csv")
+    # generate_test_data_b("./data_experiment_1_b", 2)
+    do_test_b("./data_experiment_1_b", "result.csv")
+
 
 
 if __name__ == '__main__':

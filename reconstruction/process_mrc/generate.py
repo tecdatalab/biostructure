@@ -1,6 +1,8 @@
 import sys
 import pathlib
 
+from process_mrc.miscellaneous import get_mrc_level
+
 pathlib.Path(__file__).parent.absolute()
 from process_mrc.segment import Segment
 from process_mrc.biomolecular_structure import Biomolecular_structure
@@ -16,7 +18,9 @@ import argparse
 import numpy as np
 
 
-def get_mrc_segments(mrc_path, recommendedContour_p, steps, sigma):
+def get_mrc_segments(mrc_path, steps, sigma, recommendedContour_p=None):
+    if recommendedContour_p == None:
+        recommendedContour_p = get_mrc_level(mrc_path)
     # Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off
     # ratios.
     myMolecule = molecule.Molecule(mrc_path, recommendedContour=recommendedContour_p)
@@ -55,7 +59,9 @@ def get_mrc_segments(mrc_path, recommendedContour_p, steps, sigma):
     return result, original_structure
 
 
-def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour_p):
+def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour_p=None):
+    if recommendedContour_p == None:
+        recommendedContour_p = get_mrc_level(mrc_path)
     myMolecule_complete = molecule.Molecule(mrc_path, recommendedContour=recommendedContour_p)
     segments_paths = list(glob.glob(folder_segments + "/*_*.mrc"))
     # print(segments_paths)
@@ -82,9 +88,11 @@ def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour
     return result, original_structure
 
 
-def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour_p, list_segments):
+def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, list_segments, recommendedContour_p = None):
+    if recommendedContour_p==None:
+        recommendedContour_p = get_mrc_level(mrc_path)
     myMolecule_complete = molecule.Molecule(mrc_path, recommendedContour=recommendedContour_p)
-    segments_paths = [folder_segments+i for i in list_segments]
+    segments_paths = [folder_segments + i for i in list_segments]
     # print(segments_paths)
     actual_id = 1
     result = []
@@ -109,7 +117,9 @@ def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour
     return result, original_structure
 
 
-def get_mrc_one(mrc_path, recommendedContour_p):
+def get_mrc_one(mrc_path, recommendedContour_p=None):
+    if recommendedContour_p==None:
+        recommendedContour_p = get_mrc_level(mrc_path)
     # Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off
     # ratios.
     actual_id = 1
@@ -134,6 +144,3 @@ def get_mrc_one(mrc_path, recommendedContour_p):
                                z.computeDescriptors(myMolecule.getEmMap().data()))
 
     return result, original_structure
-
-# result = get_mrc_segments("../pdb_to_mrc/exit_pdb/175d/175d.mrc", 7, 3, 1)
-# result = get_mrc_synthetic_segments_pdb("../pdb_to_mrc/exit_pdb/175d", 7)
