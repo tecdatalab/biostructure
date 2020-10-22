@@ -1,4 +1,8 @@
 import os
+import sys
+import pathlib
+
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 from experiment.experiment_1 import generate_test_data_b, do_test_b
 from fit.fit_map_chimeraX import fit_map_in_map
