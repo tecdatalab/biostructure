@@ -193,6 +193,7 @@ def do_test_b_aux(path_data, emd_name, headers_csv, result_cvs_file, remove_file
 
     for experiment in experiments_list:
         # Generate target points
+        print("Antes del completo")
         segments_graph_complete_target, _ = \
             get_mrc_one('{0}/{1}'.format(path_data, experiment))
 
@@ -205,6 +206,7 @@ def do_test_b_aux(path_data, emd_name, headers_csv, result_cvs_file, remove_file
         # print("Point Original: ", center_point1, "Point Test: ", center_point2)
 
         # Generate data simulate
+        print("Antes del segundo simulado")
         segments_graph_simulate_target, _ = \
             get_mrc_segments('{0}/{1}'.format(path_data, experiment), 3, 1)
 
