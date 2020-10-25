@@ -12,7 +12,7 @@ import seaborn as sns
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 from concurrent.futures import wait
-from Bio.PDB import PDBParser
+from Bio.PDB import PDBParser, PDBIO, Select
 import numpy as np
 
 
@@ -23,6 +23,14 @@ def execute_command(cmd):
             raise Exception('Command "%s" does not exist' % cmd)
     except Exception as exc:
         raise RuntimeError('Command "%s" does not work' % cmd) from exc
+
+def plot_hist(data, variable_name, save_path):
+    sns.set_context("paper")
+    sns.set_style("ticks")
+    plt.figure(figsize=(4, 3), dpi=300)
+    df = pd.Series(data, name=variable_name)
+    sns.distplot(df)
+    plt.savefig(save_path)
 
 # Sync headers to folder
 def get_headers(header_path):
@@ -237,6 +245,19 @@ def removeNonExistingModels(models_path, out_txt_path):
 
     df.to_csv('dataset_metadata.csv', index=False)
 
+# Define function to clean PDB file and overwrite
+def pdb_clean_and_save(chain, filepath):
+    # Custom select to store only ATM records
+    class NonHetSelect(Select):
+        def accept_residue(self, residue):
+            return 1 if residue.id[0] == " " else 0    
+    parser = PDBParser(PERMISSIVE = True, QUIET = True)
+    pdb_obj = parser.get_structure(chain, filepath)
+    io = PDBIO()
+    io.set_structure(pdb_obj)
+    io.save(filepath, NonHetSelect())
+    print("{} cleaned and saved to {}".format(chain,filepath)) 
+
 # Define function to get number of chains in structure
 def pdb_num_chain_mapper(chain, filepath):
     parser = PDBParser(PERMISSIVE = True, QUIET = True)
@@ -261,6 +282,8 @@ def processfiles(models_path, out_txt_path):
     df = pd.read_csv('./dataset_metadata.csv')
     # Create dictionary from dataframe
     pdb_id_path_dict = pd.Series(df.pdb_path.values,index=df.fitted_entries).to_dict()
+    # Remove PDB extra info
+    df["fitted_entries"].map(lambda pdb_id: pdb_clean_and_save(pdb_id, pdb_id_path_dict[pdb_id]))
     # Compute number of subunits
     df['subunit_count'] = df["fitted_entries"].map(lambda pdb_id: pdb_num_chain_mapper(pdb_id, pdb_id_path_dict[pdb_id]))
     # Get number of models with less than 2 subunits
@@ -269,7 +292,7 @@ def processfiles(models_path, out_txt_path):
     df = df[df.subunit_count>=2]
 
     df.to_csv('dataset_metadata.csv', index=False)
-    
+     
     number_of_samples = len( df.index )
    
     with open(out_txt_path, 'a') as out:
@@ -295,7 +318,7 @@ def processfiles(models_path, out_txt_path):
 
     df_simulated.to_csv('./metadata_synthetic.csv')
 
-
+    
 
 
 # Simulate map from pdb structure and calculate volume 
@@ -457,30 +480,35 @@ def fitMaptoSim_Map(index, df, models_path):
     return {'index':index, 'aligned_path':aligned_map_path,'overlap_before': overlap_before, 'corr_before':corr_before, 'overlap_after':overlap_after, 'corr_after':corr_after}
      
 # Generate simulated segments using EMAN
-def generateSimulatedSegments(index, df, models_path):
+def generateSimulatedSegments(index, df, sim_model_path):
     if not os.path.exists(sim_model_path):
         os.makedirs(sim_model_path)
     pdb_filename = df.at[df.index[index], 'pdb_path']
     simulated_path = df.at[df.index[index], 'simulated_path']
     chain_id = df.at[df.index[index], 'chain_id']
-    generated_segment_path = simulated_path.replace('.mrc','_'+chain_id+'.mrc')
-    map_box_length = str(df.at[df.index[index], 'map_length'])
+    generated_segment_path = os.path.join(sim_model_path, os.path.basename(simulated_path.replace('.mrc','_'+chain_id+'.mrc')))
+    map_box_length =df.at[df.index[index], 'map_length']
 
     result = {}
+    result['index'] = index
     try:
-        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py --center --quiet -B='+ map_box_length +','+ map_box_length+ ','+ map_box_length +' --chains=\''+  chain_id+ '\' '+ pdb_filename + ' ' + generated_segment_path
+        # Generate map without specify box dimension
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py --center -v 9 -B='+str(int(map_box_length))+ '  --chains=\''+  chain_id+ '\' '+ pdb_filename + ' ' + generated_segment_path
+        print(command)
         execute_command(command)
-        result['index'] = index
-        result['subunit_path'] = generated_segment_path
-
-        # Get segment object and compute volume
-        segment_obj = molecule.Molecule(generated_segment_path, recommendedContour=0.001, cutoffRatios=[1])
-        segment_volume = segment_obj.getVolume()
-        result['segment_volume'] = segment_volume
+    except Exception as e:
+        with open('error.txt', 'a') as error_file:
+            error_file.write("Error generating segment map {} for pdb {}: {}\n".format(chain_id,os.path.basename(pdb_filename),e))
+    try:
+        map_object = molecule.Molecule(generated_segment_path, recommendedContour=0.001, cutoffRatios=[1])        
+        segment_volume = map_object.getVolume()[0]
     except Exception as e:
         with open('error.txt', 'a') as error_file:
             segment_volume = -1
-            error_file.write("Error generating segment map {} for pdb {}\n".format(chain_id,os.path.basename(pdb_filename)))
+            error_file.write("Error reading segment map {} from pdb {}: {}\n".format(chain_id,os.path.basename(pdb_filename),e))
+    # Get subunit path back to main thread
+    result['subunit_path'] = generated_segment_path
+    result['segment_volume'] = segment_volume
     return result
     
 
@@ -561,7 +589,7 @@ def selectExperimentalDataset(result_dir, out_txt_path, percentil_boundaries_tup
         out.write("Printing vol capture distribution in percentiles\n")
         # Printing percentile values
         for i in range(0,100):
-            out.write("Percentile {} value: {}\n".format(i, df.vol_capture.quantile(i/100, interpolation = 'midpoint')))
+            print("Percentile {} value: {}\n".format(i, df.vol_capture.quantile(i/100, interpolation = 'midpoint')))
         out.write("Quartile Q1: {}\n".format(q1))
         out.write("Quartile Q3: {}\n".format(q3))
         out.write("IQR: {}\n".format(q3-q1))
@@ -580,41 +608,12 @@ def selectExperimentalDataset(result_dir, out_txt_path, percentil_boundaries_tup
             out.write("Getting outliers following IQR...\n")
     # Save csv with selected samples
     selected_samples.to_csv('dataset_selected.csv', index = False)
-
-    plt.figure(figsize=(15,8))
-    sns.set_context("paper")
-    sns.set_style("ticks")
-
-    sns.distplot(df.resolution)
-    
-    # Gerete boxplot    
-    df.hist(column='resolution', grid=True, bins=10)
-    plt.title('Ratio of simulated volume to em map volume at recommended contour')
-    plt.xlabel('Num Samples')  
-    plt.ylabel('Bins')
-    plt.savefig('resolution_hist.png')
-    plt.clf()
-
-    df.hist(column='subunit_count', grid=True, bins=10)
-    plt.title('Number of subunits per map in data')
-    plt.xlabel('Bins')
-    plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'subunit_hist.png'))
-    plt.clf()
-
-    df.hist(column='map_volume', grid=True, bins=10)
-    plt.title('Map volume distribution in data')
-    plt.xlabel('Bins')
-    plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'map_volume_hist.png'))
-    plt.clf()
-    
-    df.hist(column='pdb_volume', grid=True, bins=10)
-    plt.title('Simulated volume distribution in data')
-    plt.xlabel('Bins')
-    plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'simulated_volume_hist.png'))
-    plt.clf()
+    #Plot Number of protein subunits of EMDB maps
+    plot_hist(df.subunit_count,'Subunits', os.path.join(result_dir,'subunit_hist.png'))
+    #Plot Protein volume values of EMDB maps
+    plot_hist(df.map_volume, 'Volume in voxels', os.path.join(result_dir,'simulated_volume_hist.png'))
+    # Plot Protein volume values of generated maps
+    plot_hist(df.pdb_volume, 'Volume in voxels', os.path.join(result_dir,'simulated_volume_hist.png'))
 
 
 def generateStatsFromSelectedData(selected_samples, result_dir):
@@ -855,7 +854,8 @@ def main():
             dataset_df_to_merge = dataset_cryoem[dataset_cryoem['fitted_entries']==entryid]
             cross_join = pd.merge(dataset_df_to_merge, chain_df_to_merge, on='fitted_entries', how='outer')
             dataset_cryoem_segments = dataset_cryoem_segments.append(cross_join, sort=False)
-
+        # Reset indexes
+        dataset_cryoem_segments.reset_index(inplace=True, drop=True)  
         # Get index list to schedule processess 
         index_list = dataset_cryoem_segments.index.tolist()
         print("Spawn procecess...")
@@ -878,9 +878,9 @@ def main():
                         dataset_cryoem_segments.loc[res_index, 'subunit_path'] = subunit_path
                         dataset_cryoem_segments.loc[res_index, 'segment_volume'] = segment_volume
                         
-                    except ValueError as error:
+                    except Exception as error:
                         print("Error calculating volume for simulated {}: {}".format(df_volume.loc[i,'fitted_entries'],error))
-                dataset_cryoem_segments.to_csv('dataset_volume.csv', index=False)
+                dataset_cryoem_segments.to_csv('dataset_selected.csv', index=False)
                     
             
         # Simulate give segment with EMAN and save file following pdbid_segment.mrc fale notation
