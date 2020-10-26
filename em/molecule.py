@@ -2,8 +2,8 @@ import numpy as np
 from skimage.measure import regionprops
 from skimage.transform import resize
 
-from reader import Reader
-import processing
+from em.reader import Reader
+from em import processing
 
 ## This module represents the molecule object with its properties and different data representations for each contour level. 
 
@@ -34,7 +34,7 @@ class Molecule():
 
         for cutoffRatio in self.cutoffRatios:
             lvl = cutoffRatio*self.contourLvl
-            mask_at_contour = np.zeros(map_data.shape)
+            mask_at_contour = np.zeros(map_data.shape, dtype=np.bool)
             mask_at_contour[map_data>=lvl]=self.indicatorValue
             contour_masks[cutoffRatio] = mask_at_contour
 
