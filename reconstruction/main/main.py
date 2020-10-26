@@ -4,7 +4,7 @@ import pathlib
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 
-from experiment.experiment_1 import do_parallel_test_b
+from experiment.experiment_1 import do_parallel_test_b, do_parallel_test_a
 from fit.fit_map_chimeraX import fit_map_in_map
 from reconstruction.semi_exact_cover import get_semi_exact_s
 from writers.csv_writer import write_in_file
@@ -436,14 +436,11 @@ def main_10():
 
 
 def experiment_1():
-  from experiment.experiment_1 import generate_test_data_a, do_test_a
-  local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction"
-  # local_path = "/work/lcastillo"
+  # local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction"
+  local_path = "/work/lcastillo"
 
-  # generate_test_data_a("{0}/data_experiment_1_a".format(local_path), 5.0, 2)
-  # do_test_a("{0}/data_experiment_1_a".format(local_path), "result.csv")
-
-  do_parallel_test_b("{0}/data_experiment_1_b".format(local_path), "result.csv", 1)
+  do_parallel_test_a("{0}/data_experiment_1_a".format(local_path), "result.csv", 5.0, 1)
+  # do_parallel_test_b("{0}/data_experiment_1_b".format(local_path), "result.csv", 1)
 
 
   print("Hola mundo")
