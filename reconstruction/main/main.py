@@ -443,7 +443,7 @@ def experiment_1():
   # generate_test_data_a("{0}/data_experiment_1_a".format(local_path), 5.0, 2)
   # do_test_a("{0}/data_experiment_1_a".format(local_path), "result.csv")
 
-  do_parallel_test_b("{0}/data_experiment_1_b".format(local_path), "result.csv", 2)
+  do_parallel_test_b("{0}/data_experiment_1_b".format(local_path), "result.csv", 1)
 
 
   print("Hola mundo")
