@@ -54,7 +54,7 @@ import array
 import numpy as np
 import os.path
 
-import emMap
+from em import emMap
 import mrcfile
 
 class Reader():
