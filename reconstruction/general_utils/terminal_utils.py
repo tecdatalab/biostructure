@@ -1,19 +1,18 @@
-from subprocess import check_output, CalledProcessError
-from tempfile import TemporaryFile
 
 
 def get_out(*args):
-    import getpass
+    import getpass, subprocess
 
-    with TemporaryFile() as t:
-        try:
-            if args[0] == "chimerax":
-              if(getpass.getuser() == "lcastillo"):
-                args1 = list(args)
-                args1[0] = "ChimeraX"
-                args = tuple(args1)
-            out = check_output(args, stderr=t)
-            return 0, out.decode("utf-8")
-        except CalledProcessError as e:
-            t.seek(0)
-            return e.returncode, t.read().decode("utf-8")
+    args1 = list(args)
+    if args[0] == "chimerax":
+      if (getpass.getuser() == "lcastillo"):
+        args1[0] = "ChimeraX"
+
+    try:
+      result = subprocess.run(args1, stdout=subprocess.PIPE)
+      exit_text = result.stdout.decode('utf-8')
+      return result.returncode ,exit_text
+
+    except subprocess.CalledProcessError as grepexc:
+      return grepexc.returncode, grepexc
+

@@ -436,8 +436,8 @@ def main_10():
 
 
 def experiment_1():
-  # local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction"
-  local_path = "/work/lcastillo"
+  local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction"
+  # local_path = "/work/lcastillo"
 
   do_parallel_test_a("{0}/data_experiment_1_a".format(local_path), "result.csv", 5.0, 1)
   # do_parallel_test_b("{0}/data_experiment_1_b".format(local_path), "result.csv", 1)
