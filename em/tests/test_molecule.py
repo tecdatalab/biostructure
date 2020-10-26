@@ -1,6 +1,5 @@
 import sys 
-sys.path.append('..')
-import molecule
+from em import molecule
 import numpy as np
 
 # Segmentation test with 4 regions

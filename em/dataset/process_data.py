@@ -1,36 +1,16 @@
 import pandas as pd
 import os
-import subprocess
 from glob import glob
 from xml.etree import ElementTree
 import argparse
-import sys
-sys.path.append('..')
-import molecule
-import matplotlib.pyplot as plt
-import seaborn as sns
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 from concurrent.futures import wait
 from Bio.PDB import PDBParser, PDBIO, Select
 import numpy as np
 
-
-# Excecute command
-def execute_command(cmd):
-    try:
-        if os.system(cmd) != 0:
-            raise Exception('Command "%s" does not exist' % cmd)
-    except Exception as exc:
-        raise RuntimeError('Command "%s" does not work' % cmd) from exc
-
-def plot_hist(data, variable_name, save_path):
-    sns.set_context("paper")
-    sns.set_style("ticks")
-    plt.figure(figsize=(4, 3), dpi=300)
-    df = pd.Series(data, name=variable_name)
-    sns.distplot(df)
-    plt.savefig(save_path)
+from em.dataset.miscelaneous import *
+import em.molecule
 
 # Sync headers to folder
 def get_headers(header_path):
@@ -283,7 +263,7 @@ def processfiles(models_path, out_txt_path):
     # Create dictionary from dataframe
     pdb_id_path_dict = pd.Series(df.pdb_path.values,index=df.fitted_entries).to_dict()
     # Remove PDB extra info
-    df["fitted_entries"].map(lambda pdb_id: pdb_clean_and_save(pdb_id, pdb_id_path_dict[pdb_id]))
+    #df["fitted_entries"].map(lambda pdb_id: pdb_clean_and_save(pdb_id, pdb_id_path_dict[pdb_id]))
     # Compute number of subunits
     df['subunit_count'] = df["fitted_entries"].map(lambda pdb_id: pdb_num_chain_mapper(pdb_id, pdb_id_path_dict[pdb_id]))
     # Get number of models with less than 2 subunits
@@ -361,7 +341,11 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
     #command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=1' + ' -R=' + str(res) + ' -B='+ str(map_box[2]) +','+ str(map_box[1])+ ','+ str(map_box[0]) +' '+  pdb_filename + ' ' + simulated_path
     command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py --center --quiet -B='+ str(map_box[2]) +','+ str(map_box[1])+ ','+ str(map_box[0]) +' '+  pdb_filename + ' ' + simulated_path
     print(command)
-    execute_command(command)
+    try:
+        execute_command(command)
+    except Exception as e:
+        with open('error.txt', 'a') as error_file:
+            error_file.write("Error simulating map {}: {}\n".format(os.path.basename(simulated_path), e))
 
     volume_result = dict()
     volume_result['index']=index
@@ -384,7 +368,7 @@ def simulateMapAndCompareVolume(index, df, sim_model_path):
     else:
         volume_result['pdb_volume']=-1
         with open('error.txt', 'a') as error_file:
-            error_file.write("Error generating map {}: {}\n".format(os.path.basename(simulated_path), e))
+            error_file.write("Simulated map {} does not exist: {}\n".format(os.path.basename(simulated_path), e))
 
     return volume_result
 
@@ -488,27 +472,33 @@ def generateSimulatedSegments(index, df, sim_model_path):
     chain_id = df.at[df.index[index], 'chain_id']
     generated_segment_path = os.path.join(sim_model_path, os.path.basename(simulated_path.replace('.mrc','_'+chain_id+'.mrc')))
     map_box_length =df.at[df.index[index], 'map_length']
+    pdb_filename_chain = pdb_filename.replace('.ent','_'+chain_id+'.ent')
 
     result = {}
     result['index'] = index
     try:
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2procpdb.py --chains ' + chain_id + ' ' + pdb_filename + ' ' + pdb_filename_chain
+        print(command)
+        execute_command(command)
         # Generate map without specify box dimension
-        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py --center -v 9 -B='+str(int(map_box_length))+ '  --chains=\''+  chain_id+ '\' '+ pdb_filename + ' ' + generated_segment_path
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py --center  -B '+str(int(map_box_length))+ '  '+ pdb_filename_chain + ' ' + generated_segment_path
         print(command)
         execute_command(command)
     except Exception as e:
         with open('error.txt', 'a') as error_file:
             error_file.write("Error generating segment map {} for pdb {}: {}\n".format(chain_id,os.path.basename(pdb_filename),e))
-    try:
+    # Get simulated map volume
+    if os.path.exists(generated_segment_path):
         map_object = molecule.Molecule(generated_segment_path, recommendedContour=0.001, cutoffRatios=[1])        
-        segment_volume = map_object.getVolume()[0]
-    except Exception as e:
+        segment_volume = map_object.getVolume()[1]
+        # Get subunit path back to main thread
+        result['subunit_path'] = generated_segment_path
+        result['segment_volume'] = segment_volume
+    else: 
+        result['subunit_path'] = ''
+        result['segment_volume'] = -1
         with open('error.txt', 'a') as error_file:
-            segment_volume = -1
-            error_file.write("Error reading segment map {} from pdb {}: {}\n".format(chain_id,os.path.basename(pdb_filename),e))
-    # Get subunit path back to main thread
-    result['subunit_path'] = generated_segment_path
-    result['segment_volume'] = segment_volume
+            error_file.write("Error reading segment map {} from simulated {}: {}\n".format(chain_id,generated_segment_path,e)) 
     return result
     
 
@@ -547,12 +537,10 @@ def selectExperimentalDataset(result_dir, out_txt_path, percentil_boundaries_tup
     df.dropna(inplace=True)
 
     # Plot hist
-    df.hist(column='vol_capture', grid=True, bins=30)
-    plt.title('Ratio of simulated volume to em map volume at recommended contour')
-    plt.xlabel('Bins')  
-    plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'volume_capture_hist.png'))
-    plt.clf()
+    plot_hist(df.vol_capture, '', os.path.join(result_dir,'data_capture_hist.eps'))   
+    column_title_dict = {"map_volume":"volume exp", "pdb_volume":"vol sim", "vol_capture":"capture ratio"}
+    plot_box(df, column_title_dict, os.path.join(result_dir, 'data_boxplot'))
+
     # Computing basic stats
     num_samples = len(df)
     avg = df['vol_capture'].mean()
@@ -560,7 +548,6 @@ def selectExperimentalDataset(result_dir, out_txt_path, percentil_boundaries_tup
     std = df['vol_capture'].std()
     # Get column values to list
     values = df['vol_capture'].tolist()
-
     # Compute quartiles and plot box chart
     q1 = np.percentile(values, 25, interpolation = 'midpoint')
     q3 = np.percentile(values, 75, interpolation = 'midpoint')
@@ -609,73 +596,26 @@ def selectExperimentalDataset(result_dir, out_txt_path, percentil_boundaries_tup
     # Save csv with selected samples
     selected_samples.to_csv('dataset_selected.csv', index = False)
     #Plot Number of protein subunits of EMDB maps
-    plot_hist(df.subunit_count,'Subunits', os.path.join(result_dir,'subunit_hist.png'))
+    plot_hist(df.subunit_count,'', os.path.join(result_dir,'data_subunitcount_hist.eps'))
     #Plot Protein volume values of EMDB maps
-    plot_hist(df.map_volume, 'Volume in voxels', os.path.join(result_dir,'simulated_volume_hist.png'))
+    plot_hist(df.map_volume, '', os.path.join(result_dir,'data_volume_exp_hist.eps'))
     # Plot Protein volume values of generated maps
-    plot_hist(df.pdb_volume, 'Volume in voxels', os.path.join(result_dir,'simulated_volume_hist.png'))
+    plot_hist(df.pdb_volume, '', os.path.join(result_dir,'data_volume_sim_hist.eps'))
 
 
-def generateStatsFromSelectedData(selected_samples, result_dir):
+def generateStatsFromSelectedData(df, result_dir):
 
     # Generate charts from selected data
     # Generate resolution histogram from EMDB data
-    selected_samples.hist(column='resolution', grid=True, bins=10)
-    plt.title('Map resolution distribution in dataset')
-    plt.xlabel('Bins')
-    plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'resolution_dataset_hist.png'))
-    plt.clf()
-    
-    selected_samples.hist(column='subunit_count', grid=True, bins=10)
-    plt.title('Number of subunits per map in dataset')
-    plt.xlabel('Bins')
-    plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'subunit_dataset_hist.png'))
-    plt.clf()
-
-    selected_samples.hist(column='map_volume', grid=True, bins=10)
-    plt.title('Volume distribution in dataset')
-    plt.xlabel('Bins')
-    plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'map_volume_dataset_hist.png'))
-    plt.clf()
-    
-    selected_samples.hist(column='pdb_volume', grid=True, bins=10)
-    plt.title('Simulated volume distribution in dataset')
-    plt.xlabel('Bins')
-    plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'simulated_volume_dataset_hist.png'))
-    plt.clf()
-    
-    selected_samples.hist(column='corr_before', grid=True, bins=10)
-    plt.title('Simulated and original density correlation in dataset before alignment')
-    plt.xlabel('Bins')
-    plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'corr_before_dataset_hist.png'))
-    plt.clf()
-
-    selected_samples.hist(column='corr_after', grid=True, bins=10)
-    plt.title('Simulated and original density correlation in dataset before alignment')
-    plt.xlabel('Bins')
-    plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'corr_after_dataset_hist.png'))
-    plt.clf()
-    
-    selected_samples.hist(column='overlap_before', grid=True, bins=10)
-    plt.title('Simulated and original volume overlap in dataset before alignment')
-    plt.xlabel('Bins')
-    plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'overlap_before_dataset_hist.png'))
-    plt.clf()
-
-    selected_samples.hist(column='overlap_after', grid=True, bins=10)
-    plt.title('Simulated and original volume overlap in dataset before alignment')
-    plt.xlabel('Bins')
-    plt.ylabel('Number of Samples')
-    plt.savefig(os.path.join(result_dir,'overlap_after_dataset_hist.png'))
-    plt.clf()
-
+    plot_hist(df.resolution,'', os.path.join(result_dir,'selected_resolution_hist.eps'))
+    plot_hist(df.subunit_count,'', os.path.join(result_dir,'selected_subunitcount_hist.eps'))
+    plot_hist(df.map_volume, '', os.path.join(result_dir,'selected_volume_exp_hist.eps'))
+    plot_hist(df.pdb_volume, '', os.path.join(result_dir,'selected_volume_sim_hist.eps'))
+    plot_hist(df.corr_before, '', os.path.join(result_dir,'selected_corr_before_hist.eps'))
+    plot_hist(df.corr_after, '', os.path.join(result_dir,'selected_corr_after_hist.eps'))
+    plot_hist(df.overlap_before, '', os.path.join(result_dir,'selected_overlap_before_hist.eps'))
+    plot_hist(df.overlap_after, '', os.path.join(result_dir,'selected_overlap_after_hist.eps'))
+ 
     
 
 def main():
