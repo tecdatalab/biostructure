@@ -15,9 +15,10 @@ import random
 import progressbar
 
 
-def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None, remove_files=True):
-  # all_names = get_all_pdb_name()
-  all_names = ['101m']
+def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None, remove_files=True,
+                       start=None):
+  all_names = get_all_pdb_name()
+  # all_names = ['101m']
   print("Before get pdb names")
 
   path = '{0}'.format(os.path.abspath(path_data))
@@ -32,10 +33,20 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   bar = progressbar.ProgressBar(maxval=can_elements)
   bar.start()
   con = 0
+  flag = False
+  if start == None:
+    flag = True
   for pdb_name in all_names[:can_elements]:
-    # resolution = random.uniform(resolution_range[0], resolution_range[1])
-    resolution = 3.8680
+    if flag == False:
+      if pdb_name == start:
+        flag = True
+      else:
+        continue
+
+    resolution = random.uniform(resolution_range[0], resolution_range[1])
+    # resolution = 3.8680
     try:
+      print(pdb_name)
       do_parallel_test_a_aux(path, pdb_name, result_cvs_file, remove_files, resolution)
     except Exception as e:
       with open("error_log.txt", "a+") as myfile:

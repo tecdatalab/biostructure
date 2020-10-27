@@ -3,6 +3,7 @@ import numpy as np
 import os
 from general_utils.terminal_utils import get_out
 from general_utils.string_utils import get_float_between_ss, get_float_value
+import tempfile
 
 
 def get_center_point(index_segments, segments, filter_val):
@@ -24,7 +25,8 @@ def get_center_point(index_segments, segments, filter_val):
 
 def get_cube_len_angstrom(map_path):
   map_real_path = os.path.abspath(map_path)
-  path = "./temp_map_center"
+  path = tempfile.mkdtemp()
+  # path = "./temp_map_center"
   if os.path.exists(path):
     shutil.rmtree(path)
 
@@ -49,7 +51,8 @@ def get_cube_len_angstrom(map_path):
 
 def get_mass_angstrom(map_path):
   map_real_path = os.path.abspath(map_path)
-  path = "./temp_map_mass"
+  path = tempfile.mkdtemp()
+  # path = "./temp_map_mass"
   if os.path.exists(path):
     shutil.rmtree(path)
   os.mkdir(path)
@@ -73,7 +76,8 @@ def get_mass_angstrom(map_path):
 
 def get_mrc_level(map_path):
   map_real_path = os.path.abspath(map_path)
-  path = "./temp_map_mass"
+  path = tempfile.mkdtemp()
+  # path = "./temp_map_mass"
   if os.path.exists(path):
     shutil.rmtree(path)
   os.mkdir(path)

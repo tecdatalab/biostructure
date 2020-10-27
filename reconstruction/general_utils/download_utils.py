@@ -3,6 +3,7 @@ import urllib.request
 import progressbar
 import shutil
 from general_utils.terminal_utils import get_out
+import tempfile
 
 
 class MyProgressBar:
@@ -22,7 +23,8 @@ class MyProgressBar:
 
 
 def download_emd(id_code, exit_path, create_progress_bar=False):
-  path = './temp_emd_download'
+  # path = './temp_emd_download'
+  path = tempfile.mkdtemp()
   path = os.path.abspath(path)
   exit_path = os.path.abspath(exit_path)
   file_url = 'ftp://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/map/emd_{0}.map.gz'.format(id_code)
