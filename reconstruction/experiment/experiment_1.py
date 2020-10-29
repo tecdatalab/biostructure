@@ -16,7 +16,7 @@ import progressbar
 
 
 def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None, remove_files=True,
-                       start=None):
+                       start=None, ignore_pdbs=[]):
   all_names = get_all_pdb_name()
   # all_names = ['101m']
   print("Before get pdb names")
@@ -37,6 +37,8 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   if start == None:
     flag = True
   for pdb_name in all_names[:can_elements]:
+    if pdb_name in ignore_pdbs:
+      continue
     if flag == False:
       if pdb_name == start:
         flag = True

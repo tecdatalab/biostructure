@@ -46,13 +46,26 @@ def download_emd(id_code, exit_path, create_progress_bar=False):
 
 
 def download_pdb(id_code, exit_path, create_progress_bar=False):
-  exit_path_full = os.path.abspath(exit_path)
-  file_url = "https://files.rcsb.org/download/{0}.pdb".format(str(id_code))
+  # path = './temp_emd_download'
+  path = tempfile.mkdtemp()
+  path = os.path.abspath(path)
+  exit_path = os.path.abspath(exit_path)
+  file_url = 'ftp://ftp.ebi.ac.uk/pub/databases/pdb/data/structures/all/pdb/pdb{0}.ent.gz'.format(id_code)
 
-  if not create_progress_bar:
-    urllib.request.urlretrieve(file_url, exit_path_full)
+  if os.path.exists(path):
+    shutil.rmtree(path)
+  os.mkdir(path)
+
+  if create_progress_bar:
+    urllib.request.urlretrieve(file_url, path + '/pdb{0}.ent.gz'.format(id_code), MyProgressBar())
   else:
-    urllib.request.urlretrieve(file_url, exit_path_full, MyProgressBar())
+    urllib.request.urlretrieve(file_url, path + '/pdb{0}.ent.gz'.format(id_code))
+
+  get_out("gunzip", path + '/pdb{0}.ent.gz'.format(id_code))
+  get_out("rm", path + '/pdb{0}.ent.gz'.format(id_code))
+  get_out("mv", path + '/pdb{0}.ent'.format(id_code), exit_path)
+
+  shutil.rmtree(path)
 
 
 def get_all_pdb_name():
