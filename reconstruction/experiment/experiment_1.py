@@ -37,13 +37,13 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   if start == None:
     flag = True
   for pdb_name in all_names[:can_elements]:
-    if pdb_name in ignore_pdbs:
-      continue
     if flag == False:
       if pdb_name == start:
         flag = True
       else:
         continue
+    if pdb_name in ignore_pdbs:
+      continue
 
     resolution = random.uniform(resolution_range[0], resolution_range[1])
     # resolution = 3.8680
