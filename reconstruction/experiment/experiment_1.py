@@ -13,7 +13,7 @@ from process_mrc.miscellaneous import get_center_point
 from writers.csv_writer import write_in_file
 import random
 import progressbar
-
+import time
 
 def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None, remove_files=True,
                        start=None, ignore_pdbs=[]):
@@ -116,32 +116,46 @@ def do_test_a_aux(path_data, pdb_name, headers_csv, result_cvs_file, remove_file
 
   for experiment in experiments_list:
     # Generate target points
+    start_time = time.time()
     segments_graph_complete_target, _ = \
       get_mrc_one('{0}/{1}'.format(path_data, experiment))
+    print("--- %s Tiempo de segmentacion ---" % (time.time() - start_time))
 
+    start_time = time.time()
     graph1_match_index = get_element_list(0, [[1, 1]])
     graph2_match_index = get_element_list(1, [[1, 1]])
 
     center_point1 = get_center_point(graph1_match_index, segments_graph_complete_target, 0)
     center_point2 = get_center_point(graph2_match_index, segments_graph_complete_target, 0)
+    print("--- %s Tiempo de puntos centrales ---" % (time.time() - start_time))
+
 
     # print("Point Original: ", center_point1, "Point Test: ", center_point2)
 
     # Generate data simulate
+    start_time = time.time()
     segments_graph_simulate_target, _ = \
       get_mrc_segments('{0}/{1}'.format(path_data, experiment), 3, 1)
+    print("--- %s Tiempo de segmentacion ---" % (time.time() - start_time))
 
     # Generate test simulate
+    start_time = time.time()
     graph1 = generate_graph(segments_graph_simulate, 50, 0, 6, 1)
     graph2 = generate_graph(segments_graph_simulate_target, 50, 0, 6, 1)
+    print("--- %s Tiempo de generacion de grafos ---" % (time.time() - start_time))
+    start_time = time.time()
     result = graph_aligning(graph1, graph2, 1, False)
+    print("--- %s Tiempo de alinacion ---" % (time.time() - start_time))
+
 
     if result != []:
       graph1_match_index = get_element_list(0, result)
       graph2_match_index = get_element_list(1, result)
 
+      start_time = time.time()
       center_point1_1 = get_center_point(graph1_match_index, segments_graph_simulate, 0)
       center_point2_1 = get_center_point(graph2_match_index, segments_graph_simulate_target, 0)
+      print("--- %s Tiempo de puntos centrales ---" % (time.time() - start_time))
     else:
       center_point1_1 = [-1, -1, -1]
       center_point2_1 = [-1, -1, -1]
@@ -149,17 +163,23 @@ def do_test_a_aux(path_data, pdb_name, headers_csv, result_cvs_file, remove_file
     # print("Point Original sim: ", center_point1_1, "Point Test sim: ", center_point2_1)
 
     # Generate test synthetic
+    start_time = time.time()
     graph1 = generate_graph(segments_graph_synthetic, 50, 0, 6, 1)
     graph2 = generate_graph(segments_graph_simulate_target, 50, 0, 6, 1)
+    print("--- %s Tiempo de generacion de grafos ---" % (time.time() - start_time))
+    start_time = time.time()
     result = graph_aligning(graph1, graph2, 1, False)
+    print("--- %s Tiempo de alineacin ---" % (time.time() - start_time))
 
     if result != []:
 
       graph1_match_index = get_element_list(0, result)
       graph2_match_index = get_element_list(1, result)
 
+      start_time = time.time()
       center_point1_2 = get_center_point(graph1_match_index, segments_graph_synthetic, 0)
       center_point2_2 = get_center_point(graph2_match_index, segments_graph_simulate_target, 0)
+      print("--- %s Tiempo de puntos centrales ---" % (time.time() - start_time))
     else:
       center_point1_2 = [-1, -1, -1]
       center_point2_2 = [-1, -1, -1]
