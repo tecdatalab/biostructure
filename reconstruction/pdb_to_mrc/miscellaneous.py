@@ -15,6 +15,7 @@ def get_chains(input_file):
           list_result.append(actual_chain)
           actual_chain = line[21:22]
     list_result.append(actual_chain)
+  list_result = list(dict.fromkeys(list_result))
   return list_result
 
 
