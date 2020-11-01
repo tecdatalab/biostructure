@@ -74,6 +74,8 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, remove_files, resolu
   combinations = combinations_12n(len(chains))[1:]
 
   pdb_to_mrc_chains(True, False, resolution, '{0}/{1}.pdb'.format(local_path, pdb_name), path)
+  import sys
+  sys.stdout.flush()
 
   with open('{0}/all_pdb.blist'.format(local_path), 'wb') as fp:
     list_write = ['{0}_{1}.mrc'.format(pdb_name, i) for i in chains]
