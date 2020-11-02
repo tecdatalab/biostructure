@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import subprocess
+import pandas as pd 
 
 # Excecute command
 def execute_command(cmd):
