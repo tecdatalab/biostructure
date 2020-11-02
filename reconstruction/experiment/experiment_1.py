@@ -14,12 +14,31 @@ from writers.csv_writer import write_in_file
 import random
 import progressbar
 import time
+import shutil
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
+
+def remove_get_dirs(path):
+  result = []
+  complete_path = os.path.abspath(path)
+  list_dirs = os.listdir(complete_path)
+
+  for dir_name in list_dirs:
+    check_path = '{0}/{1}'.format(complete_path, dir_name)
+
+    files_dir = os.listdir(check_path)
+
+    if len(files_dir) == 1 and files_dir[0].split('.')[1]=='csv':
+      result.append(dir_name)
+    else:
+      shutil.rmtree(check_path)
+  return result
 
 def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None, remove_files=True,
                        start=None, ignore_pdbs=[]):
   all_names = get_all_pdb_name()
+  complete_pdb = remove_get_dirs(path_data)
+  ignore_pdbs= ignore_pdbs + complete_pdb
   # all_names = ['101m']
   print("Before get pdb names")
 
@@ -40,7 +59,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   if start == None:
     flag = True
 
-  #Parale
+  # Parale
   comm = MPI.COMM_WORLD
   size = comm.Get_size()
 
@@ -54,7 +73,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
             flag = True
           else:
             con += 1
-            con2+=1
+            con2 += 1
             continue
         if pdb_name in ignore_pdbs:
           con += 1
@@ -65,9 +84,9 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
         # resolution = 3.8680
 
         con2 += 1
-        print(pdb_name, can_elements/con2)
+        #print(pdb_name, con2/can_elements)
         futures.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
-                                       remove_files, resolution), resolution])
+                                                  remove_files, resolution), resolution])
 
       for f in futures:
         try:
@@ -154,7 +173,6 @@ def do_test_a_aux(path_data, pdb_name, headers_csv, result_cvs_file, remove_file
     center_point2 = get_center_point(graph2_match_index, segments_graph_complete_target, 0)
     print("--- %s Tiempo de puntos centrales ---" % (time.time() - start_time))
 
-
     # print("Point Original: ", center_point1, "Point Test: ", center_point2)
 
     # Generate data simulate
@@ -171,7 +189,6 @@ def do_test_a_aux(path_data, pdb_name, headers_csv, result_cvs_file, remove_file
     start_time = time.time()
     result = graph_aligning(graph1, graph2, 1, False)
     print("--- %s Tiempo de alinacion ---" % (time.time() - start_time))
-
 
     if result != []:
       graph1_match_index = get_element_list(0, result)
