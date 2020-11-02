@@ -99,7 +99,9 @@ class Reader():
         #Generate Molecule object with parameters
         return emMap.EMMap(self.header, densities,  (nz, ny, nx), (nzstart, nystart, nxstart), (mz, my, mx), (zlen, ylen, xlen), (dmin, dmax, dmean), (zorigin, yorigin, xorigin), (x,y,z), self.filename)
             
-   
+    def save(self, filename, data):
+        with mrcfile.new(filename, overwrite=True) as mrc:
+            mrc.set_data(data)       
 
 '''
 filename = "../../emd_2847.map"

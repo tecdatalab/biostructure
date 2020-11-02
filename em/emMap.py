@@ -27,6 +27,9 @@ class EMMap():
 
     def set_origin(self, new_origin):
         (self.xorigin, self.yorigin, self.zorigin) = new_origin
+
+    def set_data(self, data_array):
+        self.array = data_array
     
     def data(self):
         return self.array

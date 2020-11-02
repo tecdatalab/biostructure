@@ -3,7 +3,7 @@ from skimage.measure import regionprops
 from skimage.transform import resize
 
 from em.reader import Reader
-from em import processing
+import em.processing as processing
 
 ## This module represents the molecule object with its properties and different data representations for each contour level. 
 
@@ -67,7 +67,12 @@ class Molecule():
         self.labels = labels
         self.seg_masks = molecule_masks
 
+    def setData(self,data_array):
+        self.emMap.set_data(data_array)
 
+    def save(self, filename):
+        reader = Reader()
+        reader.save(filename, self.emMap.data())
 
     def getContourMasks(self):
         return self.contour_masks   
