@@ -9,8 +9,8 @@ from concurrent.futures import wait
 from Bio.PDB import PDBParser, PDBIO, Select
 import numpy as np
 
-from em.dataset.miscelaneous import *
-import em.molecule
+from miscellaneous import *
+import em.molecule as molecule
 
 # Sync headers to folder
 def get_headers(header_path):
@@ -225,18 +225,17 @@ def removeNonExistingModels(models_path, out_txt_path):
 
     df.to_csv('dataset_metadata.csv', index=False)
 
-# Define function to clean PDB file and overwrite
-def pdb_clean_and_save(chain, filepath):
-    # Custom select to store only ATM records
-    class NonHetSelect(Select):
-        def accept_residue(self, residue):
-            return 1 if residue.id[0] == " " else 0    
+# Define function to split PDB file and save
+def pdb_split_and_save(chain, filepath):
     parser = PDBParser(PERMISSIVE = True, QUIET = True)
     pdb_obj = parser.get_structure(chain, filepath)
     io = PDBIO()
-    io.set_structure(pdb_obj)
-    io.save(filepath, NonHetSelect())
-    print("{} cleaned and saved to {}".format(chain,filepath)) 
+    for chain in pdb_obj.get_chains():
+        model = pdb_obj[0] 
+        pdb_filename_chain = filepath.replace('.ent','_'+chain._id+'.ent')    
+        io.set_structure(model[chain._id])
+        io.save(pdb_filename_chain)
+    print("{} splitted and saved".format(chain)) 
 
 # Define function to get number of chains in structure
 def pdb_num_chain_mapper(chain, filepath):
@@ -263,7 +262,7 @@ def processfiles(models_path, out_txt_path):
     # Create dictionary from dataframe
     pdb_id_path_dict = pd.Series(df.pdb_path.values,index=df.fitted_entries).to_dict()
     # Remove PDB extra info
-    #df["fitted_entries"].map(lambda pdb_id: pdb_clean_and_save(pdb_id, pdb_id_path_dict[pdb_id]))
+    df["fitted_entries"].map(lambda pdb_id: pdb_split_and_save(pdb_id, pdb_id_path_dict[pdb_id]))
     # Compute number of subunits
     df['subunit_count'] = df["fitted_entries"].map(lambda pdb_id: pdb_num_chain_mapper(pdb_id, pdb_id_path_dict[pdb_id]))
     # Get number of models with less than 2 subunits
@@ -440,9 +439,9 @@ def fitMaptoSim_Map(index, df, models_path):
     # Compute binary mask for simulated and original map
     # OLD BINARY MASK
     #command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py ' + map_path + ' '+ mask_path +' --process threshold.binary:value=' + str(contourLvl)
-    command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py ' + map_path + ' '+ mask_path +' --process=mask.auto3d:nmaxseed=12:nshells=3:nshellsgauss=3:return_mask=1:threshold='+str(contourLvl)
-    print(command)
-    execute_command(command)
+    #command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py ' + map_path + ' '+ mask_path +' --process=mask.auto3d:nmaxseed=12:nshells=3:nshellsgauss=3:return_mask=1:threshold='+str(contourLvl)
+    #print(command)
+    #execute_command(command)
     
     try:
         simulated_object = molecule.Molecule(simulated_path, recommendedContour=0.001, cutoffRatios=[1])
@@ -451,12 +450,14 @@ def fitMaptoSim_Map(index, df, models_path):
         overlap_before = map_object.getOverlap(simulated_object)[1]
         corr_before = map_object.getCorrelation(simulated_object)[1]
         # Compute alignment
-        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py  --align=rotate_translate_3d_tree --alignref='+simulated_path+' --multfile='+ mask_path +' '+map_path+' '+aligned_map_path
+        #command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py  --align=rotate_translate_3d_tree --alignref='+simulated_path+' --multfile='+ mask_path +' '+map_path+' '+aligned_map_path
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2proc3d.py  '+map_path+' '+aligned_map_path
         print(command)
         execute_command(command)
         map_object = molecule.Molecule(aligned_map_path, recommendedContour=contourLvl, cutoffRatios=[1])
         overlap_after = map_object.getOverlap(simulated_object)[1]
         corr_after = map_object.getCorrelation(simulated_object)[1]
+        corr_after = corr_after if not np.isnan(corr_after) else 0
     except RuntimeError as e:
         with open('error.txt', 'a') as error_file:
             error_file.write("Error aligning map {}: {}\n".format(os.path.basename(map_path), e))
@@ -472,16 +473,18 @@ def generateSimulatedSegments(index, df, sim_model_path):
     chain_id = df.at[df.index[index], 'chain_id']
     generated_segment_path = os.path.join(sim_model_path, os.path.basename(simulated_path.replace('.mrc','_'+chain_id+'.mrc')))
     map_box_length =df.at[df.index[index], 'map_length']
+    # Get centered pdb
+    pdb_filename = pdb_filename.replace('.ent','_centered.ent')
     pdb_filename_chain = pdb_filename.replace('.ent','_'+chain_id+'.ent')
 
     result = {}
     result['index'] = index
     try:
-        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2procpdb.py --chains ' + chain_id + ' ' + pdb_filename + ' ' + pdb_filename_chain
-        print(command)
-        execute_command(command)
+        #command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2procpdb.py --chains ' + chain_id + ' ' + pdb_filename + ' ' + pdb_filename_chain
+        #print(command)
+        #execute_command(command)
         # Generate map without specify box dimension
-        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py --center  -B '+str(int(map_box_length))+ '  '+ pdb_filename_chain + ' ' + generated_segment_path
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py --het -B '+str(int(map_box_length))+ '  '+ pdb_filename_chain + ' ' + generated_segment_path
         print(command)
         execute_command(command)
     except Exception as e:
@@ -788,6 +791,12 @@ def main():
         for index, row in dataset_cryoem.iterrows():
             entryid = row['fitted_entries']
             filepath = row['pdb_path']
+            centered_filepath = filepath.replace('.ent','_centered.ent')
+            # Move pdb coords to center of mass
+            command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2procpdb_mod.py ' + filepath + ' ' + centered_filepath + ' --center 1'
+            execute_command(command)
+            # Split centered pdb into chains
+            pdb_split_and_save(entryid,centered_filepath)
             subunit_id_list, subunit_labels = pdb_get_chain_id_label_list(entryid, filepath)
             list_entry_name = [entryid for i in subunit_id_list]
             chain_df_to_merge = pd.DataFrame({'fitted_entries':list_entry_name,'chain_id':subunit_id_list, 'chain_label':subunit_labels})
