@@ -442,10 +442,46 @@ def experiment_1():
   startp = '139d'
   startp = '100d'
   do_parallel_test_a("{0}/data_experiment_1_a".format(local_path), "result.csv", [3.5, 7.0], 1,
-                     ignore_pdbs=['105d','106d','108d'])
+                     ignore_pdbs=['105d', '106d', '108d'])
   # do_parallel_test_b("{0}/data_experiment_1_b".format(local_path), "result.csv", 1)
 
   print("Finish")
+
+
+def create_poins():
+  import time
+  # start_time = time.time()
+  # segments_graph1, original_structure1 = \
+  #   get_mrc_segments('/home/lcastillo98/Documents/git_projects/biostructure/maps/1010/EMD-1010.map',3, 1)
+  # segments_graph2, original_structure2 = \
+  #   get_mrc_segments('/home/lcastillo98/Documents/git_projects/biostructure/maps/1010/EMD-1010.map',3, 1)
+  # print("--- %s seconds ---" % (time.time() - start_time))
+
+  path = './maps_pdb'
+  if not os.path.isdir(path):
+    os.mkdir(path)
+
+  download_pdb('1a0c', '{0}/1a0c.pdb'.format(path))
+  print("Despues de la descarga")
+
+  # Maps creation
+  chains = get_chains('{0}/1a0c.pdb'.format(path))
+  pdb_to_mrc_chains(True, False, 5.0, '{0}/1a0c.pdb'.format(path), path, chains, len(chains))
+
+  start_time = time.time()
+  segments_graph1, original_structure1 = \
+    get_mrc_segments('{0}/1a0c/1a0c.mrc'.format(path),3, 1)
+  print("--- %s seconds ---" % (time.time() - start_time))
+
+
+  start_time = time.time()
+  graph1 = generate_graph(segments_graph1, 50, 0, 6, 1)
+  graph2 = generate_graph(segments_graph1, 50, 0, 6, 1)
+  print("--- %s seconds ---" % (time.time() - start_time))
+
+  result = graph_aligning(graph1, graph2, 1, False)
+
+
 
 
 if __name__ == '__main__':
@@ -459,4 +495,5 @@ if __name__ == '__main__':
   # main_8()
   # main_9()
   # main_10()
-  experiment_1()
+  # experiment_1()
+  create_poins()

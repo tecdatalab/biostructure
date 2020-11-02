@@ -3,44 +3,75 @@ Created on Jun 9, 2020
 
 @author: luis98
 '''
+import itertools
+
 import matplotlib
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from sklearn.neighbors import KDTree
 from process_graph.process_segment_faces import get_n_points_cube
+import threading
+
+
+def gen_thread_points(id, mask, n_points_face, filter_value, semaphore, dic_result):
+  result = get_n_points_cube(mask, n_points_face, filter_value)
+  semaphore.acquire()
+  dic_result[id] = result
+  semaphore.release()
+
+
+def gen_thread_KDTree(id, data, semaphore, dic_result):
+  result = KDTree(data)
+  semaphore.acquire()
+  dic_result[id] = result
+  semaphore.release()
+
 
 def generate_graph(segments, n_points_face, filter_value, max_distance, min_points):
   face_points = {}
   kd_trees = {}
   g_result = nx.Graph()
 
+  sem = threading.Semaphore()
+  thread_list = []
   for i in segments:
-    face_points[i.id_segment] = get_n_points_cube(i.mask, n_points_face, filter_value)
+    t = threading.Thread(target=gen_thread_points, args=[i.id_segment, i.mask, n_points_face, filter_value,
+                                                         sem, face_points])
 
+    thread_list.append(t)
+    t.start()
+
+  for t in thread_list:
+    t.join()
+
+  thread_list = []
   for i in segments:
-    kd_trees[i.id_segment] = KDTree(face_points[i.id_segment])
+    t = threading.Thread(target=gen_thread_KDTree, args=[i.id_segment, face_points[i.id_segment], sem,
+                                                         kd_trees])
+    thread_list.append(t)
+    t.start()
 
-  #Add nodes in gaphs
+  for t in thread_list:
+    t.join()
+
+    # Add nodes in gaphs
   for i in segments:
     g_result.add_node(i.id_segment, zd_descriptors=i.zd_descriptors)
 
-  check = []
-  for i in segments:
-    for j in segments:
-      if (i.id_segment != j.id_segment) and ([i.id_segment, j.id_segment] not in check):
-        # check code
-        ok_values = 0
-        for point in face_points[i.id_segment]:
-          dist, _ind = kd_trees[j.id_segment].query([point], k=1)
-          if dist[0] <= max_distance:
-            ok_values += 1
-            if ok_values >= min_points:
-              ### Creation of graph
-              g_result.add_edge(i.id_segment, j.id_segment)
-              check.append([j.id_segment, i.id_segment])
-              break
-        check.append([i.id_segment, j.id_segment])
+  for item in itertools.combinations(np.arange(len(segments)), 2):
+    if item[0] == item[1]:
+      continue
+
+    i = segments[item[0]]
+    j = segments[item[1]]
+
+    # check code
+    dist, _ind = kd_trees[j.id_segment].query(face_points[i.id_segment], k=1)
+    chek_val = np.max(np.sort(np.squeeze(dist))[:min(len(dist), min_points)])
+
+    if chek_val <= max_distance:
+      g_result.add_edge(i.id_segment, j.id_segment)
 
   return g_result
 
