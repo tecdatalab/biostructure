@@ -14,6 +14,8 @@ from writers.csv_writer import write_in_file
 import random
 import progressbar
 import time
+from mpi4py import MPI
+from mpi4py.futures import MPICommExecutor
 
 def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None, remove_files=True,
                        start=None, ignore_pdbs=[]):
@@ -33,33 +35,54 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   bar = progressbar.ProgressBar(maxval=can_elements)
   bar.start()
   con = 0
+  con2 = 0
   flag = False
   if start == None:
     flag = True
-  for pdb_name in all_names[:can_elements]:
-    if flag == False:
-      if pdb_name == start:
-        flag = True
-      else:
-        continue
-    if pdb_name in ignore_pdbs:
-      continue
 
-    resolution = random.uniform(resolution_range[0], resolution_range[1])
-    # resolution = 3.8680
-    try:
-      print(pdb_name)
-      do_parallel_test_a_aux(path, pdb_name, result_cvs_file, remove_files, resolution)
-    except Exception as e:
-      with open("error_log.txt", "a+") as myfile:
-        myfile.write(pdb_name)
-        myfile.write("\n")
-        myfile.write(str(resolution))
-        myfile.write("\n")
-        myfile.write(str(e))
-        myfile.write("\n\n\n\n")
-    con += 1
-    bar.update(con)
+  #Parale
+  comm = MPI.COMM_WORLD
+  size = comm.Get_size()
+
+  with MPICommExecutor(comm, root=0, worker_size=size) as executor:
+    if executor is not None:
+      futures = []
+
+      for pdb_name in all_names[:can_elements]:
+        if flag == False:
+          if pdb_name == start:
+            flag = True
+          else:
+            con += 1
+            con2+=1
+            continue
+        if pdb_name in ignore_pdbs:
+          con += 1
+          con2 += 1
+          continue
+
+        resolution = random.uniform(resolution_range[0], resolution_range[1])
+        # resolution = 3.8680
+
+        con2 += 1
+        print(pdb_name, can_elements/con2)
+        futures.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
+                                       remove_files, resolution), resolution])
+
+      for f in futures:
+        try:
+          d = f[1].result()
+          print(f[0], d)
+        except Exception as e:
+          with open("error_log.txt", "a+") as myfile:
+            myfile.write(f[0])
+            myfile.write("\n")
+            myfile.write(str(f[2]))
+            myfile.write("\n")
+            myfile.write(str(e))
+            myfile.write("\n\n\n\n")
+        con += 1
+        bar.update(con)
 
 
 def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, remove_files, resolution):
