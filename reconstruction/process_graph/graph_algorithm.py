@@ -28,8 +28,16 @@ def structural_similarity_node(graph1, graph2, g1_degree, g2_degree, node1, node
   node1_total_neighbors = get_total_neighbors_of_neighbors(graph1, node1, g1_degree)
   node2_total_neighbors = get_total_neighbors_of_neighbors(graph2, node2, g2_degree)
 
-  similarity = 1.0 - float(min(node1_total_neighbors, node2_total_neighbors)) / float(
-    max(node1_total_neighbors, node2_total_neighbors))
+  if float(min(node1_total_neighbors, node2_total_neighbors)) == float(max(node1_total_neighbors, node2_total_neighbors)):
+    sim_error = 1.0
+  else:
+    if max(node1_total_neighbors, node2_total_neighbors) == 0:
+      sim_error = 0
+    else:
+      sim_error = \
+      float(min(node1_total_neighbors, node2_total_neighbors)) / float(max(node1_total_neighbors, node2_total_neighbors))
+
+  similarity = 1.0 - sim_error
   return similarity  # Definir como 0 el valor de igualdad total, entre mas mayor menos se parecen
 
 
@@ -43,8 +51,10 @@ def compute_aligning_costs(graph1, graph2, g1_nodes_with_data, g2_nodes_with_dat
   g1_degree = list(graph1.degree())  # Cantidad de aristas por nodo
   g2_degree = list(graph2.degree())
 
-  max_degree_g1 = sorted([d for _, d in g1_degree], reverse=True)[0]  # Creo que se puede mejorar esto
-  max_degree_g2 = sorted([d for _, d in g2_degree], reverse=True)[0]  # Creo que se puede mejorar esto
+  # max_degree_g1 = sorted([d for _, d in g1_degree], reverse=True)[0]  # Creo que se puede mejorar esto
+  max_degree_g1 = np.max(np.array(g1_degree).reshape(2, len(g1_degree))[1])
+  # max_degree_g2 = sorted([d for _, d in g2_degree], reverse=True)[0]  # Creo que se puede mejorar esto
+  max_degree_g2 = np.max(np.array(g2_degree).reshape(2, len(g2_degree))[1])
 
   C = np.zeros((graph1.number_of_nodes(),
                 graph2.number_of_nodes()))  # Crear matrix n(cantidad de aristas g1) x m(cantidad de aristas g2)
@@ -54,9 +64,16 @@ def compute_aligning_costs(graph1, graph2, g1_nodes_with_data, g2_nodes_with_dat
     for j in range(
       graph2.number_of_nodes()):  # Para todos los nodos calcular su similidad (Z) y potencial de convertirse en raiz (C)
 
-      nodes_slr_sim = 1.0 - float(g1_degree[i][1] + g2_degree[j][1]) / float(max_degree_g1 + max_degree_g2)
-      total_str_sim = float(
-        structural_similarity_node(graph1, graph2, g1_degree, g2_degree, g1_degree[i][0], g2_degree[j][0]))
+      if float(g1_degree[i][1] + g2_degree[j][1]) == float(max_degree_g1 + max_degree_g2):
+        sim_val = 1.0
+      else:
+        if max_degree_g1 + max_degree_g2 == 0:
+          sim_val = 0
+        else:
+          sim_val = float(g1_degree[i][1] + g2_degree[j][1]) / float(max_degree_g1 + max_degree_g2)
+      nodes_slr_sim = 1.0 - sim_val
+      total_str_sim = \
+        float(structural_similarity_node(graph1, graph2, g1_degree, g2_degree, g1_degree[i][0], g2_degree[j][0]))
       sim_node = similarity_node(g1_nodes_with_data, g2_nodes_with_data, g1_degree[i][0], g2_degree[j][0])
       # print(similarity_node(G1, G2, g1_degree[i][0], g2_degree[j][0]))
       C[i][j] = nodes_slr_sim + total_str_sim + sim_node

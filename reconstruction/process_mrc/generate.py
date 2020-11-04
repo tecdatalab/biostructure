@@ -141,6 +141,6 @@ def get_mrc_one(mrc_path, recommendedContour_p=None):
   # print("Can_points", len(np.where(myMolecule.getEmMap().data() > 0)[0]))
   original_structure = \
     Biomolecular_structure(myMolecule.getEmMap().data(),
-                           z.computeDescriptors(myMolecule.getEmMap().data()))
+                           result[0].zd_descriptors)
 
   return result, original_structure

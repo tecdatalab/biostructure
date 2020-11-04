@@ -34,38 +34,40 @@ def remove_get_dirs(path):
       shutil.rmtree(check_path)
   return result
 
-def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None, remove_files=True,
+def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None,
                        start=None, ignore_pdbs=[]):
-  all_names = get_all_pdb_name()
-  complete_pdb = remove_get_dirs(path_data)
-  ignore_pdbs= ignore_pdbs + complete_pdb
-  # all_names = ['101m']
-  print("Before get pdb names")
-
-  path = '{0}'.format(os.path.abspath(path_data))
-  # print(path)
-
-  if not os.path.isdir(path):
-    os.mkdir(path)
-
-  if can_elements is None:
-    can_elements = len(all_names)
-
-  bar = progressbar.ProgressBar(maxval=can_elements)
-  bar.start()
-  con = 0
-  con2 = 0
-  flag = False
-  if start == None:
-    flag = True
-
   # Parale
   comm = MPI.COMM_WORLD
   size = comm.Get_size()
 
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
-      futures = []
+
+      all_names = get_all_pdb_name()
+      # all_names = ['101m']
+      print("Before get pdb names")
+
+      path = os.path.abspath(path_data)
+      # print(path)
+
+      if not os.path.isdir(path):
+        os.mkdir(path)
+
+      complete_pdb = remove_get_dirs(path_data)
+      ignore_pdbs = ignore_pdbs + complete_pdb
+
+      if can_elements is None:
+        can_elements = len(all_names)
+
+      bar = progressbar.ProgressBar(maxval=can_elements)
+      bar.start()
+      con = 0
+
+      flag = False
+      if start == None:
+        flag = True
+
+      parallel_jobs = []
 
       for pdb_name in all_names[:can_elements]:
         if flag == False:
@@ -73,25 +75,23 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
             flag = True
           else:
             con += 1
-            con2 += 1
             continue
         if pdb_name in ignore_pdbs:
           con += 1
-          con2 += 1
           continue
 
         resolution = random.uniform(resolution_range[0], resolution_range[1])
         # resolution = 3.8680
 
-        con2 += 1
         #print(pdb_name, con2/can_elements)
-        futures.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
-                                                  remove_files, resolution), resolution])
+        #parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
+        #                                          resolution), resolution])
 
-      for f in futures:
+        do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution)
+
+      for f in parallel_jobs:
         try:
-          d = f[1].result()
-          print(f[0], d)
+          f[1].result()
         except Exception as e:
           with open("error_log.txt", "a+") as myfile:
             myfile.write(f[0])
@@ -104,7 +104,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
         bar.update(con)
 
 
-def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, remove_files, resolution):
+def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution):
   local_path = path + "/" + pdb_name
   if not os.path.exists(local_path):
     os.makedirs(local_path)
@@ -115,137 +115,85 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, remove_files, resolu
   # print(chains)
   combinations = combinations_12n(len(chains))[1:]
 
-  pdb_to_mrc_chains(True, False, resolution, '{0}/{1}.pdb'.format(local_path, pdb_name), path)
-  import sys
-  sys.stdout.flush()
+  start_time = time.time()
+  pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(local_path, pdb_name), path, chains, len(chains))
+  os.remove('{0}/{1}.pdb'.format(local_path, pdb_name))
+  time_eman = time.time() - start_time
 
-  with open('{0}/all_pdb.blist'.format(local_path), 'wb') as fp:
-    list_write = ['{0}_{1}.mrc'.format(pdb_name, i) for i in chains]
-    pickle.dump(list_write, fp)
+  chains_data = {}
+  all_segments = []
+  start_time = time.time()
+  for chain in chains:
+    segments_graph_simulate, _ = get_mrc_one('{0}/{1}_{2}.mrc'.format(local_path, pdb_name, chain))
+    chains_data[chain] = segments_graph_simulate[0]
+    all_segments.append(segments_graph_simulate[0])
+  time_segment = time.time() - start_time
 
-  experiments = []
+  headers_csv = ['Pdb', 'Chains', 'Point Original', 'Point Test', 'Point Original syn', 'Point Test syn',
+                 'Point Original syn dis', 'Point Test syn dis', 'Resolution',
+                 'Time segment', 'Time center', 'Time graph', 'Time alignment', 'Time EMAN2']
 
   for test_combination in combinations:
-    chains_use = [chains[x] for x in test_combination]
-    pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(local_path, pdb_name), path, chains_use)
-    experiments.append('{0}_{1}.mrc'.format(pdb_name, "".join(chains_use)))
-    # [0] target , [0] original
+    test_segments = []
+    test_chains = []
+    for index in test_combination:
+      test_segments.append(chains_data[chain[index]])
+      test_chains.append(chain[index])
 
-  with open('{0}/experiments_pdb.blist'.format(local_path), 'wb') as fp:
-    pickle.dump(experiments, fp)
-  os.remove('{0}/{1}.pdb'.format(local_path, pdb_name))
+    do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segments, test_chains, resolution, local_path,
+              time_eman, time_segment)
 
-  headers_csv = ['pdb', 'pdb test', 'Point Original', 'Point Test', 'Point Original sim', 'Point Test sim',
-                 'Point Original syn', 'Point Test syn', 'Point Original sim dis', 'Point Test sim dis',
-                 'Point Original syn dis', 'Point Test syn dis', 'resolution']
+  dirs = os.listdir(local_path)
 
-  do_test_a_aux(local_path, pdb_name, headers_csv, result_cvs_file, remove_files, resolution)
+  for directory in dirs:
+    if directory.split('.')[1] != 'csv':
+      path_remove = '{0}/{1}'.format(local_path, directory)
+      os.remove(path_remove)
 
 
-def do_test_a_aux(path_data, pdb_name, headers_csv, result_cvs_file, remove_files, resolution):
-  segments_graph_simulate, _ = \
-    get_mrc_segments('{0}/{1}.mrc'.format(path_data, pdb_name), 3, 1)
+def do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segments, test_chains, resolution, path_write,
+              time_eman, time_segment):
 
-  segments_graph_synthetic = None
+  graph1_match_index = get_element_list(0, [[1, 1]])
+  graph2_match_index = get_element_list(1, [[1, 1]])
 
-  with open('{0}/all_pdb.blist'.format(path_data), 'rb') as fp:
-    list_all_pdb = pickle.load(fp)
-    segments_graph_synthetic, _ = \
-      get_mrc_synthetic_segments_pdb('{0}/{1}.mrc'.format(path_data, pdb_name),
-                                     "{0}/".format(path_data), list_all_pdb)
+  start_time = time.time()
+  center_point1 = get_center_point(graph1_match_index, test_segments, 0)
+  center_point2 = get_center_point(graph2_match_index, test_segments, 0)
+  time_center = time.time() - start_time
 
-  experiments_file = open('{0}/experiments_pdb.blist'.format(path_data), 'rb')
-  experiments_list = pickle.load(experiments_file)
-  experiments_file.close()
 
-  for experiment in experiments_list:
-    # Generate target points
+  # Generate test syntetic
+  start_time = time.time()
+  graph1 = generate_graph(all_segments, 50, 0, 6, 1)
+  graph2 = generate_graph(test_segments, 50, 0, 6, 1)
+  time_graph = time.time() - start_time
+
+  start_time = time.time()
+  result = graph_aligning(graph1, graph2, 1, False)
+  time_aligning = time.time() - start_time
+
+  if result != []:
+    graph1_match_index = get_element_list(0, result)
+    graph2_match_index = get_element_list(1, result)
+
     start_time = time.time()
-    segments_graph_complete_target, _ = \
-      get_mrc_one('{0}/{1}'.format(path_data, experiment))
-    print("--- %s Tiempo de segmentacion ---" % (time.time() - start_time))
+    center_point1_1 = get_center_point(graph1_match_index, all_segments, 0)
+    center_point2_1 = get_center_point(graph2_match_index, test_segments, 0)
+    time_center += time.time() - start_time
+  else:
+    center_point1_1 = [-1, -1, -1]
+    center_point2_1 = [-1, -1, -1]
 
-    start_time = time.time()
-    graph1_match_index = get_element_list(0, [[1, 1]])
-    graph2_match_index = get_element_list(1, [[1, 1]])
+  data_write = [[pdb_name, test_chains,
+                 center_point1, center_point2,
+                 center_point1_1, center_point2_1,
+                 distance_3d_points(center_point1, center_point1_1),
+                 distance_3d_points(center_point2, center_point2_1),
+                 resolution,
+                 time_segment, time_center, time_graph, time_aligning, time_eman]]
 
-    center_point1 = get_center_point(graph1_match_index, segments_graph_complete_target, 0)
-    center_point2 = get_center_point(graph2_match_index, segments_graph_complete_target, 0)
-    print("--- %s Tiempo de puntos centrales ---" % (time.time() - start_time))
-
-    # print("Point Original: ", center_point1, "Point Test: ", center_point2)
-
-    # Generate data simulate
-    start_time = time.time()
-    segments_graph_simulate_target, _ = \
-      get_mrc_segments('{0}/{1}'.format(path_data, experiment), 3, 1)
-    print("--- %s Tiempo de segmentacion ---" % (time.time() - start_time))
-
-    # Generate test simulate
-    start_time = time.time()
-    graph1 = generate_graph(segments_graph_simulate, 50, 0, 6, 1)
-    graph2 = generate_graph(segments_graph_simulate_target, 50, 0, 6, 1)
-    print("--- %s Tiempo de generacion de grafos ---" % (time.time() - start_time))
-    start_time = time.time()
-    result = graph_aligning(graph1, graph2, 1, False)
-    print("--- %s Tiempo de alinacion ---" % (time.time() - start_time))
-
-    if result != []:
-      graph1_match_index = get_element_list(0, result)
-      graph2_match_index = get_element_list(1, result)
-
-      start_time = time.time()
-      center_point1_1 = get_center_point(graph1_match_index, segments_graph_simulate, 0)
-      center_point2_1 = get_center_point(graph2_match_index, segments_graph_simulate_target, 0)
-      print("--- %s Tiempo de puntos centrales ---" % (time.time() - start_time))
-    else:
-      center_point1_1 = [-1, -1, -1]
-      center_point2_1 = [-1, -1, -1]
-
-    # print("Point Original sim: ", center_point1_1, "Point Test sim: ", center_point2_1)
-
-    # Generate test synthetic
-    start_time = time.time()
-    graph1 = generate_graph(segments_graph_synthetic, 50, 0, 6, 1)
-    graph2 = generate_graph(segments_graph_simulate_target, 50, 0, 6, 1)
-    print("--- %s Tiempo de generacion de grafos ---" % (time.time() - start_time))
-    start_time = time.time()
-    result = graph_aligning(graph1, graph2, 1, False)
-    print("--- %s Tiempo de alineacin ---" % (time.time() - start_time))
-
-    if result != []:
-
-      graph1_match_index = get_element_list(0, result)
-      graph2_match_index = get_element_list(1, result)
-
-      start_time = time.time()
-      center_point1_2 = get_center_point(graph1_match_index, segments_graph_synthetic, 0)
-      center_point2_2 = get_center_point(graph2_match_index, segments_graph_simulate_target, 0)
-      print("--- %s Tiempo de puntos centrales ---" % (time.time() - start_time))
-    else:
-      center_point1_2 = [-1, -1, -1]
-      center_point2_2 = [-1, -1, -1]
-
-    # print("Point Original syn: ", center_point1, "Point Test syn: ", center_point2)
-
-    data_write = [[pdb_name, experiment, center_point1, center_point2, center_point1_1, center_point2_1,
-                   center_point1_2, center_point2_2,
-                   distance_3d_points(center_point1, center_point1_1),
-                   distance_3d_points(center_point2, center_point2_1),
-                   distance_3d_points(center_point1, center_point1_2),
-                   distance_3d_points(center_point2, center_point2_2),
-                   resolution]]
-    # print(data_write)
-
-    write_in_file('{0}/{1}'.format(path_data, result_cvs_file), headers_csv, data_write)
-
-  if remove_files:
-    dirs = os.listdir(path_data)
-
-    for directory in dirs:
-      if directory.split('.')[1] != 'csv':
-        path_remove = '{0}/{1}'.format(path_data, directory)
-        os.remove(path_remove)
+  write_in_file('{0}/{1}'.format(path_write, result_cvs_file), headers_csv, data_write)
 
 
 def do_parallel_test_b(path_data, result_cvs_file, can_elements=None, remove_files=True):

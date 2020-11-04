@@ -62,7 +62,6 @@ def download_pdb(id_code, exit_path, create_progress_bar=False):
     urllib.request.urlretrieve(file_url, path + '/pdb{0}.ent.gz'.format(id_code))
 
   get_out("gunzip", path + '/pdb{0}.ent.gz'.format(id_code))
-  get_out("rm", path + '/pdb{0}.ent.gz'.format(id_code))
   get_out("mv", path + '/pdb{0}.ent'.format(id_code), exit_path)
 
   shutil.rmtree(path)
