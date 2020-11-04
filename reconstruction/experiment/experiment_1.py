@@ -84,11 +84,8 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
         # resolution = 3.8680
 
         #print(pdb_name, con2/can_elements)
-        #parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
-        #                                          resolution), resolution])
-
-        do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution)
-
+        parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
+                                                        resolution), resolution])
       for f in parallel_jobs:
         try:
           f[1].result()
