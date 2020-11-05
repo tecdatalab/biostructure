@@ -18,6 +18,7 @@ import shutil
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 
+
 def remove_get_dirs(path):
   result = []
   complete_path = os.path.abspath(path)
@@ -28,11 +29,12 @@ def remove_get_dirs(path):
 
     files_dir = os.listdir(check_path)
 
-    if len(files_dir) == 1 and files_dir[0].split('.')[1]=='csv':
+    if len(files_dir) == 1 and files_dir[0].split('.')[1] == 'csv':
       result.append(dir_name)
     else:
       shutil.rmtree(check_path)
   return result
+
 
 def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None,
                        start=None, ignore_pdbs=[]):
@@ -43,8 +45,8 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      all_names = get_all_pdb_name()
-      # all_names = ['101m']
+      # all_names = get_all_pdb_name()
+      all_names = ['100d']
       print("Before get pdb names")
 
       path = os.path.abspath(path_data)
@@ -83,9 +85,10 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
         resolution = random.uniform(resolution_range[0], resolution_range[1])
         # resolution = 3.8680
 
-        #print(pdb_name, con2/can_elements)
-        parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
-                                                        resolution), resolution])
+        # print(pdb_name, con2/can_elements)
+        # parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
+        #                                                resolution), resolution])
+        do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution)
       for f in parallel_jobs:
         try:
           f[1].result()
@@ -120,25 +123,31 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution):
   chains_data = {}
   all_segments = []
   start_time = time.time()
+  con_id_segment = 1
   for chain in chains:
     segments_graph_simulate, _ = get_mrc_one('{0}/{1}_{2}.mrc'.format(local_path, pdb_name, chain))
-    chains_data[chain] = segments_graph_simulate[0]
-    all_segments.append(segments_graph_simulate[0])
+    segment = segments_graph_simulate[0]
+    segment.id_segment = con_id_segment
+    chains_data[chain] = segment
+    all_segments.append(segment)
+    con_id_segment += 1
   time_segment = time.time() - start_time
 
   headers_csv = ['Pdb', 'Chains', 'Point Original', 'Point Test', 'Point Original syn', 'Point Test syn',
-                 'Point Original syn dis', 'Point Test syn dis', 'Resolution',
+                 'Point Original syn dis', 'Point Test syn dis',
+                 'Resolution',
+                 'Match', 'Father Chains', 'Test Chains',
                  'Time segment', 'Time center', 'Time graph', 'Time alignment', 'Time EMAN2']
 
   for test_combination in combinations:
     test_segments = []
     test_chains = []
     for index in test_combination:
-      test_segments.append(chains_data[chain[index]])
-      test_chains.append(chain[index])
+      test_segments.append(chains_data[chains[index]])
+      test_chains.append(chains[index])
 
     do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segments, test_chains, resolution, local_path,
-              time_eman, time_segment)
+              time_eman, time_segment, chains, [chains[index] for index in test_combination])
 
   dirs = os.listdir(local_path)
 
@@ -149,16 +158,15 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution):
 
 
 def do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segments, test_chains, resolution, path_write,
-              time_eman, time_segment):
-
-  graph1_match_index = get_element_list(0, [[1, 1]])
-  graph2_match_index = get_element_list(1, [[1, 1]])
+              time_eman, time_segment, fchains, tchains):
+  false_match_list = [[i.id_segment, i.id_segment] for i in test_segments]
+  graph1_match_index = get_element_list(0, false_match_list)
+  graph2_match_index = get_element_list(1, false_match_list)
 
   start_time = time.time()
   center_point1 = get_center_point(graph1_match_index, test_segments, 0)
   center_point2 = get_center_point(graph2_match_index, test_segments, 0)
   time_center = time.time() - start_time
-
 
   # Generate test syntetic
   start_time = time.time()
@@ -167,7 +175,7 @@ def do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segment
   time_graph = time.time() - start_time
 
   start_time = time.time()
-  result = graph_aligning(graph1, graph2, 1, False)
+  result = graph_aligning(graph1, graph2, 2, False)
   time_aligning = time.time() - start_time
 
   if result != []:
@@ -188,6 +196,7 @@ def do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segment
                  distance_3d_points(center_point1, center_point1_1),
                  distance_3d_points(center_point2, center_point2_1),
                  resolution,
+                 result, fchains, tchains,
                  time_segment, time_center, time_graph, time_aligning, time_eman]]
 
   write_in_file('{0}/{1}'.format(path_write, result_cvs_file), headers_csv, data_write)

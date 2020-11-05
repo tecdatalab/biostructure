@@ -52,9 +52,9 @@ def compute_aligning_costs(graph1, graph2, g1_nodes_with_data, g2_nodes_with_dat
   g2_degree = list(graph2.degree())
 
   # max_degree_g1 = sorted([d for _, d in g1_degree], reverse=True)[0]  # Creo que se puede mejorar esto
-  max_degree_g1 = np.max(np.array(g1_degree).reshape(2, len(g1_degree))[1])
+  max_degree_g1 = np.max(np.array(g1_degree).reshape(2, len(g1_degree))[0])
   # max_degree_g2 = sorted([d for _, d in g2_degree], reverse=True)[0]  # Creo que se puede mejorar esto
-  max_degree_g2 = np.max(np.array(g2_degree).reshape(2, len(g2_degree))[1])
+  max_degree_g2 = np.max(np.array(g2_degree).reshape(2, len(g2_degree))[0])
 
   C = np.zeros((graph1.number_of_nodes(),
                 graph2.number_of_nodes()))  # Crear matrix n(cantidad de aristas g1) x m(cantidad de aristas g2)
@@ -186,9 +186,9 @@ def graph_aligning(graph1, graph2, min_similarity_value, repair_external_values=
     result.append([g1_nodes[i[0]], g2_nodes[j[0]]])  # Se agrega el nuevo match
     g1_mapping.append(g1_nodes[i[0]])  # Se agrega el nuevo match los mapedos
     g2_mapping.append(g2_nodes[j[0]])
-    C = set_matrix_ij_val(C, i, j,
+    C = set_matrix_ij_val(C, i[0], j[0],
                           np.Inf)  # Se llenan con infinito las filas y columnas que no pueden ser utilizadas
-    Z = set_matrix_ij_val(Z, i, j, np.Inf)
+    Z = set_matrix_ij_val(Z, i[0], j[0], np.Inf)
 
     g1_neighbors, g2_neighbors, queue_neighbors = get_promising_neighbors(graph1, graph2, g1_dic, g2_dic, g1_mapping,
                                                                           g2_mapping, Z, g1_nodes[i[0]],
