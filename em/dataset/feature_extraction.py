@@ -18,10 +18,10 @@ import pandas as pd
 # obtiene stats
 # Lo guarda en disco
 
-def annotateSample(map_id, indexes, df, fullness, output_dir):
-    map_path = df.at[indexes[0], 'aligned_path']
+def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
+    map_path = df.at[indexes[0], columns['map_path']]
     annotated_path = os.path.join(output_dir,map_path.replace('.','_gt.'))
-    contourLvl = float(df.at[indexes[0], 'contourLevel'])
+    contourLvl = float(df.at[indexes[0], columns['contourLevel']])
     map_to_annotate =  molecule.Molecule(map_path, recommendedContour=contourLvl)
     data_map = map_to_annotate.emMap.data()
     map_mask = map_to_annotate.getContourMasks()[1]
@@ -34,9 +34,9 @@ def annotateSample(map_id, indexes, df, fullness, output_dir):
     labels = []
     print('Tagging em map {}'.format(os.path.basename(map_path)))
     for i in indexes:
-        segment_path = df.at[i, 'subunit_path']
+        segment_path = df.at[i, columns['subunit_path']]
         if os.path.exists(segment_path):
-            segment_label = int(float(df.at[i, 'chain_label']))
+            segment_label = int(float(df.at[i, columns['chain_label']]))
             segment_map = molecule.Molecule(segment_path, recommendedContour=0.001)
             segment_mask = segment_map.getContourMasks()[1]
             print("Number of voxels in segment {}".format(np.sum(segment_mask)))
@@ -101,7 +101,35 @@ def annotateSample(map_id, indexes, df, fullness, output_dir):
     return result
 
         
-        
+
+def doParallelTagging(df, fullness, gt_path, columns):
+    unique_id_list = df[columns['id']].unique().tolist()
+    # Construct dataframe to store results
+    #annotation_exp_df = df[['id','fitted_entries', 'chain_id','chain_label']]
+    print("Spawn procecess...")
+    comm = MPI.COMM_WORLD
+    size = comm.Get_size()
+    with MPICommExecutor(comm, root=0, worker_size=size) as executor:
+        if executor is not None:
+            futures = []
+            # For each map, perform annotation
+            for i in unique_id_list:
+                subunit_indexes = df.loc[df[columns['id']]==i].index.tolist()
+                futures.append(executor.submit(annotateSample,i, subunit_indexes, df, fullness, columns, gt_path))
+            wait(futures)
+            for f in futures:
+                try:
+                    res = f.result()
+                    map_id = res['map_id']
+                    # Do somenthing with res
+                    print("Received {}".format(res))
+                    #voxels_reassigned = res['voxels_reasigned']
+                    #voxels_descarted = res['voxels_descarted']
+                    #voxels_assigned = res['voxels_assigned']
+                    #annotation_exp_df
+                except ValueError as error:
+                    print("Error asignating segments for {}".format(map_id))
+ 
         
 
 def main():
@@ -118,38 +146,18 @@ def main():
     if not(os.path.exists(gt_path)):
         os.mkdir(gt_path)
     fullness = int(opt.a)
-    df_exp = pd.read_csv('dataset_selected.csv')
+    df_exp = pd.read_csv('dataset_exp_merged.csv')
     #df_sim = pd.read_csv('synthetic_selected.csv')
     # Do parallel computation, one process for each map
     # Get index list to schedule processess 
     # Get id unique values to extract indexes of respective molecule subunits 
-    unique_id_list = df_exp.id.unique().tolist()
-    # Construct dataframe to store results
-    annotation_exp_df = df_exp[['id','fitted_entries', 'chain_id','chain_label']]
-    print("Spawn procecess...")
-    comm = MPI.COMM_WORLD
-    size = comm.Get_size()
-    with MPICommExecutor(comm, root=0, worker_size=size) as executor:
-        if executor is not None:
-            futures = []
-            # For each map, perform annotation
-            for i in unique_id_list:
-                subunit_indexes = df_exp.loc[df_exp['id']==i].index.tolist()
-                futures.append(executor.submit(annotateSample,i, subunit_indexes, df_exp, fullness, gt_path))
-            wait(futures)
-            for f in futures:
-                try:
-                    res = f.result()
-                    map_id = res['map_id']
-                    # Do somenthing with res
-                    print("Received {}".format(res))
-                    #voxels_reassigned = res['voxels_reasigned']
-                    #voxels_descarted = res['voxels_descarted']
-                    #voxels_assigned = res['voxels_assigned']
-                    #annotation_exp_df
-                except ValueError as error:
-                    print("Error asignating segments for {}".format(map_id))
+    doParallelTagging(df_exp, fullness, gt_path, {'id':'id','map_path':'aligned_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label'})
+    # Perform same procedure for simulated data.
+    df_sim = pd.read_csv('dataset_sim_merged.csv')
+    doParallelTagging(df_sim, fullness, gt_path, {'id':'entries','map_path':'simulated_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label'})
+
     '''
+    entries,path,subunit_count,resolution
     for l in unique_id_list:
         subunit_indexes = df_exp.loc[df_exp['id']==l].index.tolist()
         print(annotateSample(subunit_indexes, df_exp, fullness, gt_path))
