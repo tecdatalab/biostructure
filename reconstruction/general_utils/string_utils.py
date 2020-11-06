@@ -51,3 +51,17 @@ def get_vector_between(tex, a, b):
     except:
       pass
   return np.array(result)
+
+
+def change_string(ip, jp, initial, final):
+  result = ""
+  posfinal = 0
+
+  for i in range(len(initial)):
+    if i >= ip and i <= jp:
+      result += final[posfinal]
+      posfinal += 1
+    else:
+      result += initial[i]
+
+  return result

@@ -1,10 +1,11 @@
 import os
 from general_utils.terminal_utils import get_out
-from pdb_to_mrc.miscellaneous import get_cube_pdb
+from pdb_to_mrc.miscellaneous import get_cube_pdb, move_pdb_center
 
 
 def pdb_to_mrc_chains(create_original, verbose, resolution, input_file, output_dir, chains=None, div_can=1,
                       cube_dimensions=None):
+  move_pdb_center(input_file)
   if cube_dimensions is None:
     cube_dimensions = get_cube_pdb(input_file)
 
@@ -24,7 +25,7 @@ def pdb_to_mrc_chains(create_original, verbose, resolution, input_file, output_d
   if create_original:
     _exit, output = get_out('e2pdb2mrc.py', '-R', str(resolution), '-B',
                             '{0},{1},{2}'.format(cube_dimensions[0], cube_dimensions[1], cube_dimensions[2]),
-                            str(input_file), complete_file_path, '--center')
+                            str(input_file), complete_file_path)
 
     if verbose:
       print(output.decode("utf-8"))
@@ -67,7 +68,7 @@ def pdb_to_mrc_chains(create_original, verbose, resolution, input_file, output_d
 
         _exit, output = get_out('e2pdb2mrc.py', '-R', str(resolution), '-B',
                                 '{0},{1},{2}'.format(cube_dimensions[0], cube_dimensions[1],
-                                                     cube_dimensions[2]), str(pdb_path), exit_mrc_path, '--center')
+                                                     cube_dimensions[2]), str(pdb_path), exit_mrc_path)
 
         os.remove(pdb_path)
 
