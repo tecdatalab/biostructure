@@ -390,6 +390,7 @@ def generateSimulatedDataset(index, df, sim_model_path):
     result['index'] = index
     result['resolution']=res
     result['path'] = simulated_path
+    result['contour']=0.001
     # Generate map
     try:
         #command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -A=1.0 -R=' + str(res) + ' --center '+  pdb_filepath + ' ' + simulated_path
@@ -408,10 +409,12 @@ def generateSimulatedDataset(index, df, sim_model_path):
             old_box = map_box
             map_object = molecule.Molecule(simulated_path, recommendedContour=0.001, cutoffRatios=[1])
             map_box = map_object.getGridSize()
+        result['map_length'] = int(map_box[0])
         with open("generated.txt", 'a') as txt:
             txt.write("Map {} with size {} has been generated from {} \n".format(os.path.basename(simulated_path), map_box, os.path.basename(pdb_filepath)))
     except Exception as e:
         result['resolution']=-1
+        result['map_length']=0
         with open('error.txt', 'a') as error_file:
             error_file.write("Error generating map {}: {}\n".format(os.path.basename(pdb_filepath), e))
 
@@ -620,6 +623,57 @@ def generateStatsFromSelectedData(df, result_dir):
     plot_hist(df.overlap_after, '', os.path.join(result_dir,'selected_overlap_after_hist.eps'))
  
     
+def mergeMapAndChains(datasetSource, columns):
+    # Result dataset
+    dataset_result = pd.DataFrame(columns=datasetSource.columns.values.tolist())
+    # Get Molecule segments from pdb lecture with lib 
+    chain_df_to_merge = pd.DataFrame(columns=columns)
+    for index, row in datasetSource.iterrows():
+        entryid = row[columns[0]]
+        filepath = row[columns[2]]
+        centered_filepath = filepath.replace('.ent','_centered.ent')
+        # Move pdb coords to center of mass
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2procpdb_mod.py ' + filepath + ' ' + centered_filepath + ' --center 1'
+        execute_command(command)
+        # Split centered pdb into chains
+        pdb_split_and_save(entryid,centered_filepath)
+        subunit_id_list, subunit_labels = pdb_get_chain_id_label_list(entryid, filepath)
+        list_entry_name = [entryid for i in subunit_id_list]
+        chain_df_to_merge = pd.DataFrame({columns[0]:list_entry_name,columns[3]:subunit_id_list, columns[1]:subunit_labels})
+        dataset_df_to_merge = datasetSource[datasetSource[columns[0]]==entryid]
+        cross_join = pd.merge(dataset_df_to_merge, chain_df_to_merge, on=columns[0], how='outer')
+        dataset_result = dataset_result.append(cross_join, sort=False)
+    # Reset indexes
+    dataset_result.rename(columns = {columns[2]:'pdb_path', columns[4]:'simulated_path'}, inplace = True) 
+    dataset_result.reset_index(inplace=True, drop=True)               
+    return dataset_result
+
+def parallelSimulationSegments(df, simulated_path, output_csv_name):
+    # Get index list to schedule processess 
+    index_list = df.index.tolist()
+    print("Spawn procecess...")
+    comm = MPI.COMM_WORLD
+    size = comm.Get_size()
+    with MPICommExecutor(comm, root=0, worker_size=size) as executor:
+        if executor is not None:
+            futures = []
+            for i in index_list:
+                futures.append(executor.submit(generateSimulatedSegments, i, df, simulated_path))
+            wait(futures)
+            for f in futures:
+                try:
+                    d = f.result()
+                    print("received simulated segments dict: ",d)
+                    res_index = d['index']
+                    subunit_path = d['subunit_path']
+                    segment_volume = d['segment_volume']
+                    df.loc[res_index, 'subunit_path'] = subunit_path
+                    df.loc[res_index, 'segment_volume'] = segment_volume
+
+                except Exception as error:
+                    print("Error calculating volume for simulated {}: {}".format(df.loc[res_index],error))
+            df.to_csv(output_csv_name, index=False)
+
 
 def main():
     global current_dir
@@ -645,6 +699,10 @@ def main():
     results_path = os.path.join(current_dir, opt.result_dir)
     output_txt_path = os.path.join(results_path, 'output.txt')
     pdb_path = os.path.join(models_path,'pdb')
+
+    # Set seed 
+    seed = 42 
+
     # Download and process data
     if int(opt.d):
         get_headers(header_path)
@@ -743,7 +801,8 @@ def main():
         with open(output_txt_path, 'a') as out:
             out.write("Number of candidate synthetic models: {}\n".format(len(df_synthetic.index)))
             out.write("A proportion of {} synthetic data in final dataset requires {} simulated and {} experimental samples.\n".format(proportion,num_samples_to_pick,num_experimental ))
-        df_synthetic_selected = df_synthetic.sample(num_samples_to_pick)
+        
+        df_synthetic_selected = df_synthetic.sample(num_samples_to_pick, random_state=seed)
         # Get index list to schedule processess
         df_synthetic_selected.reset_index(inplace=True, drop=True)  
         index_list = df_synthetic_selected.index.tolist()
@@ -763,8 +822,12 @@ def main():
                         res_index = d['index']
                         res = d['resolution']
                         path = d['path']
+                        map_length = d['map_length']
+                        contour = d['contour']
+                        df_synthetic_selected.loc[res_index, 'contourLevel'] = contour
                         df_synthetic_selected.loc[res_index, 'resolution'] = res
-                        df_synthetic_selected.loc[res_index, 'path'] = path
+                        df_synthetic_selected.loc[res_index, 'map_path'] = path
+                        df_synthetic_selected.loc[res_index, 'map_length'] = map_length
                     except ValueError as error:
                         print("Error calculating volume for simulated {}: {}".format(df_volume.loc[i,'fitted_entries'],error))
                 df_synthetic_selected.to_csv('synthetic_selected.csv', index=False)
@@ -784,55 +847,17 @@ def main():
         if not(os.path.exists(subunits_path)):
             os.system('mkdir '+subunits_path)
         
-        # Result dataset
-        dataset_cryoem_segments = pd.DataFrame(columns=dataset_cryoem.columns.values.tolist())
-        # Get Molecule segments from pdb lecture with lib 
-        chain_df_to_merge = pd.DataFrame(columns=['fitted_entries','chain_label'])
-        for index, row in dataset_cryoem.iterrows():
-            entryid = row['fitted_entries']
-            filepath = row['pdb_path']
-            centered_filepath = filepath.replace('.ent','_centered.ent')
-            # Move pdb coords to center of mass
-            command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2procpdb_mod.py ' + filepath + ' ' + centered_filepath + ' --center 1'
-            execute_command(command)
-            # Split centered pdb into chains
-            pdb_split_and_save(entryid,centered_filepath)
-            subunit_id_list, subunit_labels = pdb_get_chain_id_label_list(entryid, filepath)
-            list_entry_name = [entryid for i in subunit_id_list]
-            chain_df_to_merge = pd.DataFrame({'fitted_entries':list_entry_name,'chain_id':subunit_id_list, 'chain_label':subunit_labels})
-            dataset_df_to_merge = dataset_cryoem[dataset_cryoem['fitted_entries']==entryid]
-            cross_join = pd.merge(dataset_df_to_merge, chain_df_to_merge, on='fitted_entries', how='outer')
-            dataset_cryoem_segments = dataset_cryoem_segments.append(cross_join, sort=False)
-        # Reset indexes
-        dataset_cryoem_segments.reset_index(inplace=True, drop=True)  
-        # Get index list to schedule processess 
-        index_list = dataset_cryoem_segments.index.tolist()
-        print("Spawn procecess...")
-        comm = MPI.COMM_WORLD
-        size = comm.Get_size()
-        with MPICommExecutor(comm, root=0, worker_size=size) as executor:
-            if executor is not None:
+        dataset_cryoem_segments = mergeMapAndChains(dataset_cryoem, ['fitted_entries','chain_label','pdb_path', 'chain_id','simulated_path'])
+        with open(output_txt_path, 'a') as out:
+            out.write("Experimental maps merged..\n")
+        parallelSimulationSegments(dataset_cryoem_segments, simulated_path, 'dataset_exp_merged.csv')
+        dataset_synthetic_merged = mergeMapAndChains(dataset_synthetic, ['entries','chain_label','path', 'chain_id', 'map_path'])
+        with open(output_txt_path, 'a') as out:
+            out.write("Simulated maps merged..\n")
+        parallelSimulationSegments(dataset_synthetic_merged, simulated_path, 'dataset_sim_merged.csv')
                 
-                futures = []
-                for i in index_list:
-                    futures.append(executor.submit(generateSimulatedSegments, i, dataset_cryoem_segments, simulated_path))
-                wait(futures)
-                for f in futures:
-                    try:
-                        d = f.result()
-                        print("received simulated segments dict: ",d)
-                        res_index = d['index']
-                        subunit_path = d['subunit_path']
-                        segment_volume = d['segment_volume']
-                        dataset_cryoem_segments.loc[res_index, 'subunit_path'] = subunit_path
-                        dataset_cryoem_segments.loc[res_index, 'segment_volume'] = segment_volume
-                        
-                    except Exception as error:
-                        print("Error calculating volume for simulated {}: {}".format(df_volume.loc[i,'fitted_entries'],error))
-                dataset_cryoem_segments.to_csv('dataset_selected.csv', index=False)
-                    
-            
-        # Simulate give segment with EMAN and save file following pdbid_segment.mrc fale notation
+        
+     # Simulate give segment with EMAN and save file following pdbid_segment.mrc fale notation
       
         # Create Dataframe
 
