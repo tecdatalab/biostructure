@@ -2,17 +2,20 @@ import os
 import sys
 import pathlib
 
+from animation.experiment1 import create_ani_expe_1a
+from csv_modules.csv_combine import combine_files
+
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 from experiment.experiment_1 import do_parallel_test_b, do_parallel_test_a
 from fit.fit_map_chimeraX import fit_map_in_map
 from reconstruction.semi_exact_cover import get_semi_exact_s
-from writers.csv_writer import write_in_file
+from csv_modules.csv_writer import write_in_file
 from general_utils.list_utils import get_element_list, generate_binary_matrix
 from general_utils.math_utils import chance_base_point, get_vector_move_1to2
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from pdb_to_mrc.miscellaneous import get_chains, move_pdb_center
-from general_utils.download_utils import download_pdb, download_emd
+from general_utils.download_utils import download_pdb, download_emd, get_all_pdb_name
 from process_graph.graph_algorithm import graph_aligning
 from process_graph.process_graph_utils import generate_graph
 from process_mrc.generate import get_mrc_segments, \
@@ -422,28 +425,65 @@ def main_9():
   plt.show()
 
 
+def sphere(shape, radius, position):
+  import numpy as np
+  # assume shape and position are both a 3-tuple of int or float
+  # the units are pixels / voxels (px for short)
+  # radius is a int or float in px
+  semisizes = (radius,) * 3
+
+  # genereate the grid for the support points
+  # centered at the position indicated by position
+  grid = [slice(-x0, dim - x0) for x0, dim in zip(position, shape)]
+  position = np.ogrid[grid]
+  # calculate the distance of all points from `position` center
+  # scaled by the radius
+  arr = np.zeros(shape, dtype=float)
+  for x_i, semisize in zip(position, semisizes):
+    # this can be generalized for exponent != 2
+    # in which case `(x_i / semisize)`
+    # would become `np.abs(x_i / semisize)`
+    arr += (x_i / semisize) ** 2
+
+    # the inner part of the sphere will have distance below 1
+    return arr <= 1.0
+
+
 def main_10():
-  path = './maps_pdb'
-  if not os.path.isdir(path):
-    os.mkdir(path)
+  path = '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/data_experiment_1_a'
 
-  download_pdb('2b24', '{0}/2b24.pdb'.format(path))
+  create_ani_expe_1a(path,
+                     '1bgy',
+                     ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+                      'U', 'V', 'W'],
+                     ['A', 'B', 'C', 'D', 'E'],
+                     [[1, 1], [1, 2], [2, 3]],
+                     0.1,
+                     [98, 98, 98],
+                     [150, 150, 150],
+                     [150, 150, 150],
+                     [150, 150, 150],
+                     5.0,
+                     True)
 
-  # Maps creation
-  chains = get_chains('{0}/2b24.pdb'.format(path))
-  print(chains)
-  pdb_to_mrc_chains(True, False, 5.0, '{0}/2b24.pdb'.format(path), path, chains, len(chains))
+
 
 
 def experiment_1():
   local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction"
   # local_path = "/work/lcastillo"
   print("Start")
-  do_parallel_test_a("{0}/data_experiment_1_a".format(local_path), "result.csv", [3.5, 9.5], 1,
+  do_parallel_test_a("{0}/data_experiment_1_a".format(local_path), "result.csv", [3.5, 9.5], 3,
                      ignore_pdbs=['105d', '106d', '108d'])
   # do_parallel_test_b("{0}/data_experiment_1_b".format(local_path), "result.csv", 1)
 
   print("Finish")
+
+
+def union_test():
+  combine_files('salida.csv',
+                '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/data_experiment_1_a')
+
 
 if __name__ == '__main__':
   # main_1()
@@ -456,5 +496,4 @@ if __name__ == '__main__':
   # main_8()
   # main_9()
   # main_10()
-  experiment_1()
-
+  union_test()

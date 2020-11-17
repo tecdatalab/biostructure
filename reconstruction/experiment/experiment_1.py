@@ -10,7 +10,7 @@ from process_graph.graph_algorithm import graph_aligning
 from process_graph.process_graph_utils import generate_graph
 from process_mrc.generate import get_mrc_one, get_mrc_segments, get_mrc_synthetic_segments_pdb
 from process_mrc.miscellaneous import get_center_point
-from writers.csv_writer import write_in_file
+from csv_modules.csv_writer import write_in_file
 import random
 import progressbar
 import time
@@ -45,7 +45,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      all_names = get_all_pdb_name()
+      all_names = get_all_pdb_name() #169315
       # all_names = ['100d']
       print("Before get pdb names")
 
