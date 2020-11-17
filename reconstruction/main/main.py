@@ -496,4 +496,5 @@ if __name__ == '__main__':
   # main_8()
   # main_9()
   # main_10()
-  union_test()
+  experiment_1()
+  # union_test()
