@@ -48,7 +48,7 @@ def remove_get_dirs(path):
           all_pdb = False
 
       if all_pdb and (max_modification_time - actual_modification_time > 900):
-        f_evil_pdb.appen(dir_name + '\n')
+        f_evil_pdb.write(dir_name + '\n')
 
       shutil.rmtree(check_path)
 
