@@ -16,6 +16,7 @@ import progressbar
 import time
 import shutil
 from mpi4py import MPI
+import time
 from mpi4py.futures import MPICommExecutor
 
 
@@ -24,15 +25,34 @@ def remove_get_dirs(path):
   complete_path = os.path.abspath(path)
   list_dirs = os.listdir(complete_path)
 
+  evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
+  f_evil_pdb = open(evil_pdb_path, 'a+')
+
+  list_dirs = sorted(list_dirs, key=lambda f: os.path.getmtime('{0}/{1}'.format(complete_path, f)))
+  max_modification_time = os.path.getmtime('{0}/{1}'.format(complete_path, list_dirs[-1]))
+
   for dir_name in list_dirs:
     check_path = '{0}/{1}'.format(complete_path, dir_name)
-
+    actual_modification_time = os.path.getmtime(check_path)
     files_dir = os.listdir(check_path)
 
     if len(files_dir) == 1 and files_dir[0].split('.')[1] == 'csv':
       result.append(dir_name)
     else:
+      if len(files_dir) == 0 and (max_modification_time - actual_modification_time > 900):
+        f_evil_pdb.appen(dir_name + '\n')
+
+      all_pdb = False
+      for i in files_dir:
+        if i.split('.')[1] != 'pdb':
+          all_pdb = True
+
+      if all_pdb and (max_modification_time - actual_modification_time > 900):
+        f_evil_pdb.appen(dir_name + '\n')
+
       shutil.rmtree(check_path)
+
+  f_evil_pdb.close()
   return result
 
 
@@ -45,8 +65,8 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      all_names = get_all_pdb_name() #169315
-      # all_names = ['100d']
+      # all_names = get_all_pdb_name() #169315
+      all_names = ['100d']
       print("Before get pdb names")
 
       path = os.path.abspath(path_data)
@@ -56,7 +76,13 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
         os.mkdir(path)
 
       complete_pdb = remove_get_dirs(path_data)
-      ignore_pdbs = ignore_pdbs + complete_pdb
+      ignore_pdbs += complete_pdb
+      # Add ignore files
+      evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
+      f_evil_pdb = open(evil_pdb_path)
+      ignore_pdbs += f_evil_pdb.read().splitlines()
+      print(ignore_pdbs)
+      f_evil_pdb.close()
 
       if can_elements is None:
         can_elements = len(all_names)
@@ -87,7 +113,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
 
         # print(pdb_name, con2/can_elements)
         parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
-                                                       resolution), resolution])
+                                                        resolution), resolution])
         # do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution)
       for f in parallel_jobs:
         try:

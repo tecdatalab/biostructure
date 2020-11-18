@@ -2,7 +2,7 @@ import os
 import sys
 import pathlib
 
-from animation.experiment1 import create_ani_expe_1a
+from animation.experiment1_animation import create_ani_expe_1a
 from csv_modules.csv_combine import combine_files
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
@@ -473,7 +473,7 @@ def experiment_1():
   local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction"
   # local_path = "/work/lcastillo"
   print("Start")
-  do_parallel_test_a("{0}/data_experiment_1_a".format(local_path), "result.csv", [3.5, 9.5], 3,
+  do_parallel_test_a("{0}/data_experiment_1_a".format(local_path), "result.csv", [3.5, 9.5], 1,
                      ignore_pdbs=['105d', '106d', '108d'])
   # do_parallel_test_b("{0}/data_experiment_1_b".format(local_path), "result.csv", 1)
 
