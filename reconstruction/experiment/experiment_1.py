@@ -42,10 +42,10 @@ def remove_get_dirs(path):
       if len(files_dir) == 0 and (max_modification_time - actual_modification_time > 900):
         f_evil_pdb.write(dir_name + '\n')
 
-      all_pdb = False
+      all_pdb = True
       for i in files_dir:
         if i.split('.')[1] != 'pdb':
-          all_pdb = True
+          all_pdb = False
 
       if all_pdb and (max_modification_time - actual_modification_time > 900):
         f_evil_pdb.appen(dir_name + '\n')
