@@ -1,12 +1,10 @@
 import os
 import sys
 import pathlib
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 from animation.experiment1_animation import create_ani_expe_1a
 from csv_modules.csv_combine import combine_files
-
-sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
-
 from experiment.experiment_1 import do_parallel_test_b, do_parallel_test_a
 from fit.fit_map_chimeraX import fit_map_in_map
 from reconstruction.semi_exact_cover import get_semi_exact_s
