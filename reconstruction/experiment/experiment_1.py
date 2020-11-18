@@ -40,7 +40,7 @@ def remove_get_dirs(path):
       result.append(dir_name)
     else:
       if len(files_dir) == 0 and (max_modification_time - actual_modification_time > 900):
-        f_evil_pdb.appen(dir_name + '\n')
+        f_evil_pdb.write(dir_name + '\n')
 
       all_pdb = False
       for i in files_dir:
