@@ -65,8 +65,8 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      # all_names = get_all_pdb_name() #169315
-      all_names = ['100d']
+      all_names = get_all_pdb_name() #169315
+      # all_names = ['100d']
       print("Before get pdb names")
 
       path = os.path.abspath(path_data)
@@ -81,7 +81,6 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
       evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
       f_evil_pdb = open(evil_pdb_path)
       ignore_pdbs += f_evil_pdb.read().splitlines()
-      print(ignore_pdbs)
       f_evil_pdb.close()
 
       if can_elements is None:
