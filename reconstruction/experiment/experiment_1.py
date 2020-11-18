@@ -65,7 +65,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      all_names = get_all_pdb_name() #169315
+      all_names = get_all_pdb_name()  # 169315
       # all_names = ['100d']
       print("Before get pdb names")
 
@@ -163,6 +163,10 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution):
                  'Resolution',
                  'Match', 'Father Chains', 'Test Chains',
                  'Time segment', 'Time center', 'Time graph', 'Time alignment', 'Time EMAN2']
+
+  # Delete
+  if len(combinations) > 10:
+    combinations = combinations[:10]
 
   for test_combination in combinations:
     test_segments = []
