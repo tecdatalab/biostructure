@@ -1,6 +1,8 @@
 from em.dataset.metrics import *
 import em.molecule as molecule
 
+
+# Test IoU metric
 def test_iou_same():
     segments_gt = molecule.Molecule('maps/segments_gt.map',1)
     iou = intersection_over_union(segments_gt, segments_gt)
@@ -25,3 +27,28 @@ def test_iou_different():
         expected_iou +=intersec/union
     expected_iou /= len(labels_in_common) 
     assert iou == expected_iou
+
+
+# Test Proportion metric
+def test_proportion():
+    segments_gt = molecule.Molecule('maps/segments_gt.map',1)
+    prop = proportion(segments_gt, segments_gt)
+    assert prop == 1.0
+
+
+
+
+# Test Homogenity metric
+def test_homogenity():
+    segments_gt = molecule.Molecule('maps/segments_gt.map',1)
+    h = homogenity(segments_gt, segments_gt)
+    assert h == 0.0
+
+
+
+
+# Test consistency
+def test_consistency():
+    segments_gt = molecule.Molecule('maps/segments_gt.map',1)
+    c = consistency(segments_gt, segments_gt)
+    assert c== 1.0

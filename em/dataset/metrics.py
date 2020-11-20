@@ -57,7 +57,7 @@ def proportion(segmented_map, gt_map):
             num_labels = len(np.unique(s_array[gt_mask]))
             p_list.append(num_labels)
             count_labels +=1
-        p = np.sum(p_list)/len(count_labels)
+        p = np.sum(p_list)/count_labels
         return p
             
 def consistency(segmented_map, gt_map):
@@ -75,7 +75,7 @@ def consistency(segmented_map, gt_map):
             gt_mask = gt_array == label
             truth = np.sum(gt_mask)
             overlap = np.sum(np.logical_and(s_mask,gt_mask))
-            c_list.append(predicted/truth)
+            c_list.append(overlap/truth)
         c = np.mean(c_list)
         return c 
 

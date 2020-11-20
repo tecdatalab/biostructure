@@ -4,12 +4,21 @@ from glob import glob
 import argparse
 import sys 
 from em import molecule
+from em.dataset import metrics
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 from concurrent.futures import wait
 from scipy.spatial import cKDTree
 import numpy as np
 import pandas as pd
+
+import json
+from json import encoder
+
+
+def convert(o):
+    if isinstance(o, np.generic): return o.item()  
+    raise TypeError
 
 # Intersección de mapas simulados de pedazos con original
 # Si hay traslape debe anotarse
@@ -46,9 +55,6 @@ def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
             labels.append(segment_label)
             print("Chain {}, voxels {}".format(segment_label,segment_map.getVolume()[1]))
             print("	Matching {} of {} voxels".format(np.sum(masks_intersec), np.sum(segment_mask)))
-            print(np.sum(data_map==1))
-            print(np.sum(data_map==2))
-            print(np.sum(data_map==3))
         else:
             return ValueError('There is a problem getting segments for {}'.format(aligned_path))
     # Get non assigned voxels
@@ -83,29 +89,44 @@ def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
         for point in points_to_discard:
             data_map[point[0],point[1],point[2]] = 0
         result['voxels_reasigned'] = np.sum(mask)
-        result['voxels_descarted'] = np.sum(mask_inv)
+        result['voxels_discarted'] = np.sum(mask_inv)
     else:
         print("	No more voxels to assign")
         result['voxels_reasigned'] = 0
-        result['voxels_descarted'] = 0
+        result['voxels_discarted'] = 0
     # print labels
     voxels_dict = {}
     for l in labels:
         voxels_dict[l]=np.sum(data_map==l)
     # Save map
-    result['voxels_assigned'] = str(voxels_dict)	
+    result['voxels_assigned'] = json.dumps(voxels_dict, default=convert)
     result['tag_path'] = annotated_path
     result['map_id'] = map_id
     map_to_annotate.setData(data_map)
     map_to_annotate.save(annotated_path)    
     return result
 
-        
+    
+def mapMetricsCompute(row,match_dict):
+    map_id = row['id']
+    tagged_path = row['tagged_path']
+    contour = 0
+    compare_path = match_dict[map_id]
+    sample = molecule.Molecule(s_path, contour)
+    labeled = molecule.Molecule(gt_path, contour)
+    iou = metrics.intersection_over_union(sample, labeled)
+    h = metrics.homogenity(sample, labeled)
+    p = metrics.proportion(sample, labeled)
+    c = metrics.consistency(sample, labeled)
+    row['iou'] = iou
+    row['homogenity'] = h
+    row['proportion'] = p
+    row['consistency'] = c
 
 def doParallelTagging(df, fullness, gt_path, columns):
     unique_id_list = df[columns['id']].unique().tolist()
     # Construct dataframe to store results
-    #annotation_exp_df = df[['id','fitted_entries', 'chain_id','chain_label']]
+    output_df = pd.DataFrame(columns=['id','tagged_path','subunits','matched_subunits','voxels','voxels_matched','voxels_discarted','voxels_reassigned','voxels_assigned'])
     print("Spawn procecess...")
     comm = MPI.COMM_WORLD
     size = comm.Get_size()
@@ -121,16 +142,28 @@ def doParallelTagging(df, fullness, gt_path, columns):
                 try:
                     res = f.result()
                     map_id = res['map_id']
-                    # Do somenthing with res
+                    voxels_assigned = json.loads(res['voxels_assigned'])
+                    voxels_reassigned = res['voxels_reasigned']
+                    voxels_discarted = res['voxels_discarted']
+                    tagged_path = res['tag_path']
+                    voxels_num = res['total']
+                    
                     print("Received {}".format(res))
-                    #voxels_reassigned = res['voxels_reasigned']
-                    #voxels_descarted = res['voxels_descarted']
-                    #voxels_assigned = res['voxels_assigned']
-                    #annotation_exp_df
+                    # Get number of segments matched
+                    segments_matched = 0
+                    voxels_matched = 0
+                    for key in voxels_assigned.keys():
+                        matched_num = voxels_assigned[key]
+                        if matched_num > 0:
+                            segments_matched+=1
+                            voxels_matched += matched_num
+                    #'tagged_path', 'subunits','matched_subunits', 'voxels', 'voxels_matched', 'matched_per_segment'
+                    output_df = output_df.append({'id':map_id, 'tagged_path':tagged_path, 'subunits':len(voxels_assigned.keys()), 'matched_subunits':segments_matched, 'voxels':voxels_num, 'voxels_matched':voxels_matched, 'voxels_discarted':voxels_discarted, 'voxels_reassigned':voxels_reassigned, 'voxels_assigned':voxels_assigned}, ignore_index=True)
+                    
                 except ValueError as error:
                     print("Error asignating segments for {}".format(map_id))
- 
-        
+
+    return output_df
 
 def main():
 
@@ -146,22 +179,27 @@ def main():
     if not(os.path.exists(gt_path)):
         os.mkdir(gt_path)
     fullness = int(opt.a)
-    df_exp = pd.read_csv('dataset_exp_merged.csv')
-    #df_sim = pd.read_csv('synthetic_selected.csv')
+    df_exp_merged = pd.read_csv('dataset_exp_merged.csv')
     # Do parallel computation, one process for each map
     # Get index list to schedule processess 
     # Get id unique values to extract indexes of respective molecule subunits 
-    doParallelTagging(df_exp, fullness, gt_path, {'id':'id','map_path':'aligned_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label'})
+    exp_sim_metrics = doParallelTagging(df_exp_merged, fullness, gt_path, {'id':'id','map_path':'simulated_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label'}) 
+    exp_metrics = doParallelTagging(df_exp_merged, fullness, gt_path, {'id':'id','map_path':'aligned_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label'})
     # Perform same procedure for simulated data.
     df_sim = pd.read_csv('dataset_sim_merged.csv')
-    doParallelTagging(df_sim, fullness, gt_path, {'id':'entries','map_path':'simulated_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label'})
+    sim_metrics=  doParallelTagging(df_sim, fullness, gt_path, {'id':'entries','map_path':'simulated_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label'})
 
-    '''
-    entries,path,subunit_count,resolution
-    for l in unique_id_list:
-        subunit_indexes = df_exp.loc[df_exp['id']==l].index.tolist()
-        print(annotateSample(subunit_indexes, df_exp, fullness, gt_path))
-        return 0
-    ''' 
+    match_exp = dict(zip(exp_sim_metrics['id'], exp_sim_metrics['tagged_path']))
+    match_exp_sim = dict(zip(sim_metrics['id'], sim_metrics['tagged_path']))
+    # Compute metrics for each dataframe
+    exp_metrics = exp_metrics.apply(mapMetricsCompute, match_exp, axis=1)
+    exp_sim_metrics = exp_sim_metrics.apply(mapMetricsCompute, match_exp, axis=1)
+    sim_metrics= sim_metrics.apply(mapMetricsCompute, match_exp_sim, axis=1)
+    # Create result dataframe with metrics
+    exp_metrics = exp_metrics.append(exp_sim_metrics)
+    exp_metrics = exp_metrics.append(sim_metrics)
+    exp_metrics.to_csv('dataset_metrics.csv')          
+    
+
 if __name__ == '__main__':
     main()
