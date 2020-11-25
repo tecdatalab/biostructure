@@ -2,8 +2,8 @@ import numpy as np
 from skimage.measure import regionprops
 from skimage.transform import resize
 
-from reader import Reader
-import processing
+from em.reader import Reader
+import em.processing as processing
 
 ## This module represents the molecule object with its properties and different data representations for each contour level. 
 
@@ -24,18 +24,19 @@ class Molecule():
             exit()
         map_data = molecule_map.data()
         contoursNum= len(cutoffRatios)
-        contour_masks = np.ndarray((contoursNum,*molecule_map.grid_size()))
-        
+        # Use dictionary instead
+        #contour_masks = np.ndarray((contoursNum,*molecule_map.grid_size()))
+        contour_masks = {}
         self.emMap=molecule_map
         self.contourLvl=recommendedContour
         self.cutoffRatios=cutoffRatios
         self.contoursNum= contoursNum
 
-        for i,cutoffRatio in enumerate(self.cutoffRatios):
+        for cutoffRatio in self.cutoffRatios:
             lvl = cutoffRatio*self.contourLvl
-            mask_at_contour = np.zeros(map_data.shape)
+            mask_at_contour = np.zeros(map_data.shape, dtype=np.bool)
             mask_at_contour[map_data>=lvl]=self.indicatorValue
-            contour_masks[i,:] = mask_at_contour
+            contour_masks[cutoffRatio] = mask_at_contour
 
         self.contour_masks = contour_masks
         self.seg_masks=None
@@ -66,7 +67,12 @@ class Molecule():
         self.labels = labels
         self.seg_masks = molecule_masks
 
+    def setData(self,data_array):
+        self.emMap.set_data(data_array)
 
+    def save(self, filename):
+        reader = Reader()
+        reader.save(filename, self.emMap.data())
 
     def getContourMasks(self):
         return self.contour_masks   
@@ -98,8 +104,8 @@ class Molecule():
     def getVolume(self):
         volume_contour_dict = dict()
         voxel_vol = self.emMap.voxelVol()
-        for i,cutoffRatio in enumerate(self.cutoffRatios):
-            mask_at_level = self.contour_masks[i,:]
+        for cutoffRatio in self.cutoffRatios:
+            mask_at_level = self.contour_masks[cutoffRatio]
             volume_contour_dict[cutoffRatio] = np.sum(mask_at_level)*voxel_vol
         return volume_contour_dict
 
@@ -118,6 +124,42 @@ class Molecule():
 
     def getVoxelSize(self):
         return self.emMap.voxelSize()
+
+    def getCorrelation(self, molecule, levels=[1]):
+        if(self.getGridSize()!=molecule.getGridSize()):
+            raise ValueError("Both maps must have same dimensions")
+        else:
+            result = {}
+            moleculeA_masks = self.getContourMasks()
+            moleculeB_masks = molecule.getContourMasks()
+         
+            for level in levels:
+                mask_A = moleculeA_masks[level]
+                mask_B = moleculeB_masks[level]
+                data_A = np.multiply(self.emMap.data(), mask_A)
+                data_B = np.multiply(self.emMap.data(), mask_B)
+                mean_A = np.mean(data_A)
+                mean_B = np.mean(data_B)
+                corr_numerator = np.sum(np.einsum("ijk, ijk -> ijk", (data_A - mean_A), (data_B - mean_B)))
+                corr_denominator =  np.sqrt( np.sum(np.power((data_A - mean_A), 2)) * np.sum(np.power((data_B - mean_B), 2)))
+                result[level] = corr_numerator/corr_denominator
+            return result
+            
+    def getOverlap(self, molecule, levels=[1]):
+        if(self.getGridSize()!=molecule.getGridSize()):
+            raise ValueError("Both maps must have same dimensions")
+        else:
+            result = {} 
+            moleculeA_masks = self.getContourMasks()
+            moleculeB_masks = molecule.getContourMasks()
+
+            for level in levels:
+                mask_A = moleculeA_masks[level]
+                mask_B = moleculeB_masks[level]
+                overlap = np.sum(np.einsum("ijk, ijk -> ijk", mask_A, mask_B))
+                result[level] = overlap
+            return result 
+         
 
 
 

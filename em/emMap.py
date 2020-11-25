@@ -13,7 +13,9 @@ class EMMap():
         (self.zorigin, self.yorigin, self.xorigin) = origin
         (self.dmin, self.dmax, self.dmean) = density_ranges
         self.axis_order = axis_order
-        self.voxel_size = tuple( i/j for i,j in zip(self.cell_dim(), self.grid_size()))
+        # Some maps dont have cell_dim value, use voxel vol of 1 instead, calculate volume in voxels not in Amgstroms.
+        self.voxel_size = 1
+        #self.voxel_size = tuple( i/j for i,j in zip(self.cell_dim(), self.grid_size()))
         
 
 
@@ -25,6 +27,9 @@ class EMMap():
 
     def set_origin(self, new_origin):
         (self.xorigin, self.yorigin, self.zorigin) = new_origin
+
+    def set_data(self, data_array):
+        self.array = data_array
     
     def data(self):
         return self.array
