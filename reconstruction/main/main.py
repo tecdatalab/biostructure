@@ -5,7 +5,6 @@ sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 from animation.experiment1_animation import create_ani_expe_1a
 from csv_modules.csv_combine import combine_files
-from experiment.experiment_1 import do_parallel_test_b, do_parallel_test_a
 from fit.fit_map_chimeraX import fit_map_in_map
 from reconstruction.semi_exact_cover import get_semi_exact_s
 from csv_modules.csv_writer import write_in_file
@@ -423,58 +422,125 @@ def main_9():
   plt.show()
 
 
-def sphere(shape, radius, position):
-  import numpy as np
-  # assume shape and position are both a 3-tuple of int or float
-  # the units are pixels / voxels (px for short)
-  # radius is a int or float in px
-  semisizes = (radius,) * 3
-
-  # genereate the grid for the support points
-  # centered at the position indicated by position
-  grid = [slice(-x0, dim - x0) for x0, dim in zip(position, shape)]
-  position = np.ogrid[grid]
-  # calculate the distance of all points from `position` center
-  # scaled by the radius
-  arr = np.zeros(shape, dtype=float)
-  for x_i, semisize in zip(position, semisizes):
-    # this can be generalized for exponent != 2
-    # in which case `(x_i / semisize)`
-    # would become `np.abs(x_i / semisize)`
-    arr += (x_i / semisize) ** 2
-
-    # the inner part of the sphere will have distance below 1
-    return arr <= 1.0
-
-
 def main_10():
-  path = '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/data_experiment_1_a'
+  # path = '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/data_experiment_1_a'
+  #
+  # create_ani_expe_1a(path,
+  #                    '1bgy',
+  #                    ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+  #                     'U', 'V', 'W'],
+  #                    ['A', 'B', 'C', 'D', 'E'],
+  #                    [[1, 1], [1, 2], [2, 3]],
+  #                    0.1,
+  #                    [98, 98, 98],
+  #                    [150, 150, 150],
+  #                    [150, 150, 150],
+  #                    [150, 150, 150],
+  #                    5.0,
+  #                    True)
 
-  create_ani_expe_1a(path,
-                     '1bgy',
-                     ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-                      'U', 'V', 'W'],
-                     ['A', 'B', 'C', 'D', 'E'],
-                     [[1, 1], [1, 2], [2, 3]],
-                     0.1,
-                     [98, 98, 98],
-                     [150, 150, 150],
-                     [150, 150, 150],
-                     [150, 150, 150],
-                     5.0,
-                     True)
+  from pymol import cmd
 
+  from pymol import cmd
 
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy.mrc", finish=0)
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_A.mrc", finish=1)
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_B.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_C.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_D.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_E.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_F.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_G.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_H.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_I.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_J.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_K.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_M.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_N.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_O.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_P.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_Q.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_R.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_S.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_T.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_U.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_V.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_W.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_father_pc.mrc")
+  cmd.load("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1bgy_father_pt.mrc")
+
+  cmd.volume("1bgy_volume", "1bgy")
+  cmd.show("volume", "1bgy_volume")
+
+  cmd.isosurface("1bgy_A_surface", "1bgy_A")
+  cmd.hide("surface", "1bgy_A_surface")
+  cmd.isosurface("1bgy_B_surface", "1bgy_B")
+  cmd.hide("surface", "1bgy_B_surface")
+  cmd.isosurface("1bgy_C_surface", "1bgy_C")
+  cmd.hide("surface", "1bgy_C_surface")
+  cmd.isosurface("1bgy_D_surface", "1bgy_D")
+  cmd.hide("surface", "1bgy_D_surface")
+  cmd.isosurface("1bgy_E_surface", "1bgy_E")
+  cmd.hide("surface", "1bgy_E_surface")
+  cmd.isosurface("1bgy_F_surface", "1bgy_F")
+  cmd.hide("surface", "1bgy_F_surface")
+  cmd.isosurface("1bgy_G_surface", "1bgy_G")
+  cmd.hide("surface", "1bgy_G_surface")
+  cmd.isosurface("1bgy_H_surface", "1bgy_H")
+  cmd.hide("surface", "1bgy_H_surface")
+  cmd.isosurface("1bgy_I_surface", "1bgy_I")
+  cmd.hide("surface", "1bgy_I_surface")
+  cmd.isosurface("1bgy_J_surface", "1bgy_J")
+  cmd.hide("surface", "1bgy_J_surface")
+  cmd.isosurface("1bgy_K_surface", "1bgy_K")
+  cmd.hide("surface", "1bgy_K_surface")
+  cmd.isosurface("1bgy_M_surface", "1bgy_M")
+  cmd.hide("surface", "1bgy_M_surface")
+  cmd.isosurface("1bgy_N_surface", "1bgy_N")
+  cmd.hide("surface", "1bgy_N_surface")
+  cmd.isosurface("1bgy_O_surface", "1bgy_O")
+  cmd.hide("surface", "1bgy_O_surface")
+  cmd.isosurface("1bgy_P_surface", "1bgy_P")
+  cmd.hide("surface", "1bgy_P_surface")
+  cmd.isosurface("1bgy_Q_surface", "1bgy_Q")
+  cmd.hide("surface", "1bgy_Q_surface")
+  cmd.isosurface("1bgy_R_surface", "1bgy_R")
+  cmd.hide("surface", "1bgy_R_surface")
+  cmd.isosurface("1bgy_S_surface", "1bgy_S")
+  cmd.hide("surface", "1bgy_S_surface")
+  cmd.isosurface("1bgy_T_surface", "1bgy_T")
+  cmd.hide("surface", "1bgy_T_surface")
+  cmd.isosurface("1bgy_U_surface", "1bgy_U")
+  cmd.hide("surface", "1bgy_U_surface")
+  cmd.isosurface("1bgy_V_surface", "1bgy_V")
+  cmd.hide("surface", "1bgy_V_surface")
+  cmd.isosurface("1bgy_W_surface", "1bgy_W")
+  cmd.hide("surface", "1bgy_W_surface")
+  cmd.isosurface("1bgy_father_pc_surface", "1bgy_father_pc")
+  cmd.color("red", "1bgy_father_pc_surface")
+  cmd.isosurface("1bgy_father_pt_surface", "1bgy_father_pt")
+  cmd.color("white", "1bgy_father_pt_surface")
+
+  cmd.png("/home/lcastillo98/Desktop/data_experiment_1_a/1bgy/1.png")
 
 
 def experiment_1():
+  from experiment.experiment_1 import do_parallel_test_a, do_parallel_test_b
+
   local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction"
   # local_path = "/work/lcastillo"
   print("Start")
   do_parallel_test_a("{0}/data_experiment_1_a".format(local_path), "result.csv", [3.5, 9.5], 1,
                      ignore_pdbs=['105d', '106d', '108d'])
-  # do_parallel_test_b("{0}/data_experiment_1_b".format(local_path), "result.csv", 1)
+  print("Finish")
 
+def experiment_3():
+  from experiment.experiment_3 import do_parallel_test_a
+
+  local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction"
+  # local_path = "/work/lcastillo"
+  print("Start")
+  do_parallel_test_a("{0}/data_experiment_3_a".format(local_path), "result.csv", [3.5, 9.5], 1)
   print("Finish")
 
 
@@ -494,5 +560,6 @@ if __name__ == '__main__':
   # main_8()
   # main_9()
   # main_10()
-  experiment_1()
+  # experiment_1()
+  experiment_3()
   # union_test()

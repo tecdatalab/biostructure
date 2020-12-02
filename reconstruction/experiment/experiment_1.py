@@ -13,7 +13,6 @@ from process_mrc.miscellaneous import get_center_point
 from csv_modules.csv_writer import write_in_file
 import random
 import progressbar
-import time
 import shutil
 from mpi4py import MPI
 import time

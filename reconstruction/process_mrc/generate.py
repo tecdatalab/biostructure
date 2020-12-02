@@ -18,7 +18,7 @@ import argparse
 import numpy as np
 
 
-def get_mrc_segments(mrc_path, steps, sigma, recommendedContour_p=None):
+def get_mrc_segments(mrc_path, steps, sigma, recommendedContour_p=None, calculate_Z3D=True):
   if recommendedContour_p == None:
     recommendedContour_p = get_mrc_level(mrc_path)
   # Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off
@@ -48,9 +48,10 @@ def get_mrc_segments(mrc_path, steps, sigma, recommendedContour_p=None):
   # segment # lets import the module
   import utils._zernike as z
   # lets create a dictionary to store descriptors for each segment
-  for i in result:
-    zd = z.computeDescriptors(i.mask)
-    i.zd_descriptors = zd
+  if calculate_Z3D:
+    for i in result:
+      zd = z.computeDescriptors(i.mask)
+      i.zd_descriptors = zd
 
   # print("Can_points", len(np.where(myMolecule.getEmMap().data() > 0)[0]))
   original_structure = \
@@ -59,7 +60,7 @@ def get_mrc_segments(mrc_path, steps, sigma, recommendedContour_p=None):
   return result, original_structure
 
 
-def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour_p=None):
+def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour_p=None, calculate_Z3D=True):
   if recommendedContour_p == None:
     recommendedContour_p = get_mrc_level(mrc_path)
   myMolecule_complete = molecule.Molecule(mrc_path, recommendedContour=recommendedContour_p)
@@ -77,9 +78,10 @@ def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour
     # print(myMolecule.contour_masks.shape)
 
   import utils._zernike as z
-  for i in result:
-    zd = z.computeDescriptors(i.mask)
-    i.zd_descriptors = zd
+  if calculate_Z3D:
+    for i in result:
+      zd = z.computeDescriptors(i.mask)
+      i.zd_descriptors = zd
 
   original_structure = \
     Biomolecular_structure(myMolecule_complete.getEmMap().data(),
@@ -88,7 +90,7 @@ def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour
   return result, original_structure
 
 
-def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, list_segments, recommendedContour_p=None):
+def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, list_segments, recommendedContour_p=None, calculate_Z3D=True):
   if recommendedContour_p == None:
     recommendedContour_p = get_mrc_level(mrc_path)
   myMolecule_complete = molecule.Molecule(mrc_path, recommendedContour=recommendedContour_p)
@@ -106,18 +108,19 @@ def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, list_segments, rec
     # print(myMolecule.contour_masks.shape)
 
   import utils._zernike as z
-  for i in result:
-    zd = z.computeDescriptors(i.mask)
-    i.zd_descriptors = zd
+  if calculate_Z3D:
+    for i in result:
+      zd = z.computeDescriptors(i.mask)
+      i.zd_descriptors = zd
 
-  original_structure = \
-    Biomolecular_structure(myMolecule_complete.getEmMap().data(),
-                           z.computeDescriptors(myMolecule_complete.getEmMap().data()))
+    original_structure = \
+      Biomolecular_structure(myMolecule_complete.getEmMap().data(),
+                             z.computeDescriptors(myMolecule_complete.getEmMap().data()))
 
   return result, original_structure
 
 
-def get_mrc_one(mrc_path, recommendedContour_p=None):
+def get_mrc_one(mrc_path, recommendedContour_p=None, calculate_Z3D=True):
   if recommendedContour_p == None:
     recommendedContour_p = get_mrc_level(mrc_path)
   # Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off
@@ -134,9 +137,10 @@ def get_mrc_one(mrc_path, recommendedContour_p=None):
   # segment # lets import the module
   import utils._zernike as z
   # lets create a dictionary to store descriptors for each segment
-  for i in result:
-    zd = z.computeDescriptors(i.mask)
-    i.zd_descriptors = zd
+  if calculate_Z3D:
+    for i in result:
+      zd = z.computeDescriptors(i.mask)
+      i.zd_descriptors = zd
 
   # print("Can_points", len(np.where(myMolecule.getEmMap().data() > 0)[0]))
   original_structure = \

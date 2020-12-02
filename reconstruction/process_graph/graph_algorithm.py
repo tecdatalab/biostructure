@@ -3,6 +3,8 @@ from operator import itemgetter
 import numpy as np
 from sklearn.metrics import mean_squared_error
 
+from general_utils.list_utils import diff_multidimensional
+
 
 def get_total_neighbors_of_neighbors(graph, node,
                                      g_degree):  # Obtiene la cantidad de vecinos para todos los vecinos de un nodo dado
@@ -15,13 +17,6 @@ def get_total_neighbors_of_neighbors(graph, node,
         break
     total_neighbors += val_degree
   return total_neighbors
-
-
-def set_diff1d_multidimensional(list_a, list_b):
-  a1_rows = set(map(tuple, list_a))
-  a2_rows = set(map(tuple, list_b))
-  result = [list(elem) for elem in list(a1_rows.difference(a2_rows))]
-  return result
 
 
 def structural_similarity_node(graph1, graph2, g1_degree, g2_degree, node1, node2):  # Que tan similares son los nodos
@@ -214,7 +209,7 @@ def graph_aligning(graph1, graph2, min_similarity_value, repair_external_values=
                                                                                 min_similarity_value)
       total_g1_neighbors += np.setdiff1d(g1_neighbors, total_g1_neighbors).tolist()
       total_g2_neighbors += np.setdiff1d(g2_neighbors, total_g2_neighbors).tolist()
-      queue_neighbors += set_diff1d_multidimensional(new_queue_neighbors, queue_neighbors)
+      queue_neighbors += diff_multidimensional(new_queue_neighbors, queue_neighbors)
 
     most_similarity_value = np.amin(C)
 
