@@ -545,8 +545,10 @@ def experiment_3():
 
 
 def union_test():
+  local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/data_experiment_1_a"
+  # local_path = "/work/lcastillo/data_experiment_1_a"
   combine_files('salida.csv',
-                '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/data_experiment_1_a')
+                local_path)
 
 
 if __name__ == '__main__':
