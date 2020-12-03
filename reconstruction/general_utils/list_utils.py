@@ -1,5 +1,5 @@
 import numpy as np
-
+from functools import reduce
 
 def get_element_list(index, list_elements):
   result = []
@@ -14,6 +14,7 @@ def generate_binary_matrix(matrix):
     val = '0b' + ''.join([str(int(x)) for x in i])
     result.append(int(val, 2))
   result = np.array(result)
+
   return result
 
 
