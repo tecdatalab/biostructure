@@ -1,62 +1,26 @@
 import os
 import pickle
 
+from experiment.utils_experiment_1 import remove_get_dirs, gen_keys_experiemnts
 from general_utils.download_utils import get_all_pdb_name, download_pdb, get_all_emd_name, download_emd
-from general_utils.list_utils import combinations_12n, get_element_list
+from general_utils.list_utils import get_element_list
 from general_utils.math_utils import distance_3d_points
 from pdb_to_mrc.miscellaneous import get_chains
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_graph.graph_algorithm import graph_aligning
 from process_graph.process_graph_utils import generate_graph
-from process_mrc.generate import get_mrc_one, get_mrc_segments, get_mrc_synthetic_segments_pdb
+from process_mrc.generate import get_mrc_one, get_mrc_segments
 from process_mrc.miscellaneous import get_center_point
 from csv_modules.csv_writer import write_in_file
 import random
 import progressbar
-import shutil
 from mpi4py import MPI
 import time
 from mpi4py.futures import MPICommExecutor
 
 
-def remove_get_dirs(path):
-  result = []
-  complete_path = os.path.abspath(path)
-  list_dirs = os.listdir(complete_path)
-
-  evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
-  f_evil_pdb = open(evil_pdb_path, 'a+')
-
-  list_dirs = sorted(list_dirs, key=lambda f: os.path.getmtime('{0}/{1}'.format(complete_path, f)))
-  max_modification_time = os.path.getmtime('{0}/{1}'.format(complete_path, list_dirs[-1]))
-
-  for dir_name in list_dirs:
-    check_path = '{0}/{1}'.format(complete_path, dir_name)
-    actual_modification_time = os.path.getmtime(check_path)
-    files_dir = os.listdir(check_path)
-
-    if len(files_dir) == 1 and files_dir[0].split('.')[1] == 'csv':
-      result.append(dir_name)
-    else:
-      if len(files_dir) == 0 and (max_modification_time - actual_modification_time > 900):
-        f_evil_pdb.write(dir_name + '\n')
-
-      all_pdb = True
-      for i in files_dir:
-        if i.split('.')[1] != 'pdb':
-          all_pdb = False
-
-      if all_pdb and (max_modification_time - actual_modification_time > 900):
-        f_evil_pdb.write(dir_name + '\n')
-
-      shutil.rmtree(check_path)
-
-  f_evil_pdb.close()
-  return result
-
-
 def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None,
-                       start=None, ignore_pdbs=[]):
+                       start=None, ignore_pdbs=[], range_incompleteness=[10.0, 15.0], can_try_experiments=10):
   # Parale
   comm = MPI.COMM_WORLD
   size = comm.Get_size()
@@ -65,7 +29,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
     if executor is not None:
 
       all_names = get_all_pdb_name()  # 169315
-      # all_names = ['100d']
+      # all_names = ['7jsh']
       print("Before get pdb names")
 
       path = os.path.abspath(path_data)
@@ -111,8 +75,9 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
 
         # print(pdb_name, con2/can_elements)
         parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
-                                                        resolution), resolution])
-        # do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution)
+                                                        resolution, range_incompleteness, can_try_experiments),
+                              resolution])
+        # do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_incompleteness, can_try_experiments)
       for f in parallel_jobs:
         try:
           f[1].result()
@@ -128,7 +93,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
         bar.update(con)
 
 
-def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution):
+def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_incompleteness, can_try_experiments):
   local_path = path + "/" + pdb_name
   if not os.path.exists(local_path):
     os.makedirs(local_path)
@@ -136,15 +101,16 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution):
   download_pdb(pdb_name, '{0}/{1}.pdb'.format(local_path, pdb_name))
   # Maps creation
   chains = get_chains('{0}/{1}.pdb'.format(local_path, pdb_name))
+
   # print(chains)
-  combinations = combinations_12n(len(chains))[1:]
+  # combinations = combinations_12n(len(chains))[1:]
 
   start_time = time.time()
   pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(local_path, pdb_name), path, chains, len(chains))
   os.remove('{0}/{1}.pdb'.format(local_path, pdb_name))
   time_eman = time.time() - start_time
 
-  chains_data = {}
+  segments_to_chains = {}
   all_segments = []
   start_time = time.time()
   con_id_segment = 1
@@ -152,7 +118,7 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution):
     segments_graph_simulate, _ = get_mrc_one('{0}/{1}_{2}.mrc'.format(local_path, pdb_name, chain))
     segment = segments_graph_simulate[0]
     segment.id_segment = con_id_segment
-    chains_data[chain] = segment
+    segments_to_chains[con_id_segment] = chain
     all_segments.append(segment)
     con_id_segment += 1
   time_segment = time.time() - start_time
@@ -161,21 +127,35 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution):
                  'Point Original syn dis', 'Point Test syn dis',
                  'Resolution',
                  'Match', 'Father Chains', 'Test Chains',
-                 'Time segment', 'Time center', 'Time graph', 'Time alignment', 'Time EMAN2']
+                 'Time segment', 'Time center', 'Time test', 'Time graph', 'Time alignment', 'Time EMAN2']
 
-  # Delete
-  if len(combinations) > 10:
-    combinations = combinations[:10]
+  completed_experiments = []
+  for _ in range(can_try_experiments):
+    can_try = 10
+    while can_try > 0:
+      percentage = random.uniform(min(range_incompleteness), max(range_incompleteness))
 
-  for test_combination in combinations:
-    test_segments = []
-    test_chains = []
-    for index in test_combination:
-      test_segments.append(chains_data[chains[index]])
-      test_chains.append(chains[index])
+      point_test = [int(random.uniform(0, all_segments[0].mask.shape[0])),
+                    int(random.uniform(0, all_segments[0].mask.shape[1])),
+                    int(random.uniform(0, all_segments[0].mask.shape[2]))]
+      # print(point_test)
+      key_segment_test = gen_keys_experiemnts(all_segments, 50, 0, [int(random.uniform(0, all_segments[0].mask.shape[0])),
+                                                                    int(random.uniform(0, all_segments[0].mask.shape[1])),
+                                                                    int(random.uniform(0, all_segments[0].mask.shape[2]))],
+                                              percentage)
+      # print(key_segment_test)
+      if key_segment_test not in completed_experiments:
+        # print(key_segment_test)
+        completed_experiments.append(key_segment_test)
+        test_segments = [i for i in all_segments if i.id_segment in key_segment_test]
+        test_chains = [segments_to_chains[i] for i in key_segment_test]
 
-    do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segments, test_chains, resolution, local_path,
-              time_eman, time_segment, chains, [chains[index] for index in test_combination])
+        do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segments, test_chains, resolution,
+                  local_path,
+                  time_eman, time_segment, chains, test_chains)
+        break
+      else:
+        can_try -=1
 
   dirs = os.listdir(local_path)
 
@@ -206,6 +186,7 @@ def do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segment
   result = graph_aligning(graph1, graph2, 2, False)
   time_aligning = time.time() - start_time
 
+  time_center_test = 0
   if result != []:
     graph1_match_index = get_element_list(0, result)
     graph2_match_index = get_element_list(1, result)
@@ -213,7 +194,7 @@ def do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segment
     start_time = time.time()
     center_point1_1 = get_center_point(graph1_match_index, all_segments, 0)
     center_point2_1 = get_center_point(graph2_match_index, test_segments, 0)
-    time_center += time.time() - start_time
+    time_center_test = time.time() - start_time
   else:
     center_point1_1 = [-1, -1, -1]
     center_point2_1 = [-1, -1, -1]
@@ -225,7 +206,10 @@ def do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segment
                  distance_3d_points(center_point2, center_point2_1),
                  resolution,
                  result, fchains, tchains,
-                 time_segment, time_center, time_graph, time_aligning, time_eman]]
+                 time_segment,
+                 time_center, time_center_test,
+                 time_graph,
+                 time_aligning, time_eman]]
 
   write_in_file('{0}/{1}'.format(path_write, result_cvs_file), headers_csv, data_write)
 

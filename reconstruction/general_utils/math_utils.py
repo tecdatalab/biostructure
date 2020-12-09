@@ -39,5 +39,7 @@ def chance_base_point(point, actual_shape, new_shape):
 
 
 def distance_3d_points(point1, point2):
+  if point1 == [-1, -1, -1] or point2 == [-1, -1, -1]:
+    return -1
   dist = math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2 + (point1[2] - point2[2]) ** 2)
   return dist

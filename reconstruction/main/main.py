@@ -530,8 +530,8 @@ def experiment_1():
   local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction"
   # local_path = "/work/lcastillo"
   print("Start")
-  do_parallel_test_a("{0}/data_experiment_1_a".format(local_path), "result.csv", [3.5, 9.5], 1,
-                     ignore_pdbs=['105d', '106d', '108d'])
+  do_parallel_test_a("{0}/data_experiment_1_a_v2".format(local_path), "result.csv", [3.5, 9.5],
+                     range_incompleteness=[10.0, 15.0], can_try_experiments=10)
   print("Finish")
 
 def experiment_3():
@@ -562,6 +562,6 @@ if __name__ == '__main__':
   # main_8()
   # main_9()
   # main_10()
-  # experiment_1()
-  experiment_3()
+  experiment_1()
+  # experiment_3()
   # union_test()

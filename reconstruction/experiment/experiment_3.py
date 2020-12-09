@@ -47,7 +47,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
 
       # all_names = get_all_pdb_name()  # 169315
       # all_names = ['100d']
-      all_names = ['1bgy']
+      all_names = ['7jsh']
       print("Before get pdb names")
 
       path = os.path.abspath(path_data)
