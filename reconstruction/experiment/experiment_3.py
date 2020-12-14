@@ -45,9 +45,9 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      # all_names = get_all_pdb_name()  # 169315
+      all_names = get_all_pdb_name()  # 169315
       # all_names = ['100d']
-      all_names = ['7jsh']
+      # all_names = ['7jsh']
       print("Before get pdb names")
 
       path = os.path.abspath(path_data)
@@ -92,9 +92,9 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
         # resolution = 3.8680
 
         # print(pdb_name, con2/can_elements)
-        # parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
-        #                                                 resolution), resolution])
-        do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution)
+        parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
+                                                         resolution), resolution])
+        # do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution)
       for f in parallel_jobs:
         try:
           f[1].result()
@@ -153,9 +153,9 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution):
 
 
 def do_our_method(initial_matrix, count_update=[]):
-  print('Before')
+  # print('Before')
   binary_matrix = generate_binary_matrix(initial_matrix)
-  print('After')
+  # print('After')
   combinations = get_semi_exact_s(binary_matrix, 1, 1, count_update=count_update)
   return combinations
 
@@ -195,25 +195,25 @@ def do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, resolution, 
   start_time = time.time()
   combinations = do_our_method(initial_matrix)
   our_combination_time = time.time() - start_time
-  print(our_combination_time)
+  # print(our_combination_time)
   max_mem_our = max(memory_usage((do_our_method, (initial_matrix,)), interval=.2))
-  print(max_mem_our)
+  # print(max_mem_our)
 
   # DLX method
   start_time = time.time()
   result = do_DLX_method(initial_matrix)
   dlx_combination_time = time.time() - start_time
-  print(dlx_combination_time)
+  # print(dlx_combination_time)
   max_mem_dlx = max(memory_usage((do_DLX_method, (initial_matrix,)), interval=.2))
-  print(max_mem_dlx)
+  # print(max_mem_dlx)
 
   count_update_DLX = [0]
   do_DLX_method(initial_matrix, count_update_DLX)
-  print(count_update_DLX)
+  # print(count_update_DLX)
 
   count_update_our = [0]
   do_our_method(initial_matrix, count_update_our)
-  print(count_update_our)
+  # print(count_update_our)
   # print(result, result)
   # print(combinations[0][1], combinations[0])
   # print(np.setdiff1d(combinations[0][1], result[0]))
