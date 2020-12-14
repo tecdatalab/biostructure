@@ -3,6 +3,7 @@ import pathlib
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
+from experiment.utils_experiment_1 import get_similar_pdb
 from csv_modules.csv_combine import combine_files
 
 
@@ -26,3 +27,4 @@ def union_test():
 
 if __name__ == '__main__':
   experiment_1()
+  #result = get_similar_pdb("6LFS")

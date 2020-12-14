@@ -5,7 +5,8 @@ import numpy as np
 from sklearn.neighbors import KDTree
 from process_graph.process_segment_faces import get_n_points_cube
 import threading
-
+import json
+import requests
 
 
 def gen_thread_points(id, mask, n_points_face, filter_value, semaphore, dic_result):
@@ -20,6 +21,7 @@ def gen_thread_KDTree(id, data, semaphore, dic_result):
   semaphore.acquire()
   dic_result[id] = result
   semaphore.release()
+
 
 def gen_keys_experiemnts(segments, n_points_face, filter_value, point_test, percentage_segments):
   face_points = {}
@@ -49,7 +51,6 @@ def gen_keys_experiemnts(segments, n_points_face, filter_value, point_test, perc
 
   result = []
   for segment in segments:
-
     # check code
     dist, _ind = kd_trees[segment.id_segment].query([point_test], k=1)
     result.append([segment.id_segment, dist[0][0]])
@@ -58,11 +59,12 @@ def gen_keys_experiemnts(segments, n_points_face, filter_value, point_test, perc
   result = sorted(result, key=lambda val: val[1])
   # print(result)
 
-  final_result = [i[0] for i in result[:int(round(len(result)*((100-percentage_segments)/100)))]]
+  final_result = [i[0] for i in result[:int(round(len(result) * ((100 - percentage_segments) / 100)))]]
   # print(final_result)
   final_result.sort()
   # print(final_result)
-  return  final_result
+  return final_result
+
 
 def remove_get_dirs(path):
   result = []
@@ -97,4 +99,42 @@ def remove_get_dirs(path):
       shutil.rmtree(check_path)
 
   f_evil_pdb.close()
+  return result
+
+
+def get_similar_pdb(pdb_name):
+  search_request = {
+                    "query": {
+                      "type": "terminal",
+                      "service": "structure",
+                      "parameters": {
+                        "value": {
+                          "entry_id": pdb_name.upper(),
+                          "assembly_id": "1"
+                        },
+                        "operator": "relaxed_shape_match"
+                      }
+                    },
+                    "return_type": "assembly",
+                    "request_options": {
+                      "pager": {
+                        "start": 0,
+                        "rows": 100
+                      },
+                      "scoring_strategy": "combined",
+                      "sort": [
+                        {
+                          "sort_by": "score",
+                          "direction": "desc"
+                        }
+                      ]
+                    }
+                  }
+  json_dump = json.dumps(search_request)
+  url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
+  response = requests.get(url_get)
+  var_result = json.loads(response.text)
+  result = []
+  for i in var_result["result_set"]:
+    result.append([i["identifier"].split("-")[0].lower(), i["score"]])
   return result
