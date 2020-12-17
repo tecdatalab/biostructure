@@ -1,4 +1,5 @@
 import os
+import pickle
 import random
 import time
 
@@ -7,7 +8,7 @@ from mpi4py.futures import MPICommExecutor
 
 from csv_modules.csv_writer import write_in_file
 from experiment.utils_experiment_1 import gen_keys_experiemnts
-from experiment.utils_general import remove_get_dirs
+from experiment.utils_general import remove_get_dirs, pdb_percentage
 from general_utils.download_utils import get_all_pdb_name, download_pdb
 from general_utils.list_utils import get_element_list
 from general_utils.math_utils import distance_3d_points
@@ -20,8 +21,8 @@ from process_mrc.miscellaneous import get_center_point
 
 
 def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None,
-                      ignore_pdbs=[], range_incompleteness=[10.0, 15.0], can_try_experiments=10,
-                       force=False, error_file='error.txt'):
+                       ignore_pdbs=[], percentage_data_set=10, file_checkpoint='check_expe_1a.pkl',
+                       error_file='error.txt'):
   # Parale
   comm = MPI.COMM_WORLD
   size = comm.Get_size()
@@ -29,7 +30,16 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      all_names = get_all_pdb_name()  # 169315
+      if not os.path.exists(file_checkpoint):
+        all_names = pdb_percentage(percentage_data_set)  # 169315
+        open_file = open(file_checkpoint, "wb")
+        pickle.dump(all_names, open_file)
+        open_file.close()
+      else:
+        open_file = open(file_checkpoint, "rb")
+        all_names = pickle.load(open_file)
+        open_file.close()
+
       # all_names = ['7jsh']
       print("Before get pdb names")
 
@@ -39,7 +49,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
       if not os.path.isdir(path):
         os.mkdir(path)
 
-      complete_pdb = remove_get_dirs(path_data, force=force)
+      complete_pdb = remove_get_dirs(path_data)
       ignore_pdbs += complete_pdb
       # Add ignore files
       evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
@@ -50,19 +60,20 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
       if can_elements is None:
         can_elements = len(all_names)
 
-
       parallel_jobs = []
 
       for pdb_name in all_names[:can_elements]:
+        if pdb_name in ignore_pdbs:
+          continue
 
         resolution = random.uniform(resolution_range[0], resolution_range[1])
         # resolution = 3.8680
 
         # print(pdb_name, con2/can_elements)
         parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
-                                                        resolution, range_incompleteness, can_try_experiments),
+                                                        resolution),
                               resolution])
-        # do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_incompleteness, can_try_experiments)
+        # do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution)
       for f in parallel_jobs:
         try:
           f[1].result()
@@ -75,8 +86,8 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
             myfile.write(str(e))
             myfile.write("\n\n\n\n")
 
-
 def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_incompleteness, can_try_experiments):
+  return
   local_path = path + "/" + pdb_name
   if not os.path.exists(local_path):
     os.makedirs(local_path)

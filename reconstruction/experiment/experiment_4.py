@@ -1,21 +1,21 @@
 import os
+import random
+import shutil
+import time
 
-from general_utils.download_utils import get_all_pdb_name, download_pdb
+import numpy as np
+from memory_profiler import memory_usage
+from mpi4py import MPI
+from mpi4py.futures import MPICommExecutor
+
+from csv_modules.csv_writer import write_in_file
+from general_utils.download_utils import download_pdb
 from general_utils.list_utils import generate_binary_matrix
 from pdb_to_mrc.miscellaneous import get_chains
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_mrc.generate import get_mrc_one
-from csv_modules.csv_writer import write_in_file
-import random
-import progressbar
-import shutil
-from mpi4py import MPI
-import time
-from mpi4py.futures import MPICommExecutor
-import numpy as np
-from reconstruction.semi_exact_cover import get_semi_exact_s
 from reconstruction.DLX import solve, gen_y_dicc, gen_x_dicc
-from memory_profiler import memory_usage
+from reconstruction.semi_exact_cover import get_semi_exact_s
 
 
 def remove_get_dirs(path):
@@ -36,7 +36,7 @@ def remove_get_dirs(path):
 
 
 def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None,
-                       start=None, ignore_pdbs=[]):
+                       ignore_pdbs=[]):
   # Parale
   comm = MPI.COMM_WORLD
   size = comm.Get_size()
@@ -44,8 +44,8 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      all_names = get_all_pdb_name()  # 169315
-      # all_names = ['100d']
+      # all_names = get_all_pdb_name()  # 169315
+      all_names = ['100d']
       # all_names = ['7jsh']
       print("Before get pdb names")
 
@@ -66,34 +66,19 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
       if can_elements is None:
         can_elements = len(all_names)
 
-      bar = progressbar.ProgressBar(maxval=can_elements)
-      bar.start()
-      con = 0
-
-      flag = False
-      if start == None:
-        flag = True
-
       parallel_jobs = []
 
       for pdb_name in all_names[:can_elements]:
-        if flag == False:
-          if pdb_name == start:
-            flag = True
-          else:
-            con += 1
-            continue
         if pdb_name in ignore_pdbs:
-          con += 1
           continue
 
         resolution = random.uniform(resolution_range[0], resolution_range[1])
         # resolution = 3.8680
 
         # print(pdb_name, con2/can_elements)
-        parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
-                                                         resolution), resolution])
-        # do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution)
+        # parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
+        #                                                  resolution), resolution])
+        do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution)
       for f in parallel_jobs:
         try:
           f[1].result()
@@ -105,8 +90,6 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
             myfile.write("\n")
             myfile.write(str(e))
             myfile.write("\n\n\n\n")
-        con += 1
-        bar.update(con)
 
 
 def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution):

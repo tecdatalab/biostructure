@@ -1,43 +1,25 @@
 import os
+import random
+import time
 
+import numpy as np
+from memory_profiler import memory_usage
+from mpi4py import MPI
+from mpi4py.futures import MPICommExecutor
+
+from csv_modules.csv_writer import write_in_file
+from experiment.utils_general import remove_get_dirs
 from general_utils.download_utils import get_all_pdb_name, download_pdb
-from general_utils.list_utils import union_multidimensional, generate_binary_matrix
-from general_utils.math_utils import distance_3d_points
+from general_utils.list_utils import generate_binary_matrix
 from pdb_to_mrc.miscellaneous import get_chains
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_mrc.generate import get_mrc_one
-from csv_modules.csv_writer import write_in_file
-import random
-import progressbar
-import shutil
-from mpi4py import MPI
-import time
-from mpi4py.futures import MPICommExecutor
-import numpy as np
-from reconstruction.semi_exact_cover import get_semi_exact_s
 from reconstruction.DLX import solve, gen_y_dicc, gen_x_dicc
-from memory_profiler import memory_usage
-
-
-def remove_get_dirs(path):
-  result = []
-  complete_path = os.path.abspath(path)
-  list_dirs = os.listdir(complete_path)
-
-  for dir_name in list_dirs:
-    check_path = '{0}/{1}'.format(complete_path, dir_name)
-    files_dir = os.listdir(check_path)
-
-    if len(files_dir) == 1 and files_dir[0].split('.')[1] == 'csv':
-      result.append(dir_name)
-    else:
-      shutil.rmtree(check_path)
-
-  return result
+from reconstruction.semi_exact_cover import get_semi_exact_s
 
 
 def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None,
-                       start=None, ignore_pdbs=[]):
+                      ignore_pdbs=[], error_file='error.txt'):
   # Parale
   comm = MPI.COMM_WORLD
   size = comm.Get_size()
@@ -67,25 +49,11 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
       if can_elements is None:
         can_elements = len(all_names)
 
-      bar = progressbar.ProgressBar(maxval=can_elements)
-      bar.start()
-      con = 0
-
-      flag = False
-      if start == None:
-        flag = True
 
       parallel_jobs = []
 
       for pdb_name in all_names[:can_elements]:
-        if flag == False:
-          if pdb_name == start:
-            flag = True
-          else:
-            con += 1
-            continue
         if pdb_name in ignore_pdbs:
-          con += 1
           continue
 
         resolution = random.uniform(resolution_range[0], resolution_range[1])
@@ -99,15 +67,13 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
         try:
           f[1].result()
         except Exception as e:
-          with open("error_log.txt", "a+") as myfile:
+          with open(error_file, "a+") as myfile:
             myfile.write(f[0])
             myfile.write("\n")
             myfile.write(str(f[2]))
             myfile.write("\n")
             myfile.write(str(e))
             myfile.write("\n\n\n\n")
-        con += 1
-        bar.update(con)
 
 
 def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution):

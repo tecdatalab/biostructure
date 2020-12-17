@@ -4,7 +4,7 @@ import progressbar
 import shutil
 from general_utils.terminal_utils import get_out
 import tempfile
-
+import time
 
 class MyProgressBar:
   def __init__(self):
@@ -45,26 +45,33 @@ def download_emd(id_code, exit_path, create_progress_bar=False):
   shutil.rmtree(path)
 
 
-def download_pdb(id_code, exit_path, create_progress_bar=False):
-  # path = './temp_emd_download'
-  path = tempfile.mkdtemp()
-  path = os.path.abspath(path)
-  exit_path = os.path.abspath(exit_path)
-  file_url = 'ftp://ftp.ebi.ac.uk/pub/databases/pdb/data/structures/all/pdb/pdb{0}.ent.gz'.format(id_code)
+def download_pdb(id_code, exit_path, create_progress_bar=False, can_try=10):
+  try:
+    # path = './temp_emd_download'
+    path = tempfile.mkdtemp()
+    path = os.path.abspath(path)
+    exit_path = os.path.abspath(exit_path)
+    file_url = 'ftp://ftp.ebi.ac.uk/pub/databases/pdb/data/structures/all/pdb/pdb{0}.ent.gz'.format(id_code)
 
-  if os.path.exists(path):
+    if os.path.exists(path):
+      shutil.rmtree(path)
+    os.mkdir(path)
+
+    if create_progress_bar:
+      urllib.request.urlretrieve(file_url, path + '/pdb{0}.ent.gz'.format(id_code), MyProgressBar())
+    else:
+      urllib.request.urlretrieve(file_url, path + '/pdb{0}.ent.gz'.format(id_code))
+
+    get_out("gunzip", path + '/pdb{0}.ent.gz'.format(id_code))
+    get_out("mv", path + '/pdb{0}.ent'.format(id_code), exit_path)
+
     shutil.rmtree(path)
-  os.mkdir(path)
-
-  if create_progress_bar:
-    urllib.request.urlretrieve(file_url, path + '/pdb{0}.ent.gz'.format(id_code), MyProgressBar())
-  else:
-    urllib.request.urlretrieve(file_url, path + '/pdb{0}.ent.gz'.format(id_code))
-
-  get_out("gunzip", path + '/pdb{0}.ent.gz'.format(id_code))
-  get_out("mv", path + '/pdb{0}.ent'.format(id_code), exit_path)
-
-  shutil.rmtree(path)
+  except Exception as ex:
+    if can_try > 0:
+      time.sleep(1)
+      download_pdb(id_code, exit_path, create_progress_bar, can_try - 1)
+    else:
+      raise ex
 
 
 def get_all_pdb_name():
