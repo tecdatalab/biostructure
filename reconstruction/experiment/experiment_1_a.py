@@ -1,7 +1,10 @@
 import os
 import pickle
 import random
+import shutil
 import time
+import copy
+from sklearn.metrics import mean_squared_error
 
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
@@ -12,6 +15,7 @@ from experiment.utils_general import remove_get_dirs, pdb_percentage
 from general_utils.download_utils import get_all_pdb_name, download_pdb
 from general_utils.list_utils import get_element_list
 from general_utils.math_utils import distance_3d_points
+from general_utils.pdb_utils import get_similar_pdb_struct, get_similar_pdb_chain
 from pdb_to_mrc.miscellaneous import get_chains
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_graph.graph_algorithm import graph_aligning
@@ -20,9 +24,9 @@ from process_mrc.generate import get_mrc_one
 from process_mrc.miscellaneous import get_center_point
 
 
-def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None,
+def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolution_range=[5.0, 5.0], can_elements=None,
                        ignore_pdbs=[], percentage_data_set=10, file_checkpoint='check_expe_1a.pkl',
-                       error_file='error.txt'):
+                       error_file='error.txt', can_chain_test=3, can_struct_test=3):
   # Parale
   comm = MPI.COMM_WORLD
   size = comm.Get_size()
@@ -49,7 +53,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
       if not os.path.isdir(path):
         os.mkdir(path)
 
-      complete_pdb = remove_get_dirs(path_data)
+      complete_pdb = remove_get_dirs(path_data, can_csv=2)
       ignore_pdbs += complete_pdb
       # Add ignore files
       evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
@@ -70,10 +74,11 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
         # resolution = 3.8680
 
         # print(pdb_name, con2/can_elements)
-        parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
-                                                        resolution),
+        parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_chain,
+                                                        result_cvs_struct, resolution, can_chain_test, can_struct_test),
                               resolution])
-        # do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution)
+        # do_parallel_test_a_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, resolution, can_chain_test,
+        # can_struct_test)
       for f in parallel_jobs:
         try:
           f[1].result()
@@ -86,8 +91,9 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
             myfile.write(str(e))
             myfile.write("\n\n\n\n")
 
-def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_incompleteness, can_try_experiments):
-  return
+
+def do_parallel_test_a_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, resolution,
+                           can_chain_test, can_struct_test):
   local_path = path + "/" + pdb_name
   if not os.path.exists(local_path):
     os.makedirs(local_path)
@@ -104,52 +110,35 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_in
   os.remove('{0}/{1}.pdb'.format(local_path, pdb_name))
   time_eman = time.time() - start_time
 
-  segments_to_chains = {}
-  all_segments = []
+  chains_to_segment = {}
   start_time = time.time()
   con_id_segment = 1
   for chain in chains:
     segments_graph_simulate, _ = get_mrc_one('{0}/{1}_{2}.mrc'.format(local_path, pdb_name, chain))
     segment = segments_graph_simulate[0]
     segment.id_segment = con_id_segment
-    segments_to_chains[con_id_segment] = chain
-    all_segments.append(segment)
+    chains_to_segment[chain] = segment
     con_id_segment += 1
   time_segment = time.time() - start_time
 
-  headers_csv = ['Pdb', 'Chains', 'Point Original', 'Point Test', 'Point Original syn', 'Point Test syn',
-                 'Point Original syn dis', 'Point Test syn dis',
-                 'Resolution',
-                 'Match', 'Father Chains', 'Test Chains',
-                 'Time segment', 'Time center', 'Time test', 'Time graph', 'Time alignment', 'Time EMAN2']
+  headers_chain = ['Pdb', 'Pdb work', 'Chains', 'Point Original', 'Point Test', 'Point Original syn', 'Point Test syn',
+                   'Point Original syn dis', 'Point Test syn dis',
+                   'Resolution',
+                   'Score pdb work', 'Changed chain',
+                   'Time segment', 'Time center', 'Time test', 'Time graph', 'Time alignment', 'Time EMAN2']
 
-  completed_experiments = []
-  for _ in range(can_try_experiments):
-    can_try = 10
-    while can_try > 0:
-      percentage = random.uniform(min(range_incompleteness), max(range_incompleteness))
+  headers_struct = ['Pdb', 'Pdb work', 'Chains', 'Work Chains', 'Point Original', 'Point Test', 'Point Original syn',
+                    'Point Test syn',
+                    'Point Original syn dis', 'Point Test syn dis',
+                    'Resolution',
+                    'Score pdb work',
+                    'Time segment', 'Time center', 'Time test', 'Time graph', 'Time alignment', 'Time EMAN2']
 
-      point_test = [int(random.uniform(0, all_segments[0].mask.shape[0])),
-                    int(random.uniform(0, all_segments[0].mask.shape[1])),
-                    int(random.uniform(0, all_segments[0].mask.shape[2]))]
-      # print(point_test)
-      key_segment_test = gen_keys_experiemnts(all_segments, 50, 0, [int(random.uniform(0, all_segments[0].mask.shape[0])),
-                                                                    int(random.uniform(0, all_segments[0].mask.shape[1])),
-                                                                    int(random.uniform(0, all_segments[0].mask.shape[2]))],
-                                              percentage)
-      # print(key_segment_test)
-      if key_segment_test not in completed_experiments:
-        # print(key_segment_test)
-        completed_experiments.append(key_segment_test)
-        test_segments = [i for i in all_segments if i.id_segment in key_segment_test]
-        test_chains = [segments_to_chains[i] for i in key_segment_test]
+  do_test_a_chain(pdb_name, headers_chain, result_cvs_chain, chains_to_segment, resolution, local_path, time_eman,
+                  time_segment, can_chain_test)
 
-        do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segments, test_chains, resolution,
-                  local_path,
-                  time_eman, time_segment, chains, test_chains)
-        break
-      else:
-        can_try -=1
+  do_test_a_struct(pdb_name, headers_struct, result_cvs_struct, chains_to_segment, resolution, local_path, time_eman,
+                   time_segment, can_struct_test)
 
   dirs = os.listdir(local_path)
 
@@ -159,50 +148,199 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_in
       os.remove(path_remove)
 
 
-def do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segments, test_chains, resolution, path_write,
-              time_eman, time_segment, fchains, tchains):
-  false_match_list = [[i.id_segment, i.id_segment] for i in test_segments]
-  graph1_match_index = get_element_list(0, false_match_list)
-  graph2_match_index = get_element_list(1, false_match_list)
+def do_test_a_struct(pdb_name, headers_csv, result_cvs_file, chains_to_segment, resolution, path_write, time_eman,
+                     time_segment, can_chain_test):
+  original_segments = []
+  for i in chains_to_segment.keys():
+    original_segments.append(chains_to_segment[i])
 
-  start_time = time.time()
-  center_point1 = get_center_point(graph1_match_index, test_segments, 0)
-  center_point2 = get_center_point(graph2_match_index, test_segments, 0)
-  time_center = time.time() - start_time
+  list_possibles_pdb = get_similar_pdb_struct(pdb_name)
+  for i in list_possibles_pdb:
+    if i[0] == pdb_name:
+      list_possibles_pdb.remove(i)
+      break
 
-  # Generate test syntetic
-  start_time = time.time()
-  graph1 = generate_graph(all_segments, 50, 0, 6, 1)
-  graph2 = generate_graph(test_segments, 50, 0, 6, 1)
-  time_graph = time.time() - start_time
+  random.choice(list_possibles_pdb)
 
-  start_time = time.time()
-  result = graph_aligning(graph1, graph2, 2, False)
-  time_aligning = time.time() - start_time
+  for _i in range(can_chain_test):
 
-  time_center_test = 0
-  if result != []:
-    graph1_match_index = get_element_list(0, result)
-    graph2_match_index = get_element_list(1, result)
+    # Change for real method
+    pdb_work, score_pdb_work, test_segments, work_chains = get_segments_struct_test(list_possibles_pdb[0], path_write,
+                                                                                    resolution)
+    list_possibles_pdb.remove(list_possibles_pdb[0])
+
+    original_match_list = [[i.id_segment, i.id_segment] for i in original_segments]
+    test_match_list = [[i.id_segment, i.id_segment] for i in test_segments]
+
+    graph1_match_index = get_element_list(0, original_match_list)
+    graph2_match_index = get_element_list(1, test_match_list)
 
     start_time = time.time()
-    center_point1_1 = get_center_point(graph1_match_index, all_segments, 0)
-    center_point2_1 = get_center_point(graph2_match_index, test_segments, 0)
-    time_center_test = time.time() - start_time
-  else:
-    center_point1_1 = [-1, -1, -1]
-    center_point2_1 = [-1, -1, -1]
+    center_point1 = get_center_point(graph1_match_index, original_segments, 0)
+    center_point2 = get_center_point(graph2_match_index, test_segments, 0)
+    time_center = time.time() - start_time
 
-  data_write = [[pdb_name, test_chains,
-                 center_point1, center_point2,
-                 center_point1_1, center_point2_1,
-                 distance_3d_points(center_point1, center_point1_1),
-                 distance_3d_points(center_point2, center_point2_1),
-                 resolution,
-                 result, fchains, tchains,
-                 time_segment,
-                 time_center, time_center_test,
-                 time_graph,
-                 time_aligning, time_eman]]
+    # Generate test syntetic
+    start_time = time.time()
+    graph1 = generate_graph(original_segments, 50, 0, 6, 1)
+    graph2 = generate_graph(test_segments, 50, 0, 6, 1)
+    time_graph = time.time() - start_time
 
-  write_in_file('{0}/{1}'.format(path_write, result_cvs_file), headers_csv, data_write)
+    start_time = time.time()
+    result = graph_aligning(graph1, graph2, 2, False)
+    time_aligning = time.time() - start_time
+
+    time_center_test = 0
+    if result != []:
+      graph1_match_index = get_element_list(0, result)
+      graph2_match_index = get_element_list(1, result)
+
+      start_time = time.time()
+      center_point1_1 = get_center_point(graph1_match_index, original_segments, 0)
+      center_point2_1 = get_center_point(graph2_match_index, test_segments, 0)
+      time_center_test = time.time() - start_time
+    else:
+      center_point1_1 = [-1, -1, -1]
+      center_point2_1 = [-1, -1, -1]
+
+    data_write = [[pdb_name, pdb_work, list(chains_to_segment.keys()), work_chains,
+                   center_point1, center_point2,
+                   center_point1_1, center_point2_1,
+                   distance_3d_points(center_point1, center_point1_1),
+                   distance_3d_points(center_point2, center_point2_1),
+                   resolution, score_pdb_work,
+                   time_segment,
+                   time_center, time_center_test,
+                   time_graph,
+                   time_aligning, time_eman]]
+
+    write_in_file('{0}/{1}'.format(path_write, result_cvs_file), headers_csv, data_write)
+
+
+def get_segments_struct_test(pdb_score, path_work, resolution):
+  download_pdb(pdb_score[0], '{0}/{1}.pdb'.format(path_work, pdb_score[0]))
+  # Maps creation
+  chains = get_chains('{0}/{1}.pdb'.format(path_work, pdb_score[0]))
+
+  pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(path_work, pdb_score[0]), path_work, chains,
+                    len(chains))
+  os.remove('{0}/{1}.pdb'.format(path_work, pdb_score[0]))
+
+  all_segments = []
+  con_id_segment = 1
+  for chain in chains:
+    segments_graph_simulate, _ = get_mrc_one(
+      '{0}/{1}_{2}.mrc'.format(path_work + '/' + pdb_score[0], pdb_score[0], chain))
+    segment = segments_graph_simulate[0]
+    segment.id_segment = con_id_segment
+    all_segments.append(segment)
+    con_id_segment += 1
+
+  shutil.rmtree(path_work + '/' + pdb_score[0])
+
+  return pdb_score[0], pdb_score[1], all_segments, chains
+
+
+def do_test_a_chain(pdb_name, headers_csv, result_cvs_file, chains_to_segment, resolution, path_write, time_eman,
+                    time_segment, can_chain_test):
+  original_segments = []
+  list_possibles_pdb_chain = []
+  for i in chains_to_segment.keys():
+    original_segments.append(chains_to_segment[i])
+
+    # Chains to change
+    list_possibles_pdb_chain += get_segments_chain_test(pdb_name, i)
+
+  random.shuffle(list_possibles_pdb_chain)
+
+  for _i in range(can_chain_test):
+    pdb_work, score_chain_work, chain_work = list_possibles_pdb_chain.pop()
+    id_work = chains_to_segment[chain_work].id_segment
+
+    # Change for real method
+    zernike_zd_descriptors_chain_pdb = get_zd_descriptors_chain_pdb(pdb_work,
+                                                                    chains_to_segment[chain_work].zd_descriptors,
+                                                                    path_write, resolution)
+
+    original_match_list = [[i.id_segment, i.id_segment] for i in original_segments]
+
+    graph1_match_index = get_element_list(0, original_match_list)
+    graph2_match_index = get_element_list(1, original_match_list)
+
+    start_time = time.time()
+    center_point1 = get_center_point(graph1_match_index, original_segments, 0)
+    center_point2 = get_center_point(graph2_match_index, original_segments, 0)
+    time_center = time.time() - start_time
+
+    # Generate test syntetic
+    start_time = time.time()
+    graph1 = generate_graph(original_segments, 50, 0, 6, 1)
+    graph2 = graph1.copy()
+    graph2.nodes[id_work]["zd_descriptors"] = zernike_zd_descriptors_chain_pdb
+    time_graph = time.time() - start_time
+
+    start_time = time.time()
+    result = graph_aligning(graph1, graph2, 2, False)
+    time_aligning = time.time() - start_time
+
+    time_center_test = 0
+    if result != []:
+      graph1_match_index = get_element_list(0, result)
+      graph2_match_index = get_element_list(1, result)
+
+      start_time = time.time()
+      center_point1_1 = get_center_point(graph1_match_index, original_segments, 0)
+      center_point2_1 = get_center_point(graph2_match_index, original_segments, 0)
+      time_center_test = time.time() - start_time
+    else:
+      center_point1_1 = [-1, -1, -1]
+      center_point2_1 = [-1, -1, -1]
+
+    data_write = [[pdb_name, pdb_work, list(chains_to_segment.keys()),
+                   center_point1, center_point2,
+                   center_point1_1, center_point2_1,
+                   distance_3d_points(center_point1, center_point1_1),
+                   distance_3d_points(center_point2, center_point2_1),
+                   resolution, score_chain_work, chain_work,
+                   time_segment,
+                   time_center, time_center_test,
+                   time_graph,
+                   time_aligning, time_eman]]
+
+    write_in_file('{0}/{1}'.format(path_write, result_cvs_file), headers_csv, data_write)
+
+
+def get_segments_chain_test(pdb_name, chain_for_test):
+  list_possibles_pdb = get_similar_pdb_chain(pdb_name, chain_for_test)
+
+  for i in list_possibles_pdb:
+    if i[0] == pdb_name:
+      list_possibles_pdb.remove(i)
+
+  return [i + [chain_for_test] for i in list_possibles_pdb]
+
+
+def get_zd_descriptors_chain_pdb(pdb_work, zd_descriptors_compare, path_work, resolution):
+  download_pdb(pdb_work, '{0}/{1}.pdb'.format(path_work, pdb_work))
+  # Maps creation
+  chains = get_chains('{0}/{1}.pdb'.format(path_work, pdb_work))
+
+  pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(path_work, pdb_work), path_work, chains,
+                    len(chains))
+  os.remove('{0}/{1}.pdb'.format(path_work, pdb_work))
+
+  best_distance = float('inf')
+  result = []
+
+  for chain in chains:
+    segments_graph_simulate, _ = get_mrc_one(
+      '{0}/{1}_{2}.mrc'.format(path_work + '/' + pdb_work, pdb_work, chain))
+
+    mse = mean_squared_error(zd_descriptors_compare, segments_graph_simulate[0].zd_descriptors)
+    if mse < best_distance:
+      best_distance = mse
+      result = segments_graph_simulate[0].zd_descriptors
+
+  shutil.rmtree(path_work + '/' + pdb_work)
+
+  return result
