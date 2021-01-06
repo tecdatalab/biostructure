@@ -10,7 +10,7 @@ def experiment_1_a():
   do_parallel_test_a("{0}/data_experiment_1_a_a_v1".format(local_path), result_cvs_chain="result_chain.csv",
                      result_cvs_struct="result_struct.csv", resolution_range=[3.5, 9.5],
                      error_file="error_log_expe_1a.txt", percentage_data_set=10, file_checkpoint='check_expe_1a.pkl',
-                     can_chain_test=3, can_struct_test=3)
+                     can_chain_test=3, can_struct_test=3, add_to_ignore_files=False)
   print("Finish")
 
 

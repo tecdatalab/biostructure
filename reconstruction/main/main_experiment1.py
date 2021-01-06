@@ -13,7 +13,7 @@ def experiment_1():
   # local_path = "/work/lcastillo"
   print("Start")
   do_parallel_test_a("{0}/data_experiment_1_a_v2".format(local_path), "result.csv", [3.5, 9.5],
-                     range_incompleteness=[10.0, 15.0], can_try_experiments=10, force=False,
+                     range_incompleteness=[10.0, 15.0], can_try_experiments=10, add_to_ignore_files=False,
                      error_file="error_log_expe_1.txt")
   print("Finish")
 

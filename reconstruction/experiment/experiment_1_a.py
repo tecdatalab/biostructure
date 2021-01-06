@@ -26,7 +26,7 @@ from process_mrc.miscellaneous import get_center_point
 
 def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolution_range=[5.0, 5.0], can_elements=None,
                        ignore_pdbs=[], percentage_data_set=10, file_checkpoint='check_expe_1a.pkl',
-                       error_file='error.txt', can_chain_test=3, can_struct_test=3):
+                       error_file='error.txt', can_chain_test=3, can_struct_test=3, add_to_ignore_files=False):
   # Parale
   comm = MPI.COMM_WORLD
   size = comm.Get_size()
@@ -53,7 +53,7 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolutio
       if not os.path.isdir(path):
         os.mkdir(path)
 
-      complete_pdb = remove_get_dirs(path_data, can_csv=2)
+      complete_pdb = remove_get_dirs(path_data, can_csv=2, add_to_ignore_files=add_to_ignore_files)
       ignore_pdbs += complete_pdb
       # Add ignore files
       evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
@@ -124,7 +124,7 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, 
   headers_chain = ['Pdb', 'Pdb work', 'Chains', 'Point Original', 'Point Test', 'Point Original syn', 'Point Test syn',
                    'Point Original syn dis', 'Point Test syn dis',
                    'Resolution',
-                   'Score pdb work', 'Changed chain',
+                   'Score pdb work', 'Changed chain', 'Score chain changed',
                    'Time segment', 'Time center', 'Time test', 'Time graph', 'Time alignment', 'Time EMAN2']
 
   headers_struct = ['Pdb', 'Pdb work', 'Chains', 'Work Chains', 'Point Original', 'Point Test', 'Point Original syn',
@@ -258,7 +258,7 @@ def do_test_a_chain(pdb_name, headers_csv, result_cvs_file, chains_to_segment, r
     id_work = chains_to_segment[chain_work].id_segment
 
     # Change for real method
-    zernike_zd_descriptors_chain_pdb = get_zd_descriptors_chain_pdb(pdb_work,
+    zernike_zd_descriptors_chain_pdb, score_chain_changed = get_zd_descriptors_chain_pdb(pdb_work,
                                                                     chains_to_segment[chain_work].zd_descriptors,
                                                                     path_write, resolution)
 
@@ -301,7 +301,7 @@ def do_test_a_chain(pdb_name, headers_csv, result_cvs_file, chains_to_segment, r
                    center_point1_1, center_point2_1,
                    distance_3d_points(center_point1, center_point1_1),
                    distance_3d_points(center_point2, center_point2_1),
-                   resolution, score_chain_work, chain_work,
+                   resolution, score_chain_work, chain_work, score_chain_changed,
                    time_segment,
                    time_center, time_center_test,
                    time_graph,
@@ -343,4 +343,4 @@ def get_zd_descriptors_chain_pdb(pdb_work, zd_descriptors_compare, path_work, re
 
   shutil.rmtree(path_work + '/' + pdb_work)
 
-  return result
+  return result, best_distance

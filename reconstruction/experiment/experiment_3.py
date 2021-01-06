@@ -19,7 +19,7 @@ from reconstruction.semi_exact_cover import get_semi_exact_s
 
 
 def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None,
-                      ignore_pdbs=[], error_file='error.txt'):
+                      ignore_pdbs=[], error_file='error.txt', add_to_ignore_files=False):
   # Parale
   comm = MPI.COMM_WORLD
   size = comm.Get_size()
@@ -38,7 +38,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
       if not os.path.isdir(path):
         os.mkdir(path)
 
-      complete_pdb = remove_get_dirs(path_data)
+      complete_pdb = remove_get_dirs(path_data, can_csv=1, add_to_ignore_files=add_to_ignore_files)
       ignore_pdbs += complete_pdb
       # Add ignore files
       evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'

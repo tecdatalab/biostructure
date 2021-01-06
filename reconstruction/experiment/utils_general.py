@@ -76,7 +76,7 @@ def pdb_percentage(percentage):
   return result
 
 
-def remove_get_dirs(path, force=False, can_csv=1):
+def remove_get_dirs(path, add_to_ignore_files=False, can_csv=1):
   result = []
   complete_path = os.path.abspath(path)
   list_dirs = os.listdir(complete_path)
@@ -100,7 +100,7 @@ def remove_get_dirs(path, force=False, can_csv=1):
       result.append(dir_name)
 
     else:
-      if force:
+      if add_to_ignore_files:
         all_pdb = True
         for i in files_dir:
           if i.split('.')[1] != 'pdb':
