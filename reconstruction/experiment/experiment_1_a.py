@@ -44,6 +44,8 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolutio
         all_names = pickle.load(open_file)
         open_file.close()
 
+      print("Do ", len(all_names), flush=True)
+      print(all_names, flush=True)
       # all_names = ['7jsh']
       print("Before get pdb names")
 

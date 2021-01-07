@@ -30,7 +30,6 @@ def pdb_percentage(percentage):
 
   # Process
   all_names = get_all_pdb_name()  # 169315
-  all_names = [all_names[0], all_names[1], all_names[3]]
   for i in range(len(all_names) - 1, -1, -1):
     if all_names[i] in ignore_pdbs or all_names[i] in can_chains_list_var:
       all_names.pop(i)
