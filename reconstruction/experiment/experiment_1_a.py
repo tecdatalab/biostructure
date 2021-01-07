@@ -35,7 +35,7 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolutio
     if executor is not None:
 
       if not os.path.exists(file_checkpoint):
-        all_names = pdb_percentage(percentage_data_set)  # 169315
+        all_names = pdb_percentage(percentage_data_set, executor, size-1)  # 169315
         open_file = open(file_checkpoint, "wb")
         pickle.dump(all_names, open_file)
         open_file.close()

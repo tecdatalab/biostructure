@@ -7,10 +7,28 @@ import random
 from general_utils.download_utils import get_all_pdb_name, download_pdb
 from pandas.core.common import flatten
 from math import ceil
-from pdb_to_mrc.miscellaneous import get_chains
+from pdb_to_mrc.miscellaneous import get_chains, move_pdb_center, get_cube_pdb
 
 
-def pdb_percentage(percentage):
+def chunks(lst, n):
+  """Yield successive n-sized chunks from lst."""
+  for i in range(0, len(lst), n):
+    yield lst[i:i + n]
+
+
+def get_parallel_can_chains_chunk(all_names, dirpath):
+  can_chains_list = []
+  for pdb_name in all_names:
+    download_pdb(pdb_name, '{0}/{1}.pdb'.format(dirpath, pdb_name))
+    chains = get_chains('{0}/{1}.pdb'.format(dirpath, pdb_name))
+    move_pdb_center('{0}/{1}.pdb'.format(dirpath, pdb_name))
+    cube_dimensions = get_cube_pdb('{0}/{1}.pdb'.format(dirpath, pdb_name))
+    can_chains_list.append([pdb_name, len(chains), cube_dimensions])
+    os.remove('{0}/{1}.pdb'.format(dirpath, pdb_name))
+  return can_chains_list
+
+
+def pdb_percentage(percentage, executor=None, size=None):
   # Add ignore files
   evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
   f_evil_pdb = open(evil_pdb_path)
@@ -37,11 +55,23 @@ def pdb_percentage(percentage):
   # Add chains
   dirpath = tempfile.mkdtemp()
 
-  for pdb_name in all_names:
-    download_pdb(pdb_name, '{0}/{1}.pdb'.format(dirpath, pdb_name))
-    chains = get_chains('{0}/{1}.pdb'.format(dirpath, pdb_name))
-    can_chains_list.append([pdb_name, len(chains)])
-    os.remove('{0}/{1}.pdb'.format(dirpath, pdb_name))
+  flag_error = False
+
+  if executor is not None:
+    parallel_jobs = []
+    for i in list(chunks(all_names, len(all_names) // size)):
+      parallel_jobs.append([executor.submit(get_parallel_can_chains_chunk, i, dirpath)])
+
+    for f in parallel_jobs:
+      try:
+        list_append = f[0].result()
+        can_chains_list += list_append
+      except Exception as e:
+        flag_error = True
+
+  else:
+    add_list = get_parallel_can_chains_chunk(all_names, dirpath)
+    can_chains_list += add_list
 
   shutil.rmtree(dirpath)
   if os.path.exists(know_can_chains_pdb_path):
@@ -50,6 +80,9 @@ def pdb_percentage(percentage):
   can_chains_pdb_file = open(know_can_chains_pdb_path, "wb")
   pickle.dump(can_chains_list, can_chains_pdb_file)
   can_chains_pdb_file.close()
+
+  if flag_error:
+    raise NameError('Error in download pdbs')
 
   # Dic with can chains to pdbs
   dic_chains = {}
