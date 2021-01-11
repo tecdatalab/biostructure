@@ -35,7 +35,7 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolutio
     if executor is not None:
 
       if not os.path.exists(file_checkpoint):
-        all_names = pdb_percentage(percentage_data_set, executor, size-1)  # 169315
+        all_names = pdb_percentage(percentage_data_set, executor)  # 169315
         open_file = open(file_checkpoint, "wb")
         pickle.dump(all_names, open_file)
         open_file.close()
@@ -164,7 +164,7 @@ def do_test_a_struct(pdb_name, headers_csv, result_cvs_file, chains_to_segment, 
 
   random.choice(list_possibles_pdb)
 
-  for _i in range(can_chain_test):
+  for _i in range(min(can_chain_test, len(list_possibles_pdb))):
 
     # Change for real method
     pdb_work, score_pdb_work, test_segments, work_chains = get_segments_struct_test(list_possibles_pdb[0], path_write,
@@ -217,7 +217,8 @@ def do_test_a_struct(pdb_name, headers_csv, result_cvs_file, chains_to_segment, 
                    time_aligning, time_eman]]
 
     write_in_file('{0}/{1}'.format(path_write, result_cvs_file), headers_csv, data_write)
-
+  if len(list_possibles_pdb) == 0:
+    write_in_file('{0}/{1}'.format(path_write, result_cvs_file), headers_csv, [[]])
 
 def get_segments_struct_test(pdb_score, path_work, resolution):
   download_pdb(pdb_score[0], '{0}/{1}.pdb'.format(path_work, pdb_score[0]))
@@ -255,7 +256,7 @@ def do_test_a_chain(pdb_name, headers_csv, result_cvs_file, chains_to_segment, r
 
   random.shuffle(list_possibles_pdb_chain)
 
-  for _i in range(can_chain_test):
+  for _i in range(min(can_chain_test, len(list_possibles_pdb_chain))):
     pdb_work, score_chain_work, chain_work = list_possibles_pdb_chain.pop()
     id_work = chains_to_segment[chain_work].id_segment
 
@@ -310,7 +311,8 @@ def do_test_a_chain(pdb_name, headers_csv, result_cvs_file, chains_to_segment, r
                    time_aligning, time_eman]]
 
     write_in_file('{0}/{1}'.format(path_write, result_cvs_file), headers_csv, data_write)
-
+  if len(list_possibles_pdb_chain) == 0:
+    write_in_file('{0}/{1}'.format(path_write, result_cvs_file), headers_csv, [[]])
 
 def get_segments_chain_test(pdb_name, chain_for_test):
   list_possibles_pdb = get_similar_pdb_chain(pdb_name, chain_for_test)
