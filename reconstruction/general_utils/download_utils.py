@@ -6,6 +6,7 @@ from general_utils.terminal_utils import get_out
 import tempfile
 import time
 
+
 class MyProgressBar:
   def __init__(self):
     self.pbar = None
@@ -23,6 +24,19 @@ class MyProgressBar:
 
 
 def download_emd(id_code, exit_path, create_progress_bar=False):
+  can_try = 20
+  while True:
+    try:
+      download_emd_aux(id_code, exit_path, create_progress_bar)
+      break
+    except Exception as e:
+      if can_try < 0:
+        raise e
+      can_try -= 1
+      time.sleep(20)
+
+
+def download_emd_aux(id_code, exit_path, create_progress_bar=False):
   # path = './temp_emd_download'
   path = tempfile.mkdtemp()
   path = os.path.abspath(path)
@@ -45,8 +59,20 @@ def download_emd(id_code, exit_path, create_progress_bar=False):
   shutil.rmtree(path)
 
 
-def download_pdb(id_code, exit_path, create_progress_bar=False, can_try=10):
-  try:
+def download_pdb(id_code, exit_path, create_progress_bar=False):
+  can_try = 20
+  while True:
+    try:
+      download_pdb_aux(id_code, exit_path, create_progress_bar)
+      break
+    except Exception as e:
+      if can_try < 0:
+        raise e
+      can_try -= 1
+      time.sleep(20)
+
+
+def download_pdb_aux(id_code, exit_path, create_progress_bar=False):
     # path = './temp_emd_download'
     path = tempfile.mkdtemp()
     path = os.path.abspath(path)
@@ -66,12 +92,6 @@ def download_pdb(id_code, exit_path, create_progress_bar=False, can_try=10):
     get_out("mv", path + '/pdb{0}.ent'.format(id_code), exit_path)
 
     shutil.rmtree(path)
-  except Exception as ex:
-    if can_try > 0:
-      time.sleep(1)
-      download_pdb(id_code, exit_path, create_progress_bar, can_try - 1)
-    else:
-      raise ex
 
 
 def get_all_pdb_name():

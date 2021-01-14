@@ -9,6 +9,7 @@ from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 
 from csv_modules.csv_writer import write_in_file
+from experiment.utils_general import get_ignore_pdbs
 from general_utils.download_utils import download_pdb
 from general_utils.list_utils import generate_binary_matrix
 from pdb_to_mrc.miscellaneous import get_chains
@@ -58,19 +59,15 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
       complete_pdb = remove_get_dirs(path_data)
       ignore_pdbs += complete_pdb
       # Add ignore files
-      evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
-      f_evil_pdb = open(evil_pdb_path)
-      ignore_pdbs += f_evil_pdb.read().splitlines()
-      f_evil_pdb.close()
+      ignore_pdbs += get_ignore_pdbs()
 
       if can_elements is None:
         can_elements = len(all_names)
 
       parallel_jobs = []
-
-      for pdb_name in all_names[:can_elements]:
-        if pdb_name in ignore_pdbs:
-          continue
+      all_names = np.setdiff1d(np.array(all_names), np.array(ignore_pdbs)).tolist()[:can_elements]
+      print("Do ", len(all_names), flush=True)
+      for pdb_name in all_names:
 
         resolution = random.uniform(resolution_range[0], resolution_range[1])
         # resolution = 3.8680

@@ -11,6 +11,8 @@ from csv_modules.csv_writer import write_in_file
 from general_utils.download_utils import get_all_pdb_name, download_pdb
 from pandas.core.common import flatten
 from math import ceil
+
+from general_utils.pdb_utils import get_pdb_adn_arn_online
 from pdb_to_mrc.miscellaneous import get_chains, move_pdb_center, get_cube_pdb
 
 
@@ -28,16 +30,14 @@ def pdb_percentage(percentage, executor=None):
   headers_csv = ['Pdb', 'Can Chains', 'Cube dimension']
 
   # Add ignore files
-  evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
-  f_evil_pdb = open(evil_pdb_path)
-  ignore_pdbs = f_evil_pdb.read().splitlines()
+  ignore_pdbs = get_ignore_pdbs()
 
   # List know can chains pdb
   know_can_chains_pdb_path = os.path.dirname(__file__) + '/../files/pdb_can_chains.csv'
 
   if os.path.exists(know_can_chains_pdb_path):
     pd_data_frame = pd.read_csv(know_can_chains_pdb_path,
-                                  converters={"Cube dimension": literal_eval})
+                                converters={"Cube dimension": literal_eval})
     can_chains_list = pd_data_frame.values.tolist()
 
     can_chains_list_name = pd_data_frame["Pdb"].tolist()
@@ -49,9 +49,9 @@ def pdb_percentage(percentage, executor=None):
   # Process
   all_names = get_all_pdb_name()  # 169315
   # all_names = all_names[:3]
-  for i in range(len(all_names) - 1, -1, -1):
-    if all_names[i] in ignore_pdbs or all_names[i] in can_chains_list_name:
-      all_names.pop(i)
+  all_names = np.setdiff1d(np.array(all_names), np.array(ignore_pdbs))
+  all_names = np.setdiff1d(np.array(all_names), np.array(can_chains_list_name))
+  all_names = all_names.tolist()
 
   # Add chains
   dirpath = tempfile.mkdtemp()
@@ -148,3 +148,33 @@ def remove_get_dirs(path, add_to_ignore_files=False, can_csv=1):
 
   f_evil_pdb.close()
   return result
+
+
+def get_pdb_no_work():
+  evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
+  if os.path.exists(evil_pdb_path):
+    f_evil_pdb = open(evil_pdb_path)
+    result = f_evil_pdb.read().splitlines()
+    f_evil_pdb.close()
+    return result
+  return []
+
+
+def get_pdb_adn_arn():
+  evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_adn_arn.txt'
+  result = []
+  if os.path.exists(evil_pdb_path):
+    f_pdb_adn_arn = open(evil_pdb_path)
+    result = f_pdb_adn_arn.read().splitlines()
+    f_pdb_adn_arn.close()
+  else:
+    result = get_pdb_adn_arn_online()
+    f = open(evil_pdb_path, "w+")
+    f.writelines("%s\n" % l for l in result)
+    f.close()
+
+  return result
+
+
+def get_ignore_pdbs():
+  return get_pdb_no_work() + get_pdb_adn_arn()

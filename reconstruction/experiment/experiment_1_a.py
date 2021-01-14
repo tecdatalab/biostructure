@@ -4,6 +4,7 @@ import random
 import shutil
 import time
 import copy
+import numpy as np
 from sklearn.metrics import mean_squared_error
 
 from mpi4py import MPI
@@ -11,7 +12,7 @@ from mpi4py.futures import MPICommExecutor
 
 from csv_modules.csv_writer import write_in_file
 from experiment.utils_experiment_1 import gen_keys_experiemnts
-from experiment.utils_general import remove_get_dirs, pdb_percentage
+from experiment.utils_general import remove_get_dirs, pdb_percentage, get_ignore_pdbs
 from general_utils.download_utils import get_all_pdb_name, download_pdb
 from general_utils.list_utils import get_element_list
 from general_utils.math_utils import distance_3d_points
@@ -44,8 +45,7 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolutio
         all_names = pickle.load(open_file)
         open_file.close()
 
-      print("Do ", len(all_names), flush=True)
-      print(all_names, flush=True)
+      # print(all_names, flush=True)
       # all_names = ['7jsh']
       print("Before get pdb names")
 
@@ -58,19 +58,16 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolutio
       complete_pdb = remove_get_dirs(path_data, can_csv=2, add_to_ignore_files=add_to_ignore_files)
       ignore_pdbs += complete_pdb
       # Add ignore files
-      evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
-      f_evil_pdb = open(evil_pdb_path)
-      ignore_pdbs += f_evil_pdb.read().splitlines()
-      f_evil_pdb.close()
+      ignore_pdbs += get_ignore_pdbs()
 
       if can_elements is None:
         can_elements = len(all_names)
 
       parallel_jobs = []
 
-      for pdb_name in all_names[:can_elements]:
-        if pdb_name in ignore_pdbs:
-          continue
+      all_names = np.setdiff1d(np.array(all_names), np.array(ignore_pdbs)).tolist()[:can_elements]
+      print("Do ", len(all_names), flush=True)
+      for pdb_name in all_names:
 
         resolution = random.uniform(resolution_range[0], resolution_range[1])
         # resolution = 3.8680
@@ -162,7 +159,7 @@ def do_test_a_struct(pdb_name, headers_csv, result_cvs_file, chains_to_segment, 
       list_possibles_pdb.remove(i)
       break
 
-  random.choice(list_possibles_pdb)
+  random.shuffle(list_possibles_pdb)
 
   for _i in range(min(can_chain_test, len(list_possibles_pdb))):
 
