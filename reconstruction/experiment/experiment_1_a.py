@@ -88,6 +88,7 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolutio
             myfile.write(str(f[2]))
             myfile.write("\n")
             myfile.write(str(type(e).__name__))
+            myfile.write("\n")
             myfile.write(str(e))
             myfile.write("\n\n\n\n")
 
