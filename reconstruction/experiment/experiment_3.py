@@ -67,6 +67,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
             myfile.write("\n")
             myfile.write(str(f[2]))
             myfile.write("\n")
+            myfile.write(str(type(e).__name__))
             myfile.write(str(e))
             myfile.write("\n\n\n\n")
 
