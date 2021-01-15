@@ -33,14 +33,13 @@ def get_similar_pdb_struct(pdb_name, can=10):
   json_dump = json.dumps(search_request)
   url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
   response = requests.get(url_get)
-  try:
-    var_result = json.loads(response.text)
-    result = []
-    for i in var_result["result_set"]:
-      result.append([i["identifier"].split("-")[0].lower(), i["score"]])
-    return result
-  except:
+  if response.status_code == 204:
     return []
+  var_result = json.loads(response.text)
+  result = []
+  for i in var_result["result_set"]:
+    result.append([i["identifier"].split("-")[0].lower(), i["score"]])
+  return result
 
 
 def get_similar_pdb_chain(pdb_name, chain, can=10):
@@ -74,14 +73,14 @@ def get_similar_pdb_chain(pdb_name, chain, can=10):
   json_dump = json.dumps(search_request)
   url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
   response = requests.get(url_get)
-  try:
-    var_result = json.loads(response.text)
-    result = []
-    for i in var_result["result_set"]:
-      result.append([i["identifier"].split("-")[0].lower(), i["score"]])
-    return result
-  except:
+  if response.status_code == 204:
     return []
+  var_result = json.loads(response.text)
+  result = []
+  for i in var_result["result_set"]:
+    result.append([i["identifier"].split("-")[0].lower(), i["score"]])
+  return result
+
 
 
 def get_pdb_adn_arn_online():
