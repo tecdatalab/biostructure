@@ -1,5 +1,6 @@
 import os
 import urllib.request
+from urllib.error import URLError
 import progressbar
 import shutil
 from general_utils.terminal_utils import get_out
@@ -32,7 +33,8 @@ def download_emd(id_code, exit_path, create_progress_bar=False):
     except Exception as e:
       if can_try < 0:
         raise e
-      can_try -= 1
+      if type(e) != URLError:
+        can_try -= 1
       time.sleep(20)
 
 
@@ -68,7 +70,8 @@ def download_pdb(id_code, exit_path, create_progress_bar=False):
     except Exception as e:
       if can_try < 0:
         raise e
-      can_try -= 1
+      if type(e) != URLError:
+        can_try -= 1
       time.sleep(20)
 
 
