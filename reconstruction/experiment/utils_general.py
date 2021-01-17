@@ -1,6 +1,4 @@
-import csv
 import os
-import pickle
 import shutil
 import tempfile
 import random
@@ -9,10 +7,9 @@ import numpy as np
 import pandas as pd
 from csv_modules.csv_writer import write_in_file
 from general_utils.download_utils import get_all_pdb_name, download_pdb
-from pandas.core.common import flatten
 from math import ceil
 
-from general_utils.pdb_utils import get_pdb_adn_arn_online
+from general_utils.pdb_utils import get_ignore_pdbs
 from pdb_to_mrc.miscellaneous import get_chains, move_pdb_center, get_cube_pdb
 
 
@@ -127,9 +124,10 @@ def remove_get_dirs(path, add_to_ignore_files=False, can_csv=1):
     for i in files_dir:
       if i.find(".") == -1:
         flag = False
-        continue
+        break
       if not i.split('.')[1] == 'csv':
         flag = False
+        break
 
     if len(files_dir) == can_csv and flag:
       result.append(dir_name)
@@ -138,8 +136,12 @@ def remove_get_dirs(path, add_to_ignore_files=False, can_csv=1):
       if add_to_ignore_files:
         all_pdb = True
         for i in files_dir:
+          if i.find(".") == -1:
+            all_pdb = False
+            break
           if i.split('.')[1] != 'pdb':
             all_pdb = False
+            break
 
         if all_pdb:
           f_evil_pdb.write(dir_name + '\n')
@@ -150,31 +152,3 @@ def remove_get_dirs(path, add_to_ignore_files=False, can_csv=1):
   return result
 
 
-def get_pdb_no_work():
-  evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
-  if os.path.exists(evil_pdb_path):
-    f_evil_pdb = open(evil_pdb_path)
-    result = f_evil_pdb.read().splitlines()
-    f_evil_pdb.close()
-    return result
-  return []
-
-
-def get_pdb_adn_arn():
-  evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_adn_arn.txt'
-  result = []
-  if os.path.exists(evil_pdb_path):
-    f_pdb_adn_arn = open(evil_pdb_path)
-    result = f_pdb_adn_arn.read().splitlines()
-    f_pdb_adn_arn.close()
-  else:
-    result = get_pdb_adn_arn_online()
-    f = open(evil_pdb_path, "w+")
-    f.writelines("%s\n" % l for l in result)
-    f.close()
-
-  return result
-
-
-def get_ignore_pdbs():
-  return get_pdb_no_work() + get_pdb_adn_arn()

@@ -12,11 +12,11 @@ from mpi4py.futures import MPICommExecutor
 
 from csv_modules.csv_writer import write_in_file
 from experiment.utils_experiment_1 import gen_keys_experiemnts
-from experiment.utils_general import remove_get_dirs, pdb_percentage, get_ignore_pdbs, get_pdb_no_work
+from experiment.utils_general import remove_get_dirs, pdb_percentage
 from general_utils.download_utils import get_all_pdb_name, download_pdb
 from general_utils.list_utils import get_element_list
 from general_utils.math_utils import distance_3d_points
-from general_utils.pdb_utils import get_similar_pdb_struct, get_similar_pdb_chain
+from general_utils.pdb_utils import get_similar_pdb_struct, get_similar_pdb_chain, get_pdb_no_work, get_ignore_pdbs
 from pdb_to_mrc.miscellaneous import get_chains
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_graph.graph_algorithm import graph_aligning
@@ -68,7 +68,6 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolutio
       parallel_jobs = []
 
       all_names = np.setdiff1d(np.array(all_names), np.array(ignore_pdbs)).tolist()[:can_elements]
-      complete_list_pdb_names = np.setdiff1d(np.array(get_all_pdb_name()), np.array(get_pdb_no_work())).tolist()
       print("Do ", len(all_names), flush=True)
       for pdb_name in all_names:
 
@@ -77,11 +76,10 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolutio
 
         # print(pdb_name, con2/can_elements)
         parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_chain,
-                                                        result_cvs_struct, resolution, can_chain_test, can_struct_test,
-                                                        complete_list_pdb_names),
+                                                        result_cvs_struct, resolution, can_chain_test, can_struct_test),
                               resolution])
         # do_parallel_test_a_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, resolution, can_chain_test,
-        # can_struct_test, complete_list_pdb_names)
+        # can_struct_test)
       for f in parallel_jobs:
         try:
           f[1].result()
@@ -98,7 +96,7 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolutio
 
 
 def do_parallel_test_a_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, resolution,
-                           can_chain_test, can_struct_test, complete_list_pdb_names):
+                           can_chain_test, can_struct_test):
   local_path = path + "/" + pdb_name
   if not os.path.exists(local_path):
     os.makedirs(local_path)
@@ -140,10 +138,10 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, 
                     'Time segment', 'Time center', 'Time test', 'Time graph', 'Time alignment', 'Time EMAN2']
 
   do_test_a_chain(pdb_name, headers_chain, result_cvs_chain, chains_to_segment, resolution, local_path, time_eman,
-                  time_segment, can_chain_test, complete_list_pdb_names)
+                  time_segment, can_chain_test)
 
   do_test_a_struct(pdb_name, headers_struct, result_cvs_struct, chains_to_segment, resolution, local_path, time_eman,
-                   time_segment, can_struct_test, complete_list_pdb_names)
+                   time_segment, can_struct_test)
 
   dirs = os.listdir(local_path)
 
@@ -154,16 +152,12 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, 
 
 
 def do_test_a_struct(pdb_name, headers_csv, result_cvs_file, chains_to_segment, resolution, path_write, time_eman,
-                     time_segment, can_chain_test, complete_list_pdb_names):
+                     time_segment, can_chain_test):
   original_segments = []
   for i in chains_to_segment.keys():
     original_segments.append(chains_to_segment[i])
 
   list_possibles_pdb = get_similar_pdb_struct(pdb_name)
-  list_possibles_pdb_name = np.intersect1d(np.array([i[0] for i in list_possibles_pdb]), np.array(complete_list_pdb_names)).tolist()
-  for i in range(len(list_possibles_pdb)-1, -1, -1):
-    if list_possibles_pdb[i][0] not in list_possibles_pdb_name:
-      list_possibles_pdb.pop(i)
 
   for i in list_possibles_pdb:
     if i[0] == pdb_name:
@@ -253,7 +247,7 @@ def get_segments_struct_test(pdb_score, path_work, resolution):
 
 
 def do_test_a_chain(pdb_name, headers_csv, result_cvs_file, chains_to_segment, resolution, path_write, time_eman,
-                    time_segment, can_chain_test, complete_list_pdb_names):
+                    time_segment, can_chain_test):
   original_segments = []
   list_possibles_pdb_chain = []
   for i in chains_to_segment.keys():
@@ -261,12 +255,6 @@ def do_test_a_chain(pdb_name, headers_csv, result_cvs_file, chains_to_segment, r
 
     # Chains to change
     list_possibles_pdb_chain += get_segments_chain_test(pdb_name, i)
-
-  list_possibles_pdb_names = np.intersect1d(np.array([i[0] for i in list_possibles_pdb_chain]),
-                                            np.array(complete_list_pdb_names)).tolist()
-  for i in range(len(list_possibles_pdb_chain)-1, -1, -1):
-    if list_possibles_pdb_chain[i][0] not in list_possibles_pdb_names:
-      list_possibles_pdb_chain.pop(i)
 
   random.shuffle(list_possibles_pdb_chain)
 

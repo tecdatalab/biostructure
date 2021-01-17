@@ -8,7 +8,8 @@ from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 
 from csv_modules.csv_writer import write_in_file
-from experiment.utils_general import remove_get_dirs, get_ignore_pdbs
+from experiment.utils_general import remove_get_dirs
+from general_utils.pdb_utils import get_ignore_pdbs
 from general_utils.download_utils import get_all_pdb_name, download_pdb
 from general_utils.list_utils import generate_binary_matrix
 from pdb_to_mrc.miscellaneous import get_chains
