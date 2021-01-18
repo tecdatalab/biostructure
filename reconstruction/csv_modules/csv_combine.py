@@ -70,7 +70,7 @@ def percentage_no_match(x):
   return can_no_match_chains/can_chains
 
 
-def combine_files(exit_file, parent_path):
+def combine_files_exp_1(exit_file, parent_path):
   result = []
   find_csv_filenames(parent_path, result)
   print(result)
@@ -92,3 +92,24 @@ def combine_files(exit_file, parent_path):
 
   # export to csv
   combined_csv.to_csv(exit_file, index=False, encoding='utf-8-sig')
+
+
+def combine_files_exp_1a(exit_file_struct, exit_file_chain, parent_path):
+  result_struct = []
+  result_chain = []
+  find_csv_filenames(parent_path, result_struct, suffix="struct.csv")
+  find_csv_filenames(parent_path, result_chain, suffix="chain.csv")
+  print(result_struct, result_chain)
+
+  # combine all files in the list
+  combined_csv_struct = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
+                                                       "Work Chains": literal_eval}) for f in result_struct])
+  combined_csv_struct['number_chains'] = combined_csv_struct['Chains'].apply(lambda x: len(x))
+  combined_csv_struct['number_work_chains'] = combined_csv_struct['Work Chains'].apply(lambda x: len(x))
+
+  combined_csv_chains = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval}) for f in result_chain])
+  combined_csv_chains['number_chains'] = combined_csv_chains['Chains'].apply(lambda x: len(x))
+
+  # export to csv
+  combined_csv_struct.to_csv(exit_file_struct, index=False, encoding='utf-8-sig')
+  combined_csv_chains.to_csv(exit_file_chain, index=False, encoding='utf-8-sig')

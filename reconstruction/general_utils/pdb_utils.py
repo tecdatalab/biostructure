@@ -57,7 +57,7 @@ def get_similar_pdb_struct(pdb_name, can=10):
               "parameters": {
                 "operator": "in",
                 "negation": True,
-                "value": list(map(lambda x:x.lower(), get_pdb_no_work())),
+                "value": list(map(lambda x:x.upper(), get_pdb_no_work())),
                 "attribute": "rcsb_entry_container_identifiers.entry_id"
               }
             }
@@ -156,7 +156,7 @@ def get_similar_pdb_chain(pdb_name, chain, can=10):
               "parameters": {
                 "operator": "in",
                 "negation": True,
-                "value": list(map(lambda x: x.lower(), get_pdb_no_work())),
+                "value": list(map(lambda x: x.upper(), get_pdb_no_work())),
                 "attribute": "rcsb_entry_container_identifiers.entry_id"
               }
             }

@@ -4,7 +4,7 @@ import pathlib
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 from animation.experiment1_animation import create_ani_expe_1a
-from csv_modules.csv_combine import combine_files
+from csv_modules.csv_combine import combine_files_exp_1
 from fit.fit_map_chimeraX import fit_map_in_map
 from reconstruction.semi_exact_cover import get_semi_exact_s
 from csv_modules.csv_writer import write_in_file
@@ -547,8 +547,8 @@ def experiment_3():
 def union_test():
   local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/data_experiment_1_a"
   # local_path = "/work/lcastillo/data_experiment_1_a"
-  combine_files('salida.csv',
-                local_path)
+  combine_files_exp_1('salida.csv',
+                      local_path)
 
 
 if __name__ == '__main__':

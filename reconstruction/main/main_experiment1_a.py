@@ -2,6 +2,7 @@ import sys
 import pathlib
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
+from csv_modules.csv_combine import combine_files_exp_1a
 
 def experiment_1_a():
   from experiment.experiment_1_a import do_parallel_test_a
@@ -16,5 +17,12 @@ def experiment_1_a():
   print("Finish")
 
 
+def union_test():
+  local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/data_experiment_1_a_a_v1"
+  # local_path = "/work/lcastillo/data_experiment_1_a_a_v1"
+  combine_files_exp_1a('salida_struct.csv', 'salida_chain.csv',
+                       local_path)
+
 if __name__ == '__main__':
   experiment_1_a()
+  # union_test()

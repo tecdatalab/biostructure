@@ -3,7 +3,7 @@ import pathlib
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
-from csv_modules.csv_combine import combine_files
+from csv_modules.csv_combine import combine_files_exp_1
 
 
 def experiment_1():
@@ -21,8 +21,8 @@ def experiment_1():
 def union_test():
   local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/data_experiment_1_a"
   # local_path = "/work/lcastillo/data_experiment_1_a"
-  combine_files('salida.csv',
-                local_path)
+  combine_files_exp_1('salida.csv',
+                      local_path)
 
 
 if __name__ == '__main__':

@@ -4,6 +4,7 @@ import time
 import numpy as np
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
+import traceback
 
 from csv_modules.csv_writer import write_in_file
 from experiment.utils_experiment_1 import gen_keys_experiemnts
@@ -74,6 +75,8 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
             myfile.write(str(type(e).__name__))
             myfile.write("\n")
             myfile.write(str(e))
+            myfile.write("\n")
+            myfile.write(str(traceback.format_exc()))
             myfile.write("\n\n\n\n")
 
 

@@ -6,6 +6,7 @@ import time
 import copy
 import numpy as np
 from sklearn.metrics import mean_squared_error
+import traceback
 
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
@@ -48,7 +49,7 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolutio
       # print(all_names, flush=True)
       # all_names = ['1aig']
       # all_names = ['1q8l']
-      # all_names = ['1cto']
+      # all_names = ['7jg5']
       print("Before get pdb names")
 
       path = os.path.abspath(path_data)
@@ -92,6 +93,8 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolutio
             myfile.write(str(type(e).__name__))
             myfile.write("\n")
             myfile.write(str(e))
+            myfile.write("\n")
+            myfile.write(str(traceback.format_exc()))
             myfile.write("\n\n\n\n")
 
 
