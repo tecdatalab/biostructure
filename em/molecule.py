@@ -67,6 +67,13 @@ class Molecule():
         self.labels = labels
         self.seg_masks = molecule_masks
 
+    def getDataAtContour(self, contour):
+        data = np.copy(self.emMap.data())
+        mask = self.contour_masks[contour]
+        data[np.logical_not(mask)]=0
+        return data
+
+
     def setData(self,data_array):
         self.emMap.set_data(data_array)
 
