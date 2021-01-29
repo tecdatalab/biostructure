@@ -1,6 +1,6 @@
 import os
 from general_utils.terminal_utils import get_out
-from pdb_to_mrc.miscellaneous import get_cube_pdb, move_pdb_center
+from general_utils.pdb_utils import get_cube_pdb, move_pdb_center
 
 
 def pdb_to_mrc_chains(create_original, verbose, resolution, input_file, output_dir, chains=None, div_can=1,

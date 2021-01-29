@@ -15,25 +15,11 @@ def find_csv_filenames(path_to_dir, result, suffix=".csv"):
 
 
 def count_no_match_chains(x):
-  f_chains = x['Father Chains']
-  t_chains = x['Test Chains']
-  match = x['Match']
+  can_chains_f = x['number_chains']
+  can_chains_t = x['number_test_chains']
+  can_match = x['total_matched']
 
-  dicc_chains = {}
-  test = []
-  check_test = []
-  for i in range(len(f_chains)):
-    dicc_chains[f_chains[i]] = i+1
-
-  for i in t_chains:
-    test.append(dicc_chains[i])
-
-  for i in match:
-    check_test.append(i[1])
-
-  result = np.setdiff1d(test, check_test)
-
-  return result.shape[0]
+  return min(can_chains_f, can_chains_t) - can_match
 
 
 def count_error(x):
@@ -52,22 +38,30 @@ def count_ok(x):
   return cont
 
 def percentage_wrong(x):
-  can_chains = x['number_test_chains']
+  can_chains = x['total_matched']
   can_wrong = x['number_wrong_chains']
 
   return can_wrong/can_chains
 
 def percentage_ok(x):
-  can_chains = x['number_test_chains']
+  can_chains = x['total_matched']
   can_ok = x['number_ok_chains']
 
   return can_ok/can_chains
 
 def percentage_no_match(x):
-  can_chains = x['number_test_chains']
+  can_chains_f = x['number_chains']
+  can_chains_t = x['number_test_chains']
   can_no_match_chains= x['number_no_match_chains']
 
-  return can_no_match_chains/can_chains
+  return can_no_match_chains/min(can_chains_f, can_chains_t)
+
+def percentage_match(x):
+  can_match = x['total_matched']
+  can_chains_f = x['number_chains']
+  can_chains_t = x['number_test_chains']
+
+  return can_match/min(can_chains_f, can_chains_t)
 
 
 def combine_files_exp_1(exit_file, parent_path):
@@ -83,12 +77,14 @@ def combine_files_exp_1(exit_file, parent_path):
   # Process data
   combined_csv['number_chains'] = combined_csv['Father Chains'].apply(lambda x: len(x))
   combined_csv['number_test_chains'] = combined_csv['Test Chains'].apply(lambda x: len(x))
+  combined_csv['total_matched'] = combined_csv['Match'].apply(lambda x: len(x))
   combined_csv['number_wrong_chains'] = combined_csv['Match'].apply(count_error)
   combined_csv['number_ok_chains'] = combined_csv['Match'].apply(count_ok)
   combined_csv['number_no_match_chains'] = combined_csv.apply(count_no_match_chains, axis=1)
   combined_csv['percentage_wrong'] = combined_csv.apply(percentage_wrong, axis=1)
   combined_csv['percentage_ok'] = combined_csv.apply(percentage_ok, axis=1)
   combined_csv['percentage_no_match'] = combined_csv.apply(percentage_no_match, axis=1)
+  combined_csv['percentage_match'] = combined_csv.apply(percentage_match, axis=1)
 
   # export to csv
   combined_csv.to_csv(exit_file, index=False, encoding='utf-8-sig')

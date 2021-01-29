@@ -10,10 +10,9 @@ from mpi4py.futures import MPICommExecutor
 import traceback
 
 from csv_modules.csv_writer import write_in_file
-from general_utils.pdb_utils import get_ignore_pdbs
+from general_utils.pdb_utils import get_ignore_pdbs, get_chains_pdb
 from general_utils.download_utils import download_pdb
 from general_utils.list_utils import generate_binary_matrix
-from pdb_to_mrc.miscellaneous import get_chains
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_mrc.generate import get_mrc_one
 from reconstruction.DLX import solve, gen_y_dicc, gen_x_dicc
@@ -101,7 +100,7 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution):
 
   download_pdb(pdb_name, '{0}/{1}.pdb'.format(local_path, pdb_name))
   # Maps creation
-  chains = get_chains('{0}/{1}.pdb'.format(local_path, pdb_name))
+  chains = get_chains_pdb('{0}/{1}.pdb'.format(local_path, pdb_name))
   # print(chains)
 
   start_time = time.time()

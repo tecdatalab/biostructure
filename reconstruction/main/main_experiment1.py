@@ -19,12 +19,13 @@ def experiment_1():
 
 
 def union_test():
-  local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/data_experiment_1_a"
+  local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/data_experiment_1_a_v2"
   # local_path = "/work/lcastillo/data_experiment_1_a"
-  combine_files_exp_1('salida.csv',
+  combine_files_exp_1('salida_exper1_v2.csv',
                       local_path)
 
 
 if __name__ == '__main__':
-  experiment_1()
+  #experiment_1()
   #result = get_similar_pdb("6LFS")
+  union_test()

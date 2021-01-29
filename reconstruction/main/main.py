@@ -11,14 +11,14 @@ from csv_modules.csv_writer import write_in_file
 from general_utils.list_utils import get_element_list, generate_binary_matrix
 from general_utils.math_utils import chance_base_point, get_vector_move_1to2
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
-from pdb_to_mrc.miscellaneous import get_chains, move_pdb_center
-from general_utils.download_utils import download_pdb, download_emd, get_all_pdb_name
+from general_utils.pdb_utils import get_chains_pdb, move_pdb_center, get_all_pdb_name
+from general_utils.download_utils import download_pdb, download_emd
 from process_graph.graph_algorithm import graph_aligning
 from process_graph.process_graph_utils import generate_graph
 from process_mrc.generate import get_mrc_segments, \
   get_mrc_synthetic_segments_pdb, get_mrc_one
-from process_mrc.miscellaneous import get_center_point, \
-  get_cube_len_angstrom, get_mass_angstrom, get_mrc_level
+from process_mrc.miscellaneous import get_center_point
+from general_utils.mrc_uilts import get_mass_angstrom, get_mrc_level, get_cube_len_angstrom
 from globals.global_values import maps_with_pdb_origin, maps_with_pdb_origin_problems
 from metric.metrics_mrc import get_geometric_overlap_p, get_cross_correlation
 
@@ -90,7 +90,7 @@ def fitting_process(verbose, path_map1, path_map2, segments_graph1, segments_gra
 
   # Match graphs
   try:
-    result = graph_aligning(graph1, graph2, 1, False)
+    alignment_note, result = graph_aligning(graph1, graph2, 1, False)
   except Exception as e:
     raise Exception('Error to graph aligning, the error is : {0}'.format(str(e)))
 
@@ -222,10 +222,10 @@ def main_1():
   download_pdb('6m03', '{0}/6m03.pdb'.format(path))
 
   # Maps creation
-  chains = get_chains('{0}/175d.pdb'.format(path))
+  chains = get_chains_pdb('{0}/175d.pdb'.format(path))
   pdb_to_mrc_chains(True, False, 5.0, '{0}/175d.pdb'.format(path), path, chains, 5)
 
-  chains = get_chains('{0}/6m03.pdb'.format(path))
+  chains = get_chains_pdb('{0}/6m03.pdb'.format(path))
   pdb_to_mrc_chains(True, False, 5.0, '{0}/6m03.pdb'.format(path), path, chains, 5)
 
   # Segments generation
@@ -247,7 +247,7 @@ def main_2():
   download_pdb('175d', '{0}/175d.pdb'.format(path))
 
   # Maps creation
-  chains = get_chains('{0}/175d.pdb'.format(path))
+  chains = get_chains_pdb('{0}/175d.pdb'.format(path))
   pdb_to_mrc_chains(True, False, 5.0, '{0}/175d.pdb'.format(path), path, chains, len(chains))
 
   # Segments generation
@@ -374,7 +374,7 @@ def main_8():
   download_pdb('175d', '{0}/175d.pdb'.format(path))
 
   # Maps creation
-  chains = get_chains('{0}/175d.pdb'.format(path))
+  chains = get_chains_pdb('{0}/175d.pdb'.format(path))
   pdb_to_mrc_chains(True, False, 5.0, '{0}/175d.pdb'.format(path), path, chains, len(chains))
 
   # Segments generation

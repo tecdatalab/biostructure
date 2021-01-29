@@ -6,16 +6,15 @@ from ast import literal_eval
 import numpy as np
 import pandas as pd
 from csv_modules.csv_writer import write_in_file
-from general_utils.download_utils import get_all_pdb_name, download_pdb
+from general_utils.download_utils import download_pdb
 from math import ceil
 
-from general_utils.pdb_utils import get_ignore_pdbs
-from pdb_to_mrc.miscellaneous import get_chains, move_pdb_center, get_cube_pdb
+from general_utils.pdb_utils import get_ignore_pdbs, get_chains_pdb, get_cube_pdb, move_pdb_center, get_all_pdb_name
 
 
 def get_parallel_can_chains_chunk(pdb_name, dirpath):
   download_pdb(pdb_name, '{0}/{1}.pdb'.format(dirpath, pdb_name))
-  chains = get_chains('{0}/{1}.pdb'.format(dirpath, pdb_name))
+  chains = get_chains_pdb('{0}/{1}.pdb'.format(dirpath, pdb_name))
   move_pdb_center('{0}/{1}.pdb'.format(dirpath, pdb_name))
   cube_dimensions = get_cube_pdb('{0}/{1}.pdb'.format(dirpath, pdb_name))
   result = [pdb_name, len(chains), cube_dimensions]

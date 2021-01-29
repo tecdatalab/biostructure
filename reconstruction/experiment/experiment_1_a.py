@@ -14,11 +14,11 @@ from mpi4py.futures import MPICommExecutor
 from csv_modules.csv_writer import write_in_file
 from experiment.utils_experiment_1 import gen_keys_experiemnts
 from experiment.utils_general import remove_get_dirs, pdb_percentage
-from general_utils.download_utils import get_all_pdb_name, download_pdb
+from general_utils.download_utils import download_pdb
 from general_utils.list_utils import get_element_list
 from general_utils.math_utils import distance_3d_points
-from general_utils.pdb_utils import get_similar_pdb_struct, get_similar_pdb_chain, get_pdb_no_work, get_ignore_pdbs
-from pdb_to_mrc.miscellaneous import get_chains
+from general_utils.pdb_utils import get_similar_pdb_struct, get_similar_pdb_chain, get_pdb_no_work, get_ignore_pdbs, \
+    get_chains_pdb, get_all_pdb_name
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_graph.graph_algorithm import graph_aligning
 from process_graph.process_graph_utils import generate_graph
@@ -106,7 +106,7 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, 
 
   download_pdb(pdb_name, '{0}/{1}.pdb'.format(local_path, pdb_name))
   # Maps creation
-  chains = get_chains('{0}/{1}.pdb'.format(local_path, pdb_name))
+  chains = get_chains_pdb('{0}/{1}.pdb'.format(local_path, pdb_name))
 
   # print(chains)
   # combinations = combinations_12n(len(chains))[1:]
@@ -194,7 +194,7 @@ def do_test_a_struct(pdb_name, headers_csv, result_cvs_file, chains_to_segment, 
     time_graph = time.time() - start_time
 
     start_time = time.time()
-    result = graph_aligning(graph1, graph2, 2, False)
+    alignment_note, result = graph_aligning(graph1, graph2, 2, False)
     time_aligning = time.time() - start_time
 
     time_center_test = 0
@@ -228,7 +228,7 @@ def do_test_a_struct(pdb_name, headers_csv, result_cvs_file, chains_to_segment, 
 def get_segments_struct_test(pdb_score, path_work, resolution):
   download_pdb(pdb_score[0], '{0}/{1}.pdb'.format(path_work, pdb_score[0]))
   # Maps creation
-  chains = get_chains('{0}/{1}.pdb'.format(path_work, pdb_score[0]))
+  chains = get_chains_pdb('{0}/{1}.pdb'.format(path_work, pdb_score[0]))
 
   pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(path_work, pdb_score[0]), path_work, chains,
                     len(chains))
@@ -288,7 +288,7 @@ def do_test_a_chain(pdb_name, headers_csv, result_cvs_file, chains_to_segment, r
     time_graph = time.time() - start_time
 
     start_time = time.time()
-    result = graph_aligning(graph1, graph2, 2, False)
+    alignment_note, result = graph_aligning(graph1, graph2, 2, False)
     time_aligning = time.time() - start_time
 
     time_center_test = 0
@@ -332,7 +332,7 @@ def get_segments_chain_test(pdb_name, chain_for_test):
 def get_zd_descriptors_chain_pdb(pdb_work, zd_descriptors_compare, path_work, resolution):
   download_pdb(pdb_work, '{0}/{1}.pdb'.format(path_work, pdb_work))
   # Maps creation
-  chains = get_chains('{0}/{1}.pdb'.format(path_work, pdb_work))
+  chains = get_chains_pdb('{0}/{1}.pdb'.format(path_work, pdb_work))
 
   pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(path_work, pdb_work), path_work, chains,
                     len(chains))

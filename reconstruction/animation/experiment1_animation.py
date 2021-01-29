@@ -4,7 +4,7 @@ import os
 from shutil import copyfile
 
 from general_utils.download_utils import download_pdb
-from pdb_to_mrc.miscellaneous import get_chains
+from general_utils.pdb_utils import get_chains_pdb
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 
 
@@ -33,7 +33,7 @@ def create_ani_expe_1a(dir_path, name_pdb, chains_father,
     download_pdb('{1}', '{0}/{1}.pdb'.format(dir_path, name_pdb))
 
     # Maps creation
-    chains = get_chains('{0}/{1}.pdb'.format(dir_path, name_pdb))
+    chains = get_chains_pdb('{0}/{1}.pdb'.format(dir_path, name_pdb))
     pdb_to_mrc_chains(True, False, resolution, '{0}/{1}.pdb'.format(dir_path, name_pdb), dir_path, chains, len(chains))
     os.remove('{0}/{1}.pdb'.format(dir_path, name_pdb))
 

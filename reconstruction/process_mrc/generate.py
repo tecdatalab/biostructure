@@ -1,7 +1,7 @@
 import sys
 import pathlib
 
-from process_mrc.miscellaneous import get_mrc_level
+from general_utils.mrc_uilts import get_mrc_level
 
 pathlib.Path(__file__).parent.absolute()
 from process_mrc.segment import Segment

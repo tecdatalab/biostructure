@@ -23,14 +23,12 @@ def structural_similarity_node(graph1, graph2, g1_degree, g2_degree, node1, node
   node1_total_neighbors = get_total_neighbors_of_neighbors(graph1, node1, g1_degree)
   node2_total_neighbors = get_total_neighbors_of_neighbors(graph2, node2, g2_degree)
 
-  if float(min(node1_total_neighbors, node2_total_neighbors)) == float(max(node1_total_neighbors, node2_total_neighbors)):
+  if node1_total_neighbors == node2_total_neighbors:
     sim_error = 1.0
   else:
-    if max(node1_total_neighbors, node2_total_neighbors) == 0:
-      sim_error = 0
-    else:
-      sim_error = \
-      float(min(node1_total_neighbors, node2_total_neighbors)) / float(max(node1_total_neighbors, node2_total_neighbors))
+    sim_error = \
+      float(min(node1_total_neighbors, node2_total_neighbors)) / float(
+        max(node1_total_neighbors, node2_total_neighbors))
 
   similarity = 1.0 - sim_error
   return similarity  # Definir como 0 el valor de igualdad total, entre mas mayor menos se parecen
@@ -59,13 +57,10 @@ def compute_aligning_costs(graph1, graph2, g1_nodes_with_data, g2_nodes_with_dat
     for j in range(
       graph2.number_of_nodes()):  # Para todos los nodos calcular su similidad (Z) y potencial de convertirse en raiz (C)
 
-      if float(g1_degree[i][1] + g2_degree[j][1]) == float(max_degree_g1 + max_degree_g2):
+      if (float(g1_degree[i][1] + g2_degree[j][1]) == float(max_degree_g1 + max_degree_g2)):
         sim_val = 1.0
       else:
-        if max_degree_g1 + max_degree_g2 == 0:
-          sim_val = 0
-        else:
-          sim_val = float(g1_degree[i][1] + g2_degree[j][1]) / float(max_degree_g1 + max_degree_g2)
+        sim_val = float(g1_degree[i][1] + g2_degree[j][1]) / float(max_degree_g1 + max_degree_g2)
       nodes_slr_sim = 1.0 - sim_val
       total_str_sim = \
         float(structural_similarity_node(graph1, graph2, g1_degree, g2_degree, g1_degree[i][0], g2_degree[j][0]))
@@ -151,7 +146,7 @@ def get_best_ij(i_list, j_list, matrix_z, g1_dic, g2_dic, total_g1_neighbors, to
   actual_val = matrix_z[g1_dic[total_g1_neighbors[i_list[0]]]][g2_dic[total_g2_neighbors[j_list[0]]]]
   for i in range(1, len(i_list)):
     x = matrix_z[g1_dic[total_g1_neighbors[i_list[i]]]][g2_dic[total_g2_neighbors[j_list[i]]]]
-    if actual_val < x:
+    if actual_val > x:
       actual_val = x
       actual_i = i_list[i]
       actual_j = j_list[i]
@@ -169,6 +164,7 @@ def graph_aligning(graph1, graph2, min_similarity_value, repair_external_values=
   C, Z = compute_aligning_costs(graph1, graph2, g1_nodes_with_data,
                                 g2_nodes_with_data)  # Computar matriz con la capacidad de convertirse en raiz(C) o similaridad (Z)
   result = []
+  error_value_result = 0
 
   g1_mapping = []  # Se almacenan todos los nodos que fueron mapeados (con su valor real)
   g2_mapping = []
@@ -177,6 +173,7 @@ def graph_aligning(graph1, graph2, min_similarity_value, repair_external_values=
   most_similarity_value = np.amin(C)
   while most_similarity_value <= min_similarity_value:
     i, j = np.where(C == most_similarity_value)
+    error_value_result += most_similarity_value
     '''Cambiar esto por escogencia probilistica'''
     result.append([g1_nodes[i[0]], g2_nodes[j[0]]])  # Se agrega el nuevo match
     g1_mapping.append(g1_nodes[i[0]])  # Se agrega el nuevo match los mapedos
@@ -197,6 +194,7 @@ def graph_aligning(graph1, graph2, min_similarity_value, repair_external_values=
       i, j = temp[0], temp[1]
       if Z[i][j] == np.Inf:
         continue
+      error_value_result += Z[i][j]
       result.append([g1_nodes[i], g2_nodes[j]])
       g1_mapping.append(g1_nodes[i])
       g2_mapping.append(g2_nodes[j])
@@ -213,8 +211,9 @@ def graph_aligning(graph1, graph2, min_similarity_value, repair_external_values=
 
     most_similarity_value = np.amin(C)
 
-  if not repair_external_values: return result
+  if not repair_external_values: return error_value_result + (len(result) - min(len(g1_nodes), len(g2_nodes))), result
   '''Arreglar el problema de los valores externos'''
+  '''En general el codigo esta un poco tocado hay que revisarlo'''
   total_g1_neighbors = np.setdiff1d(total_g1_neighbors,
                                     g1_mapping)  # Se limpian los vecinos con los elementos que ya fueron mapeados
   total_g2_neighbors = np.setdiff1d(total_g2_neighbors, g2_mapping)
@@ -226,6 +225,7 @@ def graph_aligning(graph1, graph2, min_similarity_value, repair_external_values=
       i, j = np.where(N == max_similarity_value)
       i, j = get_best_ij(i, j, Z, g1_dic, g2_dic, total_g1_neighbors,
                          total_g2_neighbors)  # De todos los posibles valores a hacer match, hacer match con el mejor
+      error_value_result += Z[i][j]
 
       result.append([total_g1_neighbors[i], total_g2_neighbors[j]])
       g1_mapping.append(total_g1_neighbors[i])
@@ -242,4 +242,4 @@ def graph_aligning(graph1, graph2, min_similarity_value, repair_external_values=
 
       total_g1_neighbors = np.setdiff1d(total_g1_neighbors, g1_mapping)
       total_g2_neighbors = np.setdiff1d(total_g2_neighbors, g2_mapping)
-  return result
+  return error_value_result+(len(result) - min(len(g1_nodes), len(g2_nodes))), result
