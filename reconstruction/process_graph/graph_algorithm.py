@@ -211,7 +211,7 @@ def graph_aligning(graph1, graph2, min_similarity_value, repair_external_values=
 
     most_similarity_value = np.amin(C)
 
-  if not repair_external_values: return error_value_result + (len(result) - min(len(g1_nodes), len(g2_nodes))), result
+  if not repair_external_values: return error_value_result +(min(len(g1_nodes), len(g2_nodes)) - len(result)), result
   '''Arreglar el problema de los valores externos'''
   '''En general el codigo esta un poco tocado hay que revisarlo'''
   total_g1_neighbors = np.setdiff1d(total_g1_neighbors,
@@ -242,4 +242,4 @@ def graph_aligning(graph1, graph2, min_similarity_value, repair_external_values=
 
       total_g1_neighbors = np.setdiff1d(total_g1_neighbors, g1_mapping)
       total_g2_neighbors = np.setdiff1d(total_g2_neighbors, g2_mapping)
-  return error_value_result+(len(result) - min(len(g1_nodes), len(g2_nodes))), result
+  return error_value_result+(min(len(g1_nodes), len(g2_nodes)) - len(result)), result

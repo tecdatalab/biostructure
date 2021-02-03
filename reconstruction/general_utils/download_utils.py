@@ -3,7 +3,6 @@ import urllib.request
 import progressbar
 import shutil
 
-from general_utils.pdb_utils import mmCIF_to_pdb
 from general_utils.terminal_utils import get_out
 import tempfile
 import time
@@ -35,6 +34,7 @@ def download_emd(id_code, exit_path, create_progress_bar=False):
   while True:
     random.shuffle(url_format_principal_list)
     flag = False
+    er = None
     for url_format_string in url_format_principal_list:
       try:
         download_biomolecular_zip_file(id_code, exit_path, url_format_string, 'emd_{0}.map.gz', 'emd_{0}.map',
@@ -42,6 +42,7 @@ def download_emd(id_code, exit_path, create_progress_bar=False):
         flag = True
         break
       except Exception as e:
+        er = e
         permit_errors_codes = ["421", "104"]
         flag_error = False
         for i in permit_errors_codes:
@@ -54,7 +55,7 @@ def download_emd(id_code, exit_path, create_progress_bar=False):
     if not flag:
       can_try -= 1
       if can_try < 0:
-        raise e
+        raise er
       else:
         time.sleep(15)
     else:
@@ -62,11 +63,14 @@ def download_emd(id_code, exit_path, create_progress_bar=False):
 
 
 def download_pdb(id_code, exit_path, create_progress_bar=False):
+  id_code = id_code.lower()
   ok_flag = False
+  er = None
   try:
     download_pdb_in_pdb(id_code, exit_path, create_progress_bar)
     ok_flag = True
   except Exception as e:
+    er = e
     ok_flag = False
 
   if not ok_flag:
@@ -74,10 +78,11 @@ def download_pdb(id_code, exit_path, create_progress_bar=False):
       download_pdb_in_mmCIF(id_code, exit_path, create_progress_bar)
       ok_flag = True
     except Exception as e:
+      er = e
       ok_flag = False
 
   if not ok_flag:
-    raise e
+    raise er
   else:
     return True
 
@@ -91,6 +96,7 @@ def download_pdb_in_pdb(id_code, exit_path, create_progress_bar=False):
   while True:
     random.shuffle(url_format_principal_list)
     flag = False
+    er = None
     for url_format_string in url_format_principal_list:
       try:
         download_biomolecular_zip_file(id_code, exit_path, url_format_string, 'pdb{0}.ent.gz', 'pdb{0}.ent',
@@ -98,6 +104,7 @@ def download_pdb_in_pdb(id_code, exit_path, create_progress_bar=False):
         flag = True
         break
       except Exception as e:
+        er = e
         permit_errors_codes = ["421", "104"]
         flag_error = False
         for i in permit_errors_codes:
@@ -110,7 +117,7 @@ def download_pdb_in_pdb(id_code, exit_path, create_progress_bar=False):
     if not flag:
       can_try -= 1
       if can_try < 0:
-        raise e
+        raise er
       else:
         time.sleep(15)
     else:
@@ -118,6 +125,8 @@ def download_pdb_in_pdb(id_code, exit_path, create_progress_bar=False):
 
 
 def download_pdb_in_mmCIF(id_code, exit_path, create_progress_bar=False):
+  from general_utils.pdb_utils import mmCIF_to_pdb
+  er = None
   can_try = 30
   url_format_principal_list = ['ftp://ftp.wwpdb.org/pub/pdb/data/structures/all/mmCIF/{0}.cif.gz',
                                'ftp://ftp.rcsb.org/pub/pdb/data/structures/all/mmCIF/{0}.cif.gz',
@@ -137,6 +146,7 @@ def download_pdb_in_mmCIF(id_code, exit_path, create_progress_bar=False):
         flag = True
         break
       except Exception as e:
+        er = e
         permit_errors_codes = ["421", "104"]
         flag_error = False
         for i in permit_errors_codes:
@@ -149,7 +159,7 @@ def download_pdb_in_mmCIF(id_code, exit_path, create_progress_bar=False):
     if not flag:
       can_try -= 1
       if can_try < 0:
-        raise e
+        raise er
       else:
         time.sleep(15)
     else:

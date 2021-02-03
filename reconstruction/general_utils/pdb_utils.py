@@ -1,10 +1,13 @@
 import json
 import math
 import os
+import shutil
+import tempfile
 from ftplib import FTP
 
 import numpy as np
 import requests
+
 
 from general_utils.string_utils import change_string
 from Bio.PDB import PDBParser
@@ -86,10 +89,7 @@ def get_similar_pdb_struct(pdb_name, can=10):
     },
     "return_type": "entry",
     "request_options": {
-      "pager": {
-        "start": 0,
-        "rows": can
-      },
+      "return_all_hits": True,
       "scoring_strategy": "combined",
       "sort": [
         {
@@ -106,12 +106,13 @@ def get_similar_pdb_struct(pdb_name, can=10):
     return []
   var_result = json.loads(response.text)
   result = []
-  for i in var_result["result_set"]:
-    result.append([i["identifier"].split("-")[0].lower(), i["score"]])
+  for i in var_result["result_set"][:can]:
+    if i["identifier"].split("-")[0].lower() != pdb_name.lower():
+      result.append([i["identifier"].split("-")[0].lower(), i["score"]])
   return result
 
 
-def get_similar_pdb_chain(pdb_name, chain, can=10):
+def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
   search_request = {
     "query": {
       "type": "group",
@@ -185,10 +186,7 @@ def get_similar_pdb_chain(pdb_name, chain, can=10):
     },
     "return_type": "entry",
     "request_options": {
-      "pager": {
-        "start": 0,
-        "rows": can
-      },
+      "return_all_hits": True,
       "scoring_strategy": "combined",
       "sort": [
         {
@@ -206,10 +204,87 @@ def get_similar_pdb_chain(pdb_name, chain, can=10):
     return []
   var_result = json.loads(response.text)
   result = []
-  for i in var_result["result_set"]:
-    result.append([i["identifier"].split("-")[0].lower(), i["score"]])
+  for i in var_result["result_set"][:can]:
+    if i["identifier"].split("-")[0].lower() != pdb_name.lower():
+      result.append([i["identifier"].split("-")[0].lower(), i["score"]])
   return result
 
+
+def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
+  from general_utils.download_utils import download_pdb
+  path_temp = tempfile.mkdtemp()
+  path_temp = os.path.abspath(path_temp)
+  temp_file_path = path_temp + "/" + pdb_name + ".pdb"
+  download_pdb(pdb_name, temp_file_path)
+  sequence = get_pdb_chain_sequence(temp_file_path, chain)
+  shutil.rmtree(path_temp)
+  search_request = {
+    "query": {
+      "type": "group",
+      "logical_operator": "and",
+      "nodes": [
+        {
+          "type": "group",
+          "logical_operator": "and",
+          "nodes": [
+            {
+              "type": "terminal",
+              "service": "text",
+              "parameters": {
+                "operator": "in",
+                "negation": True,
+                "value": list(map(lambda x: x.upper(), get_pdb_no_work())),
+                "attribute": "rcsb_entry_container_identifiers.entry_id"
+              }
+            },
+            {
+              "type": "terminal",
+              "service": "text",
+              "parameters": {
+                "operator": "contains_phrase",
+                "negation": True,
+                "value": "DNA,RNA,DNA-RNA",
+                "attribute": "struct_keywords.pdbx_keywords"
+              }
+            }
+          ]
+        },
+        {
+          "type": "terminal",
+          "service": "sequence",
+          "parameters": {
+            "evalue_cutoff": 0.1,
+            "identity_cutoff": 0,
+            "target": "pdb_protein_sequence",
+            "value": sequence
+          }
+        }
+      ]
+    },
+    "return_type": "entry",
+    "request_options": {
+      "return_all_hits": True,
+      "scoring_strategy": "sequence",
+      "sort": [
+        {
+          "sort_by": "score",
+          "direction": "desc"
+        }
+      ]
+    }
+  }
+
+  json_dump = json.dumps(search_request)
+  url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
+  response = requests.get(url_get)
+  if response.status_code == 204:
+    return []
+  var_result = json.loads(response.text)
+  result = []
+  for i in var_result["result_set"][:can]:
+    if i["identifier"].split("-")[0].lower() != pdb_name.lower():
+      result.append([i["identifier"].split("-")[0].lower(), i["score"]])
+  return result
 
 def get_pdb_adn_arn_online():
   search_request = {

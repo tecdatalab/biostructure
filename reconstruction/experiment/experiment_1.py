@@ -1,18 +1,19 @@
 import os
 import random
 import time
+import traceback
+
 import numpy as np
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
-import traceback
 
 from csv_modules.csv_writer import write_in_file
 from experiment.utils_experiment_1 import gen_keys_experiemnts
 from experiment.utils_general import remove_get_dirs
-from general_utils.pdb_utils import get_ignore_pdbs, get_chains_pdb, get_all_pdb_name
 from general_utils.download_utils import download_pdb
 from general_utils.list_utils import get_element_list
 from general_utils.math_utils import distance_3d_points
+from general_utils.pdb_utils import get_ignore_pdbs, get_chains_pdb, get_all_pdb_name
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_graph.graph_algorithm import graph_aligning
 from process_graph.process_graph_utils import generate_graph

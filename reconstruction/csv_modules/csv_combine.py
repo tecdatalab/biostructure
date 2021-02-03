@@ -67,7 +67,7 @@ def percentage_match(x):
 def combine_files_exp_1(exit_file, parent_path):
   result = []
   find_csv_filenames(parent_path, result)
-  print(result)
+  # print(result)
 
   # combine all files in the list
   combined_csv = pd.concat([pd.read_csv(f, converters={"Father Chains": literal_eval,
@@ -95,7 +95,7 @@ def combine_files_exp_1a(exit_file_struct, exit_file_chain, parent_path):
   result_chain = []
   find_csv_filenames(parent_path, result_struct, suffix="struct.csv")
   find_csv_filenames(parent_path, result_chain, suffix="chain.csv")
-  print(result_struct, result_chain)
+  # print(result_struct, result_chain)
 
   # combine all files in the list
   combined_csv_struct = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,

@@ -3,22 +3,20 @@ import pickle
 import random
 import shutil
 import time
-import copy
-import numpy as np
-from sklearn.metrics import mean_squared_error
 import traceback
 
+import numpy as np
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
+from sklearn.metrics import mean_squared_error
 
 from csv_modules.csv_writer import write_in_file
-from experiment.utils_experiment_1 import gen_keys_experiemnts
 from experiment.utils_general import remove_get_dirs, pdb_percentage
 from general_utils.download_utils import download_pdb
 from general_utils.list_utils import get_element_list
 from general_utils.math_utils import distance_3d_points
-from general_utils.pdb_utils import get_similar_pdb_struct, get_similar_pdb_chain, get_pdb_no_work, get_ignore_pdbs, \
-    get_chains_pdb, get_all_pdb_name
+from general_utils.pdb_utils import get_similar_pdb_struct, get_similar_pdb_chain_structural, get_ignore_pdbs, \
+  get_chains_pdb
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_graph.graph_algorithm import graph_aligning
 from process_graph.process_graph_utils import generate_graph
@@ -320,7 +318,7 @@ def do_test_a_chain(pdb_name, headers_csv, result_cvs_file, chains_to_segment, r
     write_in_file('{0}/{1}'.format(path_write, result_cvs_file), headers_csv, [[]])
 
 def get_segments_chain_test(pdb_name, chain_for_test):
-  list_possibles_pdb = get_similar_pdb_chain(pdb_name, chain_for_test)
+  list_possibles_pdb = get_similar_pdb_chain_structural(pdb_name, chain_for_test)
 
   for i in list_possibles_pdb:
     if i[0] == pdb_name:
