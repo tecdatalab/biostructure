@@ -85,7 +85,7 @@ def do_parallel_test(path_data,
 
       parallel_jobs = []
 
-      # all_names = np.setdiff1d(np.array(all_names), np.array(ignore_pdbs)).tolist()[:can_elements]
+      all_names = np.setdiff1d(np.array(all_names), np.array(ignore_pdbs)).tolist()[:can_elements]
       print("Do ", len(all_names), flush=True)
       for pdb_name in all_names:
         resolution = random.uniform(resolution_range[0], resolution_range[1])
