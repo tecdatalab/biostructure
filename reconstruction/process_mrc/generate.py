@@ -90,7 +90,7 @@ def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour
   return result, original_structure
 
 
-def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, list_segments, recommendedContour_p=None, calculate_Z3D=True):
+def get_mrc_synthetic_segments_pdb_list(mrc_path, folder_segments, list_segments, recommendedContour_p=None, calculate_Z3D=True):
   if recommendedContour_p == None:
     recommendedContour_p = get_mrc_level(mrc_path)
   myMolecule_complete = molecule.Molecule(mrc_path, recommendedContour=recommendedContour_p)

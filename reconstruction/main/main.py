@@ -16,7 +16,7 @@ from general_utils.download_utils import download_pdb, download_emd
 from process_graph.graph_algorithm import graph_aligning
 from process_graph.process_graph_utils import generate_graph
 from process_mrc.generate import get_mrc_segments, \
-  get_mrc_synthetic_segments_pdb, get_mrc_one
+  get_mrc_synthetic_segments_pdb_list, get_mrc_one
 from process_mrc.miscellaneous import get_center_point
 from general_utils.mrc_uilts import get_mass_angstrom, get_mrc_level, get_cube_len_angstrom
 from globals.global_values import maps_with_pdb_origin, maps_with_pdb_origin_problems
@@ -251,7 +251,7 @@ def main_2():
   pdb_to_mrc_chains(True, False, 5.0, '{0}/175d.pdb'.format(path), path, chains, len(chains))
 
   # Segments generation
-  segments_graph1, original_structure1 = get_mrc_synthetic_segments_pdb("{0}/175d/175d.mrc".format(path),
+  segments_graph1, original_structure1 = get_mrc_synthetic_segments_pdb_list("{0}/175d/175d.mrc".format(path),
                                                                         "{0}/175d".format(path), 7)
   figure1_shape = original_structure1.mask.shape
 
@@ -378,7 +378,7 @@ def main_8():
   pdb_to_mrc_chains(True, False, 5.0, '{0}/175d.pdb'.format(path), path, chains, len(chains))
 
   # Segments generation
-  segments_graph1, original_structure1 = get_mrc_synthetic_segments_pdb("{0}/175d/175d.mrc".format(path),
+  segments_graph1, original_structure1 = get_mrc_synthetic_segments_pdb_list("{0}/175d/175d.mrc".format(path),
                                                                         "{0}/175d".format(path), 7)
   initial_matrix = []
   for i in segments_graph1:

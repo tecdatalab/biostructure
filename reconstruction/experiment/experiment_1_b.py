@@ -53,20 +53,21 @@ def do_parallel_test(path_data,
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      if not os.path.exists(file_checkpoint):
-        all_names = pdb_percentage(percentage_data_set, executor)  # 169315
-        open_file = open(file_checkpoint, "wb")
-        pickle.dump(all_names, open_file)
-        open_file.close()
-      else:
-        open_file = open(file_checkpoint, "rb")
-        all_names = pickle.load(open_file)
-        open_file.close()
+      # if not os.path.exists(file_checkpoint):
+      #   all_names = pdb_percentage(percentage_data_set, executor)  # 169315
+      #   open_file = open(file_checkpoint, "wb")
+      #   pickle.dump(all_names, open_file)
+      #   open_file.close()
+      # else:
+      #   open_file = open(file_checkpoint, "rb")
+      #   all_names = pickle.load(open_file)
+      #   open_file.close()
 
       # print(all_names, flush=True)
       # all_names = ['1aig']
       # all_names = ['1q8l']
       # all_names = ['1a0t']
+      all_names = ['109l']
       print("Before get pdb names")
 
       path = os.path.abspath(path_data)

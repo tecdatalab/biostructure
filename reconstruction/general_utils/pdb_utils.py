@@ -357,18 +357,7 @@ def get_pdb_no_work():
 
 
 def get_pdb_adn_arn():
-  evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_adn_arn.txt'
-  result = []
-  if os.path.exists(evil_pdb_path):
-    f_pdb_adn_arn = open(evil_pdb_path)
-    result = f_pdb_adn_arn.read().splitlines()
-    f_pdb_adn_arn.close()
-  else:
-    result = get_pdb_adn_arn_online()
-    f = open(evil_pdb_path, "w+")
-    f.writelines("%s\n" % l for l in result)
-    f.close()
-
+  result = get_pdb_adn_arn_online()
   return result
 
 
