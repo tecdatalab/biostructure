@@ -21,7 +21,7 @@ def segment(emMap, steps, sigma, countourLevels, numContours):
     return labels_list   
         
 
-def segmentation_pipeline(contourLevel, emMap, steps, step_sigma):
+def segmentation_pipeline(contourLevel, emMap, steps, step_sigma, write_output=False):
     image = emMap.data()
     step_maps = scale_space_filtering(image, contourLevel, step_sigma, steps)
     labels = watershed_segmentation(image, contourLevel, step_maps, steps)
@@ -32,12 +32,13 @@ def segmentation_pipeline(contourLevel, emMap, steps, step_sigma):
     print("Contour Level: %.4f" % contourLevel)
     print("Number of segmented regions: %d" % len(regions))
     print("    step sigma = %.2f\n    steps = %.2f" % (step_sigma, steps))
-    try:
-        with open(os.path.join("export/", emMap.name+".txt"), "w") as output_file:
-            output_file.write("Number of segmented regions: %d\n" % len(regions))
-            output_file.write("    step sigma = %.2f\n    steps = %.2f\n" % (step_sigma, steps))
-    except Exception as e:
-        print("Could not create output file, ", e)
+    if write_output:
+        try:
+            with open(os.path.join("export/", emMap.name+".txt"), "w") as output_file:
+                output_file.write("Number of segmented regions: %d\n" % len(regions))
+                output_file.write("    step sigma = %.2f\n    steps = %.2f\n" % (step_sigma, steps))
+        except Exception as e:
+            print("Could not create output file, ", e)
     return labels
 
 
@@ -202,7 +203,7 @@ def watershed_segmentation(data, level, scale_maps, steps):
     
     
     label_rename_time = time.process_time() - t
-
+    '''
     print(" Preprocessing time ", preprocess_time)
     print(" Watershed time ", watershed_time)
     print(" Initial maxima computation time ",initial_maxima_time)
@@ -210,7 +211,7 @@ def watershed_segmentation(data, level, scale_maps, steps):
     print(" Scale space time ", scale_space_time)
     print(" Repeated maxima search time ", repeated_maxima_time)
     print(" Labels renaming time ", label_rename_time)
-
+    '''
     
     return labels
 

@@ -25,8 +25,10 @@ class SegmentationDataset(Dataset):
         return len(self.maps)
 
     def __getitem__(self, idx):
-        map_data = Molecule(self.maps[idx], self.contours[idx], [1.2]).getDataAtContour(1.2)
+        map_data = Molecule(self.maps[idx], self.contours[idx]).getDataAtContour(1)
         mask_data = np.load(self.masks[idx])
+        # Remove noise
+        #map_data[mask_data==0] = 0
         point_data =  np.load(self.points[idx])
         # Resize imput data
         zoom_factor = [ resized_shape/axis_shape for axis_shape,resized_shape in zip(map_data.shape,self.image_size) ]
@@ -38,7 +40,7 @@ class SegmentationDataset(Dataset):
         # Input data normalization
         data_max = np.max(map_data)
         data_min = np.min(map_data)
-        norm_data = (map_data - data_min)/ (data_max-data_min)
+        norm_data = (map_data - data_min)/ (data_max-data_min + 1e-6)
         # Create two channel input data
         input_data = np.vstack([norm_data[np.newaxis], point_data[np.newaxis]])
 

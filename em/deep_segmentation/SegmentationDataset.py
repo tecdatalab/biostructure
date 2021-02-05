@@ -25,7 +25,7 @@ class SegmentationDataset(Dataset):
         return len(self.maps)
 
     def __getitem__(self, idx):
-        map_data = Molecule(self.maps[idx], self.contours[idx], [1.2]).getDataAtContour(1.2)
+        map_data = Molecule(self.maps[idx], self.contours[idx], [1]).getDataAtContour(1)
         mask_data = np.load(self.masks[idx])
         point_data =  np.load(self.points[idx])
         # Resize imput data

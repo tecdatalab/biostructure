@@ -68,11 +68,11 @@ class SegmentationAgent:
             self.dataframe = self.dataframe.sample(frac=1)
 
         val_num = int(val_percentage * len(self.dataframe))
-
-        train_samples = self.dataframe.iloc[:val_num]
-        validation_samples = self.dataframe.iloc[val_num:-test_num]
+        print(val_num)
+        validation_samples = self.dataframe.iloc[:val_num]
+        train_samples = self.dataframe.iloc[val_num:-test_num]
         test_samples = self.dataframe.iloc[-test_num:]
-
+        print("Number of samples: {} Training {} Validation {} Testing {}".format(len(self.dataframe),len(train_samples), len(validation_samples), len(test_samples)))
         return train_samples, validation_samples, test_samples
 
     def get_dataloader(self, split, split_name=None):

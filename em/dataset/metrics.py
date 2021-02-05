@@ -35,7 +35,7 @@ def homogenity(segmented_map, gt_map):
             gt_mask = gt_array == label  
             overlap = np.sum(np.logical_and(s_mask,gt_mask))
             falses = np.sum(np.logical_xor(s_mask,gt_mask))
-            h_list.append(falses/overlap)
+            h_list.append(falses/(overlap+np.finfo(float).eps))
         h = np.mean(h_list)
         return h
 
