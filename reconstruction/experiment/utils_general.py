@@ -9,24 +9,22 @@ from csv_modules.csv_writer import write_in_file
 from general_utils.download_utils import download_pdb
 from math import ceil
 
-from general_utils.pdb_utils import get_ignore_pdbs, get_chains_pdb, get_cube_pdb, move_pdb_center, get_all_pdb_name
+from general_utils.pdb_utils import get_chains_pdb, get_cube_pdb, move_pdb_center, \
+  get_all_pdb_work
 
 
-def get_parallel_can_chains_chunk(pdb_name, dirpath):
-  download_pdb(pdb_name, '{0}/{1}.pdb'.format(dirpath, pdb_name))
-  chains = get_chains_pdb('{0}/{1}.pdb'.format(dirpath, pdb_name))
-  move_pdb_center('{0}/{1}.pdb'.format(dirpath, pdb_name))
-  cube_dimensions = get_cube_pdb('{0}/{1}.pdb'.format(dirpath, pdb_name))
+def get_parallel_can_chains_chunk(pdb_name, dir_path):
+  download_pdb(pdb_name, '{0}/{1}.pdb'.format(dir_path, pdb_name))
+  chains = get_chains_pdb('{0}/{1}.pdb'.format(dir_path, pdb_name))
+  move_pdb_center('{0}/{1}.pdb'.format(dir_path, pdb_name))
+  cube_dimensions = get_cube_pdb('{0}/{1}.pdb'.format(dir_path, pdb_name))
   result = [pdb_name, len(chains), cube_dimensions]
-  os.remove('{0}/{1}.pdb'.format(dirpath, pdb_name))
+  os.remove('{0}/{1}.pdb'.format(dir_path, pdb_name))
   return result
 
 
 def pdb_percentage(percentage, executor=None):
   headers_csv = ['Pdb', 'Can Chains', 'Cube dimension']
-
-  # Add ignore files
-  ignore_pdbs = get_ignore_pdbs()
 
   # List know can chains pdb
   know_can_chains_pdb_path = os.path.dirname(__file__) + '/../files/pdb_can_chains.csv'
@@ -43,9 +41,8 @@ def pdb_percentage(percentage, executor=None):
     can_chains_list_name = []
 
   # Process
-  all_names = get_all_pdb_name()  # 169315
+  all_names = get_all_pdb_work()  # 169315
   # all_names = all_names[:3]
-  all_names = np.setdiff1d(np.array(all_names), np.array(ignore_pdbs))
   all_names = np.setdiff1d(np.array(all_names), np.array(can_chains_list_name))
   all_names = all_names.tolist()
 

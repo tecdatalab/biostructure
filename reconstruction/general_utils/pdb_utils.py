@@ -3,11 +3,11 @@ import math
 import os
 import shutil
 import tempfile
+import pandas as pd
 from ftplib import FTP
 
 import numpy as np
 import requests
-
 
 from general_utils.string_utils import change_string
 from Bio.PDB import PDBParser
@@ -106,9 +106,18 @@ def get_similar_pdb_struct(pdb_name, can=10):
     return []
   var_result = json.loads(response.text)
   result = []
-  for i in var_result["result_set"][:can]:
+  # Make sure that only pdb appear that we can process
+  chain_score = {}
+  dirty_list = []
+  for i in var_result["result_set"]:
     if i["identifier"].split("-")[0].lower() != pdb_name.lower():
-      result.append([i["identifier"].split("-")[0].lower(), i["score"]])
+      dirty_list.append(i["identifier"].split("-")[0].lower())
+      chain_score[i["identifier"].split("-")[0].lower()] = i["score"]
+
+  clean_list = np.intersect1d(np.array(dirty_list), np.array(get_ignore_pdbs())).tolist()
+  for i in clean_list[:can]:
+    result.append(i, chain_score[i])
+
   return result
 
 
@@ -204,9 +213,19 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
     return []
   var_result = json.loads(response.text)
   result = []
-  for i in var_result["result_set"][:can]:
+
+  #Make sure that only pdb appear that we can process
+  chain_score = {}
+  dirty_list = []
+  for i in var_result["result_set"]:
     if i["identifier"].split("-")[0].lower() != pdb_name.lower():
-      result.append([i["identifier"].split("-")[0].lower(), i["score"]])
+      dirty_list.append(i["identifier"].split("-")[0].lower())
+      chain_score[i["identifier"].split("-")[0].lower()] = i["score"]
+
+  clean_list = np.intersect1d(np.array(dirty_list), np.array(get_ignore_pdbs())).tolist()
+  for i in clean_list[:can]:
+    result.append(i, chain_score[i])
+
   return result
 
 
@@ -281,10 +300,20 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
     return []
   var_result = json.loads(response.text)
   result = []
-  for i in var_result["result_set"][:can]:
+  # Make sure that only pdb appear that we can process
+  chain_score = {}
+  dirty_list = []
+  for i in var_result["result_set"]:
     if i["identifier"].split("-")[0].lower() != pdb_name.lower():
-      result.append([i["identifier"].split("-")[0].lower(), i["score"]])
+      dirty_list.append(i["identifier"].split("-")[0].lower())
+      chain_score[i["identifier"].split("-")[0].lower()] = i["score"]
+
+  clean_list = np.intersect1d(np.array(dirty_list), np.array(get_ignore_pdbs())).tolist()
+  for i in clean_list[:can]:
+    result.append(i, chain_score[i])
+
   return result
+
 
 def get_pdb_adn_arn_online():
   search_request = {
@@ -347,11 +376,13 @@ def get_pdb_adn_arn_online():
 
 
 def get_pdb_no_work():
-  evil_pdb_path = os.path.dirname(__file__) + '/../files/pdb_no_work.txt'
-  if os.path.exists(evil_pdb_path):
-    f_evil_pdb = open(evil_pdb_path)
-    result = f_evil_pdb.read().splitlines()
-    f_evil_pdb.close()
+  know_pdb_path = os.path.dirname(__file__) + '/../files/pdb_list.csv'
+
+  if os.path.exists(know_pdb_path):
+    pd_data_frame = pd.read_csv(know_pdb_path)
+    filter = pd_data_frame["OK"] == 0
+    pd_data_frame.where(filter)
+    result = pd_data_frame["Name"].tolist()
     return result
   return []
 
@@ -459,7 +490,7 @@ def mmCIF_to_pdb(mmCIF_path, exit_pdb_path):
   cmd.save(exit_pdb_path)
 
 
-def get_all_pdb_name():
+def get_all_pdb_name_online():
   list_servers = [["ftp.wwpdb.org", "/pub/pdb/data/structures/all/pdb/"],
                   ["ftp.rcsb.org", "/pub/pdb/data/structures/all/pdb/"],
                   ["ftp.ebi.ac.uk", "/pub/databases/pdb/data/structures/all/pdb/"],
@@ -483,3 +514,20 @@ def get_all_pdb_name():
       pass
 
   return e
+
+
+def get_all_pdb_name():
+  know_pdb_path = os.path.dirname(__file__) + '/../files/pdb_list.csv'
+
+  if os.path.exists(know_pdb_path):
+    pd_data_frame = pd.read_csv(know_pdb_path)
+    result = pd_data_frame["Name"].tolist()
+    return result
+  else:
+    return get_all_pdb_name_online()
+
+
+def get_all_pdb_work():
+  all_names = get_all_pdb_name()  # 169315
+  all_names = np.setdiff1d(np.array(all_names), np.array(get_ignore_pdbs())).tolist()
+  return all_names
