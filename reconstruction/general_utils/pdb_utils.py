@@ -380,9 +380,11 @@ def get_pdb_no_work():
 
   if os.path.exists(know_pdb_path):
     pd_data_frame = pd.read_csv(know_pdb_path)
-    filter = pd_data_frame["OK"] == 0
-    pd_data_frame.where(filter)
-    result = pd_data_frame["Name"].tolist()
+    temp = pd_data_frame.values.tolist()
+    result = []
+    for i in temp:
+      if i[1]==0:
+        result.append(i[0])
     return result
   return []
 

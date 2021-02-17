@@ -32,12 +32,8 @@ def pdb_percentage(percentage, executor=None):
   if os.path.exists(know_can_chains_pdb_path):
     pd_data_frame = pd.read_csv(know_can_chains_pdb_path,
                                 converters={"Cube dimension": literal_eval})
-    can_chains_list = pd_data_frame.values.tolist()
-
     can_chains_list_name = pd_data_frame["Pdb"].tolist()
-
   else:
-    can_chains_list = []
     can_chains_list_name = []
 
   # Process
@@ -59,9 +55,6 @@ def pdb_percentage(percentage, executor=None):
     for f in parallel_jobs:
       try:
         list_append = f[0].result()
-        can_chains_list.append(list_append)
-        can_chains_list_name.append(list_append[0])
-
         data_write = [list_append]
         write_in_file(know_can_chains_pdb_path, headers_csv, data_write)
       except Exception as e:
@@ -69,9 +62,6 @@ def pdb_percentage(percentage, executor=None):
   else:
     for i in all_names:
       list_append = get_parallel_can_chains_chunk(i, dirpath)
-      can_chains_list.append(list_append)
-      can_chains_list_name.append(list_append[0])
-
       data_write = [list_append]
       write_in_file(know_can_chains_pdb_path, headers_csv, data_write)
 
@@ -79,6 +69,15 @@ def pdb_percentage(percentage, executor=None):
 
   if flag_error:
     raise NameError('Error in download pdbs')
+
+  #Gen data use
+  pd_data_frame = pd.read_csv(know_can_chains_pdb_path,
+                              converters={"Cube dimension": literal_eval})
+  can_chains_list = pd_data_frame.values.tolist()
+  can_chains_list_dic = {value[0]: value[1] for value in can_chains_list}
+  can_chains_list = []
+  for i in get_all_pdb_work():
+    can_chains_list.append([i, can_chains_list_dic[i]])
 
   # Dic with can chains to pdbs
   dic_chains = {}
