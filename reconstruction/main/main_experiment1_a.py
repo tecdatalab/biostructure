@@ -4,12 +4,14 @@ import pathlib
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 from csv_modules.csv_combine import combine_files_exp_1a
+from general_utils.temp_utils import clean_work_dir
+
 folder_work = "data_experiment_1_a_v1"
 
 
 def experiment_1_a():
   from experiment.experiment_1_a import do_parallel_test_a
-
+  clean_work_dir()
   local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction"
   # local_path = "/work/lcastillo"
   print("Start")
