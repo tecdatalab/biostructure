@@ -29,6 +29,13 @@ def gen_thread_KDTree(id, data, semaphore, dic_result):
 
 
 def generate_graph(segments, n_points_face, filter_value, max_distance, min_points):
+  segments_id = []
+  for i in segments:
+    if i.id_segment in segments_id:
+      raise TypeError("Error in segments id, some are duplicate")
+    else:
+      segments_id.append(i.id_segment)
+
   face_points = {}
   kd_trees = {}
   g_result = nx.Graph()

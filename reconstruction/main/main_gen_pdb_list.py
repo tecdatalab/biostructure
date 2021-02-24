@@ -2,6 +2,7 @@ import sys
 import pathlib
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
+
 import os
 import shutil
 import tempfile
@@ -17,6 +18,7 @@ from general_utils.download_utils import download_pdb
 from general_utils.pdb_utils import get_chains_pdb
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_mrc.generate import get_mrc_synthetic_segments_pdb
+from general_utils.database_utils import get_chains_pdb_db
 
 
 def test_pdb(pdb_name):
@@ -40,6 +42,7 @@ def test_pdb(pdb_name):
 
   know_pdb_path = os.path.dirname(__file__) + '/../files/pdb_list.csv'
   write_in_file(know_pdb_path, ["Name", "OK"], [[pdb_name, 1]])
+  get_chains_pdb_db(pdb_name)
   print("\n\n\n Finish:" + pdb_name + "\n\n\n", flush=True)
 
 
@@ -77,6 +80,9 @@ def gen_update_pdb_list():
       else:
         actual_pdb_list = []
 
+      real_pdb_name = np.unique(real_pdb_name, axis=0).tolist()
+      print(len(actual_pdb_list))
+      print(len(real_pdb_name))
       real_pdb_name = np.setdiff1d(real_pdb_name, actual_pdb_list).tolist()
       #real_pdb_name = ["5uyk"]
       print(len(real_pdb_name))

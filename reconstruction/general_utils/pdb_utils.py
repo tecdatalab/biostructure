@@ -1,5 +1,7 @@
 import json
 import math
+import time
+import random
 import os
 import shutil
 import tempfile
@@ -13,6 +15,8 @@ from general_utils.string_utils import change_string
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
 from pymol import cmd
+
+adn_arn_online_list = []
 
 
 def get_similar_pdb_struct(pdb_name, can=10):
@@ -101,8 +105,16 @@ def get_similar_pdb_struct(pdb_name, can=10):
   }
   json_dump = json.dumps(search_request)
   url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
-  response = requests.get(url_get)
-  if response.status_code == 204:
+
+  status_code = 500
+  while status_code != 200 and status_code != 204 and status_code != 400:
+    response = requests.get(url_get)
+    status_code = response.status_code
+    time.sleep(random.randint(2, 15))
+    if status_code != 200 and status_code != 204:
+        print(response, response.status_code, response.text,"\n\n\n", flush=True)
+
+  if response.status_code == 204 or response.status_code == 400:
     return []
   var_result = json.loads(response.text)
   result = []
@@ -114,9 +126,9 @@ def get_similar_pdb_struct(pdb_name, can=10):
       dirty_list.append(i["identifier"].split("-")[0].lower())
       chain_score[i["identifier"].split("-")[0].lower()] = i["score"]
 
-  clean_list = np.intersect1d(np.array(dirty_list), np.array(get_ignore_pdbs())).tolist()
+  clean_list = np.intersect1d(np.array(dirty_list), np.array(get_all_pdb_work())).tolist()
   for i in clean_list[:can]:
-    result.append(i, chain_score[i])
+    result.append([i, chain_score[i]])
 
   return result
 
@@ -208,13 +220,21 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
 
   json_dump = json.dumps(search_request)
   url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
-  response = requests.get(url_get)
-  if response.status_code == 204:
+
+  status_code = 500
+  while status_code != 200 and status_code != 204 and status_code != 400:
+    response = requests.get(url_get)
+    status_code = response.status_code
+    time.sleep(random.randint(2, 15))
+    if status_code != 200 and status_code != 204:
+        print(response, response.status_code, response.text,"\n\n\n", flush=True)
+
+  if response.status_code == 204 or response.status_code == 400:
     return []
   var_result = json.loads(response.text)
   result = []
 
-  #Make sure that only pdb appear that we can process
+  # Make sure that only pdb appear that we can process
   chain_score = {}
   dirty_list = []
   for i in var_result["result_set"]:
@@ -222,9 +242,9 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
       dirty_list.append(i["identifier"].split("-")[0].lower())
       chain_score[i["identifier"].split("-")[0].lower()] = i["score"]
 
-  clean_list = np.intersect1d(np.array(dirty_list), np.array(get_ignore_pdbs())).tolist()
+  clean_list = np.intersect1d(np.array(dirty_list), np.array(get_all_pdb_work())).tolist()
   for i in clean_list[:can]:
-    result.append(i, chain_score[i])
+    result.append([i, chain_score[i]])
 
   return result
 
@@ -295,10 +315,19 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
 
   json_dump = json.dumps(search_request)
   url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
-  response = requests.get(url_get)
-  if response.status_code == 204:
+
+  status_code = 500
+  while status_code != 200 and status_code != 204 and status_code != 400:
+    response = requests.get(url_get)
+    status_code = response.status_code
+    time.sleep(random.randint(2, 15))
+    if status_code != 200 and status_code != 204:
+        print(response, response.status_code, response.text,"\n\n\n", flush=True)
+
+  if response.status_code == 204 or response.status_code == 400:
     return []
   var_result = json.loads(response.text)
+
   result = []
   # Make sure that only pdb appear that we can process
   chain_score = {}
@@ -308,14 +337,21 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
       dirty_list.append(i["identifier"].split("-")[0].lower())
       chain_score[i["identifier"].split("-")[0].lower()] = i["score"]
 
-  clean_list = np.intersect1d(np.array(dirty_list), np.array(get_ignore_pdbs())).tolist()
+  clean_list = np.intersect1d(np.array(dirty_list), np.array(get_all_pdb_work())).tolist()
   for i in clean_list[:can]:
-    result.append(i, chain_score[i])
+    result.append([i, chain_score[i]])
 
   return result
 
 
 def get_pdb_adn_arn_online():
+  global adn_arn_online_list
+  if adn_arn_online_list == []:
+    adn_arn_online_list = get_pdb_adn_arn_online_aux()
+  return adn_arn_online_list
+
+
+def get_pdb_adn_arn_online_aux():
   search_request = {
     "query": {
       "type": "group",
@@ -367,7 +403,15 @@ def get_pdb_adn_arn_online():
   }
   json_dump = json.dumps(search_request)
   url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
-  response = requests.get(url_get)
+
+  status_code = 500
+  while status_code != 200:
+    response = requests.get(url_get)
+    status_code = response.status_code
+    time.sleep(random.randint(2, 15))
+    if status_code != 200 and status_code != 204:
+        print(response, response.status_code, response.text,"\n\n\n", flush=True)
+
   var_result = json.loads(response.text)
   result = []
   for i in var_result["result_set"]:
@@ -383,7 +427,7 @@ def get_pdb_no_work():
     temp = pd_data_frame.values.tolist()
     result = []
     for i in temp:
-      if i[1]==0:
+      if i[1] == 0:
         result.append(i[0])
     return result
   return []
