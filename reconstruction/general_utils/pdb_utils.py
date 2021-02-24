@@ -4,7 +4,6 @@ import time
 import random
 import os
 import shutil
-import tempfile
 import pandas as pd
 from ftplib import FTP
 
@@ -15,6 +14,8 @@ from general_utils.string_utils import change_string
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
 from pymol import cmd
+
+from general_utils.temp_utils import gen_dir, free_dir
 
 adn_arn_online_list = []
 
@@ -251,12 +252,12 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
 
 def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
   from general_utils.download_utils import download_pdb
-  path_temp = tempfile.mkdtemp()
+  path_temp = gen_dir()
   path_temp = os.path.abspath(path_temp)
   temp_file_path = path_temp + "/" + pdb_name + ".pdb"
   download_pdb(pdb_name, temp_file_path)
   sequence = get_pdb_chain_sequence(temp_file_path, chain)
-  shutil.rmtree(path_temp)
+  free_dir(path_temp)
   search_request = {
     "query": {
       "type": "group",

@@ -1,6 +1,5 @@
 import os
 import shutil
-import tempfile
 import random
 from ast import literal_eval
 import numpy as np
@@ -11,6 +10,7 @@ from math import ceil
 
 from general_utils.pdb_utils import get_chains_pdb, get_cube_pdb, move_pdb_center, \
   get_all_pdb_work
+from general_utils.temp_utils import gen_dir, free_dir
 
 
 def get_parallel_can_chains_chunk(pdb_name, dir_path):
@@ -43,7 +43,7 @@ def pdb_percentage(percentage, executor=None):
   all_names = all_names.tolist()
 
   # Add chains
-  dirpath = tempfile.mkdtemp()
+  dirpath = gen_dir()
 
   flag_error = False
 
@@ -65,7 +65,7 @@ def pdb_percentage(percentage, executor=None):
       data_write = [list_append]
       write_in_file(know_can_chains_pdb_path, headers_csv, data_write)
 
-  shutil.rmtree(dirpath)
+  free_dir(dirpath)
 
   if flag_error:
     raise NameError('Error in download pdbs')

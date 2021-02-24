@@ -1,9 +1,9 @@
 import os
 import shutil
-import tempfile
 from ftplib import FTP
 
 from general_utils.string_utils import get_float_between_ss, get_float_value
+from general_utils.temp_utils import gen_dir, free_dir
 from general_utils.terminal_utils import get_out
 
 
@@ -34,7 +34,7 @@ def get_all_emd_name():
 
 def get_mass_angstrom(map_path):
   map_real_path = os.path.abspath(map_path)
-  path = tempfile.mkdtemp()
+  path = gen_dir()
   # path = "./temp_map_mass"
   if os.path.exists(path):
     shutil.rmtree(path)
@@ -50,16 +50,17 @@ def get_mass_angstrom(map_path):
   mass = 0
   error, exit_binary_text = get_out("chimerax", "--nogui", map_real_path, commands_real_path)
   if error != 0:
+    free_dir(path)
     raise Exception("Error on try to get mass")
   text = exit_binary_text
   mass = get_float_between_ss(text, "Enclosed volume for surface (#1.1) =", "\n")
-  shutil.rmtree(path)
+  free_dir(path)
   return mass
 
 
 def get_mrc_level(map_path):
   map_real_path = os.path.abspath(map_path)
-  path = tempfile.mkdtemp()
+  path = gen_dir()
   # path = "./temp_map_mass"
   if os.path.exists(path):
     shutil.rmtree(path)
@@ -73,16 +74,17 @@ def get_mrc_level(map_path):
   level = 0
   error, exit_binary_text = get_out("chimerax", "--nogui", map_real_path, commands_real_path)
   if error != 0:
+    free_dir(path)
     raise Exception("Error on try to get mass")
   text = exit_binary_text
   level = get_float_between_ss(text, "at level", ",")
-  shutil.rmtree(path)
+  free_dir(path)
   return level
 
 
 def get_cube_len_angstrom(map_path):
   map_real_path = os.path.abspath(map_path)
-  path = tempfile.mkdtemp()
+  path = gen_dir()
   # path = "./temp_map_center"
   if os.path.exists(path):
     shutil.rmtree(path)
@@ -101,6 +103,6 @@ def get_cube_len_angstrom(map_path):
   y = get_float_value(text, 'ylen =', '\n')
   z = get_float_value(text, 'zlen =', '\n')
 
-  shutil.rmtree(path)
+  free_dir(path)
 
   return [x, y, z]

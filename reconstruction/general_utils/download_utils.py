@@ -3,8 +3,8 @@ import urllib.request
 import progressbar
 import shutil
 
+from general_utils.temp_utils import gen_dir, free_dir
 from general_utils.terminal_utils import get_out
-import tempfile
 import time
 import random
 
@@ -137,12 +137,12 @@ def download_pdb_in_mmCIF(id_code, exit_path, create_progress_bar=False):
     flag = False
     for url_format_string in url_format_principal_list:
       try:
-        path_temp = os.path.abspath(tempfile.mkdtemp())
+        path_temp = gen_dir()
         temp_file_path = path_temp +"/"+ os.path.basename(exit_path).split(".")[0]+".cif"
         download_biomolecular_zip_file(id_code, temp_file_path, url_format_string, '{0}.cif.gz', '{0}.cif',
                                        create_progress_bar)
         mmCIF_to_pdb(temp_file_path, exit_path)
-        shutil.rmtree(path_temp)
+        free_dir(path_temp)
         flag = True
         break
       except Exception as e:
@@ -169,7 +169,7 @@ def download_pdb_in_mmCIF(id_code, exit_path, create_progress_bar=False):
 def download_biomolecular_zip_file(id_code, exit_path, url_format_string, file_zip, file_unzip,
                                    create_progress_bar=False):
   # path = './temp_emd_download'
-  path = tempfile.mkdtemp()
+  path = gen_dir()
   path = os.path.abspath(path)
   exit_path = os.path.abspath(exit_path)
   file_url = url_format_string.format(id_code)
@@ -186,4 +186,4 @@ def download_biomolecular_zip_file(id_code, exit_path, url_format_string, file_z
   get_out("gunzip", path + "/" + file_zip.format(id_code))
   get_out("mv", path + "/" + file_unzip.format(id_code), exit_path)
 
-  shutil.rmtree(path)
+  free_dir(path)

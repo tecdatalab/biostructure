@@ -7,8 +7,8 @@ import os
 import shutil
 
 from fit.fit_result_chimeraX import FitMapResult
+from general_utils.temp_utils import gen_dir, free_dir
 from general_utils.terminal_utils import get_out
-import tempfile
 
 
 def create_execute_file(path, map0_level, map1_level, map0_vector_move, map1_vector_move, attempts, path_exit_folder,
@@ -52,8 +52,8 @@ def create_execute_file(path, map0_level, map1_level, map0_vector_move, map1_vec
 # Fit map0 into map1
 def fit_map_in_map(map0_path, map1_path, path_exit_folder, attempts, map0_vector_move=None, map1_vector_move=None,
                    map0_level=None, map1_level=None):
-  # path = "./temp_map"
-  path = tempfile.mkdtemp()
+
+  path = gen_dir()
   map0_exit_name = map0_path.split('/')[-1]
   map0_exit_name = map0_exit_name.split('.')[:-1]
   map0_exit_name = ".".join(map0_exit_name)
@@ -85,7 +85,7 @@ def fit_map_in_map(map0_path, map1_path, path_exit_folder, attempts, map0_vector
       error, exit_binary_text = get_out("chimerax", "--nogui", map0_real_path, map1_real_path, commands_real_path)
       text = exit_binary_text
 
-    shutil.rmtree(path)
+    free_dir(path)
     # print(text)
     return FitMapResult(text, 'x')
   else:
