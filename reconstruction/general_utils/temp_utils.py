@@ -21,4 +21,5 @@ def gen_dir():
 
 def clean_work_dir():
   if global_temp_dir != None:
-    shutil.rmtree(global_temp_dir)
+    if os.path.exists(global_temp_dir):
+      shutil.rmtree(global_temp_dir)

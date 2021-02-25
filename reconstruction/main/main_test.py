@@ -104,4 +104,4 @@ pdb = '6VM4'
 # "Mas pequeno"
 #
 # print(simulate_contour_level_value('/home/lcastillo98/Desktop/EMD-5017.map'))
-print(get_pdb_no_work())
+# print(get_pdb_no_work())

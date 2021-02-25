@@ -11,7 +11,7 @@ from process_mrc.generate import get_mrc_one
 from networkx.readwrite import json_graph
 
 ZIPJSON_KEY = 'base64(zip(o))'
-database_name = "pdb_database"
+database_name = "lcastillo_biostructures"
 collection_name = "pdb_collection"
 exists_mongo_db_var = None
 valid_resolutions = [4, 6, 8, 10]
@@ -53,12 +53,12 @@ def json_unzip(j, insist=True):
 
 
 def get_mongo_client():
-  client = pymongo.MongoClient(host="11.0.0.21",
-                               port=27017,
-                               username='lcastilloAdmin',
-                               password='LPtYJpA3',
-                               authSource='lcastillo_biostructures')
-  # client = pymongo.MongoClient()
+  # client = pymongo.MongoClient(host="11.0.0.21",
+  #                              port=27017,
+  #                              username='lcastilloAdmin',
+  #                              password='LPtYJpA3',
+  #                              authSource='lcastillo_biostructures')
+  client = pymongo.MongoClient()
   return client
 
 
@@ -266,6 +266,8 @@ def get_all_archive_pdb():
     db = client[database_name]
     col = db[collection_name]
     pdbs_data = col.find()
+    if pdbs_data.count() == 0:
+      return []
     result = []
     for i in pdbs_data:
       result.append(i['pdbID'])
@@ -273,6 +275,7 @@ def get_all_archive_pdb():
 
   else:
     return []
+
 
 # client = get_mongo_client()
 # Issue the serverStatus command and print the results
@@ -287,4 +290,4 @@ def get_all_archive_pdb():
 #
 #
 # print(get_chains_pdb_db('100d'))
-# print(get_all_archive_pdb())
+print(get_all_archive_pdb())
