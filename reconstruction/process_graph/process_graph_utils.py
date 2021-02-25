@@ -13,6 +13,8 @@ from sklearn.neighbors import KDTree
 from process_graph.process_segment_faces import get_n_points_cube
 import threading
 
+from process_mrc.miscellaneous import get_sum_xyz_can
+
 
 def gen_thread_points(id, mask, n_points_face, filter_value, semaphore, dic_result):
   result = get_n_points_cube(mask, n_points_face, filter_value)
@@ -64,7 +66,7 @@ def generate_graph(segments, n_points_face, filter_value, max_distance, min_poin
 
     # Add nodes in gaphs
   for i in segments:
-    g_result.add_node(i.id_segment, zd_descriptors=i.zd_descriptors)
+    g_result.add_node(i.id_segment, zd_descriptors=i.zd_descriptors, cube_xyz_can=get_sum_xyz_can(i))
 
   for item in itertools.combinations(np.arange(len(segments)), 2):
     if item[0] == item[1]:

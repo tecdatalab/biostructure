@@ -45,9 +45,6 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_struct, resolutio
         open_file.close()
 
       # print(all_names, flush=True)
-      # all_names = ['1aig']
-      # all_names = ['1q8l']
-      # all_names = ['7jg5']
       print("Before get pdb names")
 
       path = os.path.abspath(path_data)

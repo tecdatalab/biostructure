@@ -191,7 +191,7 @@ def insert_pdb_information(col, pdb_id):
   download_pdb(pdb_id, '{0}/{1}.pdb'.format(path_dir, pdb_id))
   chains = get_chains_pdb('{0}/{1}.pdb'.format(path_dir, pdb_id))
   new_pdb = {}
-  new_pdb['pdbID'] = pdb_id
+  # new_pdb['pdbID'] = pdb_id
   new_pdb['chains'] = chains
   for i in [4, 6, 8, 10]:
     graph, father_ZD = gen_graph_resolution_aux(chains, i, path_dir, pdb_id, True)
@@ -200,7 +200,13 @@ def insert_pdb_information(col, pdb_id):
     g_json = json_graph.node_link_data(graph)
     new_pdb[str(i) + "A_G"] = json_zip(g_json)
     new_pdb[str(i) + "A_OZD"] = json_zip(json.dumps(father_ZD.tolist()))
-  col.insert_one(new_pdb)
+
+  col.update_one(
+    {"pdbID": pdb_id},
+    {"$setOnInsert": new_pdb},
+    True
+  )
+
   free_dir(path_dir)
 
 
@@ -254,15 +260,31 @@ def gen_zd_resolution_aux(resolution, pdb_id):
   return father_ZD
 
 
-client = get_mongo_client()
+def get_all_archive_pdb():
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    pdbs_data = col.find()
+    result = []
+    for i in pdbs_data:
+      result.append(i['pdbID'])
+    return result
+
+  else:
+    return []
+
+# client = get_mongo_client()
 # Issue the serverStatus command and print the results
 # serverStatusResult = db.command("serverStatus")
 # pprint(serverStatusResult)
-print(exists_mongo_db())
-print(exists_mongo_db())
+# print(exists_mongo_db())
+# print(exists_mongo_db())
 # graph = get_graph_pdb_db('100d', 4)
 # result = get_zd_chains_pdb_db('100d', '2')
 # result2 = get_zd_pdb_db('100d', 4)
-#print(result2)
-
-print(get_chains_pdb_db('100d'))
+# print(result2)
+#
+#
+# print(get_chains_pdb_db('100d'))
+# print(get_all_archive_pdb())

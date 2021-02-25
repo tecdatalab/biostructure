@@ -18,3 +18,9 @@ def get_center_point(index_segments, segments, filter_val):
   return [int(center_point[0]), int(center_point[1]), int(center_point[2])]
 
 
+def get_sum_xyz_can(segment):
+  points = np.where(segment.mask > 0)
+  points_pos = np.column_stack(points)
+  total_sum = np.sum(points_pos, axis=0)
+
+  return [total_sum.tolist(), points_pos.size]
