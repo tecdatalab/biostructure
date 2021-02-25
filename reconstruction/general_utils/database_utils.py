@@ -53,12 +53,12 @@ def json_unzip(j, insist=True):
 
 
 def get_mongo_client():
-  # client = pymongo.MongoClient(host="11.0.0.21",
-  #                              port=27017,
-  #                              username='lcastilloAdmin',
-  #                              password='LPtYJpA3',
-  #                              authSource='lcastillo_biostructures')
-  client = pymongo.MongoClient()
+  client = pymongo.MongoClient(host="11.0.0.21",
+                               port=27017,
+                               username='lcastilloAdmin',
+                               password='LPtYJpA3',
+                               authSource='lcastillo_biostructures')
+  # client = pymongo.MongoClient()
   return client
 
 
