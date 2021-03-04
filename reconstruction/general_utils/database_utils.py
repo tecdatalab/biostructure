@@ -164,6 +164,36 @@ def get_zd_chains_pdb_db(pdb_id, resolution):
     return result
 
 
+def get_zd_chain_pdb_db(pdb_id, chain, resolution):
+  if resolution not in valid_resolutions:
+    raise TypeError("Resolution is not valid, you can use: {0}".format(valid_resolutions))
+
+  pdb_id = pdb_id.lower()
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    pdb_data = col.find_one({'pdbID': pdb_id})
+    if pdb_data != None:
+      result_zip = pdb_data[str(resolution) + "A_G"]
+      js_graph = json_unzip(result_zip)
+      graph = json_graph.node_link_graph(js_graph)
+      final_result = []
+      for j in graph.nodes():
+        final_result.append([pdb_data["chains"][j - 1], np.array(graph.nodes[j]["zd_descriptors"])])
+      for k in final_result:
+        if k[0] == chain:
+          return k[1]
+
+    else:
+      insert_pdb_information(col, pdb_id)
+      return get_zd_chains_pdb_db(pdb_id, resolution)
+
+  else:
+    result = gen_zd_chain_resolution_one_chain_aux(resolution, pdb_id, chain)
+    return result
+
+
 def get_chains_pdb_db(pdb_id):
   pdb_id = pdb_id.lower()
   if exists_mongo_db():
@@ -250,6 +280,24 @@ def gen_zd_chain_resolution_aux(resolution, pdb_id):
   return result
 
 
+def gen_zd_chain_resolution_one_chain_aux(resolution, pdb_id, chain):
+  path_dir = gen_dir()
+  download_pdb(pdb_id, '{0}/{1}.pdb'.format(path_dir, pdb_id))
+  chains = get_chains_pdb('{0}/{1}.pdb'.format(path_dir, pdb_id))
+
+  pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(path_dir, pdb_id), path_dir, chains,
+                    len(chains))
+  local_path = path_dir + "/" + pdb_id
+  result = []
+
+  segments_graph_simulate, _ = get_mrc_one('{0}/{1}_{2}.mrc'.format(local_path, pdb_id, chain))
+  segment = segments_graph_simulate[0]
+  result.append([chain, segment.zd_descriptors])
+
+  free_dir(path_dir)
+  return result
+
+
 def gen_zd_resolution_aux(resolution, pdb_id):
   path_dir = gen_dir()
   download_pdb(pdb_id, '{0}/{1}.pdb'.format(path_dir, pdb_id))
@@ -276,7 +324,6 @@ def get_all_archive_pdb():
   else:
     return []
 
-
 # client = get_mongo_client()
 # Issue the serverStatus command and print the results
 # serverStatusResult = db.command("serverStatus")
@@ -290,4 +337,4 @@ def get_all_archive_pdb():
 #
 #
 # print(get_chains_pdb_db('100d'))
-print(get_all_archive_pdb())
+# print(get_all_archive_pdb())

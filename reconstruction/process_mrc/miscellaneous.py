@@ -18,6 +18,21 @@ def get_center_point(index_segments, segments, filter_val):
   return [int(center_point[0]), int(center_point[1]), int(center_point[2])]
 
 
+def get_center_point_by_graph(index_segments, graph):
+  x = 0
+  y = 0
+  z = 0
+  total_div_points = 0
+
+  for i in index_segments:
+    x += graph.nodes[i]["cube_xyz_can"][0][0]
+    y += graph.nodes[i]["cube_xyz_can"][0][1]
+    z += graph.nodes[i]["cube_xyz_can"][0][2]
+    total_div_points += graph.nodes[i]["cube_xyz_can"][1]
+
+  return [int(x / total_div_points), int(y / total_div_points), int(z / total_div_points)]
+
+
 def get_sum_xyz_can(segment):
   points = np.where(segment.mask > 0)
   points_pos = np.column_stack(points)

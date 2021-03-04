@@ -13,6 +13,8 @@ from sklearn.metrics import mean_squared_error
 
 from csv_modules.csv_writer import write_in_file
 from experiment.utils_general import remove_get_dirs, pdb_percentage
+from general_utils.database_utils import get_chains_pdb_db, get_graph_pdb_db, get_zd_pdb_db, get_zd_chain_pdb_db, \
+  get_zd_chains_pdb_db
 from general_utils.download_utils import download_pdb
 from general_utils.list_utils import get_element_list
 from general_utils.math_utils import distance_3d_points
@@ -22,7 +24,7 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_graph.graph_algorithm import graph_aligning
 from process_graph.process_graph_utils import generate_graph
 from process_mrc.generate import get_mrc_one
-from process_mrc.miscellaneous import get_center_point
+from process_mrc.miscellaneous import get_center_point, get_center_point_by_graph
 
 headers_chain = ['Pdb', 'Pdb work', 'Chains', 'Point Original', 'Point Test', 'Point Original syn', 'Point Test syn',
                  'Point Original syn dis', 'Point Test syn dis',
@@ -53,21 +55,21 @@ def do_parallel_test(path_data,
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      if not os.path.exists(file_checkpoint):
-        all_names = pdb_percentage(percentage_data_set, executor)  # 169315
-        open_file = open(file_checkpoint, "wb")
-        pickle.dump(all_names, open_file)
-        open_file.close()
-      else:
-        open_file = open(file_checkpoint, "rb")
-        all_names = pickle.load(open_file)
-        open_file.close()
+      # if not os.path.exists(file_checkpoint):
+      #   all_names = pdb_percentage(percentage_data_set, executor)  # 169315
+      #   open_file = open(file_checkpoint, "wb")
+      #   pickle.dump(all_names, open_file)
+      #   open_file.close()
+      # else:
+      #   open_file = open(file_checkpoint, "rb")
+      #   all_names = pickle.load(open_file)
+      #   open_file.close()
 
       # print(all_names, flush=True)
       # all_names = ['1aig']
       # all_names = ['1q8l']
       # all_names = ['1a0t']
-      # all_names = ['109l']
+      all_names = ['6r6k']
       print("Before get pdb names")
 
       path = os.path.abspath(path_data)
@@ -121,61 +123,69 @@ def do_parallel_test(path_data,
 
 def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, result_cvs_secuencial, resolution,
                          can_chain_test, can_struct_test, can_secuencial_test):
-  local_path = path + "/" + pdb_name
-  if not os.path.exists(local_path):
-    os.makedirs(local_path)
-  path_of_pdb = '{0}/{1}.pdb'.format(local_path, pdb_name)
+  try:
+    local_path = path + "/" + pdb_name
+    if not os.path.exists(local_path):
+      os.makedirs(local_path)
 
-  download_pdb(pdb_name, path_of_pdb)
-  chains = get_chains_pdb(path_of_pdb)
+    chains = get_chains_pdb_db(pdb_name)
 
-  result_struct = []
-  temp = get_similar_pdb_struct(pdb_name, -1)
-  for i in temp:
-    add_data = [pdb_name, i[0], i[1]]
-    result_struct.append(add_data)
-
-  result_chain_struct = []
-  for chain in chains:
-    temp = get_similar_pdb_chain_structural(pdb_name, chain, -1)
+    result_struct = []
+    #temp = get_similar_pdb_struct(pdb_name, -1)
+    temp = [["1abe", 0.136435164904959]]
     for i in temp:
-      add_data = [pdb_name, i[0], i[1], chain]
-      result_chain_struct.append(add_data)
+      add_data = [pdb_name, i[0], i[1]]
+      result_struct.append(add_data)
 
-  result_chain_sequence = []
-  for chain in chains:
-    temp = get_similar_pdb_chain_sequential(pdb_name, chain, -1)
-    for i in temp:
-      add_data = [pdb_name, i[0], i[1], chain]
-      result_chain_sequence.append(add_data)
+    result_chain_struct = []
+    # for chain in chains:
+    #   temp = get_similar_pdb_chain_structural(pdb_name, chain, -1)
+    #   for i in temp:
+    #     add_data = [pdb_name, i[0], i[1], chain]
+    #     result_chain_struct.append(add_data)
+    result_chain_struct = [['6r6k', '1a1s', 0.0568062323699072, 'A']]
 
-  # Clen not do
-  result_struct = get_experiments_to_do(result_struct, can_struct_test)
-  result_chain_struct = get_experiments_to_do(result_chain_struct, can_chain_test)
-  result_chain_sequence = get_experiments_to_do(result_chain_sequence, can_secuencial_test)
+    result_chain_sequence = []
+    # for chain in chains:
+    #   temp = get_similar_pdb_chain_sequential(pdb_name, chain, -1)
+    #   for i in temp:
+    #     add_data = [pdb_name, i[0], i[1], chain]
+    #     result_chain_sequence.append(add_data)
+    result_chain_sequence = [['6r6k', '1k0f', 0, 'A']]
 
-  for struct_score in result_struct:
-    do_test_struct(local_path, struct_score, resolution, result_cvs_struct)
-  if result_struct==[]:
-    do_test_struct(local_path, None, resolution, result_cvs_struct)
+    # Clen not do
+    result_struct = get_experiments_to_do(result_struct, can_struct_test)
+    result_chain_struct = get_experiments_to_do(result_chain_struct, can_chain_test)
+    result_chain_sequence = get_experiments_to_do(result_chain_sequence, can_secuencial_test)
 
-  for chain_score in result_chain_struct:
-    do_test_chain(local_path, chain_score, resolution, result_cvs_chain)
-  if result_chain_struct==[]:
-    do_test_chain(local_path, None, resolution, result_cvs_chain)
+    for struct_score in result_struct:
+      do_test_struct(local_path, struct_score, resolution, result_cvs_struct)
+    if result_struct==[]:
+      do_test_struct(local_path, None, resolution, result_cvs_struct)
 
-  for sequential_score in result_chain_sequence:
-    do_test_chain(local_path, sequential_score, resolution, result_cvs_secuencial)
-  if result_chain_sequence == []:
-    do_test_chain(local_path, None, resolution, result_cvs_secuencial)
+    for chain_score in result_chain_struct:
+      do_test_chain(local_path, chain_score, resolution, result_cvs_chain)
+    if result_chain_struct==[]:
+      do_test_chain(local_path, None, resolution, result_cvs_chain)
 
-  dirs = os.listdir(local_path)
+    for sequential_score in result_chain_sequence:
+      do_test_chain(local_path, sequential_score, resolution, result_cvs_secuencial)
+    if result_chain_sequence == []:
+      do_test_chain(local_path, None, resolution, result_cvs_secuencial)
 
-  for directory in dirs:
-    if directory.split('.')[1] != 'csv':
-      path_remove = '{0}/{1}'.format(local_path, directory)
-      os.remove(path_remove)
+    dirs = os.listdir(local_path)
 
+    for directory in dirs:
+      if directory.split('.')[1] != 'csv':
+        path_remove = '{0}/{1}'.format(local_path, directory)
+        os.remove(path_remove)
+  except Exception as e:
+    print(str(type(e).__name__))
+    print("\n")
+    print(str(e))
+    print("\n")
+    print(str(traceback.format_exc()))
+    print("\n\n\n\n")
 
 def get_experiments_to_do(list_possibles, cant_by_range):
   dic_values = {}
@@ -203,53 +213,30 @@ def do_test_struct(path, struct_score, resolution, result_cvs_struct):
   if not os.path.exists(local_path):
     os.makedirs(local_path)
 
-  download_pdb(struct_score[0], '{0}/{1}.pdb'.format(local_path, struct_score[0]))
-  # Maps creation
-  chains = get_chains_pdb('{0}/{1}.pdb'.format(local_path, struct_score[0]))
+  # Varaibles
+  pdb_test = struct_score[0]
+  pdb_work = struct_score[1]
+  score_pdb_work = struct_score[2]
 
+  # Generate graphs
   start_time = time.time()
-  pdb_to_mrc_chains(True, False, resolution, '{0}/{1}.pdb'.format(local_path, struct_score[0]), path, chains,
-                    len(chains))
-  os.remove('{0}/{1}.pdb'.format(local_path, struct_score[0]))
-  time_eman = time.time() - start_time
+  graph1 = get_graph_pdb_db(pdb_test, resolution)
+  graph2 = get_graph_pdb_db(pdb_work, resolution)
+  time_graph = time.time() - start_time
 
-  chains_to_segment = {}
-  start_time = time.time()
-  con_id_segment = 1
-  for chain in chains:
-    segments_graph_simulate, _ = get_mrc_one('{0}/{1}_{2}.mrc'.format(local_path, struct_score[0], chain))
-    segment = segments_graph_simulate[0]
-    segment.id_segment = con_id_segment
-    chains_to_segment[chain] = segment
-    con_id_segment += 1
-  time_segment = time.time() - start_time
-
-  original_segments = []
-  for i in chains_to_segment.keys():
-    original_segments.append(chains_to_segment[i])
-
-
-  # Change for real method
-  pdb_work, score_pdb_work, test_segments, work_chains = get_segments_struct_test(struct_score[1:], local_path,
-                                                                                  resolution)
-
-  original_match_list = [[i.id_segment, i.id_segment] for i in original_segments]
-  test_match_list = [[i.id_segment, i.id_segment] for i in test_segments]
+  #Match syntetic
+  original_match_list = [[i, i] for i in list(graph1.nodes)]
+  test_match_list = [[i, i] for i in list(graph2.nodes)]
 
   graph1_match_index = get_element_list(0, original_match_list)
   graph2_match_index = get_element_list(1, test_match_list)
 
   start_time = time.time()
-  center_point1 = get_center_point(graph1_match_index, original_segments, 0)
-  center_point2 = get_center_point(graph2_match_index, test_segments, 0)
+  center_point1 = get_center_point_by_graph(graph1_match_index, graph1)
+  center_point2 = get_center_point_by_graph(graph2_match_index, graph2)
   time_center = time.time() - start_time
 
-  # Generate test syntetic
-  start_time = time.time()
-  graph1 = generate_graph(original_segments, 50, 0, 6, 1)
-  graph2 = generate_graph(test_segments, 50, 0, 6, 1)
-  time_graph = time.time() - start_time
-
+  #Real match process
   start_time = time.time()
   alignment_note, result = graph_aligning(graph1, graph2, 2, False)
   time_aligning = time.time() - start_time
@@ -260,32 +247,26 @@ def do_test_struct(path, struct_score, resolution, result_cvs_struct):
     graph2_match_index = get_element_list(1, result)
 
     start_time = time.time()
-    center_point1_1 = get_center_point(graph1_match_index, original_segments, 0)
-    center_point2_1 = get_center_point(graph2_match_index, test_segments, 0)
+    center_point1_1 = get_center_point_by_graph(graph1_match_index, graph1)
+    center_point2_1 = get_center_point_by_graph(graph2_match_index, graph2)
     time_center_test = time.time() - start_time
   else:
     center_point1_1 = [-1, -1, -1]
     center_point2_1 = [-1, -1, -1]
 
-  download_pdb(struct_score[1], '{0}/{1}.pdb'.format(local_path, struct_score[1]))
-  pdb_to_mrc_chains(True, False, resolution, '{0}/{1}.pdb'.format(local_path, struct_score[1]), local_path)
-
-  pdb_work_mrc = get_mrc_one('{0}/{1}.mrc'.format(local_path, struct_score[0]))[0][0]
-  pdb_test_mrc = get_mrc_one('{0}/{1}/{1}.mrc'.format(local_path, struct_score[1]))[0][0]
-  shutil.rmtree(local_path + '/' + struct_score[1])
-
-  data_write = [[struct_score[0], pdb_work, list(chains_to_segment.keys()), work_chains,
+  data_write = [[pdb_test, pdb_work, get_chains_pdb_db(pdb_test), get_chains_pdb_db(pdb_work),
                  center_point1, center_point2,
                  center_point1_1, center_point2_1,
                  distance_3d_points(center_point1, center_point1_1),
                  distance_3d_points(center_point2, center_point2_1),
                  resolution, result,
-                 score_pdb_work, mean_squared_error(pdb_work_mrc.zd_descriptors, pdb_test_mrc.zd_descriptors),
+                 score_pdb_work, mean_squared_error(get_zd_pdb_db(pdb_work, resolution),
+                                                    get_zd_pdb_db(pdb_test, resolution)),
                  alignment_note,
-                 time_segment,
+                 0,
                  time_center, time_center_test,
                  time_graph,
-                 time_aligning, time_eman]]
+                 time_aligning, 0]]
 
   write_in_file('{0}/{1}'.format(path, result_cvs_struct), headers_struct, data_write)
   shutil.rmtree(local_path)
@@ -300,58 +281,41 @@ def do_test_chain(path, chain_score, resolution, result_cvs_chain):
   if not os.path.exists(local_path):
     os.makedirs(local_path)
 
-  download_pdb(chain_score[0], '{0}/{1}.pdb'.format(local_path, chain_score[0]))
-  # Maps creation
-  chains = get_chains_pdb('{0}/{1}.pdb'.format(local_path, chain_score[0]))
+  # Varaibles
+  pdb_test = chain_score[0]
+  pdb_work = chain_score[1]
+  score_chain_work = chain_score[2]
+  chain_work = chain_score[3]
 
-  start_time = time.time()
-  pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(local_path, chain_score[0]), path, chains,
-                    len(chains))
-  os.remove('{0}/{1}.pdb'.format(local_path, chain_score[0]))
-  time_eman = time.time() - start_time
+  #Generate First graph (original)
+  graph1 = get_graph_pdb_db(pdb_test, resolution)
 
-  chains_to_segment = {}
-  start_time = time.time()
-  con_id_segment = 1
-  for chain in chains:
-    segments_graph_simulate, _ = get_mrc_one('{0}/{1}_{2}.mrc'.format(local_path, chain_score[0], chain))
-    segment = segments_graph_simulate[0]
-    segment.id_segment = con_id_segment
-    chains_to_segment[chain] = segment
-    con_id_segment += 1
-  time_segment = time.time() - start_time
-
-  original_segments = []
-  for i in chains_to_segment.keys():
-    original_segments.append(chains_to_segment[i])
-
-  pdb_work, score_chain_work, chain_work = chain_score[1], chain_score[2], chain_score[3]
-  id_work = chains_to_segment[chain_work].id_segment
+  #Get pos element in graph
+  id_work = get_chains_pdb_db(pdb_test).index(chain_work) + 1
 
   # Change for real method
-  zernike_zd_descriptors_chain_pdb, score_chain_changed, chain_changed = get_zd_descriptors_chain_pdb(pdb_work,
-                                                                                                      chains_to_segment[
-                                                                                                        chain_work].zd_descriptors,
-                                                                                                      local_path,
-                                                                                                      resolution)
+  zernike_zd_descriptors_chain_pdb, score_chain_changed, chain_changed = \
+    get_zd_descriptors_chain_pdb(pdb_work,
+                                 get_zd_chain_pdb_db(pdb_test, chain_work, resolution),
+                                 resolution)
 
-  original_match_list = [[i.id_segment, i.id_segment] for i in original_segments]
-
+  # Match syntetic
+  original_match_list = [[i, i] for i in list(graph1.nodes)]
   graph1_match_index = get_element_list(0, original_match_list)
   graph2_match_index = get_element_list(1, original_match_list)
 
   start_time = time.time()
-  center_point1 = get_center_point(graph1_match_index, original_segments, 0)
-  center_point2 = get_center_point(graph2_match_index, original_segments, 0)
+  center_point1 = get_center_point_by_graph(graph1_match_index, graph1)
+  center_point2 = get_center_point_by_graph(graph2_match_index, graph1)
   time_center = time.time() - start_time
 
-  # Generate test syntetic
+  #Change matcheg chain
   start_time = time.time()
-  graph1 = generate_graph(original_segments, 50, 0, 6, 1)
   graph2 = graph1.copy()
   graph2.nodes[id_work]["zd_descriptors"] = zernike_zd_descriptors_chain_pdb
   time_graph = time.time() - start_time
 
+  #Real match process
   start_time = time.time()
   alignment_note, result = graph_aligning(graph1, graph2, 2, False)
   time_aligning = time.time() - start_time
@@ -362,14 +326,14 @@ def do_test_chain(path, chain_score, resolution, result_cvs_chain):
     graph2_match_index = get_element_list(1, result)
 
     start_time = time.time()
-    center_point1_1 = get_center_point(graph1_match_index, original_segments, 0)
-    center_point2_1 = get_center_point(graph2_match_index, original_segments, 0)
+    center_point1_1 = get_center_point_by_graph(graph1_match_index, graph1)
+    center_point2_1 = get_center_point_by_graph(graph2_match_index, graph2)
     time_center_test = time.time() - start_time
   else:
     center_point1_1 = [-1, -1, -1]
     center_point2_1 = [-1, -1, -1]
 
-  data_write = [[chain_score[0], pdb_work, list(chains_to_segment.keys()),
+  data_write = [[chain_score[0], pdb_work, get_chains_pdb_db(pdb_test),
                  center_point1, center_point2,
                  center_point1_1, center_point2_1,
                  distance_3d_points(center_point1, center_point1_1),
@@ -377,82 +341,26 @@ def do_test_chain(path, chain_score, resolution, result_cvs_chain):
                  resolution, result,
                  score_chain_work, score_chain_changed, alignment_note,
                  chain_work, chain_changed,
-                 time_segment,
+                 0,
                  time_center, time_center_test,
                  time_graph,
-                 time_aligning, time_eman]]
+                 time_aligning, 0]]
 
   write_in_file('{0}/{1}'.format(path, result_cvs_chain), headers_chain, data_write)
   shutil.rmtree(local_path)
 
 
-def get_segments_struct_test(pdb_score, path_work, resolution):
-  download_pdb(pdb_score[0], '{0}/{1}.pdb'.format(path_work, pdb_score[0]))
-  # Maps creation
-  chains = get_chains_pdb('{0}/{1}.pdb'.format(path_work, pdb_score[0]))
-
-  pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(path_work, pdb_score[0]), path_work, chains,
-                    len(chains))
-  os.remove('{0}/{1}.pdb'.format(path_work, pdb_score[0]))
-
-  all_segments = []
-  con_id_segment = 1
-  for chain in chains:
-    segments_graph_simulate, _ = get_mrc_one(
-      '{0}/{1}_{2}.mrc'.format(path_work + '/' + pdb_score[0], pdb_score[0], chain))
-    segment = segments_graph_simulate[0]
-    segment.id_segment = con_id_segment
-    all_segments.append(segment)
-    con_id_segment += 1
-
-  shutil.rmtree(path_work + '/' + pdb_score[0])
-
-  return pdb_score[0], pdb_score[1], all_segments, chains
-
-
-def get_zd_descriptors_chain_pdb(pdb_work, zd_descriptors_compare, path_work, resolution):
-  download_pdb(pdb_work, '{0}/{1}.pdb'.format(path_work, pdb_work))
-  # Maps creation
-  chains = get_chains_pdb('{0}/{1}.pdb'.format(path_work, pdb_work))
-
-  pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(path_work, pdb_work), path_work, chains,
-                    len(chains))
-  os.remove('{0}/{1}.pdb'.format(path_work, pdb_work))
+def get_zd_descriptors_chain_pdb(pdb_work, zd_descriptors_compare, resolution):
 
   best_distance = float('inf')
-  result = []
+  result = None
   chain_changed = ''
 
-  for chain in chains:
-    segments_graph_simulate, _ = get_mrc_one(
-      '{0}/{1}_{2}.mrc'.format(path_work + '/' + pdb_work, pdb_work, chain))
-
-    mse = mean_squared_error(zd_descriptors_compare, segments_graph_simulate[0].zd_descriptors)
+  for chain_zd in get_zd_chains_pdb_db(pdb_work, resolution):
+    mse = mean_squared_error(zd_descriptors_compare, chain_zd[1])
     if mse < best_distance:
       best_distance = mse
-      result = segments_graph_simulate[0].zd_descriptors
-      chain_changed = chain
-
-  shutil.rmtree(path_work + '/' + pdb_work)
+      result = chain_zd[1]
+      chain_changed = chain_zd[0]
 
   return result, best_distance, chain_changed
-
-
-def get_zd_descriptors_one_chain_pdb(pdb_work, zd_descriptors_compare, path_work, resolution, chain):
-  download_pdb(pdb_work, '{0}/{1}.pdb'.format(path_work, pdb_work))
-  # Maps creation
-  chains = get_chains_pdb('{0}/{1}.pdb'.format(path_work, pdb_work))
-
-  pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(path_work, pdb_work), path_work, chains,
-                    len(chains))
-  os.remove('{0}/{1}.pdb'.format(path_work, pdb_work))
-
-  segments_graph_simulate, _ = get_mrc_one(
-    '{0}/{1}_{2}.mrc'.format(path_work + '/' + pdb_work, pdb_work, chain))
-
-  best_distance = mean_squared_error(zd_descriptors_compare, segments_graph_simulate[0].zd_descriptors)
-  result = segments_graph_simulate[0].zd_descriptors
-
-  shutil.rmtree(path_work + '/' + pdb_work)
-
-  return result, best_distance
