@@ -1,3 +1,9 @@
+import sys
+import pathlib
+
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
+
+import general_utils.database_utils
 import os
 
 from general_utils.download_utils import download_pdb
