@@ -55,21 +55,21 @@ def do_parallel_test(path_data,
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      # if not os.path.exists(file_checkpoint):
-      #   all_names = pdb_percentage(percentage_data_set, executor)  # 169315
-      #   open_file = open(file_checkpoint, "wb")
-      #   pickle.dump(all_names, open_file)
-      #   open_file.close()
-      # else:
-      #   open_file = open(file_checkpoint, "rb")
-      #   all_names = pickle.load(open_file)
-      #   open_file.close()
+      if not os.path.exists(file_checkpoint):
+        all_names = pdb_percentage(percentage_data_set, executor)  # 169315
+        open_file = open(file_checkpoint, "wb")
+        pickle.dump(all_names, open_file)
+        open_file.close()
+      else:
+        open_file = open(file_checkpoint, "rb")
+        all_names = pickle.load(open_file)
+        open_file.close()
 
       # print(all_names, flush=True)
       # all_names = ['1aig']
       # all_names = ['1q8l']
       # all_names = ['1a0t']
-      all_names = ['6r6k']
+      # all_names = ['6r6k']
       print("Before get pdb names")
 
       path = os.path.abspath(path_data)
@@ -93,7 +93,7 @@ def do_parallel_test(path_data,
       print("Do ", len(all_names), flush=True)
       for pdb_name in all_names:
         resolution = random.choices(resolution_range)[0]
-        # resolution = 3.8680
+        # resolution = 10
 
         # print(pdb_name, con2/can_elements)
         parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_aux, path, pdb_name, result_cvs_chain,
@@ -123,69 +123,62 @@ def do_parallel_test(path_data,
 
 def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, result_cvs_secuencial, resolution,
                          can_chain_test, can_struct_test, can_secuencial_test):
-  try:
-    local_path = path + "/" + pdb_name
-    if not os.path.exists(local_path):
-      os.makedirs(local_path)
+  local_path = path + "/" + pdb_name
+  if not os.path.exists(local_path):
+    os.makedirs(local_path)
 
-    chains = get_chains_pdb_db(pdb_name)
+  chains = get_chains_pdb_db(pdb_name)
 
-    result_struct = []
-    #temp = get_similar_pdb_struct(pdb_name, -1)
-    temp = [["1abe", 0.136435164904959]]
+  result_struct = []
+  temp = get_similar_pdb_struct(pdb_name, -1)
+  #temp = [["1abe", 0.136435164904959]]
+  for i in temp:
+    add_data = [pdb_name, i[0], i[1]]
+    result_struct.append(add_data)
+
+  result_chain_struct = []
+  for chain in chains:
+    temp = get_similar_pdb_chain_structural(pdb_name, chain, -1)
     for i in temp:
-      add_data = [pdb_name, i[0], i[1]]
-      result_struct.append(add_data)
+      add_data = [pdb_name, i[0], i[1], chain]
+      result_chain_struct.append(add_data)
+  # result_chain_struct = [['6r6k', '1a1s', 0.0568062323699072, 'A']]
 
-    result_chain_struct = []
-    # for chain in chains:
-    #   temp = get_similar_pdb_chain_structural(pdb_name, chain, -1)
-    #   for i in temp:
-    #     add_data = [pdb_name, i[0], i[1], chain]
-    #     result_chain_struct.append(add_data)
-    result_chain_struct = [['6r6k', '1a1s', 0.0568062323699072, 'A']]
+  result_chain_sequence = []
+  for chain in chains:
+    temp = get_similar_pdb_chain_sequential(pdb_name, chain, -1)
+    for i in temp:
+      add_data = [pdb_name, i[0], i[1], chain]
+      result_chain_sequence.append(add_data)
+  # result_chain_sequence = [['6r6k', '1k0f', 0, 'A']]
 
-    result_chain_sequence = []
-    # for chain in chains:
-    #   temp = get_similar_pdb_chain_sequential(pdb_name, chain, -1)
-    #   for i in temp:
-    #     add_data = [pdb_name, i[0], i[1], chain]
-    #     result_chain_sequence.append(add_data)
-    result_chain_sequence = [['6r6k', '1k0f', 0, 'A']]
+  # Clen not do
+  result_struct = get_experiments_to_do(result_struct, can_struct_test)
+  result_chain_struct = get_experiments_to_do(result_chain_struct, can_chain_test)
+  result_chain_sequence = get_experiments_to_do(result_chain_sequence, can_secuencial_test)
 
-    # Clen not do
-    result_struct = get_experiments_to_do(result_struct, can_struct_test)
-    result_chain_struct = get_experiments_to_do(result_chain_struct, can_chain_test)
-    result_chain_sequence = get_experiments_to_do(result_chain_sequence, can_secuencial_test)
+  for struct_score in result_struct:
+    do_test_struct(local_path, struct_score, resolution, result_cvs_struct)
+  if result_struct==[]:
+    do_test_struct(local_path, None, resolution, result_cvs_struct)
 
-    for struct_score in result_struct:
-      do_test_struct(local_path, struct_score, resolution, result_cvs_struct)
-    if result_struct==[]:
-      do_test_struct(local_path, None, resolution, result_cvs_struct)
+  for chain_score in result_chain_struct:
+    do_test_chain(local_path, chain_score, resolution, result_cvs_chain)
+  if result_chain_struct==[]:
+    do_test_chain(local_path, None, resolution, result_cvs_chain)
 
-    for chain_score in result_chain_struct:
-      do_test_chain(local_path, chain_score, resolution, result_cvs_chain)
-    if result_chain_struct==[]:
-      do_test_chain(local_path, None, resolution, result_cvs_chain)
+  for sequential_score in result_chain_sequence:
+    do_test_chain(local_path, sequential_score, resolution, result_cvs_secuencial)
+  if result_chain_sequence == []:
+    do_test_chain(local_path, None, resolution, result_cvs_secuencial)
 
-    for sequential_score in result_chain_sequence:
-      do_test_chain(local_path, sequential_score, resolution, result_cvs_secuencial)
-    if result_chain_sequence == []:
-      do_test_chain(local_path, None, resolution, result_cvs_secuencial)
+  dirs = os.listdir(local_path)
 
-    dirs = os.listdir(local_path)
+  for directory in dirs:
+    if directory.split('.')[1] != 'csv':
+      path_remove = '{0}/{1}'.format(local_path, directory)
+      os.remove(path_remove)
 
-    for directory in dirs:
-      if directory.split('.')[1] != 'csv':
-        path_remove = '{0}/{1}'.format(local_path, directory)
-        os.remove(path_remove)
-  except Exception as e:
-    print(str(type(e).__name__))
-    print("\n")
-    print(str(e))
-    print("\n")
-    print(str(traceback.format_exc()))
-    print("\n\n\n\n")
 
 def get_experiments_to_do(list_possibles, cant_by_range):
   dic_values = {}

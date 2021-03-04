@@ -38,4 +38,4 @@ def get_sum_xyz_can(segment):
   points_pos = np.column_stack(points)
   total_sum = np.sum(points_pos, axis=0)
 
-  return [total_sum.tolist(), points_pos.size]
+  return [total_sum.tolist(), len(points_pos)]
