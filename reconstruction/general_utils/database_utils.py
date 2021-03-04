@@ -324,6 +324,14 @@ def get_all_archive_pdb():
   else:
     return []
 
+
+def clear_collection():
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    col.drop()
+
 # client = get_mongo_client()
 # Issue the serverStatus command and print the results
 # serverStatusResult = db.command("serverStatus")
