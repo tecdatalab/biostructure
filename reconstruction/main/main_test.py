@@ -1,9 +1,20 @@
 import sys
 import pathlib
 
+import matplotlib
+
+from process_graph.process_graph_utils import draw_graph_similarity
+
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
-import general_utils.database_utils
+import matplotlib.pyplot as plt
+from general_utils.database_utils import get_graph_pdb_db, get_chains_pdb_db
+from process_graph.graph_algorithm import graph_aligning
+from process_graph.graph_algorithm2 import graph_aligning2
+from process_graph.graph_algorithm3 import graph_aligning3
+import networkx as nx
+
+
 import os
 
 from general_utils.download_utils import download_pdb
@@ -12,9 +23,9 @@ from general_utils.pdb_utils import get_pdb_chain_sequence, get_similar_pdb_stru
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 
 # pdb = '5T4P'
-path = "./"
+# path = "./"
 
-pdb = '6VM4'
+# pdb = '6VM4'
 
 # download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
 # chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb))
@@ -111,3 +122,55 @@ pdb = '6VM4'
 #
 # print(simulate_contour_level_value('/home/lcastillo98/Desktop/EMD-5017.map'))
 # print(get_pdb_no_work())
+
+chains = get_chains_pdb_db('1c5f')
+nums =[ 1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16]
+all = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
+test =[          'C', 'D', 'E',      'G', 'H', 'I',      'K', 'L', 'M',      'O'     ]
+
+
+print(chains)
+graph1 = get_graph_pdb_db('1c5f', 10)
+graph2 = get_graph_pdb_db('1c5f', 10)
+
+
+
+##Remove for test
+graph2.remove_node(12) #ok
+graph2.remove_node(15) #ok
+graph2.remove_node(7)
+graph2.remove_node(3)
+#graph2.remove_node(1)
+#graph2.remove_node(4)
+#graph2.remove_node(5)
+#graph2.remove_node(6)
+#graph2.remove_node(7)
+#graph2.remove_node(11)
+#graph2.remove_node(12)
+graph2.remove_edge(13, 6)
+graph2.remove_edge(13, 5)
+graph2.remove_edge(13, 11)
+graph2.remove_edge(14, 11)
+
+
+matplotlib.use('TKAgg')
+
+
+# alignment_note1, result1 = graph_aligning(graph1, graph2, 2, False)
+# print(alignment_note1, result1)
+# print("\n\n\n\n")
+# alignment_note2, result2 = graph_aligning2(graph1, graph2, 2, False)
+# print(alignment_note2, result2)
+# print("\n\n\n\n")
+print(graph2.nodes())
+alignment_note3, result3 = graph_aligning3(graph1, graph2, 2, False)
+print(alignment_note3, result3)
+
+
+plt.figure(1)
+plt.suptitle('Graph 1', fontsize=16)
+nx.draw(graph1, with_labels=True)
+plt.figure(2)
+plt.suptitle('Graph 2', fontsize=16)
+nx.draw(graph2, with_labels=True)
+plt.show()

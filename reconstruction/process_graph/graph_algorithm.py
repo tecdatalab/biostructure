@@ -1,13 +1,14 @@
+import random
 from operator import itemgetter
 
 import numpy as np
 from sklearn.metrics import mean_squared_error
 
-from general_utils.list_utils import diff_multidimensional
+from general_utils.list_utils import setdiff2d
 
 
-def get_total_neighbors_of_neighbors(graph, node,
-                                     g_degree):  # Obtiene la cantidad de vecinos para todos los vecinos de un nodo dado
+# Obtiene la cantidad de vecinos para todos los vecinos de un nodo dado
+def get_total_neighbors_of_neighbors(graph, node, g_degree):
   total_neighbors = 0
   for n in graph.neighbors(node):
     val_degree = 0
@@ -19,7 +20,8 @@ def get_total_neighbors_of_neighbors(graph, node,
   return total_neighbors
 
 
-def structural_similarity_node(graph1, graph2, g1_degree, g2_degree, node1, node2):  # Que tan similares son los nodos
+# Que tan similares son los nodos
+def structural_similarity_node(graph1, graph2, g1_degree, g2_degree, node1, node2):
   node1_total_neighbors = get_total_neighbors_of_neighbors(graph1, node1, g1_degree)
   node2_total_neighbors = get_total_neighbors_of_neighbors(graph2, node2, g2_degree)
 
@@ -33,9 +35,8 @@ def structural_similarity_node(graph1, graph2, g1_degree, g2_degree, node1, node
   similarity = 1.0 - sim_error
   return similarity  # Definir como 0 el valor de igualdad total, entre mas mayor menos se parecen
 
-
-def similarity_node(g1_nodes_with_data, g2_nodes_with_data, node1,
-                    node2):  # Que tan similares son los nodos mediantre el error minimo cuadrado
+# Que tan similares son los nodos mediantre el error minimo cuadrado
+def similarity_node(g1_nodes_with_data, g2_nodes_with_data, node1, node2):
   mse = mean_squared_error(g1_nodes_with_data[node1]['zd_descriptors'], g2_nodes_with_data[node2]['zd_descriptors'])
   return mse  # Definir como 0 el valor de igualdad total, entre mas mayor menos se parecen
 
@@ -45,9 +46,9 @@ def compute_aligning_costs(graph1, graph2, g1_nodes_with_data, g2_nodes_with_dat
   g2_degree = list(graph2.degree())
 
   # max_degree_g1 = sorted([d for _, d in g1_degree], reverse=True)[0]  # Creo que se puede mejorar esto
-  max_degree_g1 = np.max(np.array(g1_degree).reshape(2, len(g1_degree))[0])
+  max_degree_g1 = np.max([d for _, d in graph1.degree()])
+  max_degree_g2 = np.max([d for _, d in graph2.degree()])
   # max_degree_g2 = sorted([d for _, d in g2_degree], reverse=True)[0]  # Creo que se puede mejorar esto
-  max_degree_g2 = np.max(np.array(g2_degree).reshape(2, len(g2_degree))[0])
 
   C = np.zeros((graph1.number_of_nodes(),
                 graph2.number_of_nodes()))  # Crear matrix n(cantidad de aristas g1) x m(cantidad de aristas g2)
@@ -80,8 +81,8 @@ def get_promising_neighbors(graph1, graph2, g1_dic, g2_dic, g1_mapping, g2_mappi
                           g2_mapping)  # Se optienen los vecinos que no han sido mapeados ya
   for n in np.setdiff1d(list(graph1.neighbors(node1)), g1_mapping):
     for m in g2_cycle:
-      result.append([matrix_z[g1_dic[n]][g2_dic[m]], g1_dic[n], g2_dic[m], n,
-                     m])  # A lista de resultado se le agregan los valores de: [Similidad, index n, index m, n value, m value]
+      # A lista de resultado se le agregan los valores de: [Similidad, index n, index m, n value, m value]
+      result.append([matrix_z[g1_dic[n]][g2_dic[m]], g1_dic[n], g2_dic[m], n, m])
 
   g1_check = []  # Lista para revisar que un elemento no ha sido ya mapedo con otro nodo
   g2_check = []
@@ -107,15 +108,14 @@ def get_dic_number(g_nodes):  # Dado un alista de nodos, se crea un diccionario 
     g_dic[g_nodes[i]] = i
   return g_dic
 
-
-def set_matrix_ij_val(matrix, i, j, val):  # Se setea una fila y columna dada con un valor dado
+ # Se setea una fila y columna dada con un valor dado
+def set_matrix_ij_val(matrix, i, j, val):
   matrix[i, :] = val
   matrix[:, j] = val
   return matrix
 
-
-def ok_neighbors(graph1, graph2, g1_mapping, g2_mapping, node1, node2,
-                 equivalences_list):  # Dado dos nodos se retorna la cantidad de nodos compartidos, mapeados
+# Dado dos nodos se retorna la cantidad de nodos compartidos, mapeados
+def ok_neighbors(graph1, graph2, g1_mapping, g2_mapping, node1, node2, equivalences_list):
   g1_check = np.intersect1d(list(graph1.neighbors(node1)), g1_mapping)
   g2_check = np.intersect1d(list(graph2.neighbors(node2)), g2_mapping)
 
@@ -128,9 +128,9 @@ def ok_neighbors(graph1, graph2, g1_mapping, g2_mapping, node1, node2,
 
   return len(np.intersect1d(g1_check, g2_equivalent_in_g1))
 
-
+# Calculo de matriz de nodos compartidos
 def compute_neighbors_matrix(graph1, graph2, g1_mapping, g2_mapping, total_g1_neighbors, total_g2_neighbors,
-                             equivalences_list):  # Calculo de matriz de nodos compartidos
+                             equivalences_list):
   N = np.zeros((len(total_g1_neighbors), len(total_g2_neighbors)))
   for i in range(len(total_g1_neighbors)):
     for j in range(len(total_g2_neighbors)):
@@ -150,6 +150,14 @@ def get_best_ij(i_list, j_list, matrix_z, g1_dic, g2_dic, total_g1_neighbors, to
       actual_val = x
       actual_i = i_list[i]
       actual_j = j_list[i]
+
+    if actual_val == x:
+      flat = random.choice([True, False])
+      if flat:
+        actual_val = x
+        actual_i = i_list[i]
+        actual_j = j_list[i]
+
   return actual_i, actual_j
 
 
@@ -163,6 +171,9 @@ def graph_aligning(graph1, graph2, min_similarity_value, repair_external_values=
 
   C, Z = compute_aligning_costs(graph1, graph2, g1_nodes_with_data,
                                 g2_nodes_with_data)  # Computar matriz con la capacidad de convertirse en raiz(C) o similaridad (Z)
+  print(C)
+  print(Z)
+
   result = []
   error_value_result = 0
 
@@ -207,11 +218,11 @@ def graph_aligning(graph1, graph2, min_similarity_value, repair_external_values=
                                                                                 min_similarity_value)
       total_g1_neighbors += np.setdiff1d(g1_neighbors, total_g1_neighbors).tolist()
       total_g2_neighbors += np.setdiff1d(g2_neighbors, total_g2_neighbors).tolist()
-      queue_neighbors += diff_multidimensional(new_queue_neighbors, queue_neighbors)
+      queue_neighbors += setdiff2d(new_queue_neighbors, queue_neighbors)
 
     most_similarity_value = np.amin(C)
 
-  if not repair_external_values: return error_value_result +(min(len(g1_nodes), len(g2_nodes)) - len(result)), result
+  if not repair_external_values: return error_value_result + (min(len(g1_nodes), len(g2_nodes)) - len(result)), result
   '''Arreglar el problema de los valores externos'''
   '''En general el codigo esta un poco tocado hay que revisarlo'''
   total_g1_neighbors = np.setdiff1d(total_g1_neighbors,
@@ -242,4 +253,4 @@ def graph_aligning(graph1, graph2, min_similarity_value, repair_external_values=
 
       total_g1_neighbors = np.setdiff1d(total_g1_neighbors, g1_mapping)
       total_g2_neighbors = np.setdiff1d(total_g2_neighbors, g2_mapping)
-  return error_value_result+(min(len(g1_nodes), len(g2_nodes)) - len(result)), result
+  return error_value_result + (min(len(g1_nodes), len(g2_nodes)) - len(result)), result
