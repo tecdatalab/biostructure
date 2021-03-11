@@ -12,19 +12,15 @@ from mpi4py.futures import MPICommExecutor
 from sklearn.metrics import mean_squared_error
 
 from csv_modules.csv_writer import write_in_file
-from experiment.utils_general import remove_get_dirs, pdb_percentage
+from experiment.utils_general import remove_get_dirs
 from general_utils.database_utils import get_chains_pdb_db, get_graph_pdb_db, get_zd_pdb_db, get_zd_chain_pdb_db, \
   get_zd_chains_pdb_db
-from general_utils.download_utils import download_pdb
 from general_utils.list_utils import get_element_list
 from general_utils.math_utils import distance_3d_points
 from general_utils.pdb_utils import get_similar_pdb_struct, get_similar_pdb_chain_structural, get_ignore_pdbs, \
-  get_chains_pdb, get_similar_pdb_chain_sequential
-from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
+  get_similar_pdb_chain_sequential, get_percentage_pbs_check_file
 from process_graph.graph_algorithm import graph_aligning
-from process_graph.process_graph_utils import generate_graph
-from process_mrc.generate import get_mrc_one
-from process_mrc.miscellaneous import get_center_point, get_center_point_by_graph
+from process_mrc.miscellaneous import get_center_point_by_graph
 
 headers_chain = ['Pdb', 'Pdb work', 'Chains', 'Point Original', 'Point Test', 'Point Original syn', 'Point Test syn',
                  'Point Original syn dis', 'Point Test syn dis',
@@ -55,31 +51,15 @@ def do_parallel_test(path_data,
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      if not os.path.exists(file_checkpoint):
-        all_names = pdb_percentage(percentage_data_set, executor)  # 169315
-        open_file = open(file_checkpoint, "wb")
-        pickle.dump(all_names, open_file)
-        open_file.close()
-      else:
-        open_file = open(file_checkpoint, "rb")
-        all_names = pickle.load(open_file)
-        open_file.close()
-
-      # print(all_names, flush=True)
-      # all_names = ['1aig']
-      # all_names = ['1q8l']
-      # all_names = ['1a0t']
-      # all_names = ['6r6k']
-      print("Before get pdb names")
-
+      all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor)
       path = os.path.abspath(path_data)
-      # print(path)
 
       if not os.path.isdir(path):
         os.mkdir(path)
 
       complete_pdb = remove_get_dirs(path_data, can_csv=3, add_to_ignore_files=add_to_ignore_files)
       ignore_pdbs += complete_pdb
+
       # Add ignore files
       ignore_pdbs += get_ignore_pdbs()
 
@@ -123,7 +103,7 @@ def do_parallel_test(path_data,
 
 def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, result_cvs_secuencial, resolution,
                          can_chain_test, can_struct_test, can_secuencial_test):
-  local_path = path + "/" + pdb_name
+  local_path = os.path.join(path, pdb_name)
   if not os.path.exists(local_path):
     os.makedirs(local_path)
 
@@ -131,7 +111,6 @@ def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, re
 
   result_struct = []
   temp = get_similar_pdb_struct(pdb_name, -1)
-  #temp = [["1abe", 0.136435164904959]]
   for i in temp:
     add_data = [pdb_name, i[0], i[1]]
     result_struct.append(add_data)
@@ -142,7 +121,6 @@ def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, re
     for i in temp:
       add_data = [pdb_name, i[0], i[1], chain]
       result_chain_struct.append(add_data)
-  # result_chain_struct = [['6r6k', '1a1s', 0.0568062323699072, 'A']]
 
   result_chain_sequence = []
   for chain in chains:
@@ -150,7 +128,6 @@ def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, re
     for i in temp:
       add_data = [pdb_name, i[0], i[1], chain]
       result_chain_sequence.append(add_data)
-  # result_chain_sequence = [['6r6k', '1k0f', 0, 'A']]
 
   # Clen not do
   result_struct = get_experiments_to_do(result_struct, can_struct_test)
@@ -159,12 +136,12 @@ def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, re
 
   for struct_score in result_struct:
     do_test_struct(local_path, struct_score, resolution, result_cvs_struct)
-  if result_struct==[]:
+  if result_struct == []:
     do_test_struct(local_path, None, resolution, result_cvs_struct)
 
   for chain_score in result_chain_struct:
     do_test_chain(local_path, chain_score, resolution, result_cvs_chain)
-  if result_chain_struct==[]:
+  if result_chain_struct == []:
     do_test_chain(local_path, None, resolution, result_cvs_chain)
 
   for sequential_score in result_chain_sequence:
@@ -217,7 +194,7 @@ def do_test_struct(path, struct_score, resolution, result_cvs_struct):
   graph2 = get_graph_pdb_db(pdb_work, resolution)
   time_graph = time.time() - start_time
 
-  #Match syntetic
+  # Match syntetic
   original_match_list = [[i, i] for i in list(graph1.nodes)]
   test_match_list = [[i, i] for i in list(graph2.nodes)]
 
@@ -229,7 +206,7 @@ def do_test_struct(path, struct_score, resolution, result_cvs_struct):
   center_point2 = get_center_point_by_graph(graph2_match_index, graph2)
   time_center = time.time() - start_time
 
-  #Real match process
+  # Real match process
   start_time = time.time()
   alignment_note, result = graph_aligning(graph1, graph2, 2, False)
   time_aligning = time.time() - start_time
@@ -270,7 +247,7 @@ def do_test_chain(path, chain_score, resolution, result_cvs_chain):
     write_in_file('{0}/{1}'.format(path, result_cvs_chain), headers_chain, [[]])
     return
 
-  local_path = path + "/" + chain_score[0]
+  local_path = os.path.join(path, chain_score[0])
   if not os.path.exists(local_path):
     os.makedirs(local_path)
 
@@ -280,10 +257,10 @@ def do_test_chain(path, chain_score, resolution, result_cvs_chain):
   score_chain_work = chain_score[2]
   chain_work = chain_score[3]
 
-  #Generate First graph (original)
+  # Generate First graph (original)
   graph1 = get_graph_pdb_db(pdb_test, resolution)
 
-  #Get pos element in graph
+  # Get pos element in graph
   id_work = get_chains_pdb_db(pdb_test).index(chain_work) + 1
 
   # Change for real method
@@ -302,13 +279,13 @@ def do_test_chain(path, chain_score, resolution, result_cvs_chain):
   center_point2 = get_center_point_by_graph(graph2_match_index, graph1)
   time_center = time.time() - start_time
 
-  #Change matcheg chain
+  # Change matcheg chain
   start_time = time.time()
   graph2 = graph1.copy()
   graph2.nodes[id_work]["zd_descriptors"] = zernike_zd_descriptors_chain_pdb
   time_graph = time.time() - start_time
 
-  #Real match process
+  # Real match process
   start_time = time.time()
   alignment_note, result = graph_aligning(graph1, graph2, 2, False)
   time_aligning = time.time() - start_time
@@ -344,7 +321,6 @@ def do_test_chain(path, chain_score, resolution, result_cvs_chain):
 
 
 def get_zd_descriptors_chain_pdb(pdb_work, zd_descriptors_compare, resolution):
-
   best_distance = float('inf')
   result = None
   chain_changed = ''

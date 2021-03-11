@@ -14,6 +14,8 @@ from general_utils.temp_utils import gen_dir, free_dir
 
 
 def get_parallel_can_chains_chunk(pdb_name, dir_path):
+  from general_utils.pdb_utils import get_chains_pdb
+
   download_pdb(pdb_name, '{0}/{1}.pdb'.format(dir_path, pdb_name))
   chains = get_chains_pdb('{0}/{1}.pdb'.format(dir_path, pdb_name))
   move_pdb_center('{0}/{1}.pdb'.format(dir_path, pdb_name))

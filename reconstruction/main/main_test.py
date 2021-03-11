@@ -3,6 +3,8 @@ import pathlib
 
 import matplotlib
 
+from general_utils.graph_utils import remove_node_by_name, remove_edge_nodes
+from general_utils.list_utils import combinations_i2jInK
 from process_graph.process_graph_utils import draw_graph_similarity
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
@@ -10,8 +12,6 @@ sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 import matplotlib.pyplot as plt
 from general_utils.database_utils import get_graph_pdb_db, get_chains_pdb_db
 from process_graph.graph_algorithm import graph_aligning
-from process_graph.graph_algorithm2 import graph_aligning2
-from process_graph.graph_algorithm3 import graph_aligning3
 import networkx as nx
 
 
@@ -123,54 +123,39 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 # print(simulate_contour_level_value('/home/lcastillo98/Desktop/EMD-5017.map'))
 # print(get_pdb_no_work())
 
-chains = get_chains_pdb_db('1c5f')
-nums =[ 1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16]
-all = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
-test =[          'C', 'D', 'E',      'G', 'H', 'I',      'K', 'L', 'M',      'O'     ]
+# chains = get_chains_pdb_db('1c5f')
+# nums =[ 1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16]
+# all = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']
+# test =[          'C', 'D', 'E',      'G', 'H', 'I',      'K', 'L', 'M',      'O'     ]
+#
+#
+# graph1 = get_graph_pdb_db('1c5f', 10)
+# graph2 = graph1.copy()
+#
+# ##Remove for test
+# remove_node_by_name(graph2, 13)
+# remove_node_by_name(graph2, 15)
+# remove_node_by_name(graph2, 17)
+# remove_node_by_name(graph2, 3)
+# remove_node_by_name(graph2, 4)
+# remove_node_by_name(graph2, 6)
+# remove_node_by_name(graph2, 1)
+# remove_node_by_name(graph2, 2)
+# remove_edge_nodes(graph2, 1, 1)
+#
+# matplotlib.use('TKAgg')
+#
+# alignment_note3, result3 = graph_aligning(graph1, graph2, 2, False)
+# print(alignment_note3, result3)
+# print(nx.is_connected(graph2))
+#
+# plt.figure(1)
+# plt.suptitle('Graph 1', fontsize=16)
+# nx.draw(graph1, with_labels=True)
+# plt.figure(2)
+# plt.suptitle('Graph 2', fontsize=16)
+# nx.draw(graph2, with_labels=True)
+# plt.show()
 
 
-print(chains)
-graph1 = get_graph_pdb_db('1c5f', 10)
-graph2 = get_graph_pdb_db('1c5f', 10)
-
-
-
-##Remove for test
-graph2.remove_node(12) #ok
-graph2.remove_node(15) #ok
-graph2.remove_node(7)
-graph2.remove_node(3)
-#graph2.remove_node(1)
-#graph2.remove_node(4)
-#graph2.remove_node(5)
-#graph2.remove_node(6)
-#graph2.remove_node(7)
-#graph2.remove_node(11)
-#graph2.remove_node(12)
-graph2.remove_edge(13, 6)
-graph2.remove_edge(13, 5)
-graph2.remove_edge(13, 11)
-graph2.remove_edge(14, 11)
-
-
-matplotlib.use('TKAgg')
-
-
-# alignment_note1, result1 = graph_aligning(graph1, graph2, 2, False)
-# print(alignment_note1, result1)
-# print("\n\n\n\n")
-# alignment_note2, result2 = graph_aligning2(graph1, graph2, 2, False)
-# print(alignment_note2, result2)
-# print("\n\n\n\n")
-print(graph2.nodes())
-alignment_note3, result3 = graph_aligning3(graph1, graph2, 2, False)
-print(alignment_note3, result3)
-
-
-plt.figure(1)
-plt.suptitle('Graph 1', fontsize=16)
-nx.draw(graph1, with_labels=True)
-plt.figure(2)
-plt.suptitle('Graph 2', fontsize=16)
-nx.draw(graph2, with_labels=True)
-plt.show()
+print(combinations_i2jInK(10, 2, 3))

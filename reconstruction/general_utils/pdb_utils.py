@@ -1,5 +1,6 @@
 import json
 import math
+import pickle
 import time
 import random
 import os
@@ -577,4 +578,20 @@ def get_all_pdb_name():
 def get_all_pdb_work():
   all_names = get_all_pdb_name()  # 169315
   all_names = np.setdiff1d(np.array(all_names), np.array(get_ignore_pdbs())).tolist()
+  return all_names
+
+
+def get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor):
+  from experiment.utils_general import pdb_percentage
+
+  if not os.path.exists(file_checkpoint):
+    all_names = pdb_percentage(percentage_data_set, executor)  # 169315
+    open_file = open(file_checkpoint, "wb")
+    pickle.dump(all_names, open_file)
+    open_file.close()
+  else:
+    open_file = open(file_checkpoint, "rb")
+    all_names = pickle.load(open_file)
+    open_file.close()
+
   return all_names

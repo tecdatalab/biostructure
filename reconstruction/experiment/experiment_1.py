@@ -10,20 +10,23 @@ from mpi4py.futures import MPICommExecutor
 from csv_modules.csv_writer import write_in_file
 from experiment.utils_experiment_1 import gen_keys_experiemnts
 from experiment.utils_general import remove_get_dirs
+from general_utils.database_utils import get_graph_pdb_db
 from general_utils.download_utils import download_pdb
-from general_utils.list_utils import get_element_list
+from general_utils.graph_utils import graph_is_connect
+from general_utils.list_utils import get_element_list, combinations_i2jInK
 from general_utils.math_utils import distance_3d_points
-from general_utils.pdb_utils import get_ignore_pdbs, get_chains_pdb, get_all_pdb_name
+from general_utils.pdb_utils import get_ignore_pdbs, get_chains_pdb, get_all_pdb_name, get_percentage_pbs_check_file
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_graph.graph_algorithm import graph_aligning
 from process_graph.process_graph_utils import generate_graph
 from process_mrc.generate import get_mrc_one
-from process_mrc.miscellaneous import get_center_point
+from process_mrc.miscellaneous import get_center_point, get_center_point_by_graph
 
 
 def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None,
-                      ignore_pdbs=[], range_incompleteness=[10.0, 15.0], can_try_experiments=10,
-                       add_to_ignore_files=False, error_file='error.txt'):
+                       ignore_pdbs=[], range_incompleteness=[10.0, 15.0], percentage_data_set=10,
+                       can_experiments_to_do=-1,
+                       file_checkpoint='check_expe_1.pkl', add_to_ignore_files=False, error_file='error.txt'):
   # Parale
   comm = MPI.COMM_WORLD
   size = comm.Get_size()
@@ -31,18 +34,18 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      all_names = get_all_pdb_name()  # 169315
-      # all_names = ['7jsh']
-      print("Before get pdb names")
-
+      # Get Pdbs to work
+      all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor)
       path = os.path.abspath(path_data)
-      # print(path)
+
+      print("Before get pdbs work")
 
       if not os.path.isdir(path):
         os.mkdir(path)
 
       complete_pdb = remove_get_dirs(path_data, add_to_ignore_files=add_to_ignore_files)
       ignore_pdbs += complete_pdb
+
       # Add ignore files
       ignore_pdbs += get_ignore_pdbs()
 
@@ -56,11 +59,10 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
       for pdb_name in all_names:
 
         resolution = random.choices(resolution_range)[0]
-        # resolution = 3.8680
 
-        # print(pdb_name, con2/can_elements)
-        parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
-                                                        resolution, range_incompleteness, can_try_experiments),
+        parallel_jobs.append([pdb_name,
+                              executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
+                                              resolution, range_incompleteness, can_experiments_to_do),
                               resolution])
         # do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_incompleteness, can_try_experiments)
       for f in parallel_jobs:
@@ -80,69 +82,36 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
             myfile.write("\n\n\n\n")
 
 
-def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_incompleteness, can_try_experiments):
-  local_path = path + "/" + pdb_name
+def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_incompleteness,can_experiments_to_do):
+  local_path = os.path.join(path, pdb_name)
   if not os.path.exists(local_path):
     os.makedirs(local_path)
 
-  download_pdb(pdb_name, '{0}/{1}.pdb'.format(local_path, pdb_name))
-  # Maps creation
-  chains = get_chains_pdb('{0}/{1}.pdb'.format(local_path, pdb_name))
-
-  # print(chains)
-  # combinations = combinations_12n(len(chains))[1:]
-
-  start_time = time.time()
-  pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(local_path, pdb_name), path, chains, len(chains))
-  os.remove('{0}/{1}.pdb'.format(local_path, pdb_name))
-  time_eman = time.time() - start_time
-
-  segments_to_chains = {}
-  all_segments = []
-  start_time = time.time()
-  con_id_segment = 1
-  for chain in chains:
-    segments_graph_simulate, _ = get_mrc_one('{0}/{1}_{2}.mrc'.format(local_path, pdb_name, chain))
-    segment = segments_graph_simulate[0]
-    segment.id_segment = con_id_segment
-    segments_to_chains[con_id_segment] = chain
-    all_segments.append(segment)
-    con_id_segment += 1
-  time_segment = time.time() - start_time
+  graph_pdb = get_graph_pdb_db(pdb_name, resolution)
 
   headers_csv = ['Pdb', 'Chains', 'Point Original', 'Point Test', 'Point Original syn', 'Point Test syn',
                  'Point Original syn dis', 'Point Test syn dis',
-                 'Resolution',
+                 'Resolution', 'Match note',
                  'Match', 'Father Chains', 'Test Chains',
-                 'Time segment', 'Time center', 'Time test', 'Time graph', 'Time alignment', 'Time EMAN2']
+                 'Time center', 'Time test', 'Time alignment',
+                 'Graph original is connect', 'Graph test is connect']
 
-  completed_experiments = []
-  for _ in range(can_try_experiments):
-    can_try = 10
-    while can_try > 0:
-      percentage = random.uniform(min(range_incompleteness), max(range_incompleteness))
+  remove_try = combinations_i2jInK(graph_pdb.number_of_nodes(),
+                                   round(graph_pdb.number_of_nodes() * (range_incompleteness[0]/100)),
+                                   round(graph_pdb.number_of_nodes() * (range_incompleteness[1]/100)))
+  graph_pdb_nodes = list(graph_pdb.nodes)
+  random.shuffle(remove_try)
 
-      point_test = [int(random.uniform(0, all_segments[0].mask.shape[0])),
-                    int(random.uniform(0, all_segments[0].mask.shape[1])),
-                    int(random.uniform(0, all_segments[0].mask.shape[2]))]
-      # print(point_test)
-      key_segment_test = gen_keys_experiemnts(all_segments, 50, 0, [int(random.uniform(0, all_segments[0].mask.shape[0])),
-                                                                    int(random.uniform(0, all_segments[0].mask.shape[1])),
-                                                                    int(random.uniform(0, all_segments[0].mask.shape[2]))],
-                                              percentage)
-      # print(key_segment_test)
-      if key_segment_test not in completed_experiments:
-        # print(key_segment_test)
-        completed_experiments.append(key_segment_test)
-        test_segments = [i for i in all_segments if i.id_segment in key_segment_test]
-        test_chains = [segments_to_chains[i] for i in key_segment_test]
+  for i in remove_try[:can_experiments_to_do]:
 
-        do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segments, test_chains, resolution,
-                  local_path,
-                  time_eman, time_segment, chains, test_chains)
-        break
-      else:
-        can_try -=1
+    graph_pdb_test = graph_pdb.copy()
+
+    for node_pos in i:
+      graph_pdb_test.remove_node(graph_pdb_nodes[node_pos])
+
+    do_test(pdb_name, headers_csv, result_cvs_file, resolution, local_path,
+            graph_pdb, graph_pdb_test)
+
 
   dirs = os.listdir(local_path)
 
@@ -152,25 +121,21 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_in
       os.remove(path_remove)
 
 
-def do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segments, test_chains, resolution, path_write,
-              time_eman, time_segment, fchains, tchains):
-  false_match_list = [[i.id_segment, i.id_segment] for i in test_segments]
-  graph1_match_index = get_element_list(0, false_match_list)
-  graph2_match_index = get_element_list(1, false_match_list)
+def do_test(pdb_name, headers_csv, result_cvs_file, resolution, path_write,
+              graph_pdb, graph_pdb_test):
+
+  test_match_list = [[i, i] for i in list(graph_pdb_test.nodes)]
+
+  graph1_match_index = get_element_list(0, test_match_list)
+  graph2_match_index = get_element_list(1, test_match_list)
 
   start_time = time.time()
-  center_point1 = get_center_point(graph1_match_index, test_segments, 0)
-  center_point2 = get_center_point(graph2_match_index, test_segments, 0)
+  center_point1 = get_center_point_by_graph(graph1_match_index, graph_pdb)
+  center_point2 = get_center_point_by_graph(graph2_match_index, graph_pdb_test)
   time_center = time.time() - start_time
 
-  # Generate test syntetic
   start_time = time.time()
-  graph1 = generate_graph(all_segments, 50, 0, 6, 1)
-  graph2 = generate_graph(test_segments, 50, 0, 6, 1)
-  time_graph = time.time() - start_time
-
-  start_time = time.time()
-  alignment_note, result = graph_aligning(graph1, graph2, 2, False)
+  alignment_note, result = graph_aligning(graph_pdb, graph_pdb_test, 2, False)
   time_aligning = time.time() - start_time
 
   time_center_test = 0
@@ -179,23 +144,22 @@ def do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, test_segment
     graph2_match_index = get_element_list(1, result)
 
     start_time = time.time()
-    center_point1_1 = get_center_point(graph1_match_index, all_segments, 0)
-    center_point2_1 = get_center_point(graph2_match_index, test_segments, 0)
+    center_point1_1 = get_center_point_by_graph(graph1_match_index, graph_pdb)
+    center_point2_1 = get_center_point_by_graph(graph2_match_index, graph_pdb_test)
     time_center_test = time.time() - start_time
   else:
     center_point1_1 = [-1, -1, -1]
     center_point2_1 = [-1, -1, -1]
 
-  data_write = [[pdb_name, test_chains,
+  data_write = [[pdb_name, list(graph_pdb.nodes),
                  center_point1, center_point2,
                  center_point1_1, center_point2_1,
                  distance_3d_points(center_point1, center_point1_1),
                  distance_3d_points(center_point2, center_point2_1),
-                 resolution,
-                 result, fchains, tchains,
-                 time_segment,
+                 resolution, alignment_note,
+                 result, list(graph_pdb.nodes), list(graph_pdb_test.nodes),
                  time_center, time_center_test,
-                 time_graph,
-                 time_aligning, time_eman]]
+                 time_aligning,
+                 graph_is_connect(graph_pdb), graph_is_connect(graph_pdb_test)]]
 
   write_in_file('{0}/{1}'.format(path_write, result_cvs_file), headers_csv, data_write)

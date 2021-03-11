@@ -1,5 +1,6 @@
 import numpy as np
-from functools import reduce
+import itertools
+
 
 def get_element_list(index, list_elements):
   result = []
@@ -19,12 +20,20 @@ def generate_binary_matrix(matrix):
 
 
 def combinations_12n(n):
-  import itertools
-
   stuff = [i for i in range(n)]
   result = []
 
   for L in range(0, len(stuff) + 1):
+    for subset in itertools.combinations(stuff, L):
+      result.append(list(subset))
+  return result
+
+
+def combinations_i2jInK(n, min_can, max_can):
+  stuff = [i for i in range(n)]
+  result = []
+
+  for L in range(min_can, max_can + 1):
     for subset in itertools.combinations(stuff, L):
       result.append(list(subset))
   return result

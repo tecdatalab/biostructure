@@ -5,6 +5,7 @@ import numpy as np
 from general_utils.download_utils import download_pdb
 from general_utils.pdb_utils import get_chains_pdb
 from general_utils.temp_utils import gen_dir, free_dir
+from general_utils.workspace_utils import is_work_in_cluster
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_graph.process_graph_utils import generate_graph
 from process_mrc.generate import get_mrc_one
@@ -53,12 +54,14 @@ def json_unzip(j, insist=True):
 
 
 def get_mongo_client():
-  # client = pymongo.MongoClient(host="11.0.0.21",
-  #                              port=27017,
-  #                              username='lcastilloAdmin',
-  #                              password='LPtYJpA3',
-  #                              authSource='lcastillo_biostructures')
-  client = pymongo.MongoClient()
+  if is_work_in_cluster():
+    client = pymongo.MongoClient(host="11.0.0.21",
+                                 port=27017,
+                                 username='lcastilloAdmin',
+                                 password='LPtYJpA3',
+                                 authSource='lcastillo_biostructures')
+  else:
+    client = pymongo.MongoClient()
   return client
 
 
@@ -250,6 +253,7 @@ def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, return_OZD=Fa
     segments_graph_simulate, _ = get_mrc_one('{0}/{1}_{2}.mrc'.format(local_path, pdb_id, chain))
     segment = segments_graph_simulate[0]
     segment.id_segment = con_id_segment
+    # segment.id_segment = chain
     segments.append(segment)
     con_id_segment += 1
   graph = generate_graph(segments, 100, 0, 6, 1)
