@@ -8,19 +8,14 @@ from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 
 from csv_modules.csv_writer import write_in_file
-from experiment.utils_experiment_1 import gen_keys_experiemnts
 from experiment.utils_general import remove_get_dirs
 from general_utils.database_utils import get_graph_pdb_db
-from general_utils.download_utils import download_pdb
 from general_utils.graph_utils import graph_is_connect
 from general_utils.list_utils import get_element_list, combinations_i2jInK
 from general_utils.math_utils import distance_3d_points
-from general_utils.pdb_utils import get_ignore_pdbs, get_chains_pdb, get_all_pdb_name, get_percentage_pbs_check_file
-from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
+from general_utils.pdb_utils import get_ignore_pdbs, get_percentage_pbs_check_file
 from process_graph.graph_algorithm import graph_aligning
-from process_graph.process_graph_utils import generate_graph
-from process_mrc.generate import get_mrc_one
-from process_mrc.miscellaneous import get_center_point, get_center_point_by_graph
+from process_mrc.miscellaneous import get_center_point_by_graph
 
 
 def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None,
