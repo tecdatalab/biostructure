@@ -39,7 +39,8 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_sequence, result_
     if executor is not None:
 
       # Get Pdbs to work
-      all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor)
+      # all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor)
+      all_names = ['1c5f']
 
       print("Before get pdb names")
 
@@ -100,17 +101,16 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_chain, result_cvs_sequence
   # Get PDBs to do in experiment
   list_possibles_pdb_chain_struct = []
   for chain in chains:
+    print(chain)
     temp = get_similar_pdb_chain_structural(pdb_name, chain, -1)
-    for i in temp:
-      add_data = [i[0], i[1]]
-      list_possibles_pdb_chain_struct.append(add_data)
+    list_possibles_pdb_chain_struct += temp
+
 
   list_possibles_pdb_chain_sequence = []
   for chain in chains:
+    print(chain)
     temp = get_similar_pdb_chain_sequential(pdb_name, chain, -1)
-    for i in temp:
-      add_data = [i[0], i[1]]
-      list_possibles_pdb_chain_sequence.append(add_data)
+    list_possibles_pdb_chain_sequence += temp
 
   list_possibles_pdb_struct = get_similar_pdb_struct(pdb_name, -1)
 
@@ -140,7 +140,7 @@ def do_test_pdb_list(pdb_name, headers_csv, result_cvs_file, pdb_origin_graph, r
   for i in range(min(can_chain_test, len(list_possibles_pdb))):
 
     # Change for real method
-    pdb_work = list_possibles_pdb[i][0],
+    pdb_work = list_possibles_pdb[i][0]
     score_pdb_work = list_possibles_pdb[i][1]
     graph_pdb_work = get_graph_pdb_db(pdb_work, resolution)
 
