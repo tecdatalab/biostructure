@@ -1,16 +1,18 @@
 import sys
 import pathlib
 
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
+
 import matplotlib
 
 from general_utils.graph_utils import remove_node_by_name, remove_edge_nodes
 from general_utils.list_utils import combinations_i2jInK
+from general_utils.workspace_utils import is_work_in_cluster
 from process_graph.process_graph_utils import draw_graph_similarity
 
-sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 import matplotlib.pyplot as plt
-from general_utils.database_utils import get_graph_pdb_db, get_chains_pdb_db
+from general_utils.database_utils import get_graph_pdb_db, get_chains_pdb_db, exists_mongo_db, get_all_archive_pdb
 from process_graph.graph_algorithm import graph_aligning
 import networkx as nx
 
@@ -158,4 +160,8 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 # plt.show()
 
 
-print(combinations_i2jInK(10, 2, 3))
+# print(combinations_i2jInK(10, 2, 3))
+print(is_work_in_cluster())
+print(exists_mongo_db())
+print(len(get_all_archive_pdb()))
+print(len(list(set(get_all_archive_pdb()))))
