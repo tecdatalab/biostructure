@@ -7,6 +7,7 @@ import numpy as np
 import general_utils
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
+from general_utils.workspace_utils import is_work_in_cluster
 
 from general_utils.pdb_utils import get_all_pdb_work
 from general_utils.database_utils import get_chains_pdb_db, get_all_archive_pdb
@@ -39,7 +40,9 @@ def gen_load_database():
 
 
 if __name__ == '__main__':
-  general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_load_database"
-  general_utils.temp_utils.global_temp_dir = None
+  if is_work_in_cluster():
+    general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_load_database"
+  else:
+    general_utils.temp_utils.global_temp_dir = None
   clean_work_dir()
   gen_load_database()
