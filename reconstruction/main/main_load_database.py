@@ -4,6 +4,7 @@ import pathlib
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 import numpy as np
+import random
 import general_utils
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
@@ -27,6 +28,7 @@ def gen_load_database():
     if executor is not None:
 
       all_names = np.setdiff1d(np.array(get_all_pdb_work()), np.array(get_all_archive_pdb())).tolist()
+      random.shuffle(all_names)
 
       parallel_jobs = []
       for pdb_name in all_names:
@@ -44,5 +46,5 @@ if __name__ == '__main__':
     general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_load_database"
   else:
     general_utils.temp_utils.global_temp_dir = None
-  clean_work_dir()
+  # clean_work_dir()
   gen_load_database()
