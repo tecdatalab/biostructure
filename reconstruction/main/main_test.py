@@ -131,37 +131,38 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 # test =[          'C', 'D', 'E',      'G', 'H', 'I',      'K', 'L', 'M',      'O'     ]
 #
 #
-# graph1 = get_graph_pdb_db('1c5f', 10)
-# graph2 = graph1.copy()
-#
-# ##Remove for test
-# remove_node_by_name(graph2, 13)
-# remove_node_by_name(graph2, 15)
-# remove_node_by_name(graph2, 17)
-# remove_node_by_name(graph2, 3)
-# remove_node_by_name(graph2, 4)
-# remove_node_by_name(graph2, 6)
-# remove_node_by_name(graph2, 1)
-# remove_node_by_name(graph2, 2)
-# remove_edge_nodes(graph2, 1, 1)
-#
-# matplotlib.use('TKAgg')
-#
-# alignment_note3, result3 = graph_aligning(graph1, graph2, 2, False)
-# print(alignment_note3, result3)
-# print(nx.is_connected(graph2))
-#
-# plt.figure(1)
-# plt.suptitle('Graph 1', fontsize=16)
-# nx.draw(graph1, with_labels=True)
-# plt.figure(2)
-# plt.suptitle('Graph 2', fontsize=16)
-# nx.draw(graph2, with_labels=True)
-# plt.show()
+graph1 = get_graph_pdb_db('1c5f', 10)
+graph2 = graph1.copy()
+
+##Remove for test
+remove_node_by_name(graph2, 13)
+remove_node_by_name(graph2, 15)
+remove_node_by_name(graph2, 17)
+remove_node_by_name(graph2, 3)
+remove_node_by_name(graph2, 4)
+remove_node_by_name(graph2, 6)
+remove_node_by_name(graph2, 1)
+remove_node_by_name(graph2, 2)
+remove_node_by_name(graph2, 9)
+remove_edge_nodes(graph2, 1, 1)
+
+matplotlib.use('TKAgg')
+
+alignment_note3, result3 = graph_aligning(graph1, graph2, 2, False)
+print(alignment_note3, result3)
+print(nx.is_connected(graph2))
+
+plt.figure(1)
+plt.suptitle('Graph 1', fontsize=16)
+nx.draw(graph1, with_labels=True)
+plt.figure(2)
+plt.suptitle('Graph 2', fontsize=16)
+nx.draw(graph2, with_labels=True)
+plt.show()
 
 
 # print(combinations_i2jInK(10, 2, 3))
-print(is_work_in_cluster())
-print(exists_mongo_db())
-print(len(get_all_archive_pdb()))
-print(len(list(set(get_all_archive_pdb()))))
+# print(is_work_in_cluster())
+# print(exists_mongo_db())
+# print(len(get_all_archive_pdb()))
+# print(len(list(set(get_all_archive_pdb()))))

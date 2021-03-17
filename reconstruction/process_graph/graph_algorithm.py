@@ -110,9 +110,16 @@ def possible_valid_error(graph1, graph2, node1, node2, min_sin_value):
   return result
 
 
-def calculate_C(graph1, graph2, min_similarity_value):
-  max_degree_g1 = np.max([d for _, d in graph1.degree()])
-  max_degree_g2 = np.max([d for _, d in graph2.degree()])
+def calculate_C(graph1, graph2, min_similarity_value, g1_mapping=[], g2_mapping=[], Z=None):
+  nodes_g1_check = np.setdiff1d(graph1.nodes, g1_mapping).tolist()
+  nodes_g2_check = np.setdiff1d(graph2.nodes, g2_mapping).tolist()
+
+  if nodes_g1_check == [] or nodes_g2_check == []:
+    C = np.full((graph1.number_of_nodes(), graph2.number_of_nodes()), np.infty)
+    return C
+
+  max_degree_g1 = np.max([graph1.degree[node] for node in nodes_g1_check])
+  max_degree_g2 = np.max([graph2.degree[node] for node in nodes_g2_check])
 
   mm_global_degree = min(max_degree_g1, max_degree_g2)
 
@@ -121,6 +128,10 @@ def calculate_C(graph1, graph2, min_similarity_value):
 
   for i in range(graph1.number_of_nodes()):
     for j in range(graph2.number_of_nodes()):
+      if Z is not None:
+        if Z[i][j] == np.infty:
+          C[i][j] = np.infty
+          continue
       # Calculo de que tan cerca estan de tener la misma cantidad de conexicones que la mayor pareja
       temp_sum = float(min(graph1.degree[get_node_name_by_pos(graph1, i)], mm_global_degree)
                        + min(graph2.degree[get_node_name_by_pos(graph2, j)], mm_global_degree))
@@ -290,6 +301,7 @@ def graph_aligning(graph1, graph2, min_permit_value, repair_external_values=True
                                                C[i][j],
                                                min_permit_value, result)
 
+    C = calculate_C(graph1, graph2, min_permit_value, g1_mapping, g2_mapping, Z)
     most_similarity_value = np.amin(C)
 
   # Retornar resultado si no se quiere que se haga el proceso de forsar match
