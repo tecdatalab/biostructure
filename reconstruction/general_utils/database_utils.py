@@ -336,6 +336,16 @@ def clear_collection():
     col = db[collection_name]
     col.drop()
 
+
+def memory_use():
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    result = db.command("collstats", collection_name)
+    final_size = result["totalIndexSize"] + result["storageSize"]
+    return final_size / (1024 * 1024)
+  return 0
+
 # client = get_mongo_client()
 # Issue the serverStatus command and print the results
 # serverStatusResult = db.command("serverStatus")
