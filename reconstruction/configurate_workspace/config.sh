@@ -100,3 +100,11 @@ pip3 install -U psutil
 
 #Mrcfile
 pip3 install mrcfile
+
+
+#Tqdm
+pip3 install tqdm
+
+
+#Progress
+pip3 install progress
