@@ -8,9 +8,9 @@ minutes_delete = 60
 
 dir_to_search = "/work/lcastillo/" + folder
 
-list_all_dirs = os.walk(dir_to_search)
-bar1 = Bar('Process:', max=len(list_all_dirs))
-for dirpath, dirnames, filenames in list_all_dirs:
+bar1 = Bar('Process:', max=len(list(os.walk(dir_to_search))))
+print("Start")
+for dirpath, dirnames, filenames in os.walk(dir_to_search):
    for file in filenames:
       curpath = os.path.join(dirpath, file)
       file_modified = datetime.datetime.fromtimestamp(os.path.getmtime(curpath))
