@@ -1,6 +1,8 @@
 import sys
 import pathlib
 
+from general_utils.emd_utils import get_all_emd_name, get_associated_pdb
+
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 import matplotlib
@@ -20,7 +22,7 @@ import networkx as nx
 
 import os
 
-from general_utils.download_utils import download_pdb
+from general_utils.download_utils import download_pdb, download_emd_xml
 from general_utils.pdb_utils import get_pdb_chain_sequence, get_similar_pdb_struct, get_similar_pdb_chain_structural, \
   get_similar_pdb_chain_sequential, get_chains_pdb, get_pdb_no_work
 from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
@@ -168,3 +170,18 @@ print(exists_mongo_db())
 print(len(get_all_archive_pdb()))
 print(len(list(set(get_all_archive_pdb()))))
 print(memory_use())
+# all_emd_names = get_all_emd_name()
+# star_pos = all_emd_names.index('0561')
+# for i in all_emd_names[star_pos:]:
+#   result = get_associated_pdb(i)
+#   if len(result)>1:
+#     print(i)
+#     print(result)
+#     print("\n\n\n")
+#   else:
+#     print("no " + i)
+
+
+
+
+

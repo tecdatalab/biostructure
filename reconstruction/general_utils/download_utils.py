@@ -62,6 +62,43 @@ def download_emd(id_code, exit_path, create_progress_bar=False):
       break
 
 
+
+def download_emd_xml(id_code, exit_path, create_progress_bar=False):
+  can_try = 60
+  url_format_principal_list = ['ftp://ftp.wwpdb.org/pub/emdb/structures/EMD-{0}/header/emd-{0}.xml',
+                               'ftp://ftp.rcsb.org/pub/emdb/structures/EMD-{0}/header/emd-{0}.xml',
+                               'ftp://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-{0}/header/emd-{0}.xml',
+                               'ftp://ftp.pdbj.org/pub/emdb/structures/EMD-{0}/header/emd-{0}.xml']
+  while True:
+    random.shuffle(url_format_principal_list)
+    flag = False
+    er = None
+    for url_format_string in url_format_principal_list:
+      try:
+        download_biomolecular_file(id_code, exit_path, url_format_string, create_progress_bar)
+        flag = True
+        break
+      except Exception as e:
+        er = e
+        permit_errors_codes = ["421", "104"]
+        flag_error = False
+        for i in permit_errors_codes:
+          if str(e).find(i) != -1:
+            flag_error = True
+            break
+        if not flag_error:
+          raise e
+
+    if not flag:
+      can_try -= 1
+      if can_try < 0:
+        raise er
+      else:
+        time.sleep(15)
+    else:
+      break
+
+
 def download_pdb(id_code, exit_path, create_progress_bar=False):
   id_code = id_code.lower()
   ok_flag = False
@@ -187,3 +224,16 @@ def download_biomolecular_zip_file(id_code, exit_path, url_format_string, file_z
   get_out("mv", path + "/" + file_unzip.format(id_code), exit_path)
 
   free_dir(path)
+
+
+def download_biomolecular_file(id_code, exit_path, url_format_string, create_progress_bar=False):
+  # path = './temp_emd_download'
+  exit_path = os.path.abspath(exit_path)
+  file_url = url_format_string.format(id_code)
+
+  if create_progress_bar:
+    urllib.request.urlretrieve(file_url, exit_path, MyProgressBar())
+  else:
+    urllib.request.urlretrieve(file_url, exit_path)
+
+

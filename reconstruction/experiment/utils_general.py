@@ -25,7 +25,7 @@ def get_parallel_can_chains_chunk(pdb_name, dir_path):
   return result
 
 
-def pdb_percentage(percentage, executor=None):
+def pdb_percentage(percentage, executor=None, min_can_chains=0):
   headers_csv = ['Pdb', 'Can Chains', 'Cube dimension']
 
   # List know can chains pdb
@@ -72,7 +72,7 @@ def pdb_percentage(percentage, executor=None):
   if flag_error:
     raise NameError('Error in download pdbs')
 
-  #Gen data use
+  # Gen data use
   pd_data_frame = pd.read_csv(know_can_chains_pdb_path,
                               converters={"Cube dimension": literal_eval})
   can_chains_list = pd_data_frame.values.tolist()
@@ -98,9 +98,10 @@ def pdb_percentage(percentage, executor=None):
   percentage_value = percentage / 100
 
   for i in dic_chains.keys():
-    real_can_add = ceil(len(dic_chains[i]) * percentage_value)
-    random.shuffle(dic_chains[i])
-    result += dic_chains[i][:real_can_add]
+    if i > min_can_chains:
+      real_can_add = ceil(len(dic_chains[i]) * percentage_value)
+      random.shuffle(dic_chains[i])
+      result += dic_chains[i][:real_can_add]
 
   return result
 
@@ -147,5 +148,3 @@ def remove_get_dirs(path, add_to_ignore_files=False, can_csv=1):
 
   f_evil_pdb.close()
   return result
-
-

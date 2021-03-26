@@ -40,7 +40,7 @@ headers_struct = ['Pdb', 'Pdb work', 'Chains', 'Work Chains', 'Point Original', 
 def do_parallel_test(path_data,
                      result_cvs_chain, result_cvs_struct, result_cvs_secuencial,
                      resolution_range=[5.0, 5.0], can_elements=None,
-                     ignore_pdbs=[], percentage_data_set=10, file_checkpoint='check_expe_1a.pkl',
+                     ignore_pdbs=[], percentage_data_set=10, file_checkpoint='check_expe_1b.pkl',
                      error_file='error.txt',
                      can_chain_test=3, can_struct_test=3, can_secuencial_test=3,
                      add_to_ignore_files=False):

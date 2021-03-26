@@ -581,11 +581,11 @@ def get_all_pdb_work():
   return all_names
 
 
-def get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor):
+def get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor, min_can_chains=0):
   from experiment.utils_general import pdb_percentage
 
   if not os.path.exists(file_checkpoint):
-    all_names = pdb_percentage(percentage_data_set, executor)  # 169315
+    all_names = pdb_percentage(percentage_data_set, executor, min_can_chains)  # 169315
     open_file = open(file_checkpoint, "wb")
     pickle.dump(all_names, open_file)
     open_file.close()

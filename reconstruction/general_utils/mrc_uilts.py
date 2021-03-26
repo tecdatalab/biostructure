@@ -1,35 +1,9 @@
 import os
 import shutil
-from ftplib import FTP
 
 from general_utils.string_utils import get_float_between_ss, get_float_value
 from general_utils.temp_utils import gen_dir, free_dir
 from general_utils.terminal_utils import get_out
-
-
-def get_all_emd_name():
-  list_servers = [["ftp.wwpdb.org", "/pub/emdb/structures/"],
-                  ["ftp.rcsb.org", "/pub/emdb/structures/"],
-                  ["ftp.ebi.ac.uk", "/pub/databases/emdb/structures/"],
-                  ["ftp.pdbj.org", "/pub/emdb/structures/"]]
-
-  for i in list_servers:
-    try:
-      ftp = FTP()
-      ftp.connect(i[0])
-      ftp.login()
-      ftp.cwd(i[1])
-      files_list = ftp.nlst()
-
-      result = []
-
-      for filename in files_list:
-        result.append(filename[4:])
-
-      return result
-    except Exception as e:
-      pass
-  return e
 
 
 def get_mass_angstrom(map_path):
