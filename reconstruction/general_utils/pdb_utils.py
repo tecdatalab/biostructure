@@ -11,7 +11,6 @@ from ftplib import FTP
 import numpy as np
 import requests
 
-from general_utils.database_utils import get_all_archive_pdb
 from general_utils.string_utils import change_string
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
@@ -577,6 +576,7 @@ def get_all_pdb_name():
 
 
 def get_all_pdb_work():
+  from general_utils.database_utils import get_all_archive_pdb
   # all_names = get_all_pdb_name()  # 169315
   # all_names = np.setdiff1d(np.array(all_names), np.array(get_ignore_pdbs())).tolist()
   # return all_names
