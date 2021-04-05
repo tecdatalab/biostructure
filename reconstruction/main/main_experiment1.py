@@ -24,7 +24,7 @@ def experiment_1():
                      "result.csv",
                      [4, 6, 8, 10],
                      range_incompleteness=[10.0, 15.0],
-                     percentage_data_set=40,
+                     percentage_data_set=10,
                      can_experiments_to_do=5,
                      file_checkpoint='check_expe_1.pkl',
                      add_to_ignore_files=False,

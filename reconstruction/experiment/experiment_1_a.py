@@ -39,8 +39,8 @@ def do_parallel_test_a(path_data, result_cvs_chain, result_cvs_sequence, result_
     if executor is not None:
 
       # Get Pdbs to work
-      # all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor)
-      all_names = ['1c5f']
+      all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor)
+      # all_names = ['1c5f']
 
       print("Before get pdb names")
 
