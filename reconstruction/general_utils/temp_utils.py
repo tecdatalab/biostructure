@@ -23,3 +23,4 @@ def clean_work_dir():
   if global_temp_dir != None:
     if os.path.exists(global_temp_dir):
       shutil.rmtree(global_temp_dir)
+      os.mkdir(global_temp_dir)

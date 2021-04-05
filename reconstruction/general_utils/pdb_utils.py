@@ -11,6 +11,7 @@ from ftplib import FTP
 import numpy as np
 import requests
 
+from general_utils.database_utils import get_all_archive_pdb
 from general_utils.string_utils import change_string
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
@@ -576,9 +577,11 @@ def get_all_pdb_name():
 
 
 def get_all_pdb_work():
-  all_names = get_all_pdb_name()  # 169315
-  all_names = np.setdiff1d(np.array(all_names), np.array(get_ignore_pdbs())).tolist()
-  return all_names
+  # all_names = get_all_pdb_name()  # 169315
+  # all_names = np.setdiff1d(np.array(all_names), np.array(get_ignore_pdbs())).tolist()
+  # return all_names
+  return get_all_archive_pdb()
+
 
 
 def get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor, min_can_chains=0):
