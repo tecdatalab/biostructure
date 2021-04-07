@@ -46,7 +46,7 @@ def do_parallel_test(path_data,
     if executor is not None:
 
       all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor, min_can_chains)
-      # all_names = ['1c5f']
+      # all_names = ['6x0m']
       path = os.path.abspath(path_data)
 
       if not os.path.isdir(path):
@@ -101,7 +101,7 @@ def do_parallel_test_aux(path, pdb_name, result_cvs, resolution, can_groups):
     os.makedirs(local_path)
   os.makedirs(os.path.join(local_path, "flat"))
 
-  #Ok with can_groups
+  # Ok with can_groups
   can_groups = max(1, can_groups)
   can_groups = min(len(get_chains_pdb_db(pdb_name)), can_groups)
 
@@ -179,9 +179,12 @@ def do_parallel_test_aux(path, pdb_name, result_cvs, resolution, can_groups):
   dirs = os.listdir(local_path)
 
   for directory in dirs:
-    if directory.split('.')[1] != 'csv':
+    if directory.find('.') == -1 or directory.split('.')[1] != 'csv':
       path_remove = '{0}/{1}'.format(local_path, directory)
-      os.remove(path_remove)
+      if os.path.isdir(path_remove):
+        os.rmdir(path_remove)
+      else:
+        os.remove(path_remove)
 
 
 def do_test(pdb_name, local_path, father_graph, test_graph, resolution, result_cvs):

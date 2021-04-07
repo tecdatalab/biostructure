@@ -41,7 +41,7 @@ def do_parallel_test(path_data,
                      result_cvs_chain, result_cvs_struct, result_cvs_secuencial,
                      resolution_range=[5.0, 5.0], can_elements=None,
                      ignore_pdbs=[], percentage_data_set=10, file_checkpoint='check_expe_1b.pkl',
-                     error_file='error.txt',
+                     error_file='error_log_expe_1b.txt',
                      can_chain_test=3, can_struct_test=3, can_secuencial_test=3,
                      add_to_ignore_files=False):
   # Parale
@@ -52,6 +52,7 @@ def do_parallel_test(path_data,
     if executor is not None:
 
       all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor)
+      # all_names = ['2kmu']
       path = os.path.abspath(path_data)
 
       if not os.path.isdir(path):
@@ -152,9 +153,12 @@ def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, re
   dirs = os.listdir(local_path)
 
   for directory in dirs:
-    if directory.split('.')[1] != 'csv':
+    if directory.find('.') == -1 or directory.split('.')[1] != 'csv':
       path_remove = '{0}/{1}'.format(local_path, directory)
-      os.remove(path_remove)
+      if os.path.isdir(path_remove):
+        os.rmdir(path_remove)
+      else:
+        os.remove(path_remove)
 
 
 def get_experiments_to_do(list_possibles, cant_by_range):

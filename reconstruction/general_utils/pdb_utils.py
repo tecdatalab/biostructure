@@ -114,7 +114,7 @@ def get_similar_pdb_struct(pdb_name, can=10):
     status_code = response.status_code
     time.sleep(random.randint(2, 15))
     if status_code != 200 and status_code != 204:
-        print(response, response.status_code, response.text,"\n\n\n", flush=True)
+      print(response, response.status_code, response.text, "\n\n\n", flush=True)
 
   if response.status_code == 204 or response.status_code == 400:
     return []
@@ -229,7 +229,7 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
     status_code = response.status_code
     time.sleep(random.randint(2, 15))
     if status_code != 200 and status_code != 204:
-        print(response, response.status_code, response.text,"\n\n\n", flush=True)
+      print(response, response.status_code, response.text, "\n\n\n", flush=True)
 
   if response.status_code == 204 or response.status_code == 400:
     return []
@@ -259,6 +259,10 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
   download_pdb(pdb_name, temp_file_path)
   sequence = get_pdb_chain_sequence(temp_file_path, chain)
   free_dir(path_temp)
+
+  if len(sequence) < 10 or sequence == len(sequence) * 'X':
+    return []
+
   search_request = {
     "query": {
       "type": "group",
@@ -324,7 +328,7 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
     status_code = response.status_code
     time.sleep(random.randint(2, 15))
     if status_code != 200 and status_code != 204:
-        print(response, response.status_code, response.text,"\n\n\n", flush=True)
+      print(response, response.status_code, response.text, "\n\n\n", flush=True)
 
   if response.status_code == 204 or response.status_code == 400:
     return []
@@ -412,7 +416,7 @@ def get_pdb_adn_arn_online_aux():
     status_code = response.status_code
     time.sleep(random.randint(2, 15))
     if status_code != 200 and status_code != 204:
-        print(response, response.status_code, response.text,"\n\n\n", flush=True)
+      print(response, response.status_code, response.text, "\n\n\n", flush=True)
 
   var_result = json.loads(response.text)
   result = []
@@ -577,11 +581,10 @@ def get_all_pdb_name():
 
 def get_all_pdb_work():
   from general_utils.database_utils import get_all_archive_pdb
-  # all_names = get_all_pdb_name()  # 169315
-  # all_names = np.setdiff1d(np.array(all_names), np.array(get_ignore_pdbs())).tolist()
-  # return all_names
-  return get_all_archive_pdb()
-
+  all_names = get_all_pdb_name()  # 169315
+  all_names = np.setdiff1d(np.array(all_names), np.array(get_ignore_pdbs())).tolist()
+  return all_names
+  #return get_all_archive_pdb()
 
 
 def get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor, min_can_chains=0):

@@ -295,7 +295,10 @@ class Matching:
 
     # Retornar resultado si no se quiere que se haga el proceso de forsar match
     if not repair_external_values:
-      return error_value_result / len(result), result
+      if len(result) == 0:
+        return error_value_result, result
+      else:
+        return error_value_result / len(result), result
 
     # Se computa la matrix N de vecinos y se obtiene el elemento con mas nodos compartidos
     N = self.compute_neighbors_matrix(graph1, graph2, Z, result)
@@ -317,8 +320,10 @@ class Matching:
       N = self.compute_neighbors_matrix(graph1, graph2, Z, result)
       max_similarity_value = np.amax(N)
 
-    return error_value_result / len(result), result
-
+    if len(result) == 0:
+      return error_value_result, result
+    else:
+      return error_value_result / len(result), result
 
   def expansion_cycle(self, C, Z, error_value_result, g1_mapping, g2_mapping, graph1, graph2, i, j, match_root_vale,
                       min_permit_value, result):

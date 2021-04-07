@@ -128,9 +128,12 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_chain, result_cvs_sequence
   dirs = os.listdir(local_path)
 
   for directory in dirs:
-    if directory.split('.')[1] != 'csv':
+    if directory.find('.') == -1 or directory.split('.')[1] != 'csv':
       path_remove = '{0}/{1}'.format(local_path, directory)
-      os.remove(path_remove)
+      if os.path.isdir(path_remove):
+        os.rmdir(path_remove)
+      else:
+        os.remove(path_remove)
 
 
 def do_test_pdb_list(pdb_name, headers_csv, result_cvs_file, pdb_origin_graph, resolution, path_write, can_chain_test,
