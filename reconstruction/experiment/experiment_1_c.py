@@ -46,7 +46,7 @@ def do_parallel_test(path_data,
     if executor is not None:
 
       all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor, min_can_chains)
-      # all_names = ['6x0m']
+      # all_names = ['6tpx']
       path = os.path.abspath(path_data)
 
       if not os.path.isdir(path):
@@ -129,7 +129,7 @@ def do_parallel_test_aux(path, pdb_name, result_cvs, resolution, can_groups):
 
   # Gen initial elements of groups
   max_distance_elements = []
-  min_max_distance = 0
+  min_max_distance = -1
   for i in list_chain:
     dist, ind = kd_tree.query(np.array([dicc_node_pos[i]]), k=original_graph.number_of_nodes())
     dist = dist.tolist()
