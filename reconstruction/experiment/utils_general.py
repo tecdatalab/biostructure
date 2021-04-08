@@ -98,7 +98,7 @@ def pdb_percentage(percentage, executor=None, min_can_chains=0):
   percentage_value = percentage / 100
 
   for i in dic_chains.keys():
-    if i > min_can_chains:
+    if i >= min_can_chains:
       real_can_add = ceil(len(dic_chains[i]) * percentage_value)
       random.shuffle(dic_chains[i])
       result += dic_chains[i][:real_can_add]
