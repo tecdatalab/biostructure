@@ -29,8 +29,8 @@ def average_precision(segmented_map, gt_map, thresholds=np.arange(0.5,1,0.05)):
     segmented_labels = segmented_labels[segmented_labels!=0]
     gt_labels = np.unique(gt_array)
     gt_labels = gt_labels[gt_labels!=0]
-    segmented_masks = [ segmented_array[segmented_array==l] for l in segmented_labels ]
-    gt_masks = [ gt_array[gt_array==l] for l in gt_labels ]
+    segmented_masks = [ segmented_array==l for l in segmented_labels ]
+    gt_masks = [ gt_array==l for l in gt_labels ]
    
     iou_tensor = np.zeros([len(thresholds), len(segmented_masks), len(gt_masks)])
     for i,seg_mask in enumerate(segmented_masks):
@@ -44,7 +44,7 @@ def average_precision(segmented_map, gt_map, thresholds=np.arange(0.5,1,0.05)):
 
     return np.mean(precision)
 
-def iou_at_thresholds(gt_mask, seg_mask, thresholds=np.arange(0.5,1,0.05))
+def iou_at_thresholds(gt_mask, seg_mask, thresholds=np.arange(0.5,1,0.05)):
     intersection = np.logical_and(gt_mask, seg_mask)
     union = np.logical_or(gt_mask, seg_mask)
     iou = np.sum(intersection > 0) / np.sum(union > 0)
