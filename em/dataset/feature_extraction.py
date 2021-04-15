@@ -11,12 +11,16 @@ from concurrent.futures import wait
 from scipy.spatial import cKDTree
 import numpy as np
 import pandas as pd
+import traceback
+import random
 
 import json
 from json import encoder
 
 from skimage.measure import regionprops
 from scipy.ndimage import distance_transform_edt, gaussian_filter
+
+from Bio.PDB import PDBParser, PDBIO
 
 def convert(o):
     if isinstance(o, np.generic): return o.item()  
@@ -160,7 +164,62 @@ def annotatePoints(df, i, output_path, number_points=3, gaussian_std=3):
     #print("output_df: ", output_df)
     return output_df
         
+def compute_adjacency(df, i):
+    # Get EM map id
+    map_id = df.iloc[i]['id']
+    # Get pdb path and chain id 
+    pdb_path = df.iloc[i]['pdb_path']
+    chain = df.iloc[i]['fitted_entries']
+    # Create parser and get readed object
+    parser = PDBParser(PERMISSIVE = True, QUIET = True)
+    pdb_obj = parser.get_structure(chain, pdb_path)
+    # Compute dictionary to translate chain id (letter) to chain label (number)
+    chain_id_list = [chain._id for chain in pdb_obj.get_chains()]
+    chain_label_list = [i for i in range(1,len(chain_id_list)+1)]
+    dict_label_id_chain = dict(zip(chain_id_list,chain_label_list))
+    # Create dictionaries to store coords and kdtree for each chain
+    dict_chain_kdtree = dict()
+    # Create dictionary to store final adjency data
+    adjacency_dict = dict()
+    # Compute kdtree for each chain and assign it along with their coords to the corresponding chain label in dict
+    for c in pdb_obj.get_chains():        
+        ca_coord_list = [atom.coord for atom in c.get_atoms() if atom.name=="CA"]
+        chain_id = c.id
+        print("get {} atoms for chain {}".format(len(ca_coord_list), chain_id))
+        if len(ca_coord_list) == 0:
+            continue
+        else:
+             kdtree = cKDTree(ca_coord_list)
+             dict_chain_kdtree[dict_label_id_chain[chain_id]] = kdtree
+    # Loop over chains again to compute adjacency (if exists an atom from other chain at a distance of 4 o less Angstroms )
+    for c in dict_chain_kdtree.keys():
+        # Get atoms coords for current chain from dict
+        current_chain_adjacency_dict = dict()
+        current_kdtree = dict_chain_kdtree[c]
+        # For every other chain, loop atoms to find adjacency or until atom list is empty.
+        for c_i in dict_chain_kdtree.keys():
+            if c == c_i:
+                continue
+            else:
+                print("Comparing {} against {}".format(c,c_i))
+                # Get kdtree to compare with
+                chain_kdtree = dict_chain_kdtree[c_i]
+                # Get adjacent atoms within radius of 4 Angstroms
+                adjacent_atoms = current_kdtree.query_ball_tree(chain_kdtree, r=5)
+                number_adjacencies = np.sum([len(adjacent) for adjacent in adjacent_atoms]) 
+                if number_adjacencies > 0:
+                    current_chain_adjacency_dict[c_i] = 1
+                else:
+                    current_chain_adjacency_dict[c_i] = 0
+        adjacency_dict[c] = current_chain_adjacency_dict
+
+    label_id_chain = json.dumps(dict_label_id_chain, default=convert)
+    adjacency = json.dumps(adjacency_dict, default=convert)
+
+    return pd.Series( [map_id, label_id_chain, adjacency], index=['map_id','chain_id_to_label','adjacency'])          
+                    
         
+            
     
 def mapMetricsCompute(row,match_dict):
     map_id = row['id']
@@ -220,6 +279,32 @@ def doParallelTagging(df, fullness, gt_path, columns):
 
     return output_df
 
+def doParallelAdjacency(df):
+    id_list = df.index.tolist()
+    print("Spawn procecess...")
+    comm = MPI.COMM_WORLD
+    size = comm.Get_size()
+    output_df = pd.DataFrame(columns=['map_id','chain_id_to_label', 'adjacency'])
+    ''' 
+    with MPICommExecutor(comm, root=0, worker_size=size) as executor:
+        if executor is not None:
+            futures = []
+            # For each map, perform annotation
+            for i in id_list:
+                futures.append(executor.submit(compute_adjacency,df,i))
+            wait(futures)
+            for f in futures:
+                try:
+                    res = f.result()
+                    print("Received {}".format(res))
+                    output_df = output_df.append(res, ignore_index=True)
+                except Exception as error:
+                    print(traceback.format_exc())
+    '''
+    for i in id_list:
+        res = compute_adjacency(df,i)
+        output_df = output_df.append(res, ignore_index=True)
+    return output_df
 
 def doParallelExtremePointAnnotation(df, output_path):
     indexes = df.index.tolist()
@@ -261,28 +346,30 @@ def main():
     # Do parallel computation, one process for each map
     # Get index list to schedule processess 
     # Get id unique values to extract indexes of respective molecule subunits 
-    exp_sim_metrics = doParallelTagging(df_exp_merged, fullness, gt_path, {'id':'id','map_path':'simulated_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label', 'chain_id':'chain_id'}) 
-    exp_tagged = doParallelTagging(df_exp_merged, fullness, gt_path, {'id':'id','map_path':'aligned_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label','chain_id':'chain_id'})
+    #exp_sim_metrics = doParallelTagging(df_exp_merged, fullness, gt_path, {'id':'id','map_path':'simulated_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label', 'chain_id':'chain_id'}) 
+    #exp_tagged = doParallelTagging(df_exp_merged, fullness, gt_path, {'id':'id','map_path':'aligned_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label','chain_id':'chain_id'})
     # Perform same procedure for simulated data.
-    df_sim = pd.read_csv('dataset_sim_merged.csv')
-    sim_tagged=  doParallelTagging(df_sim, fullness, gt_path, {'id':'entries','map_path':'simulated_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label','chain_id':'chain_id'})
+    #df_sim = pd.read_csv('dataset_sim_merged.csv')
+    #sim_tagged=  doParallelTagging(df_sim, fullness, gt_path, {'id':'entries','map_path':'simulated_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label','chain_id':'chain_id'})
 
-    match_exp = dict(zip(exp_tagged['id'], exp_tagged['tagged_path']))
-    match_exp_sim = dict(zip(sim_tagged['id'], sim_tagged['tagged_path']))
+    #match_exp = dict(zip(exp_tagged['id'], exp_tagged['tagged_path']))
+    #match_exp_sim = dict(zip(sim_tagged['id'], sim_tagged['tagged_path']))
     # Compute metrics for each dataframe
-    exp_metrics = exp_tagged.apply(lambda x: mapMetricsCompute(x,match_exp), axis=1)
-    sim_metrics= sim_tagged.apply(lambda x: mapMetricsCompute(x,match_exp_sim), axis=1)
+    #exp_metrics = exp_tagged.apply(lambda x: mapMetricsCompute(x,match_exp), axis=1)
+    #sim_metrics= sim_tagged.apply(lambda x: mapMetricsCompute(x,match_exp_sim), axis=1)
 
     # Create result dataframe with metrics
-    exp_metrics.to_csv('dataset_exp_metrics.csv', index=False)
-    exp_tagged.to_csv('dataset_exp_tagged.csv', index=False)
-    sim_metrics.to_csv('dataset_sim_metrics.csv', index = False)         
-    sim_tagged.to_csv('dataset_sim_tagged.csv', index=False) 
+    #exp_metrics.to_csv('dataset_exp_metrics.csv', index=False)
+    #exp_tagged.to_csv('dataset_exp_tagged.csv', index=False)
+    #sim_metrics.to_csv('dataset_sim_metrics.csv', index = False)         
+    #sim_tagged.to_csv('dataset_sim_tagged.csv', index=False) 
     
-    extreme_points_df = doParallelExtremePointAnnotation(exp_metrics, os.path.join(current_dir,'extreme_points/'))
-    extreme_points_df.to_csv('dataset_extreme_points.csv', index = False)
-    extreme_points_df = doParallelExtremePointAnnotation(sim_metrics, os.path.join(current_dir,'extreme_points/'))
-    extreme_points_df.to_csv('dataset_extreme_points_sim.csv', index = False)
-
+    #extreme_points_df = doParallelExtremePointAnnotation(exp_metrics, os.path.join(current_dir,'extreme_points/'))
+    #extreme_points_df.to_csv('dataset_extreme_points.csv', index = False)
+    #extreme_points_df = doParallelExtremePointAnnotation(sim_metrics, os.path.join(current_dir,'extreme_points/'))
+    #extreme_points_df.to_csv('dataset_extreme_points_sim.csv', index = False)
+    selected_df = pd.read_csv('dataset_selected.csv')
+    result_df = doParallelAdjacency(selected_df)
+    result_df.to_csv('dataset_selected_adjacency.csv', index=False)
 if __name__ == '__main__':
     main()
