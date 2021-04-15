@@ -1,12 +1,14 @@
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import torch
 from ignite.engine import Events, create_supervised_evaluator, \
     create_supervised_trainer
 from ignite.metrics import DiceCoefficient, IoU, Accuracy, Loss, ConfusionMatrix
 from ignite.handlers import Checkpoint, DiskSaver, global_step_from_engine
 from matplotlib import pyplot as plt
+plt.style.use('science')
 from torchsummary import summary
 
 from SegmentationAgent import SegmentationAgent
@@ -19,8 +21,8 @@ DIM_SIZE = 96  # The input size for model
 CSV_PATH = Path('dataset/dataset.csv')  # Location of the dataset
 SHUFFLE = True  # Shuffle the dataset before making the split
 LR = 0.001  # Learning rate for the model
-EPOCHS = 150  # Number of epochs to train the model
-DEPTH = 5  # Depth of Unet model
+EPOCHS = 100  # Number of epochs to train the model
+DEPTH = 4  # Depth of Unet model
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'  # Device used to train
 
@@ -41,7 +43,7 @@ def score_function(engine):
 to_save = {'model': agent.model}
 handler = Checkpoint(to_save, DiskSaver('./model', create_dir=True), n_saved=2,
                      filename_prefix='best', score_function=score_function, score_name="val_dice",
-                     global_step_transform=global_step_from_engine(trainer))
+                     global_step_transform=global_step_from_engine(evaluator))
 
 evaluator.add_event_handler(Events.COMPLETED, handler)
 
@@ -92,49 +94,50 @@ def log_validation_results(engine):
             "Validation - Epoch: {} Dice: {:.2f}  Iou: {:.2f}  Accuracy: {:.2f}  Loss: {:.2f}".format(
                     engine.state.epoch, avg_dice, avg_iou, avg_accuracy, avg_loss))
 
-
 # Print summary of the model
 summary(agent.model, (2, DIM_SIZE, DIM_SIZE, DIM_SIZE))
 # Train model
 trainer.run(agent.train_loader, max_epochs=EPOCHS)
 
-# Save the model's weights after training is complete
-torch.save(agent.model.state_dict(), 'model.pt')
+pd.DataFrame(train_metrics).T.reset_index().to_csv('training.csv', header=False, index=False)
 
-plt.figure(figsize=(30, 10))
-plt.subplot(221)
+pd.DataFrame(validation_metrics).T.reset_index().to_csv('validation.csv', header=False, index=False)
+
+plt.figure()
 plt.plot(np.arange(len(train_metrics['dice'])) + 1, train_metrics['dice'], label='Train')
 plt.plot(np.arange(len(validation_metrics['dice'])) + 1, validation_metrics['dice'],
          label='Validation')
 plt.xlabel('Epochs')
 plt.ylabel('Dice Coefficient')
-plt.legend()
-plt.grid()
-plt.subplot(222)
+plt.savefig('dice.png', dpi=300)
+plt.clf()
+
+plt.figure()
 plt.plot(np.arange(len(train_metrics['iou'])) + 1, train_metrics['iou'], label='Train')
 plt.plot(np.arange(len(validation_metrics['iou'])) + 1, validation_metrics['iou'],
          label='Validation')
 plt.xlabel('Epochs')
 plt.ylabel('IoU')
-plt.legend()
-plt.grid()
-plt.subplot(223)
+plt.savefig('iou.png', dpi=300)
+plt.clf()
+
+plt.figure()
 plt.plot(np.arange(len(train_metrics['accuracy'])) + 1, train_metrics['accuracy'], label='Train')
 plt.plot(np.arange(len(validation_metrics['accuracy'])) + 1, validation_metrics['accuracy'],
          label='Validation')
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy')
-plt.legend()
-plt.grid()
-plt.subplot(224)
+plt.savefig('accuracy.png', dpi=300)
+plt.clf()
+
+
+plt.figure()
 plt.plot(np.arange(len(train_loss)) + 1, train_loss, label='Train')
 plt.plot(np.arange(len(validation_loss)) + 1, validation_loss,
          label='Validation')
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
-plt.legend()
-plt.grid()
-plt.savefig('training.png')
+plt.savefig('loss.png', dpi=300)
 
 
 # Test the model on the test images
