@@ -6,7 +6,10 @@ global_temp_dir = None
 
 
 def free_dir(path_dir):
-  shutil.rmtree(path_dir)
+  try:
+    shutil.rmtree(path_dir)
+  except:
+    pass
 
 
 def gen_dir():
@@ -14,7 +17,11 @@ def gen_dir():
     return os.path.abspath(tempfile.mkdtemp())
 
   if not os.path.exists(global_temp_dir):
-    os.mkdir(global_temp_dir)
+    try:
+      os.mkdir(global_temp_dir)
+    except:
+      pass
+
 
   return os.path.abspath(tempfile.mkdtemp(dir=global_temp_dir))
 

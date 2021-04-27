@@ -104,61 +104,65 @@ def do_parallel_test(path_data,
 
 def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, result_cvs_secuencial, resolution,
                          can_chain_test, can_struct_test, can_secuencial_test):
-  local_path = os.path.join(path, pdb_name)
-  if not os.path.exists(local_path):
-    os.makedirs(local_path)
+  try:
+    local_path = os.path.join(path, pdb_name)
+    if not os.path.exists(local_path):
+      os.makedirs(local_path)
 
-  chains = get_chains_pdb_db(pdb_name)
+    chains = get_chains_pdb_db(pdb_name)
 
-  result_struct = []
-  temp = get_similar_pdb_struct(pdb_name, -1)
-  for i in temp:
-    add_data = [pdb_name, i[0], i[1]]
-    result_struct.append(add_data)
-
-  result_chain_struct = []
-  for chain in chains:
-    temp = get_similar_pdb_chain_structural(pdb_name, chain, -1)
+    result_struct = []
+    temp = get_similar_pdb_struct(pdb_name, -1)
     for i in temp:
-      add_data = [pdb_name, i[0], i[1], chain]
-      result_chain_struct.append(add_data)
+      add_data = [pdb_name, i[0], i[1]]
+      result_struct.append(add_data)
 
-  result_chain_sequence = []
-  for chain in chains:
-    temp = get_similar_pdb_chain_sequential(pdb_name, chain, -1)
-    for i in temp:
-      add_data = [pdb_name, i[0], i[1], chain]
-      result_chain_sequence.append(add_data)
+    result_chain_struct = []
+    for chain in chains:
+      temp = get_similar_pdb_chain_structural(pdb_name, chain, -1)
+      for i in temp:
+        add_data = [pdb_name, i[0], i[1], chain]
+        result_chain_struct.append(add_data)
 
-  # Clen not do
-  result_struct = get_experiments_to_do(result_struct, can_struct_test)
-  result_chain_struct = get_experiments_to_do(result_chain_struct, can_chain_test)
-  result_chain_sequence = get_experiments_to_do(result_chain_sequence, can_secuencial_test)
+    result_chain_sequence = []
+    for chain in chains:
+      temp = get_similar_pdb_chain_sequential(pdb_name, chain, -1)
+      for i in temp:
+        add_data = [pdb_name, i[0], i[1], chain]
+        result_chain_sequence.append(add_data)
 
-  for struct_score in result_struct:
-    do_test_struct(local_path, struct_score, resolution, result_cvs_struct)
-  if result_struct == []:
-    do_test_struct(local_path, None, resolution, result_cvs_struct)
+    # Clen not do
+    result_struct = get_experiments_to_do(result_struct, can_struct_test)
+    result_chain_struct = get_experiments_to_do(result_chain_struct, can_chain_test)
+    result_chain_sequence = get_experiments_to_do(result_chain_sequence, can_secuencial_test)
 
-  for chain_score in result_chain_struct:
-    do_test_chain(local_path, chain_score, resolution, result_cvs_chain)
-  if result_chain_struct == []:
-    do_test_chain(local_path, None, resolution, result_cvs_chain)
+    for struct_score in result_struct:
+      do_test_struct(local_path, struct_score, resolution, result_cvs_struct)
+    if result_struct == []:
+      do_test_struct(local_path, None, resolution, result_cvs_struct)
 
-  for sequential_score in result_chain_sequence:
-    do_test_chain(local_path, sequential_score, resolution, result_cvs_secuencial)
-  if result_chain_sequence == []:
-    do_test_chain(local_path, None, resolution, result_cvs_secuencial)
+    for chain_score in result_chain_struct:
+      do_test_chain(local_path, chain_score, resolution, result_cvs_chain)
+    if result_chain_struct == []:
+      do_test_chain(local_path, None, resolution, result_cvs_chain)
 
-  dirs = os.listdir(local_path)
+    for sequential_score in result_chain_sequence:
+      do_test_chain(local_path, sequential_score, resolution, result_cvs_secuencial)
+    if result_chain_sequence == []:
+      do_test_chain(local_path, None, resolution, result_cvs_secuencial)
 
-  for directory in dirs:
-    if directory.find('.') == -1 or directory.split('.')[1] != 'csv':
-      path_remove = '{0}/{1}'.format(local_path, directory)
-      if os.path.isdir(path_remove):
-        os.rmdir(path_remove)
-      else:
-        os.remove(path_remove)
+    dirs = os.listdir(local_path)
+
+    for directory in dirs:
+      if directory.find('.') == -1 or directory.split('.')[1] != 'csv':
+        path_remove = '{0}/{1}'.format(local_path, directory)
+        if os.path.isdir(path_remove):
+          os.rmdir(path_remove)
+        else:
+          os.remove(path_remove)
+  except:
+    print(pdb_name, flush=True)
+    traceback.print_exc()
 
 
 def get_experiments_to_do(list_possibles, cant_by_range):

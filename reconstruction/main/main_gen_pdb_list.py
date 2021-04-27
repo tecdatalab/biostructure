@@ -25,22 +25,9 @@ from general_utils.temp_utils import clean_work_dir, gen_dir, free_dir
 def test_pdb(pdb_name):
   pdb_name = pdb_name.lower()
   print("\n\n\n Enter:" + pdb_name + "\n\n\n", flush=True)
-  path_dir = gen_dir()
-
-  download_pdb(pdb_name, '{0}/{1}.pdb'.format(path_dir, pdb_name))
-  chains = get_chains_pdb('{0}/{1}.pdb'.format(path_dir, pdb_name))
-
-  pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path_dir, pdb_name), path_dir, chains, len(chains))
-  local_path = path_dir + "/" + pdb_name
-
-  _segments, _original_structure = get_mrc_synthetic_segments_pdb('{0}/{1}.mrc'.format(local_path, pdb_name),
-                                                                  local_path, calculate_Z3D=True)
-
-  free_dir(path_dir)
-
+  get_chains_pdb_db(pdb_name)
   know_pdb_path = os.path.dirname(__file__) + '/../files/pdb_list.csv'
   write_in_file(know_pdb_path, ["Name", "OK"], [[pdb_name, 1]])
-  get_chains_pdb_db(pdb_name)
   print("\n\n\n Finish:" + pdb_name + "\n\n\n", flush=True)
 
 
@@ -53,6 +40,11 @@ def gen_update_pdb_list():
     if executor is not None:
 
       path_dir = gen_dir()
+      try:
+        with open(path_dir + "/data.txt", 'w') as fp:
+          pass
+      except:
+        pass
       urllib.request.urlretrieve("ftp://ftp.wwpdb.org/pub/pdb/derived_data/index/author.idx", path_dir + "/data.txt")
       with open(path_dir + "/data.txt") as f:
         content = f.readlines()
@@ -78,7 +70,7 @@ def gen_update_pdb_list():
       print(len(real_pdb_name))
       real_pdb_name = np.setdiff1d(real_pdb_name, actual_pdb_list).tolist()
       # real_pdb_name = ["5uyk"]
-      print(len(real_pdb_name))
+      print("Todo do:", len(real_pdb_name), flush=True)
       random.shuffle(real_pdb_name)
 
       # real_pdb_name = ["1fnt"]
@@ -97,7 +89,7 @@ def gen_update_pdb_list():
 
 if __name__ == '__main__':
   if is_work_in_cluster():
-    general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_gen"
+    general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_gen_create_list"
   else:
     general_utils.temp_utils.global_temp_dir = None
   clean_work_dir()

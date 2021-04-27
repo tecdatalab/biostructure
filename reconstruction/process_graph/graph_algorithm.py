@@ -101,7 +101,7 @@ class Matching:
     if ok_match == 0:
       result = 1.0
     else:
-      result = float(min(len(list(graph1.neighbors(node1))), len(list(graph2.neighbors(node2))))) / (float(ok_match))
+      result = (float(ok_match)) / float(min(len(list(graph1.neighbors(node1))), len(list(graph2.neighbors(node2)))))
     result = 1.0 - result
 
     self.dic_g1g2_possible[str(node1) + str(node2)] = result
