@@ -1,8 +1,11 @@
 # tecdatalab - BioStructure Project
 
-## -> Description
+## -> EvoSeg:  An evolutionary automatic subunit segmentation
 
-The description of the project goes here.
+EvoSeg is a tool for automatic subunit segmentation of EM Maps. 
+
+**[Tutorial (Jupyter Noteboook)](https://github.com/tecdatalab/biostructure/blob/master/em/evolutionary_segmentation/Evolutionary_Segmentation.ipynb)**
+
 
 ## -> Project download and configuration
 
