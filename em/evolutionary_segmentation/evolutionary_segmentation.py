@@ -247,7 +247,7 @@ def mutate(population, merge_prob, split_prob, steps_range, sigma_range, input_m
             #print(dict_attributes)
             mutated_ft_vector = create_vec_features(dict_attributes, MAX_NUMBER_SEGMENTS)
             mutated_population.append({'features':mutated_ft_vector, 'labels':new_labels.astype(np.int32)})
-        elif np.random.uniform(0,1,1) <=  merge_prob:
+        if np.random.uniform(0,1,1) <=  merge_prob:
             indiv_labels = individual['labels'].astype(np.int32)
             indiv_label_props = regionprops(indiv_labels)
             #print("preparing merging")
@@ -292,57 +292,3 @@ def mutate(population, merge_prob, split_prob, steps_range, sigma_range, input_m
 
 
 
-#test
-
-#test_ids = ['3573', '0044','7090','0790','8528','3206','20824','4670']
-#test_contour_level = [0.01, 5.45, 0.017, 0.83, 0.105, 0.028, 0.250, 0.025]
-test_ids = ['4670']
-test_contour_level = [0.025]
-
-
-classifier = pickle.load(open('classifier.pkl', 'rb'))
-
-for test_id, test_contour in zip(test_ids, test_contour_level):
-    mol = molecule.Molecule('models/aligned_emd_{}.mrc'.format(test_id),test_contour)
-    mol_gt = molecule.Molecule('models/aligned_emd_{}_gt.mrc'.format(test_id), 0.01)           
-    data = mol.getDataAtContour(1)
-    data_gt = mol_gt.getDataAtContour(1)
-    data[data_gt==0]=0
-    mol.setData(data)
-
-    pop = init_population(30, MAX_NUMBER_SEGMENTS, [1,4], [1,4], mol)
-    print("Init population score:")
-    for p in pop:
-        print(classifier.predict_proba(p['features'].reshape(1, -1)))
-
-    save=False
-    counter = 0 
-    run= True
-    pop_fitness = None
-    overall_best_score = 0
-    patience = 20
-    std_max = 0.01
-
-    while(run):
-        ma, pa = select_parents(pop, 15)
-        new_gen = mating(ma, pa, 0.9, 0.5, data)
-        mutated_pop = mutate(new_gen, 0.1, 0.1, [1,4], [1,4], mol)
-        pop_fitness = [ classifier.predict_proba(n['features'].reshape(1, -1))[0][1] for n in mutated_pop ]
-        print("Population of gen {} fitness {}".format(counter,pop_fitness))
-        best_individual_score = np.max(pop_fitness)
-        std_score_pop = np.std(pop_fitness)
-        
-        print("***Optimizing {}, best score of generation {} is {}".format(test_id, counter, best_individual_score))
-        print("		population std of {}".format(std_score_pop))	
-        save = True if best_individual_score > overall_best_score else False
-        overall_best_score = best_individual_score if best_individual_score > overall_best_score else overall_best_score
-        if save:
-            print("	saving segmentation...")
-            sorted_idx = np.argsort(pop_fitness)
-            np.save('results_2/best_{0}_{1:.2f}.npy'.format(test_id,best_individual_score), mutated_pop[sorted_idx[-1]]['labels'])
-            patience = 20
-        else: 
-            patience -= 1
-        
-        run = False if ((counter > 200) | (patience==0)) else True
-        counter += 1
