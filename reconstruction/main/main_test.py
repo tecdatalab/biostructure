@@ -134,8 +134,26 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 # test =[          'C', 'D', 'E',      'G', 'H', 'I',      'K', 'L', 'M',      'O'     ]
 #
 #
-# graph1 = get_graph_pdb_db('1c5f', 10)
+# graph1 = get_graph_pdb_db('7NO3', 10)
+#
+# matplotlib.use('TKAgg')
+#
+# plt.figure(1)
+# plt.suptitle('Graph 1', fontsize=16)
+# nx.draw(graph1, with_labels=True)
+# plt.show()
+#
 # graph2 = graph1.copy()
+# path = './result'
+# pdb = '7no3'
+# #os.mkdir(path)
+#
+# download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
+# chains = get_chains_pdb_db(pdb)
+# pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path, pdb), path, chains, len(chains))
+# #os.remove('{0}/{1}.pdb'.format(path, pdb))
+#
+# print(chains)
 #
 # ##Remove for test
 # remove_node_by_name(graph2, 13)
@@ -163,13 +181,15 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 # nx.draw(graph2, with_labels=True)
 # plt.show()
 #
+result = combinations_i2jInK(10, 2, 5)
+print(result)
+print(len(result))
 
-# print(combinations_i2jInK(10, 2, 3))
-print(is_work_in_cluster())
-print(exists_mongo_db())
-print(len(get_all_archive_pdb()))
-print(len(list(set(get_all_archive_pdb()))))
-print(memory_use())
+# print(is_work_in_cluster())
+# print(exists_mongo_db())
+# print(len(get_all_archive_pdb()))
+# print(len(list(set(get_all_archive_pdb()))))
+# print(memory_use())
 # all_emd_names = get_all_emd_name()
 # star_pos = all_emd_names.index('0561')
 # for i in all_emd_names[star_pos:]:
@@ -180,8 +200,52 @@ print(memory_use())
 #     print("\n\n\n")
 #   else:
 #     print("no " + i)
+#
+#
+# import sys
+# import pathlib
+#
+#
+# pathlib.Path(__file__).parent.absolute()
+#
+# sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../../em")
+# import visualizer
+# import processing
+# import molecule
+# import configparser
+# import argparse
+#
+# import numpy as np
+#
+#
+#
+# myMolecule = molecule.Molecule("/tmp/tmpk4uj2qbj/1h1k/1h1k.mrc", recommendedContour=5)
+# # Segment EM map with parameters steps (3) and sigma (1)
+# myMolecule.generateSegments(3, 1)
+# # Get generated dictionary, with contour ratio as keys and composited numpy array with segment masks and labels
+# segments_at_contour_dict = myMolecule.getSegmentsMasks()
+# # To get density array for each segment, we can use mask array indexing
+# # What contour ratios do we have?
+# # print(segments_at_contour_dict.keys())
+# # Get segments masks at default contour ratio (which is 1)
+# segments_masks = segments_at_contour_dict[1]
+# # Print segment labels
+# # print (segments_masks.keys())
+# # Lets create a list to store a copy of densities for each segment
+# result = []
+# import utils._zernike as z
+# zd = z.computeDescriptors(myMolecule.getEmMap().data())
 
 
 
-
-
+# # Import math Library
+# import math
+#
+# # Initialize the number of items to choose from
+# n = 10000
+#
+# # Initialize the number of possibilities to choose
+# k = 500
+#
+# # Print total number of possible combinations
+# print (math.comb(n, k))
