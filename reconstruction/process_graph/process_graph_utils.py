@@ -161,11 +161,19 @@ def draw_graph_similarity_same_image(graph1, graph2, result):
   ax[1].set_axis_off()
 
   ax[2].set_title('Graph 0 match')
-  nx.draw_networkx(graph1, ax=ax[2], with_labels=True, node_color=graph1_match)
+  mapping = {}
+  for i in result:
+    mapping[i[0]] = str(i[0]) + ":" + str(i[1])
+  graph1_cpy = nx.relabel_nodes(graph1, mapping)
+  nx.draw_networkx(graph1_cpy, ax=ax[2], with_labels=True, node_color=graph1_match)
   ax[2].set_axis_off()
 
   ax[3].set_title('Graph 1 match')
-  nx.draw_networkx(graph2, ax=ax[3], with_labels=True, node_color=graph2_match)
+  mapping = {}
+  for i in result:
+    mapping[i[1]] = str(i[1]) + ":" + str(i[0])
+  graph2_cpy = nx.relabel_nodes(graph2, mapping)
+  nx.draw_networkx(graph2_cpy, ax=ax[3], with_labels=True, node_color=graph2_match)
   ax[3].set_axis_off()
 
   plt.show()

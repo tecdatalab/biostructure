@@ -1,7 +1,7 @@
 import pymongo
 import zlib, json, base64
 import numpy as np
-
+import os
 from general_utils.download_utils import download_pdb
 from general_utils.pdb_utils import get_chains_pdb
 from general_utils.temp_utils import gen_dir, free_dir
@@ -10,6 +10,7 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_graph.process_graph_utils import generate_graph
 from process_mrc.generate import get_mrc_one
 from networkx.readwrite import json_graph
+from bson.json_util import dumps
 
 ZIPJSON_KEY = 'base64(zip(o))'
 database_name = "lcastillo_biostructures"
@@ -335,6 +336,52 @@ def clear_collection():
     db = client[database_name]
     col = db[collection_name]
     col.drop()
+
+
+def save_collection(export_json_path):
+  if os.path.exists(export_json_path):
+    os.remove(export_json_path)
+
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    cursor = col.find({})
+    with open(export_json_path, 'w') as file:
+      file.write('[')
+
+      flag_1 = True
+      for document in cursor:
+        if not flag_1:
+          file.write(',')
+        else:
+          flag_1 = False
+        file.write(dumps(document))
+      file.write(']')
+
+
+def load_collection(json_path):
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    with open(json_path) as f:
+      file_data = json.load(f)
+      if isinstance(file_data, list):
+        for add_pdb in file_data:
+          add_pdb.pop("_id")
+          col.update_one(
+            {"pdbID": add_pdb["pdbID"]},
+            {"$setOnInsert": add_pdb},
+            True
+          )
+      else:
+        file_data.pop("_id")
+        col.update_one(
+          {"pdbID": file_data["pdbID"]},
+          {"$setOnInsert": file_data},
+          True
+        )
 
 
 def memory_use():

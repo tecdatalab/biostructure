@@ -1,21 +1,20 @@
 import sys
 import pathlib
 
-from general_utils.emd_utils import get_all_emd_name, get_associated_pdb
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
+from general_utils.emd_utils import get_all_emd_name, get_associated_pdb
 
 import matplotlib
 
 from general_utils.graph_utils import remove_node_by_name, remove_edge_nodes
 from general_utils.list_utils import combinations_i2jInK
 from general_utils.workspace_utils import is_work_in_cluster
-from process_graph.process_graph_utils import draw_graph_similarity
-
+from process_graph.process_graph_utils import draw_graph_similarity, draw_graph_similarity_same_image
 
 import matplotlib.pyplot as plt
 from general_utils.database_utils import get_graph_pdb_db, get_chains_pdb_db, exists_mongo_db, get_all_archive_pdb, \
-  memory_use
+  memory_use, save_collection, load_collection, clear_collection
 from process_graph.graph_algorithm import graph_aligning
 import networkx as nx
 
@@ -134,56 +133,33 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 # test =[          'C', 'D', 'E',      'G', 'H', 'I',      'K', 'L', 'M',      'O'     ]
 #
 #
-# graph1 = get_graph_pdb_db('7NO3', 10)
-#
-# matplotlib.use('TKAgg')
-#
-# plt.figure(1)
-# plt.suptitle('Graph 1', fontsize=16)
-# nx.draw(graph1, with_labels=True)
-# plt.show()
+# graph1 = get_graph_pdb_db('4v7r', 10)
+# graph1 = get_graph_pdb_db('4c4g', 10)
 #
 # graph2 = graph1.copy()
-# path = './result'
-# pdb = '7no3'
-# #os.mkdir(path)
 #
-# download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
-# chains = get_chains_pdb_db(pdb)
-# pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path, pdb), path, chains, len(chains))
-# #os.remove('{0}/{1}.pdb'.format(path, pdb))
-#
-# print(chains)
-#
-# ##Remove for test
 # remove_node_by_name(graph2, 13)
 # remove_node_by_name(graph2, 15)
 # remove_node_by_name(graph2, 17)
 # remove_node_by_name(graph2, 3)
 # remove_node_by_name(graph2, 4)
 # remove_node_by_name(graph2, 6)
-# remove_node_by_name(graph2, 1)
-# remove_node_by_name(graph2, 2)
-# remove_node_by_name(graph2, 9)
-# remove_edge_nodes(graph2, 1, 1)
 #
-# matplotlib.use('TKAgg')
 #
-# alignment_note3, result3 = graph_aligning(graph1, graph2, 2, False)
-# print(alignment_note3, result3)
-# print(nx.is_connected(graph2))
 #
-# plt.figure(1)
-# plt.suptitle('Graph 1', fontsize=16)
-# nx.draw(graph1, with_labels=True)
-# plt.figure(2)
-# plt.suptitle('Graph 2', fontsize=16)
-# nx.draw(graph2, with_labels=True)
-# plt.show()
+# alignment_note, result = graph_aligning(graph1, graph2, 2, False)
+# print(alignment_note, result)
 #
-result = combinations_i2jInK(10, 2, 5)
-print(result)
-print(len(result))
+# draw_graph_similarity_same_image(graph1, graph2, result)
+
+save_collection('./collection.json')
+#clear_collection()
+#load_collection('./collection.json')
+#print(get_all_archive_pdb())
+#
+# result = combinations_i2jInK(10, 2, 5)
+# print(result)
+# print(len(result))
 
 # print(is_work_in_cluster())
 # print(exists_mongo_db())
