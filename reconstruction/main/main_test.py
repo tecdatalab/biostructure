@@ -215,18 +215,14 @@ draw_graph_similarity_same_image(graph1, graph2, result)
 
 
 # # Import math Library
-# import math
-#
-# # Initialize the number of items to choose from
-# n = 20
-#
-# # Print total number of possible combinations
-#
-# total = 0
-#
-# for i in range(n):
-#   result = math.comb(n, i)
-#   print(i, ":", result)
-#   total += result
-# print(total)
+import math
+
+# Initialize the number of items to choose from
+n = 20
+
+# Print total number of possible combinations
+
+total = combinations_i2jInK(1000, 1, 5, check_max=True)
+
+print(total)
 
