@@ -9,7 +9,7 @@ from general_utils.workspace_utils import is_work_in_cluster
 from general_utils.temp_utils import clean_work_dir
 from csv_modules.csv_combine import combine_files_exp_1
 
-folder_work = "data_experiment_1_d_v2"
+folder_work = "data_experiment_1_d"
 
 
 def experiment_1_d():
@@ -35,12 +35,12 @@ def union_test():
   else:
     local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/{0}".format(folder_work)
 
-  combine_files_exp_1('salida_exper1_d_v2.csv', local_path)
+  combine_files_exp_1('salida_exper1_d.csv', local_path)
 
 
 if __name__ == '__main__':
   if is_work_in_cluster():
-    general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_exp_1"
+    general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_exp_1_d"
   else:
     general_utils.temp_utils.global_temp_dir = None
   clean_work_dir()
