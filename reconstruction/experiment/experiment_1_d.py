@@ -43,7 +43,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
           parallel_jobs.append([pdb_name,
                                 executor.submit(do_parallel_test_aux, path, pdb_name, result_cvs_file,
                                                 actual_resolution, combination_to_do_delete),
-                                actual_resolution])
+                                actual_resolution, combination_to_do_delete])
         # do_parallel_test_a_aux
       total_experiments_do = len(parallel_jobs)
       con = 0
@@ -56,6 +56,8 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
             myfile.write(f[0])
             myfile.write("\n")
             myfile.write(str(f[2]))
+            myfile.write("\n")
+            myfile.write(str(f[3]))
             myfile.write("\n")
             myfile.write(str(type(e).__name__))
             myfile.write("\n")
