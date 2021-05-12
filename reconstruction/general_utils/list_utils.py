@@ -37,7 +37,7 @@ def combinations_i2jInK(n, min_can, max_can, max_combinations=1000, max_combinat
 
   for k in range(min_can, max_can + 1):
 
-    if check_max and (combinations_formule(k,n) < max_combinations):
+    if not check_max or (combinations_formule(k,n) < max_combinations):
       for subset in itertools.combinations(stuff, k):
         result.append(list(subset))
     else:
