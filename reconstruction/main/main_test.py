@@ -8,7 +8,7 @@ from general_utils.emd_utils import get_all_emd_name, get_associated_pdb
 import matplotlib
 
 from general_utils.graph_utils import remove_node_by_name, remove_edge_nodes
-from general_utils.list_utils import combinations_i2jInK
+from general_utils.list_utils import combinations_i2jInK, seudo_combinations_i2jInK
 from general_utils.workspace_utils import is_work_in_cluster
 from process_graph.process_graph_utils import draw_graph_similarity, draw_graph_similarity_same_image
 
@@ -133,9 +133,8 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 # test =[          'C', 'D', 'E',      'G', 'H', 'I',      'K', 'L', 'M',      'O'     ]
 #
 #
-graph1 = get_graph_pdb_db('5w66', 10)
+graph1 = get_graph_pdb_db('5w5y', 10)
 print(list(graph1.nodes))
-#graph1 = get_graph_pdb_db('4c4g', 10)
 
 graph2 = graph1.copy()
 
@@ -230,3 +229,4 @@ draw_graph_similarity_same_image(graph1, graph2, result)
 #   print(i, ":", result)
 #   total += result
 # print(total)
+

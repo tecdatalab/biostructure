@@ -60,12 +60,9 @@ def seudo_combinations_i2jInK(n, can_add,  can_per_val):
     temp_list = []
     random.shuffle(values)
 
-    for i in range(n):
-      if random.random() < .5:
-        temp_list.append(values[i])
-
-      if (can_add - len(temp_list)) == (n - (can_add + 1)):
-        temp_list += values[can_add + 1:]
+    for actual_pos in range(n):
+      if (can_add - len(temp_list)) == (n - actual_pos):
+        temp_list += values[actual_pos:]
 
         temp_list.sort()
         if temp_list not in result:
@@ -73,8 +70,11 @@ def seudo_combinations_i2jInK(n, can_add,  can_per_val):
           adding += 1
         break
 
-      temp_list.sort()
+      if random.random() < .5:
+        temp_list.append(values[actual_pos])
+
       if can_add == len(temp_list):
+        temp_list.sort()
         if temp_list not in result:
           result.append(temp_list)
           adding += 1
