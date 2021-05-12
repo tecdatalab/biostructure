@@ -36,7 +36,7 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
 
       for pdb_name in pdbs_work:
         actual_resolution = random.choice(resolution_range)
-        total_combinations = combinations_i2jInK(get_chains_pdb_db(pdb_name), 1, get_chains_pdb_db(pdb_name)-1)
+        total_combinations = combinations_i2jInK(len(get_chains_pdb_db(pdb_name)), 1, len(get_chains_pdb_db(pdb_name))-1)
 
         for combination_to_do_delete in total_combinations:
           parallel_jobs.append([pdb_name,

@@ -65,7 +65,7 @@ def seudo_combinations_i2jInK(n, can_add,  can_per_val):
         temp_list.append(values[i])
 
       if (can_add - len(temp_list)) == (n - (can_add + 1)):
-        temp_list = + values[can_add + 1:]
+        temp_list += values[can_add + 1:]
 
         temp_list.sort()
         if temp_list not in result:
