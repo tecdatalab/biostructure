@@ -133,24 +133,24 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 # test =[          'C', 'D', 'E',      'G', 'H', 'I',      'K', 'L', 'M',      'O'     ]
 #
 #
-# graph1 = get_graph_pdb_db('4v7r', 10)
-# graph1 = get_graph_pdb_db('4c4g', 10)
-#
-# graph2 = graph1.copy()
-#
-# remove_node_by_name(graph2, 13)
-# remove_node_by_name(graph2, 15)
-# remove_node_by_name(graph2, 17)
-# remove_node_by_name(graph2, 3)
-# remove_node_by_name(graph2, 4)
-# remove_node_by_name(graph2, 6)
-#
-#
-#
-# alignment_note, result = graph_aligning(graph1, graph2, 2, False)
-# print(alignment_note, result)
-#
-# draw_graph_similarity_same_image(graph1, graph2, result)
+graph1 = get_graph_pdb_db('4v7r', 10)
+#graph1 = get_graph_pdb_db('4c4g', 10)
+
+graph2 = graph1.copy()
+
+remove_node_by_name(graph2, 13)
+remove_node_by_name(graph2, 15)
+remove_node_by_name(graph2, 17)
+remove_node_by_name(graph2, 3)
+remove_node_by_name(graph2, 4)
+remove_node_by_name(graph2, 6)
+
+
+
+alignment_note, result = graph_aligning(graph1, graph2, 2, False)
+print(alignment_note, result)
+
+draw_graph_similarity_same_image(graph1, graph2, result)
 
 #save_collection('./collection.json')
 #clear_collection()
@@ -215,14 +215,17 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 
 
 # # Import math Library
-import math
-
-# Initialize the number of items to choose from
-n = 20
-
-# Print total number of possible combinations
-
-total = 0
-
-for i in range(n):
-  print(i, ":", math.comb(n, i))
+# import math
+#
+# # Initialize the number of items to choose from
+# n = 20
+#
+# # Print total number of possible combinations
+#
+# total = 0
+#
+# for i in range(n):
+#   result = math.comb(n, i)
+#   print(i, ":", result)
+#   total += result
+# print(total)

@@ -31,13 +31,13 @@ def combinations_12n(n):
   return result
 
 
-def combinations_i2jInK(n, min_can, max_can, max_combinations=1000, max_combinations_peer_value=500):
+def combinations_i2jInK(n, min_can, max_can, max_combinations=1000, max_combinations_peer_value=500, check_max=True):
   stuff = [i for i in range(n)]
   result = []
 
   for k in range(min_can, max_can + 1):
 
-    if combinations_formule(k,n) < max_combinations:
+    if check_max and (combinations_formule(k,n) < max_combinations):
       for subset in itertools.combinations(stuff, k):
         result.append(list(subset))
     else:
