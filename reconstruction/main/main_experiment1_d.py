@@ -23,8 +23,7 @@ def experiment_1_d():
   do_parallel_test_a("{0}/{1}".format(local_path, folder_work),
                      "result.csv",
                      [4, 6, 8, 10],
-                     #pdbs_work=['2ian', '4fmi', '6l7o', '2nx5', '6ytk', '2df7', '6gej', '4ind', '3u8k', '6m6h', '2qjh', '6rdm', '6z86', '5gip', '3glc', '6xky', '3r8r', '6w09', '5no4', '5w66'],
-                     pdbs_work=['2ian'],
+                     pdbs_work=['2ian', '4fmi', '6l7o', '2nx5', '6ytk', '2df7', '6gej', '4ind', '3u8k', '6m6h', '2qjh', '6rdm', '6z86', '5gip', '3glc', '6xky', '3r8r', '6w09', '5no4', '5w66'],
                      error_file="error_log_expe_1_d.txt")
   print("Finish")
 
