@@ -152,7 +152,7 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 #
 # draw_graph_similarity_same_image(graph1, graph2, result)
 
-save_collection('./collection.json')
+#save_collection('./collection.json')
 #clear_collection()
 #load_collection('./collection.json')
 #print(get_all_archive_pdb())
@@ -215,13 +215,14 @@ save_collection('./collection.json')
 
 
 # # Import math Library
-# import math
-#
-# # Initialize the number of items to choose from
-# n = 10000
-#
-# # Initialize the number of possibilities to choose
-# k = 500
-#
-# # Print total number of possible combinations
-# print (math.comb(n, k))
+import math
+
+# Initialize the number of items to choose from
+n = 20
+
+# Print total number of possible combinations
+
+total = 0
+
+for i in range(n):
+  print(i, ":", math.comb(n, i))

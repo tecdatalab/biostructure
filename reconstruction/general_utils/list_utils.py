@@ -31,17 +31,17 @@ def combinations_12n(n):
   return result
 
 
-def combinations_i2jInK(n, min_can, max_can):
+def combinations_i2jInK(n, min_can, max_can, max_combinations=1000, max_combinations_peer_value=500):
   stuff = [i for i in range(n)]
   result = []
 
   for k in range(min_can, max_can + 1):
 
-    if combinations_formule(k,n) < 1000:
+    if combinations_formule(k,n) < max_combinations:
       for subset in itertools.combinations(stuff, k):
         result.append(list(subset))
     else:
-      result += seudo_combinations_i2jInK(n, k, 500)
+      result += seudo_combinations_i2jInK(n, k, max_combinations_peer_value)
   return result
 
 def combinations_formule(k, n):
