@@ -9,7 +9,16 @@ from general_utils.workspace_utils import is_work_in_cluster
 from general_utils.temp_utils import clean_work_dir
 from csv_modules.csv_combine import combine_files_exp_1
 
-folder_work = "data_experiment_1_v2"
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--number_exe', help='foo help')
+args = parser.parse_args()
+
+if args.number_exe is None:
+  raise ("Can not run")
+
+folder_work = "data_experiment_1_v2_exe_{}".format(args.number_exe)
 
 
 def experiment_1():
@@ -28,7 +37,7 @@ def experiment_1():
                      can_experiments_to_do=5,
                      file_checkpoint='check_expe_1.pkl',
                      add_to_ignore_files=False,
-                     error_file="error_log_expe_1.txt")
+                     error_file="error_log_expe_1_exe_{}.txt".format(args.number_exe))
   print("Finish")
 
 
@@ -43,7 +52,7 @@ def union_test():
 
 if __name__ == '__main__':
   if is_work_in_cluster():
-    general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_exp_1"
+    general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_exp_1_exe_{}".format(args.number_exe)
   else:
     general_utils.temp_utils.global_temp_dir = None
   clean_work_dir()

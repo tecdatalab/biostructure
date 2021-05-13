@@ -168,6 +168,17 @@ def get_zd_chains_pdb_db(pdb_id, resolution):
     return result
 
 
+def get_chain_to_number_chain(pdb_id, chain):
+  pdb_id = pdb_id.lower()
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    pdb_data = col.find_one({'pdbID': pdb_id})
+    if pdb_data != None:
+      return pdb_data["chains"].index(chain)+1
+
+
 def get_zd_chain_pdb_db(pdb_id, chain, resolution):
   if resolution not in valid_resolutions:
     raise TypeError("Resolution is not valid, you can use: {0}".format(valid_resolutions))
