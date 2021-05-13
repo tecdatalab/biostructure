@@ -9,8 +9,17 @@ from general_utils.workspace_utils import is_work_in_cluster
 from general_utils.temp_utils import clean_work_dir
 from csv_modules.csv_combine import combine_files_exp_1
 
+import argparse
 
-folder_work = "data_experiment_1_d"
+parser = argparse.ArgumentParser()
+parser.add_argument('-p','--pdbs_work', nargs='+', help='<Required> Set flag', required=True)
+args = parser.parse_args()
+
+if args.pdbs_work is None:
+  raise ("Can not run")
+
+
+folder_work = "data_experiment_1_d_exe_{}".format('.'.join(map(str, args.pdbs_work)))
 
 
 def experiment_1_d():
@@ -24,8 +33,7 @@ def experiment_1_d():
   do_parallel_test_a("{0}/{1}".format(local_path, folder_work),
                      "result.csv",
                      [4, 6, 8, 10],
-                     pdbs_work=['2ian', '4fmi', '6l7o', '2nx5', '6ytk', '2df7', '6gej', '4ind', '3u8k', '6m6h', '2qjh',
-                                '6rdm', '6z86', '5gip', '3glc', '6xky', '3r8r', '6w09', '5no4', '5w66'],
+                     pdbs_work=args.pdbs_work,
                      error_file="error_log_expe_1_d.txt")
   print("Finish")
 
@@ -41,7 +49,7 @@ def union_test():
 
 if __name__ == '__main__':
   if is_work_in_cluster():
-    general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_exp_1_d"
+    general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_exp_1_d_exe_{}".format('.'.join(map(str, args.pdbs_work)))
   else:
     general_utils.temp_utils.global_temp_dir = None
   clean_work_dir()
