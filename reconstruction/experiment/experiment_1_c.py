@@ -11,6 +11,7 @@ from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 from sklearn.metrics import mean_squared_error
 from sklearn.neighbors import KDTree
+from k_means_constrained import KMeansConstrained
 
 from csv_modules.csv_writer import write_in_file
 from experiment.utils_general import remove_get_dirs
@@ -46,7 +47,7 @@ def do_parallel_test(path_data,
     if executor is not None:
 
       all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor, min_can_chains)
-      # all_names = ['6tpx']
+      # all_names = ['3j8z']
       path = os.path.abspath(path_data)
 
       if not os.path.isdir(path):
@@ -108,8 +109,12 @@ def do_parallel_test_aux(path, pdb_name, result_cvs, resolution, can_groups):
   # Order points in tree
   list_chain = []
   original_graph = get_graph_pdb_db(pdb_name, resolution)
-  data_kd = []
-  dicc_node_pos = {}
+  data_kn = []
+
+  clf = KMeansConstrained(
+    n_clusters=can_groups,
+    size_min=original_graph.number_of_nodes()//(can_groups))
+
   for i in original_graph.nodes:
     node_data = original_graph.nodes[i]
     x = node_data["cube_xyz_can"][0][0]
@@ -122,48 +127,13 @@ def do_parallel_test_aux(path, pdb_name, result_cvs, resolution, can_groups):
     z //= total_div_points
 
     list_chain.append(i)
-    data_kd.append([x, y, z])
-    dicc_node_pos[i] = [x, y, z]
+    data_kn.append([x, y, z])
 
-  kd_tree = KDTree(np.array(data_kd))
+  groups_pos = clf.fit_predict(data_kn)
+  groups = np.zeros((can_groups, 0)).tolist()
 
-  # Gen initial elements of groups
-  max_distance_elements = []
-  min_max_distance = -1
-  for i in list_chain:
-    dist, ind = kd_tree.query(np.array([dicc_node_pos[i]]), k=original_graph.number_of_nodes())
-    dist = dist.tolist()
-    ind = ind.tolist()
-    dist = dist[0]
-    ind = ind[0]
-
-    if dist[(-can_groups) + 1] > min_max_distance:
-      max_distance_elements = []
-      min_max_distance = dist[(-can_groups) + 1]
-      for k in range((-can_groups) + 1, 0, 1):
-        max_distance_elements.append(list_chain[ind[k]])
-      max_distance_elements.append(i)
-
-  # Gen groups
-  match_elements = max_distance_elements
-  groups = np.expand_dims(max_distance_elements, axis=1).tolist()
-
-  while len(match_elements) < original_graph.number_of_nodes():
-    for i in range(can_groups):
-      dist, ind = kd_tree.query(np.array([dicc_node_pos[groups[i][0]]]),
-                                k=original_graph.number_of_nodes())
-      dist = dist.tolist()
-      ind = ind.tolist()
-      dist = dist[0]
-      ind = ind[0]
-      for k in ind:
-        if list_chain[ind[k]] not in match_elements:
-          groups[i].append(list_chain[ind[k]])
-          match_elements.append(list_chain[ind[k]])
-          break
-
-      if len(match_elements) >= original_graph.number_of_nodes():
-        break
+  for i in range(len(groups_pos)):
+    groups[groups_pos[i]].append(list_chain[i])
 
   # Do experiments
   for i in groups:

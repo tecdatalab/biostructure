@@ -18,7 +18,7 @@ pip3 install -U numpy
 pip3 install matplotlib
 
 
-#NetworkX 
+#NetworkX
 pip3 install networkx
 
 
@@ -63,7 +63,7 @@ pip3 install -U scikit-image
 
 
 #Biopandas
-pip3 install -U biopandas 
+pip3 install -U biopandas
 
 
 #Scipy
@@ -71,15 +71,15 @@ pip3 install -U scipy
 
 
 #Packaging
-pip3 install -U packaging 
+pip3 install -U packaging
 
 
 #Appdirs
-pip3 install -U appdirs  
+pip3 install -U appdirs
 
 
 #Glfw
-pip3 install -U glfw 
+pip3 install -U glfw
 
 
 #Pyqt5
@@ -108,3 +108,7 @@ pip3 install tqdm
 
 #Progress
 pip3 install progress
+
+
+#k-means-constrained
+pip3 install k-means-constrained

@@ -228,15 +228,15 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 
 #Gen PDB with chains
 
-# path = "./"
-#
-# pdb = '6h7w'
-#
-# download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
-# chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb))
-#
-# pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path, pdb), path, chains,
-#                     len(chains))
+path = "./"
+
+pdb = '3j8z'
+
+download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
+chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb))
+
+pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path, pdb), path, chains,
+                    len(chains))
 
 
 '''
@@ -441,24 +441,24 @@ K, L, M, N, O, P, Q, R, S, T
 
 '''
 
-pdb = '3lel'
-graph1 = get_graph_pdb_db(pdb, 4)
-print(list(graph1.nodes))
-print(get_chains_pdb_db(pdb))
-
-graph2 = graph1.copy()
-
-remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'A'))
-remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'B'))
-remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'C'))
-remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'D'))
-remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'E'))
-remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'F'))
-remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'G'))
-remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'H'))
-remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'I'))
-remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'J'))
-
-alignment_note, result = graph_aligning(graph1, graph2, 2, False)
-print(alignment_note, result)
-draw_graph_similarity_same_image(graph1, graph2, result)
+# pdb = '3lel'
+# graph1 = get_graph_pdb_db(pdb, 4)
+# print(list(graph1.nodes))
+# print(get_chains_pdb_db(pdb))
+#
+# graph2 = graph1.copy()
+#
+# remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'A'))
+# remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'B'))
+# remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'C'))
+# remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'D'))
+# remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'E'))
+# remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'F'))
+# remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'G'))
+# remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'H'))
+# remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'I'))
+# remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'J'))
+#
+# alignment_note, result = graph_aligning(graph1, graph2, 2, False)
+# print(alignment_note, result)
+# draw_graph_similarity_same_image(graph1, graph2, result)
