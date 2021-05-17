@@ -23,11 +23,11 @@ EvoSeg is a tool for automatic subunit segmentation of EM Maps.
 - **--n_mates** int
     - Max number of matings per generation
 - **--p_mates** float
-    - Probability for combination 
+    - Probability of combination 
 - **--p_split** float
-    - Probability for split mutation
+    - Probability of split mutation
 - **--p_merge** float
-    - Probability for merge mutation
+    - Probability of merge mutation
 - **--n_patience** int
     - Max number of generations without improvements before stopping.
 - **--n_max** int
