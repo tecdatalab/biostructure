@@ -1,4 +1,4 @@
-## -> EvoSeg:  An evolutionary automatic subunit segmentation
+## EvoSeg:  An evolutionary automatic subunit segmentation
 
 EvoSeg is a tool for automatic subunit segmentation of EM Maps. 
 
