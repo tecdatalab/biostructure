@@ -47,7 +47,7 @@ def union_test():
   else:
     local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/{0}".format(folder_work)
 
-  combine_files_exp_1('salida_exper1_v2.csv', local_path)
+  combine_files_exp_1('salida_exper1_v2_{}.csv'.format(args.number_exe), local_path)
 
 
 if __name__ == '__main__':

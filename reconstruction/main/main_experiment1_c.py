@@ -6,7 +6,7 @@ sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 import general_utils
 from general_utils.workspace_utils import is_work_in_cluster
 from general_utils.temp_utils import clean_work_dir
-from csv_modules.csv_combine import combine_files_exp_1a
+from csv_modules.csv_combine import combine_files_exp_1c
 
 import argparse
 
@@ -16,7 +16,6 @@ args = parser.parse_args()
 
 if args.number_exe is None:
   raise ("Can not run")
-
 
 folder_work = "data_experiment_1_c_v1_exe_{}".format(args.number_exe)
 
@@ -44,7 +43,7 @@ def union_test():
   else:
     local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/{0}".format(folder_work)
 
-  combine_files_exp_1a('salida_struct.csv', 'salida_chain.csv', local_path)
+  combine_files_exp_1c('salida_experiment_1_c_v1_exe_{}.csv'.format(args.number_exe), local_path)
 
 
 if __name__ == '__main__':
@@ -54,5 +53,5 @@ if __name__ == '__main__':
     general_utils.temp_utils.global_temp_dir = None
 
   clean_work_dir()
-  experiment_1_c()
-  # union_test()
+  # experiment_1_c()
+  union_test()

@@ -109,3 +109,32 @@ def combine_files_exp_1a(exit_file_struct, exit_file_chain, parent_path):
   # export to csv
   combined_csv_struct.to_csv(exit_file_struct, index=False, encoding='utf-8-sig')
   combined_csv_chains.to_csv(exit_file_chain, index=False, encoding='utf-8-sig')
+
+
+
+def combine_files_exp_1c(exit_file, parent_path):
+  result = []
+  find_csv_filenames(parent_path, result)
+  # print(result)
+
+  # combine all files in the list
+  combined_csv = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
+                                                       "Nodes father": literal_eval,
+                                                       "Nodes test": literal_eval,
+                                                       "Match": literal_eval}) for f in result])
+
+  # Process data
+  combined_csv['number_chains'] = combined_csv['Nodes father'].apply(lambda x: len(x))
+  combined_csv['number_test_chains'] = combined_csv['Nodes test'].apply(lambda x: len(x))
+  combined_csv['total_matched'] = combined_csv['Match'].apply(lambda x: len(x))
+  combined_csv['number_wrong_chains'] = combined_csv['Match'].apply(count_error)
+  combined_csv['number_ok_chains'] = combined_csv['Match'].apply(count_ok)
+  combined_csv['number_no_match_chains'] = combined_csv.apply(count_no_match_chains, axis=1)
+  combined_csv['percentage_wrong'] = combined_csv.apply(percentage_wrong, axis=1)
+  combined_csv['percentage_ok'] = combined_csv.apply(percentage_ok, axis=1)
+  combined_csv['percentage_no_match'] = combined_csv.apply(percentage_no_match, axis=1)
+  combined_csv['percentage_match'] = combined_csv.apply(percentage_match, axis=1)
+
+
+  # export to csv
+  combined_csv.to_csv(exit_file, index=False, encoding='utf-8-sig')
