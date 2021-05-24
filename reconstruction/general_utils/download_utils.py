@@ -111,7 +111,7 @@ def download_pdb(id_code, exit_path, create_progress_bar=False):
 
   if not ok_flag:
     try:
-      download_pdb_in_mmCIF(id_code, exit_path, create_progress_bar)
+      download_pdb_in_http(id_code, exit_path, create_progress_bar)
       ok_flag = True
     except Exception as e:
       er = e
@@ -119,7 +119,7 @@ def download_pdb(id_code, exit_path, create_progress_bar=False):
 
   if not ok_flag:
     try:
-      download_pdb_in_http(id_code, exit_path, create_progress_bar)
+      download_pdb_in_mmCIF(id_code, exit_path, create_progress_bar)
       ok_flag = True
     except Exception as e:
       er = e

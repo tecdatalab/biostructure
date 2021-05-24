@@ -540,6 +540,7 @@ def mmCIF_to_pdb(mmCIF_path, exit_pdb_path):
   pdb_name = os.path.basename(input_file).split('.')[0]
   cmd.load(input_file, pdb_name)
   cmd.save(exit_pdb_path)
+  cmd.quit()
 
 
 def get_all_pdb_name_online():
