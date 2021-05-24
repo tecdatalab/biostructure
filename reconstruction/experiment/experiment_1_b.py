@@ -177,7 +177,7 @@ def get_experiments_to_do(list_possibles, cant_by_range):
   result = []
 
   for key in dic_values.keys():
-    random.choice(dic_values[key])
+    random.shuffle(dic_values[key])
     result += dic_values[key][:cant_by_range]
   return result
 
