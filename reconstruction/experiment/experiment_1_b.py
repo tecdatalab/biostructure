@@ -80,7 +80,8 @@ def do_parallel_test(path_data,
         parallel_jobs.append([pdb_name, executor.submit(do_parallel_test_aux, path, pdb_name, result_cvs_chain,
                                                         result_cvs_struct, result_cvs_secuencial,
                                                         resolution,
-                                                        can_chain_test, can_struct_test, can_secuencial_test),
+                                                        can_chain_test, can_struct_test, can_secuencial_test,
+                                                        error_file),
 
                               resolution])
         # do_parallel_test_a_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, resolution, can_chain_test,
@@ -103,7 +104,7 @@ def do_parallel_test(path_data,
 
 
 def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, result_cvs_secuencial, resolution,
-                         can_chain_test, can_struct_test, can_secuencial_test):
+                         can_chain_test, can_struct_test, can_secuencial_test, error_file):
   try:
     local_path = os.path.join(path, pdb_name)
     if not os.path.exists(local_path):
@@ -160,9 +161,20 @@ def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, re
           os.rmdir(path_remove)
         else:
           os.remove(path_remove)
-  except:
-    print(pdb_name, flush=True)
-    traceback.print_exc()
+  except Exception as e:
+    with open(error_file, "a+") as myfile:
+      myfile.write("Not control error")
+      myfile.write("\n")
+      myfile.write(pdb_name)
+      myfile.write("\n")
+      myfile.write(str(resolution))
+      myfile.write("\n")
+      myfile.write(str(type(e).__name__))
+      myfile.write("\n")
+      myfile.write(str(e))
+      myfile.write("\n")
+      myfile.write(str(traceback.format_exc()))
+      myfile.write("\n\n\n\n")
 
 
 def get_experiments_to_do(list_possibles, cant_by_range):
