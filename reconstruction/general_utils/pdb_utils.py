@@ -532,7 +532,7 @@ def get_pdb_chain_sequence(pdb_path, pdb_name, chain):
 
   chain = {record.id: record.seq for record in SeqIO.parse(PDB_file_path, 'pdb-seqres')}
   query_chain = chain[query_chain_id]
-
+  query_chain = str(query_chain)
   return query_chain
 
 

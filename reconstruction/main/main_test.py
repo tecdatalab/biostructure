@@ -463,5 +463,5 @@ K, L, M, N, O, P, Q, R, S, T
 # print(alignment_note, result)
 # draw_graph_similarity_same_image(graph1, graph2, result)
 
-# result = get_similar_pdb_chain_sequential("6a5q", "A")
+# result = get_similar_pdb_chain_sequential("1hfi", "A")
 # print(result)
