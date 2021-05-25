@@ -10,6 +10,7 @@ from ftplib import FTP
 
 import numpy as np
 import requests
+from Bio import SeqIO
 
 from general_utils.string_utils import change_string
 from Bio.PDB import PDBParser
@@ -257,7 +258,7 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
   path_temp = os.path.abspath(path_temp)
   temp_file_path = path_temp + "/" + pdb_name + ".pdb"
   download_pdb(pdb_name, temp_file_path)
-  sequence = get_pdb_chain_sequence(temp_file_path, chain)
+  sequence = get_pdb_chain_sequence(temp_file_path, pdb_name, chain)
   free_dir(path_temp)
 
   if len(sequence) < 10 or sequence == len(sequence) * 'X':
@@ -523,14 +524,15 @@ def move_pdb_center(pdb_path):
   exit_file.close()
 
 
-def get_pdb_chain_sequence(pdb_path, chain):
+def get_pdb_chain_sequence(pdb_path, pdb_name, chain):
   input_file = os.path.abspath(pdb_path)
 
-  pdbparser = PDBParser()
-  structure = pdbparser.get_structure(os.path.basename(input_file).split('.')[0], input_file)
-  chains = {chain.id: seq1(''.join(residue.resname for residue in chain)) for chain in structure.get_chains()}
+  PDB_file_path = input_file
+  query_chain_id = '{}:{}'.format(pdb_name.upper(), chain)
 
-  query_chain = chains[chain]
+  chain = {record.id: record.seq for record in SeqIO.parse(PDB_file_path, 'pdb-seqres')}
+  query_chain = chain[query_chain_id]
+
   return query_chain
 
 
