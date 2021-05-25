@@ -528,9 +528,13 @@ def get_pdb_chain_sequence(pdb_path, pdb_name, chain):
   input_file = os.path.abspath(pdb_path)
 
   PDB_file_path = input_file
-  query_chain_id = '{}:{}'.format(pdb_name.upper(), chain)
+  query_chain_id = '{}'.format(chain)
 
-  chain = {record.id: record.seq for record in SeqIO.parse(PDB_file_path, 'pdb-seqres')}
+  chain = {}
+  for record in SeqIO.parse(PDB_file_path, 'pdb-seqres'):
+    chain[record.annotations['chain']] = record.seq
+
+
   query_chain = chain[query_chain_id]
   query_chain = str(query_chain)
   return query_chain
