@@ -20,8 +20,11 @@ def intersection_over_union(segmented_map, gt_map):
         iou = np.mean(iou_list)
         return iou
 
-def iou(s_array, gt_array):
-    labels = np.unique(gt_array)
+def iou(s_array, gt_array, restricted=False):
+    if restricted:
+        labels = np.unique(gt_array)
+    else:
+        labels = np.unique(s_array)
     if s_array.shape != gt_array.shape:
         return ValueError("Arrays must have same shape")
     else:
@@ -45,13 +48,13 @@ def matching_iou(segmented_map, gt_map):
     segmented_labels = segmented_labels[segmented_labels!=0]
     gt_labels = np.unique(gt_array)
     gt_labels = gt_labels[gt_labels!=0]
-
-    segmented_masks = [ s_array==l for l in segmented_labels ]
-    gt_masks = [ gt_array==l for l in gt_labels ]
-
-    iou_tensor = np.zeros([len(segmented_masks), len(gt_masks)])
-    for i,seg_mask in enumerate(segmented_masks):
-        for j,gt_mask in enumerate(gt_masks):
+    print(segmented_labels)
+    print(gt_labels)
+    iou_tensor = np.zeros([len(segmented_labels), len(gt_labels)])
+    for i,s in enumerate(segmented_labels):
+        for j,g in enumerate(gt_labels):
+            seg_mask = s_array==s
+            gt_mask = gt_array==g
             iou_tensor[i, j] = iou(seg_mask, gt_mask)
     row_ind, col_ind = linear_sum_assignment(iou_tensor, maximize=True)
     last_label = len(segmented_labels)
