@@ -4,7 +4,7 @@ EvoSeg is a tool for automatic subunit segmentation of EM Maps.
 
 **[Tutorial (Jupyter Noteboook)](https://github.com/tecdatalab/biostructure/blob/master/em/evolutionary_segmentation/Evolutionary_Segmentation.ipynb)**
 
-**[Classifier Training (Jupyter Notebook)](https://github.com/tecdatalab/biostructure/blob/master/em/dataset/jupyter_notebook/Segmentation_classifier_train.ipynb)
+**[Classifier Training (Jupyter Notebook)](https://github.com/tecdatalab/biostructure/blob/master/em/dataset/jupyter_notebook/Segmentation_classifier_train.ipynb)**
 
 
 ## User Guide 
