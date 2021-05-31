@@ -12,6 +12,7 @@ import { UserRolesComponent } from "./components/user-roles/user-roles.component
 import { SearchHistoryComponent } from "./components/search-history/search-history.component";
 import { TutorialPageComponent } from "./components/tutorial-page/tutorial-page.component";
 import { ParametersPanelComponent } from "./components/parameters-panel/parameters-panel.component";
+import { SearchMatchFormComponent } from "./components/search-match-form/search-match-form.component";
 
 export const router: Routes = [
   {
@@ -22,6 +23,10 @@ export const router: Routes = [
   {
     path: "search",
     component: SearchFormComponent
+  },
+  {
+    path: "search-match",
+    component: SearchMatchFormComponent
   },
   {
     path: "result/:emdbId",

@@ -36,6 +36,7 @@ import { StatisticsTableComponent } from "./components/statistics-table/statisti
 import { TutorialPageComponent } from "./components/tutorial-page/tutorial-page.component";
 import { AuthServiceConfig } from "angularx-social-login";
 import { GoogleLoginProvider } from "angularx-social-login";
+import { SearchMatchFormComponent } from './components/search-match-form/search-match-form.component';
 export const config = new AuthServiceConfig([
   {
     id: GoogleLoginProvider.PROVIDER_ID,
@@ -78,7 +79,8 @@ export function provideConfig() {
     SearchHistoryComponent,
     StatisticsTableComponent,
     TutorialPageComponent,
-    ParametersPanelComponent
+    ParametersPanelComponent,
+    SearchMatchFormComponent
   ],
   imports: [
     BrowserModule,
