@@ -1,8 +1,8 @@
 class Biomolecular_structure(object):
-    '''
-    classdocs
-    '''
+  '''
+  classdocs
+  '''
 
-    def __init__(self, mask, zd_descriptors):
-        self.mask = mask
-        self.zd_descriptors = zd_descriptors
+  def __init__(self, mask, zd_descriptors):
+    self.mask = mask
+    self.zd_descriptors = zd_descriptors

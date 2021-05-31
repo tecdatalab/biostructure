@@ -2,14 +2,14 @@ import os
 import random
 import time
 import traceback
-
+import tempfile
 import numpy as np
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 
 from csv_modules.csv_writer import write_in_file
 from experiment.utils_general import remove_get_dirs
-from general_utils.database_utils import get_graph_pdb_db
+from general_utils.database_utils import get_graph_pdb_db, get_chains_pdb_db
 from general_utils.graph_utils import graph_is_connect
 from general_utils.list_utils import get_element_list, combinations_i2jInK
 from general_utils.math_utils import distance_3d_points
@@ -18,10 +18,8 @@ from process_graph.graph_algorithm import graph_aligning
 from process_mrc.miscellaneous import get_center_point_by_graph
 
 
-def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], can_elements=None,
-                       ignore_pdbs=[], range_incompleteness=[10.0, 15.0], percentage_data_set=10,
-                       can_experiments_to_do=-1,
-                       file_checkpoint='check_expe_1.pkl', add_to_ignore_files=False, error_file='error.txt'):
+def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], pdbs_work=[],
+                       error_file='error.txt'):
   # Parale
   comm = MPI.COMM_WORLD
   size = comm.Get_size()
@@ -29,38 +27,28 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      # Get Pdbs to work
-      all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor)
       path = os.path.abspath(path_data)
-
-      print("Before get pdbs work")
 
       if not os.path.isdir(path):
         os.mkdir(path)
 
-      complete_pdb = remove_get_dirs(path_data, add_to_ignore_files=add_to_ignore_files)
-      ignore_pdbs += complete_pdb
-
-      # Add ignore files
-      ignore_pdbs += get_ignore_pdbs()
-
-      if can_elements is None:
-        can_elements = len(all_names)
-
       parallel_jobs = []
 
-      all_names = np.setdiff1d(np.array(all_names), np.array(ignore_pdbs)).tolist()[:can_elements]
-      print("Do ", len(all_names), flush=True)
-      for pdb_name in all_names:
+      for pdb_name in pdbs_work:
+        actual_resolution = random.choice(resolution_range)
+        total_combinations = combinations_i2jInK(len(get_chains_pdb_db(pdb_name)), 1,
+                                                 len(get_chains_pdb_db(pdb_name)), check_max=False)
 
-        resolution = random.choices(resolution_range)[0]
-
-        parallel_jobs.append([pdb_name,
-                              executor.submit(do_parallel_test_a_aux, path, pdb_name, result_cvs_file,
-                                              resolution, range_incompleteness, can_experiments_to_do),
-                              resolution])
-        # do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_incompleteness, can_try_experiments)
+        for combination_to_do_delete in total_combinations:
+          parallel_jobs.append([pdb_name,
+                                executor.submit(do_parallel_test_aux, path, pdb_name, result_cvs_file,
+                                                actual_resolution, combination_to_do_delete),
+                                actual_resolution, combination_to_do_delete])
+        # do_parallel_test_a_aux
+      total_experiments_do = len(parallel_jobs)
+      con = 0
       for f in parallel_jobs:
+        con+=1
         try:
           f[1].result()
         except Exception as e:
@@ -69,18 +57,20 @@ def do_parallel_test_a(path_data, result_cvs_file, resolution_range=[5.0, 5.0], 
             myfile.write("\n")
             myfile.write(str(f[2]))
             myfile.write("\n")
+            myfile.write(str(f[3]))
+            myfile.write("\n")
             myfile.write(str(type(e).__name__))
             myfile.write("\n")
             myfile.write(str(e))
             myfile.write("\n")
             myfile.write(str(traceback.format_exc()))
             myfile.write("\n\n\n\n")
+        print("Actual:", (con/total_experiments_do)*100, "%", flush=True)
 
 
-def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_incompleteness,can_experiments_to_do):
-  local_path = os.path.join(path, pdb_name)
-  if not os.path.exists(local_path):
-    os.makedirs(local_path)
+
+def do_parallel_test_aux(path, pdb_name, result_cvs_file, resolution, combination_to_do_delete):
+  local_path = tempfile.mkdtemp(dir=path)
 
   graph_pdb = get_graph_pdb_db(pdb_name, resolution)
 
@@ -91,22 +81,14 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_in
                  'Time center', 'Time test', 'Time alignment',
                  'Graph original is connect', 'Graph test is connect']
 
-  remove_try = combinations_i2jInK(graph_pdb.number_of_nodes(),
-                                   round(graph_pdb.number_of_nodes() * (range_incompleteness[0]/100)),
-                                   round(graph_pdb.number_of_nodes() * (range_incompleteness[1]/100)))
   graph_pdb_nodes = list(graph_pdb.nodes)
-  random.shuffle(remove_try)
+  graph_pdb_test = graph_pdb.copy()
 
-  for i in remove_try[:can_experiments_to_do]:
+  for node_pos in combination_to_do_delete:
+    graph_pdb_test.remove_node(graph_pdb_nodes[node_pos])
 
-    graph_pdb_test = graph_pdb.copy()
-
-    for node_pos in i:
-      graph_pdb_test.remove_node(graph_pdb_nodes[node_pos])
-
-    do_test(pdb_name, headers_csv, result_cvs_file, resolution, local_path,
-            graph_pdb, graph_pdb_test)
-
+  do_test(pdb_name, headers_csv, result_cvs_file, resolution, local_path,
+          graph_pdb, graph_pdb_test)
 
   dirs = os.listdir(local_path)
 
@@ -120,8 +102,7 @@ def do_parallel_test_a_aux(path, pdb_name, result_cvs_file, resolution, range_in
 
 
 def do_test(pdb_name, headers_csv, result_cvs_file, resolution, path_write,
-              graph_pdb, graph_pdb_test):
-
+            graph_pdb, graph_pdb_test):
   test_match_list = [[i, i] for i in list(graph_pdb_test.nodes)]
 
   graph1_match_index = get_element_list(0, test_match_list)
