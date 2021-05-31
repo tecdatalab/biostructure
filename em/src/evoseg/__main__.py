@@ -1,9 +1,9 @@
 import os
 import argparse
 from em import molecule
-from em.dataset.metrics import matching_iou
-from em.evolutionary_segmentation import evolutionary_segmentation as evo_seg
-from em.evolutionary_segmentation import miscellaneous as misc
+from dataset.metrics import matching_iou
+from evoseg import evolutionary_segmentation as evo_seg
+from evoseg import miscellaneous as misc
 import numpy as np
 import pandas as pd
 import pickle 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     if not os.path.exists(opt.output_path):
         os.mkdir(opt.output_path)
     print('init')
-    classifier = pickle.load(open('classifier.pkl', 'rb'))
+    classifier = pickle.load(open('classifier/classifier.pkl', 'rb'))
     print("Loading maps from {}".format(opt.input_path))
     filenames = glob.glob(opt.input_path)
     for f in filenames:
