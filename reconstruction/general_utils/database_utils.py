@@ -92,7 +92,7 @@ def get_graph_pdb_db(pdb_id, resolution):
     client = get_mongo_client()
     db = client[database_name]
     col = db[collection_name]
-    pdb_data = col.find_one({'pdbID': pdb_id})
+    pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
     if pdb_data != None:
       result_zip = pdb_data[str(resolution) + "A_G"]
       js_graph = json_unzip(result_zip)
@@ -123,7 +123,7 @@ def get_zd_pdb_db(pdb_id, resolution):
     client = get_mongo_client()
     db = client[database_name]
     col = db[collection_name]
-    pdb_data = col.find_one({'pdbID': pdb_id})
+    pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
     if pdb_data != None:
       result_zip = pdb_data[str(resolution) + "A_OZD"]
       js_zd = json_unzip(result_zip)
@@ -149,7 +149,7 @@ def get_zd_chains_pdb_db(pdb_id, resolution):
     client = get_mongo_client()
     db = client[database_name]
     col = db[collection_name]
-    pdb_data = col.find_one({'pdbID': pdb_id})
+    pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
     if pdb_data != None:
       result_zip = pdb_data[str(resolution) + "A_G"]
       js_graph = json_unzip(result_zip)
@@ -174,7 +174,7 @@ def get_chain_to_number_chain(pdb_id, chain):
     client = get_mongo_client()
     db = client[database_name]
     col = db[collection_name]
-    pdb_data = col.find_one({'pdbID': pdb_id})
+    pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
     if pdb_data != None:
       return pdb_data["chains"].index(chain)+1
 
@@ -188,7 +188,7 @@ def get_zd_chain_pdb_db(pdb_id, chain, resolution):
     client = get_mongo_client()
     db = client[database_name]
     col = db[collection_name]
-    pdb_data = col.find_one({'pdbID': pdb_id})
+    pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
     if pdb_data != None:
       result_zip = pdb_data[str(resolution) + "A_G"]
       js_graph = json_unzip(result_zip)
@@ -215,7 +215,7 @@ def get_chains_pdb_db(pdb_id):
     client = get_mongo_client()
     db = client[database_name]
     col = db[collection_name]
-    pdb_data = col.find_one({'pdbID': pdb_id})
+    pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
     if pdb_data != None:
       return pdb_data["chains"]
 
@@ -329,7 +329,7 @@ def get_all_archive_pdb():
     client = get_mongo_client()
     db = client[database_name]
     col = db[collection_name]
-    pdbs_data = col.find()
+    pdbs_data = col.find(no_cursor_timeout=True)
     if pdbs_data.count() == 0:
       return []
     result = []
@@ -357,7 +357,7 @@ def save_collection(export_json_path):
     client = get_mongo_client()
     db = client[database_name]
     col = db[collection_name]
-    cursor = col.find({})
+    cursor = col.find({}, no_cursor_timeout=True)
     with open(export_json_path, 'w') as file:
       file.write('[')
 
