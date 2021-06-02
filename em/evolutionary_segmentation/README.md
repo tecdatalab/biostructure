@@ -18,14 +18,14 @@ EvoSeg is a tool for automatic subunit segmentation of EM Maps.
 
 ## Instalation
   
-    pip install -i https://test.pypi.org/simple/ evoseg-tecdatalab
+    pip install -i https://test.pypi.org/simple/ evoseg-tecdatalab==0.0.1a
 
 ## Program command
 
 ### Required
 
 - **--input_path** string 
-    - EM Map in MRC Format with protein structure.
+    - EM Map binaries in MRC Format. Quoted string with wildcard pattern for file extension needed..
 - **--output_dir** string
     - Output directory path to save output as npy array with numerical labels for each segment.
 - **--level** float
@@ -50,5 +50,5 @@ EvoSeg is a tool for automatic subunit segmentation of EM Maps.
    
 ### Example
   
-  python -m evoseg --input_path path_to_mrc_files/ --output_dir out/ --level 1.0
+  python -m evoseg --input_path 'path_to_mrc_files/*.mrc' --output_dir out/ --level 1.0
   
