@@ -231,6 +231,15 @@ def get_chains_pdb_db(pdb_id):
     return chains
 
 
+def delete_pdb_db(pdb_id):
+  pdb_id = pdb_id.lower()
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    result = col.delete_one({'pdbID': pdb_id})
+
+
 def insert_pdb_information(col, pdb_id):
   path_dir = gen_dir()
   download_pdb(pdb_id, '{0}/{1}.pdb'.format(path_dir, pdb_id))

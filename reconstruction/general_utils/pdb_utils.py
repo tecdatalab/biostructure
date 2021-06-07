@@ -12,6 +12,7 @@ import numpy as np
 import requests
 from Bio import SeqIO
 
+from general_utils.database_utils import delete_pdb_db, get_chains_pdb_db
 from general_utils.string_utils import change_string
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
@@ -525,6 +526,15 @@ def move_pdb_center(pdb_path):
 
 
 def get_pdb_chain_sequence(pdb_path, pdb_name, chain):
+  try:
+    return get_pdb_chain_sequence_aux(pdb_path, pdb_name, chain)
+  except Exception as e:
+    delete_pdb_db(pdb_name)
+    get_chains_pdb_db(pdb_name)
+    return get_pdb_chain_sequence_aux(pdb_path, pdb_name, chain)
+
+
+def get_pdb_chain_sequence_aux(pdb_path, pdb_name, chain):
   input_file = os.path.abspath(pdb_path)
 
   PDB_file_path = input_file
@@ -533,7 +543,6 @@ def get_pdb_chain_sequence(pdb_path, pdb_name, chain):
   chain = {}
   for record in SeqIO.parse(PDB_file_path, 'pdb-seqres'):
     chain[record.annotations['chain']] = record.seq
-
 
   query_chain = chain[query_chain_id]
   query_chain = str(query_chain)

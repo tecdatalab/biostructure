@@ -14,7 +14,7 @@ from process_graph.process_graph_utils import draw_graph_similarity, draw_graph_
 
 import matplotlib.pyplot as plt
 from general_utils.database_utils import get_graph_pdb_db, get_chains_pdb_db, exists_mongo_db, get_all_archive_pdb, \
-  memory_use, save_collection, load_collection, clear_collection, get_chain_to_number_chain
+  memory_use, save_collection, load_collection, clear_collection, get_chain_to_number_chain, delete_pdb_db
 from process_graph.graph_algorithm import graph_aligning
 import networkx as nx
 
@@ -462,6 +462,13 @@ K, L, M, N, O, P, Q, R, S, T
 # alignment_note, result = graph_aligning(graph1, graph2, 2, False)
 # print(alignment_note, result)
 # draw_graph_similarity_same_image(graph1, graph2, result)
-
-result = get_similar_pdb_chain_sequential("6nru", "A")
-print(result)
+pdb = "7ndg"
+# download_pdb(pdb, "./7ndg.pdb")
+# result = get_chains_pdb("./7ndg.pdb")
+# print(result)
+# delete_pdb_db(pdb)
+graph1 = get_graph_pdb_db(pdb, 4)
+print(list(graph1.nodes))
+print(get_chains_pdb_db(pdb))
+# result = get_similar_pdb_chain_sequential(pdb, "A")
+# print(result)
