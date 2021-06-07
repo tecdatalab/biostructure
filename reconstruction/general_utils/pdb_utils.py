@@ -12,7 +12,6 @@ import numpy as np
 import requests
 from Bio import SeqIO
 
-from general_utils.database_utils import delete_pdb_db, get_chains_pdb_db
 from general_utils.string_utils import change_string
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
@@ -532,6 +531,7 @@ def move_pdb_center(pdb_path):
 
 
 def get_pdb_chain_sequence(pdb_path, pdb_name, chain):
+  from general_utils.database_utils import delete_pdb_db, get_chains_pdb_db
   try:
     return get_pdb_chain_sequence_aux(pdb_path, pdb_name, chain)
   except Exception as e:
