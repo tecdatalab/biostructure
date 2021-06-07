@@ -117,6 +117,9 @@ def get_similar_pdb_struct(pdb_name, can=10):
     if status_code != 200 and status_code != 204:
       print(response, response.status_code, response.text, "\n\n\n", flush=True)
     elif status_code == 204:
+      if response.text == "":
+        print("Return empy\n")
+        return []
       print("Check why\n", response, "\n", response.status_code, "\n", response.text, "\n\n\n", flush=True)
 
   if response.status_code == 204 or response.status_code == 400:
@@ -234,6 +237,8 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
     if status_code != 200 and status_code != 204:
       print(response, response.status_code, response.text, "\n\n\n", flush=True)
     elif status_code == 204:
+      if response.text == "":
+        print("Return empy\n")
       print("Check why\n", response, "\n", response.status_code, "\n", response.text, "\n\n\n", flush=True)
 
   if response.status_code == 204 or response.status_code == 400:
@@ -335,6 +340,8 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
     if status_code != 200 and status_code != 204:
       print(response, response.status_code, response.text, "\n\n\n", flush=True)
     elif status_code == 204:
+      if response.text == "":
+        print("Return empy\n")
       print("Check why\n", response, "\n", response.status_code, "\n", response.text, "\n\n\n", flush=True)
 
   if response.status_code == 204 or response.status_code == 400:
