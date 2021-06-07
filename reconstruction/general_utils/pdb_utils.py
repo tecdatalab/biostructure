@@ -266,6 +266,7 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
   path_temp = gen_dir()
   path_temp = os.path.abspath(path_temp)
   temp_file_path = path_temp + "/" + pdb_name + ".pdb"
+  print("Antes de descarga")
   download_pdb(pdb_name, temp_file_path)
   sequence = get_pdb_chain_sequence(temp_file_path, pdb_name, chain)
   free_dir(path_temp)
@@ -568,7 +569,7 @@ def mmCIF_to_pdb(mmCIF_path, exit_pdb_path):
   pdb_name = os.path.basename(input_file).split('.')[0]
   cmd.load(input_file, pdb_name)
   cmd.save(exit_pdb_path)
-  cmd.quit()
+  #cmd.quit()
 
 
 def get_all_pdb_name_online():
