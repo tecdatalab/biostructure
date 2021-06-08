@@ -5,7 +5,7 @@ with open("src/evoseg/README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="evoseg-tecdatalab",
-    version="0.0.6",
+    version="0.0.1a",
     author="Manuel Zumbado Corrales",
     author_email="manzumbado@ic-itcr.ac.cr",
     description="EvoSeg is a tool for automatic subunit segmentation of EM Maps",
@@ -23,4 +23,5 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.6",
+    install_requires=['numpy>=1.19.5','pandas>=1.1.5', 'scikit-image>=0.17.2', 'scikit-learn>=0.24.2','scipy>=1.5.4', ' mrcfile>=1.3.0'],
 )
