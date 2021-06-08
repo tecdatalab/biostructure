@@ -1,3 +1,4 @@
+import itertools
 import json
 import math
 import pickle
@@ -266,7 +267,6 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
   path_temp = gen_dir()
   path_temp = os.path.abspath(path_temp)
   temp_file_path = path_temp + "/" + pdb_name + ".pdb"
-  print("Antes de descarga")
   download_pdb(pdb_name, temp_file_path)
   sequence = get_pdb_chain_sequence(temp_file_path, pdb_name, chain)
   free_dir(path_temp)
@@ -551,16 +551,34 @@ def get_pdb_chain_sequence(pdb_path, pdb_name, chain):
 def get_pdb_chain_sequence_aux(pdb_path, pdb_name, chain):
   input_file = os.path.abspath(pdb_path)
 
-  PDB_file_path = input_file
-  query_chain_id = '{}'.format(chain)
+  list_chain_residue = []
 
-  chain = {}
-  for record in SeqIO.parse(PDB_file_path, 'pdb-seqres'):
-    chain[record.annotations['chain']] = record.seq
+  with open(input_file) as origin_file:
+    actual_chain = ''
+    for line in origin_file:
+      if line[0:4] == "ATOM":
+        if actual_chain == '':
+          actual_chain = line[21:22]
+        elif actual_chain != line[21:22]:
+          actual_chain = line[21:22]
 
-  query_chain = chain[query_chain_id]
-  query_chain = str(query_chain)
-  return query_chain
+        if actual_chain == chain:
+          to_add = [line[17:20].replace(" ", ""), int(line[22:26])]
+          if list_chain_residue == [] or to_add != list_chain_residue[-1]:
+            list_chain_residue.append(to_add)
+
+  # Clear duplciates
+  list_chain_residue = list(k for k, _ in itertools.groupby(list_chain_residue))
+
+  list_chain_residue = sorted(list_chain_residue, key=lambda x: x[1], reverse=False)
+
+  result = ""
+  for i in list_chain_residue:
+    result += i[0]
+
+  if result == "":
+    raise Exception("Chain not exist")
+  return result
 
 
 def mmCIF_to_pdb(mmCIF_path, exit_pdb_path):
@@ -569,7 +587,7 @@ def mmCIF_to_pdb(mmCIF_path, exit_pdb_path):
   pdb_name = os.path.basename(input_file).split('.')[0]
   cmd.load(input_file, pdb_name)
   cmd.save(exit_pdb_path)
-  #cmd.quit()
+  # cmd.quit()
 
 
 def get_all_pdb_name_online():
