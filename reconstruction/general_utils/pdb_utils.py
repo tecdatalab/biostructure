@@ -11,6 +11,7 @@ from ftplib import FTP
 
 import numpy as np
 import requests
+import re
 from Bio import SeqIO
 
 from general_utils.string_utils import change_string
@@ -262,6 +263,20 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
   return result
 
 
+def type_sequence(sequence):
+  math_protein = '^[ARNDCEQGHILKMFPSTWYVX]+$'
+  math_dna = '^[ACTG]+$'
+  math_rna = '^[ACUG]+$'
+
+  if re.match(math_dna, sequence):
+    return "pdb_dna_sequence"
+  elif re.match(math_rna, sequence):
+    return "pdb_rna_sequence"
+  elif re.match(math_protein, sequence):
+    return "pdb_protein_sequence"
+  else:
+    raise NameError('Can not get type of sequence')
+
 def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
   from general_utils.download_utils import download_pdb
   path_temp = gen_dir()
@@ -275,60 +290,53 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
     return []
 
   search_request = {
-    "query": {
-      "type": "group",
-      "logical_operator": "and",
-      "nodes": [
-        {
-          "type": "group",
-          "logical_operator": "and",
-          "nodes": [
-            {
-              "type": "terminal",
-              "service": "text",
-              "parameters": {
-                "operator": "in",
-                "negation": True,
-                "value": list(map(lambda x: x.upper(), get_pdb_no_work())),
-                "attribute": "rcsb_entry_container_identifiers.entry_id"
+      "query": {
+        "type": "group",
+        "logical_operator": "and",
+        "nodes": [
+          {
+            "type": "group",
+            "logical_operator": "and",
+            "nodes": [
+              {
+                "type": "terminal",
+                "service": "text",
+                "parameters": {
+                  "operator": "contains_phrase",
+                  "negation": True,
+                  "value": "DNA,RNA,DNA-RNA",
+                  "attribute": "struct_keywords.pdbx_keywords"
+                }
               }
-            },
-            {
-              "type": "terminal",
-              "service": "text",
-              "parameters": {
-                "operator": "contains_phrase",
-                "negation": True,
-                "value": "DNA,RNA,DNA-RNA",
-                "attribute": "struct_keywords.pdbx_keywords"
-              }
+            ]
+          },
+          {
+            "type": "terminal",
+            "service": "sequence",
+            "parameters": {
+              "evalue_cutoff": 0.1,
+              "identity_cutoff": 0,
+              "target": type_sequence(sequence),
+              "value": sequence
             }
-          ]
-        },
-        {
-          "type": "terminal",
-          "service": "sequence",
-          "parameters": {
-            "evalue_cutoff": 0.1,
-            "identity_cutoff": 0,
-            "target": "pdb_protein_sequence",
-            "value": sequence
           }
-        }
-      ]
-    },
-    "return_type": "entry",
-    "request_options": {
-      "return_all_hits": True,
-      "scoring_strategy": "sequence",
-      "sort": [
-        {
-          "sort_by": "score",
-          "direction": "desc"
-        }
-      ]
+        ]
+      },
+      "return_type": "entry",
+      "request_options": {
+        "pager": {
+          "start": 0,
+          "rows": 25
+        },
+        "scoring_strategy": "combined",
+        "sort": [
+          {
+            "sort_by": "score",
+            "direction": "desc"
+          }
+        ]
+      }
     }
-  }
 
   json_dump = json.dumps(search_request)
   url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)

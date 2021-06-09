@@ -459,19 +459,21 @@ K, L, M, N, O, P, Q, R, S, T
 # remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'I'))
 # remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'J'))
 #
-# load_collection("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/collection.json")
+#load_collection("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/collection.json")
 
 # alignment_note, result = graph_aligning(graph1, graph2, 2, False)
 # print(alignment_note, result)
 # draw_graph_similarity_same_image(graph1, graph2, result)
-pdb = "5t2c"
+pdb = "6q98"
 # download_pdb(pdb, "./7ndg.pdb")
 # result = get_chains_pdb("./7ndg.pdb")
 # print(result)
 # delete_pdb_db(pdb)
-#graph1 = get_graph_pdb_db(pdb, 4)
-#print(list(graph1.nodes))
+graph1 = get_graph_pdb_db(pdb, 4)
+print(list(graph1.nodes))
 print(get_chains_pdb_db(pdb))
-result = get_similar_pdb_chain_sequential(pdb, "B")
+result = get_similar_pdb_chain_sequential(pdb, "1")
 print(result)
+
+
 

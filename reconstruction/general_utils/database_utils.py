@@ -2,6 +2,10 @@ import pymongo
 import zlib, json, base64
 import numpy as np
 import os
+
+from tqdm import tqdm
+
+
 from general_utils.download_utils import download_pdb
 from general_utils.pdb_utils import get_chains_pdb
 from general_utils.temp_utils import gen_dir, free_dir
@@ -388,13 +392,15 @@ def load_collection(json_path):
     with open(json_path) as f:
       file_data = json.load(f)
       if isinstance(file_data, list):
-        for add_pdb in file_data:
-          add_pdb.pop("_id")
-          col.update_one(
-            {"pdbID": add_pdb["pdbID"]},
-            {"$setOnInsert": add_pdb},
-            True
-          )
+        with tqdm(total=len(file_data)) as pbar:
+          for add_pdb in file_data:
+            add_pdb.pop("_id")
+            col.update_one(
+              {"pdbID": add_pdb["pdbID"]},
+              {"$setOnInsert": add_pdb},
+              True
+            )
+            pbar.update(1)
       else:
         file_data.pop("_id")
         col.update_one(
