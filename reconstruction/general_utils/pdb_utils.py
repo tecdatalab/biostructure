@@ -277,6 +277,7 @@ def type_sequence(sequence):
   else:
     raise NameError('Can not get type of sequence')
 
+
 def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
   from general_utils.download_utils import download_pdb
   path_temp = gen_dir()
@@ -286,54 +287,59 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
   sequence = get_pdb_chain_sequence(temp_file_path, pdb_name, chain)
   free_dir(path_temp)
 
+  try:
+    type_s = type_sequence(sequence)
+  except:
+    return []
+
   if len(sequence) < 10 or sequence == len(sequence) * 'X':
     return []
 
   search_request = {
-      "query": {
-        "type": "group",
-        "logical_operator": "and",
-        "nodes": [
-          {
-            "type": "group",
-            "logical_operator": "and",
-            "nodes": [
-              {
-                "type": "terminal",
-                "service": "text",
-                "parameters": {
-                  "operator": "contains_phrase",
-                  "negation": True,
-                  "value": "DNA,RNA,DNA-RNA",
-                  "attribute": "struct_keywords.pdbx_keywords"
-                }
+    "query": {
+      "type": "group",
+      "logical_operator": "and",
+      "nodes": [
+        {
+          "type": "group",
+          "logical_operator": "and",
+          "nodes": [
+            {
+              "type": "terminal",
+              "service": "text",
+              "parameters": {
+                "operator": "contains_phrase",
+                "negation": True,
+                "value": "DNA,RNA,DNA-RNA",
+                "attribute": "struct_keywords.pdbx_keywords"
               }
-            ]
-          },
-          {
-            "type": "terminal",
-            "service": "sequence",
-            "parameters": {
-              "evalue_cutoff": 0.1,
-              "identity_cutoff": 0,
-              "target": type_sequence(sequence),
-              "value": sequence
             }
+          ]
+        },
+        {
+          "type": "terminal",
+          "service": "sequence",
+          "parameters": {
+            "evalue_cutoff": 0.1,
+            "identity_cutoff": 0,
+            "target": type_s,
+            "value": sequence
           }
-        ]
-      },
-      "return_type": "entry",
-      "request_options": {
-        "return_all_hits": True,
-        "scoring_strategy": "combined",
-        "sort": [
-          {
-            "sort_by": "score",
-            "direction": "desc"
-          }
-        ]
-      }
+        }
+      ]
+    },
+    "return_type": "entry",
+    "request_options": {
+      "return_all_hits": True,
+      "scoring_strategy": "combined",
+      "sort": [
+        {
+          "sort_by": "score",
+          "direction": "desc"
+        }
+      ]
     }
+  }
 
   json_dump = json.dumps(search_request)
   url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)

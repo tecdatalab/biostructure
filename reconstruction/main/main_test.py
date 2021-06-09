@@ -464,7 +464,7 @@ K, L, M, N, O, P, Q, R, S, T
 # alignment_note, result = graph_aligning(graph1, graph2, 2, False)
 # print(alignment_note, result)
 # draw_graph_similarity_same_image(graph1, graph2, result)
-pdb = "6q98"
+pdb = "5taw"
 # download_pdb(pdb, "./7ndg.pdb")
 # result = get_chains_pdb("./7ndg.pdb")
 # print(result)
@@ -472,8 +472,10 @@ pdb = "6q98"
 graph1 = get_graph_pdb_db(pdb, 4)
 print(list(graph1.nodes))
 print(get_chains_pdb_db(pdb))
-result = get_similar_pdb_chain_sequential(pdb, "1")
-print(result)
+for i in get_chains_pdb_db(pdb):
+  print("Chain=", i)
+  result = get_similar_pdb_chain_sequential(pdb, i)
+  print(result)
 
 
 
