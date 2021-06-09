@@ -324,10 +324,7 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
       },
       "return_type": "entry",
       "request_options": {
-        "pager": {
-          "start": 0,
-          "rows": 25
-        },
+        "return_all_hits": True,
         "scoring_strategy": "combined",
         "sort": [
           {
