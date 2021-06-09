@@ -6,7 +6,7 @@ sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 import general_utils
 from general_utils.workspace_utils import is_work_in_cluster
 from general_utils.temp_utils import clean_work_dir
-from csv_modules.csv_combine import combine_files_exp_1a
+from csv_modules.csv_combine import combine_files_exp_1b
 
 folder_work = "data_experiment_1_b_v1"
 
@@ -35,7 +35,7 @@ def union_test():
   else:
     local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/{0}".format(folder_work)
 
-  combine_files_exp_1a('salida_struct.csv', 'salida_chain.csv', local_path)
+  combine_files_exp_1b('salida_struct.csv', 'salida_chain.csv', 'salida_secuencial.csv', local_path)
 
 
 if __name__ == '__main__':
