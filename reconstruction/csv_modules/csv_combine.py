@@ -41,12 +41,16 @@ def percentage_wrong(x):
   can_chains = x['total_matched']
   can_wrong = x['number_wrong_chains']
 
+  if can_chains == 0:
+    return 1.0
   return can_wrong/can_chains
 
 def percentage_ok(x):
   can_chains = x['total_matched']
   can_ok = x['number_ok_chains']
 
+  if can_chains == 0:
+    return 1.0
   return can_ok/can_chains
 
 def percentage_no_match(x):
@@ -54,6 +58,8 @@ def percentage_no_match(x):
   can_chains_t = x['number_test_chains']
   can_no_match_chains= x['number_no_match_chains']
 
+  if min(can_chains_f, can_chains_t) == 0:
+    return 1.0
   return can_no_match_chains/min(can_chains_f, can_chains_t)
 
 def percentage_match(x):
@@ -61,6 +67,8 @@ def percentage_match(x):
   can_chains_f = x['number_chains']
   can_chains_t = x['number_test_chains']
 
+  if min(can_chains_f, can_chains_t) == 0:
+    return 1.0
   return can_match/min(can_chains_f, can_chains_t)
 
 
