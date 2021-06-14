@@ -166,6 +166,11 @@ def combine_files_exp_1b(exit_file_struct, exit_file_chain, exit_file_secuencial
   combined_csv_chain['percentage_no_match'] = combined_csv_chain.apply(percentage_no_match, axis=1)
   combined_csv_chain['percentage_match'] = combined_csv_chain.apply(percentage_match, axis=1)
 
+  combined_csv_struct['number_chains'] = combined_csv_struct['Chains'].apply(lambda x: len(x))
+  combined_csv_struct['number_test_chains'] = combined_csv_struct['Work Chains'].apply(lambda x: len(x))
+  combined_csv_struct['total_matched'] = combined_csv_struct['Match'].apply(lambda x: len(x))
+  combined_csv_struct['percentage_match'] = combined_csv_struct.apply(percentage_match, axis=1)
+
   # export to csv
   combined_csv_struct.to_csv(exit_file_struct, index=False, encoding='utf-8-sig')
   combined_csv_chain.to_csv(exit_file_chain, index=False, encoding='utf-8-sig')

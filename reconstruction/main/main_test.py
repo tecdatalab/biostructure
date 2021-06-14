@@ -230,14 +230,14 @@ from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 
 # path = "./"
 #
-# pdb = '3j8z'
+# pdb = '7no3'
 #
 # download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
 # chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb))
 #
 # pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path, pdb), path, chains,
 #                     len(chains))
-#
+
 
 '''
 1is8
@@ -464,18 +464,39 @@ K, L, M, N, O, P, Q, R, S, T
 # alignment_note, result = graph_aligning(graph1, graph2, 2, False)
 # print(alignment_note, result)
 # draw_graph_similarity_same_image(graph1, graph2, result)
-pdb = "5taw"
-# download_pdb(pdb, "./7ndg.pdb")
-# result = get_chains_pdb("./7ndg.pdb")
-# print(result)
-# delete_pdb_db(pdb)
-graph1 = get_graph_pdb_db(pdb, 4)
-print(list(graph1.nodes))
-print(get_chains_pdb_db(pdb))
-for i in get_chains_pdb_db(pdb):
-  print("Chain=", i)
-  result = get_similar_pdb_chain_sequential(pdb, i)
-  print(result)
+# pdb = "5taw"
+# # download_pdb(pdb, "./7ndg.pdb")
+# # result = get_chains_pdb("./7ndg.pdb")
+# # print(result)
+# # delete_pdb_db(pdb)
+# graph1 = get_graph_pdb_db(pdb, 4)
+# print(list(graph1.nodes))
+# print(get_chains_pdb_db(pdb))
+# for i in get_chains_pdb_db(pdb):
+#   print("Chain=", i)
+#   result = get_similar_pdb_chain_sequential(pdb, i)
+#   print(result)
 
+# path = "./"
+#
+# pdb = '7no3'
+#
+# download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
+# chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb))
+#
+# pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path, pdb), path, chains,
+#                     len(chains))
 
-
+# pdb = '7no3'
+# graph1 = get_graph_pdb_db(pdb, 8)
+# print(list(graph1.nodes))
+# print(get_chains_pdb_db(pdb))
+#
+# graph2 = graph1.copy()
+#
+# # alignment_note, result = graph_aligning(graph1, graph2, 2, False)
+# # print(alignment_note, result)
+# # draw_graph_similarity_same_image(graph1, graph2, result)
+#
+# print(graph1.nodes[1])
+print(len(get_all_archive_pdb()))
