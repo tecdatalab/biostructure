@@ -56,8 +56,10 @@ def check_chains():
     if executor is not None:
 
       all_names = get_all_archive_pdb()
+      total_to_do = len(all_names)
 
       parallel_jobs = []
+      actual_do = 0
       for pdb_name in all_names:
         parallel_jobs.append([pdb_name, executor.submit(check_pdb, pdb_name)])
       for f in parallel_jobs:
@@ -65,6 +67,9 @@ def check_chains():
           f[1].result()
         except Exception as e:
           print(f[0], e, flush=True)
+
+        actual_do += 1
+        print("Done", actual_do / total_to_do, flush=True)
 
 
 if __name__ == '__main__':
