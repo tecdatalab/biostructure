@@ -69,7 +69,7 @@ def check_chains():
           print(f[0], e, flush=True)
 
         actual_do += 1
-        print("Done", actual_do / total_to_do, flush=True)
+        print("Done", total_to_do, actual_do, actual_do / total_to_do, flush=True)
 
 
 if __name__ == '__main__':
