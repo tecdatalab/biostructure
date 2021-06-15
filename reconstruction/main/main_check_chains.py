@@ -74,7 +74,7 @@ def check_chains():
 
 if __name__ == '__main__':
   if is_work_in_cluster():
-    general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_load_database"
+    general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_check_chains"
   else:
     general_utils.temp_utils.global_temp_dir = None
   # clean_work_dir()
