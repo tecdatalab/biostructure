@@ -1,3 +1,8 @@
+import sys
+import pathlib
+
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
+
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 
