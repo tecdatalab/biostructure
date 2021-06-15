@@ -5,7 +5,8 @@ from ast import literal_eval
 import numpy as np
 import pandas as pd
 from csv_modules.csv_writer import write_in_file
-from general_utils.download_utils import download_pdb
+from general_utils.cif_utils import get_chains_cif, cif_to_pdb
+from general_utils.download_utils import download_pdb, download_cif
 from math import ceil
 
 from general_utils.pdb_utils import get_chains_pdb, get_cube_pdb, move_pdb_center, \
@@ -16,12 +17,23 @@ from general_utils.temp_utils import gen_dir, free_dir
 def get_parallel_can_chains_chunk(pdb_name, dir_path):
   from general_utils.pdb_utils import get_chains_pdb
 
-  download_pdb(pdb_name, '{0}/{1}.pdb'.format(dir_path, pdb_name))
-  chains = get_chains_pdb('{0}/{1}.pdb'.format(dir_path, pdb_name))
-  move_pdb_center('{0}/{1}.pdb'.format(dir_path, pdb_name))
-  cube_dimensions = get_cube_pdb('{0}/{1}.pdb'.format(dir_path, pdb_name))
+  try:
+    path_of_pdb = '{0}/{1}.pdb'.format(dir_path, pdb_name)
+    download_pdb(pdb_name, path_of_pdb)
+    chains = get_chains_pdb(path_of_pdb)
+  except:
+    path_of_cif = '{0}/{1}.cif'.format(dir_path, pdb_name)
+    download_cif(pdb_name, path_of_cif)
+    chains = get_chains_cif(path_of_cif)
+    path_of_pdb = os.path.join(dir_path, "pdbFile.pdb")
+    cif_to_pdb(path_of_cif, path_of_pdb)
+    os.remove(path_of_cif)
+
+  move_pdb_center(path_of_pdb)
+  cube_dimensions = get_cube_pdb(path_of_pdb)
+
   result = [pdb_name, len(chains), cube_dimensions]
-  os.remove('{0}/{1}.pdb'.format(dir_path, pdb_name))
+  os.remove(path_of_pdb)
   return result
 
 

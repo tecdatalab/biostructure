@@ -1,6 +1,8 @@
 import sys
 import pathlib
 
+from general_utils.cif_utils import get_chains_cif, get_cif_chain_sequence
+from to_mrc.cif_2_mrc import cif_to_mrc_chains
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 from general_utils.emd_utils import get_all_emd_name, get_associated_pdb
@@ -24,7 +26,7 @@ import os
 from general_utils.download_utils import download_pdb, download_emd_xml
 from general_utils.pdb_utils import get_pdb_chain_sequence, get_similar_pdb_struct, get_similar_pdb_chain_structural, \
   get_similar_pdb_chain_sequential, get_chains_pdb, get_pdb_no_work
-from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
+from to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 
 # pdb = '5T4P'
 
@@ -478,16 +480,17 @@ K, L, M, N, O, P, Q, R, S, T
 #   print(result)
 
 # path = "./"
-#
-# pdb = '7no3'
-#
+# #
+# pdb = '4v4r'
+# #
 # download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
 # chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb))
+# print(chains)
+# #
+# # pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path, pdb), path, chains,
+# #                     len(chains))
 #
-# pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path, pdb), path, chains,
-#                     len(chains))
-
-# pdb = '7no3'
+# pdb = '4v4r'
 # graph1 = get_graph_pdb_db(pdb, 8)
 # print(list(graph1.nodes))
 # print(get_chains_pdb_db(pdb))
@@ -499,4 +502,19 @@ K, L, M, N, O, P, Q, R, S, T
 # # draw_graph_similarity_same_image(graph1, graph2, result)
 #
 # print(graph1.nodes[1])
-print(len(get_all_archive_pdb()))
+# print(len(get_all_archive_pdb()))
+cif_path = "./4v4r.cif"
+chains = get_chains_cif(cif_path)
+print(chains)
+#
+# #cif_to_mrc_chains(True, False, 5.0, cif_path, "./", chains, len(chains))
+#
+# sequence = get_cif_chain_sequence(cif_path, "4v4r", "A")
+# print(sequence)
+# print("\n\n\n")
+
+
+
+pdb_name = "4v4r"
+delete_pdb_db(pdb_name)
+get_chains_pdb_db(pdb_name)

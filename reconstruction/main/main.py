@@ -10,7 +10,7 @@ from reconstruction.semi_exact_cover import get_semi_exact_s
 from csv_modules.csv_writer import write_in_file
 from general_utils.list_utils import get_element_list, generate_binary_matrix
 from general_utils.math_utils import chance_base_point, get_vector_move_1to2
-from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
+from to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from general_utils.pdb_utils import get_chains_pdb, move_pdb_center, get_all_pdb_name
 from general_utils.download_utils import download_pdb, download_emd
 from process_graph.graph_algorithm import graph_aligning
@@ -29,7 +29,7 @@ from metric.metrics_mrc import get_geometric_overlap_p, get_cross_correlation
 # segments_graph2 = segments
 #
 # print(segments[0].mask.shape)
-# ##segments = get_mrc_synthetic_segments_pdb("../pdb_to_mrc/exit_pdb/175d", 7)
+# ##segments = get_mrc_synthetic_segments_pdb("../to_mrc/exit_pdb/175d", 7)
 # graph1 = generate_graph(segments_graph1, 50, 0, 6, 1) #Preguntar con los no conectados y sub grafos
 # graph2 = generate_graph(segments_graph2, 50, 0, 6, 1) #Preguntar con los no conectados y sub grafos
 #

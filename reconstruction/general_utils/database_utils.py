@@ -5,12 +5,13 @@ import os
 
 from tqdm import tqdm
 
-
-from general_utils.download_utils import download_pdb
+from general_utils.cif_utils import get_chains_cif
+from general_utils.download_utils import download_pdb, download_cif
 from general_utils.pdb_utils import get_chains_pdb
 from general_utils.temp_utils import gen_dir, free_dir
 from general_utils.workspace_utils import is_work_in_cluster
-from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
+from to_mrc.cif_2_mrc import cif_to_mrc_chains
+from to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_graph.process_graph_utils import generate_graph
 from process_mrc.generate import get_mrc_one
 from networkx.readwrite import json_graph
@@ -111,9 +112,19 @@ def get_graph_pdb_db(pdb_id, resolution):
 
   else:
     path_dir = gen_dir()
-    download_pdb(pdb_id, '{0}/{1}.pdb'.format(path_dir, pdb_id))
-    chains = get_chains_pdb('{0}/{1}.pdb'.format(path_dir, pdb_id))
-    graph = gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id)
+
+    is_pdb = True
+    try:
+      path_of_file = '{0}/{1}.pdb'.format(path_dir, pdb_id)
+      download_pdb(pdb_id, path_of_file)
+      chains = get_chains_pdb(path_of_file)
+    except:
+      is_pdb = False
+      path_of_file = '{0}/{1}.cif'.format(path_dir, pdb_id)
+      download_cif(pdb_id, path_of_file)
+      chains = get_chains_cif(path_of_file)
+
+    graph = gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_of_file, is_pdb)
     free_dir(path_dir)
     return graph
 
@@ -180,7 +191,7 @@ def get_chain_to_number_chain(pdb_id, chain):
     col = db[collection_name]
     pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
     if pdb_data != None:
-      return pdb_data["chains"].index(chain)+1
+      return pdb_data["chains"].index(chain) + 1
 
 
 def get_zd_chain_pdb_db(pdb_id, chain, resolution):
@@ -246,13 +257,23 @@ def delete_pdb_db(pdb_id):
 
 def insert_pdb_information(col, pdb_id):
   path_dir = gen_dir()
-  download_pdb(pdb_id, '{0}/{1}.pdb'.format(path_dir, pdb_id))
-  chains = get_chains_pdb('{0}/{1}.pdb'.format(path_dir, pdb_id))
+
+  is_pdb = True
+  try:
+    path_of_file = '{0}/{1}.pdb'.format(path_dir, pdb_id)
+    download_pdb(pdb_id, path_of_file)
+    chains = get_chains_pdb(path_of_file)
+  except:
+    is_pdb = False
+    path_of_file = '{0}/{1}.cif'.format(path_dir, pdb_id)
+    download_cif(pdb_id, path_of_file)
+    chains = get_chains_cif(path_of_file)
+
   new_pdb = {}
   # new_pdb['pdbID'] = pdb_id
   new_pdb['chains'] = chains
   for i in [4, 6, 8, 10]:
-    graph, father_ZD = gen_graph_resolution_aux(chains, i, path_dir, pdb_id, True)
+    graph, father_ZD = gen_graph_resolution_aux(chains, i, path_dir, pdb_id, path_of_file, is_pdb, True)
     for j in graph.nodes():
       graph.nodes[j]["zd_descriptors"] = graph.nodes[j]["zd_descriptors"].tolist()
     g_json = json_graph.node_link_data(graph)
@@ -268,9 +289,12 @@ def insert_pdb_information(col, pdb_id):
   free_dir(path_dir)
 
 
-def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, return_OZD=False):
-  pdb_to_mrc_chains(return_OZD, False, resolution, '{0}/{1}.pdb'.format(path_dir, pdb_id), path_dir, chains,
-                    len(chains))
+def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_file, is_pdb, return_OZD=False):
+  if is_pdb:
+    pdb_to_mrc_chains(return_OZD, False, resolution, path_file, path_dir, chains, len(chains))
+  else:
+    cif_to_mrc_chains(return_OZD, False, resolution, path_file, path_dir, chains, len(chains))
+
   local_path = path_dir + "/" + pdb_id
   con_id_segment = 1
   segments = []
@@ -293,11 +317,18 @@ def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, return_OZD=Fa
 
 def gen_zd_chain_resolution_aux(resolution, pdb_id):
   path_dir = gen_dir()
-  download_pdb(pdb_id, '{0}/{1}.pdb'.format(path_dir, pdb_id))
-  chains = get_chains_pdb('{0}/{1}.pdb'.format(path_dir, pdb_id))
 
-  pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(path_dir, pdb_id), path_dir, chains,
-                    len(chains))
+  try:
+    path_of_pdb = '{0}/{1}.pdb'.format(path_dir, pdb_id)
+    download_pdb(pdb_id, path_of_pdb)
+    chains = get_chains_pdb(path_of_pdb)
+    pdb_to_mrc_chains(False, False, resolution, path_of_pdb, path_dir, chains, len(chains))
+  except:
+    path_of_cif = '{0}/{1}.cif'.format(path_dir, pdb_id)
+    download_cif(pdb_id, path_of_cif)
+    chains = get_chains_cif(path_of_cif)
+    cif_to_mrc_chains(False, False, resolution, path_of_cif, path_dir, chains, len(chains))
+
   local_path = path_dir + "/" + pdb_id
   result = []
   for chain in chains:
@@ -311,11 +342,20 @@ def gen_zd_chain_resolution_aux(resolution, pdb_id):
 
 def gen_zd_chain_resolution_one_chain_aux(resolution, pdb_id, chain):
   path_dir = gen_dir()
-  download_pdb(pdb_id, '{0}/{1}.pdb'.format(path_dir, pdb_id))
-  chains = get_chains_pdb('{0}/{1}.pdb'.format(path_dir, pdb_id))
 
-  pdb_to_mrc_chains(False, False, resolution, '{0}/{1}.pdb'.format(path_dir, pdb_id), path_dir, chains,
-                    len(chains))
+  try:
+    path_of_pdb = '{0}/{1}.pdb'.format(path_dir, pdb_id)
+    download_pdb(pdb_id, path_of_pdb)
+    # chains = get_chains_pdb(path_of_pdb)
+    chains = [chain]
+    pdb_to_mrc_chains(False, False, resolution, path_of_pdb, path_dir, chains, len(chains))
+  except:
+    path_of_cif = '{0}/{1}.cif'.format(path_dir, pdb_id)
+    download_cif(pdb_id, path_of_cif)
+    # chains = get_chains_cif(path_of_cif)
+    chains = [chain]
+    cif_to_mrc_chains(False, False, resolution, path_of_cif, path_dir, chains, len(chains))
+
   local_path = path_dir + "/" + pdb_id
   result = []
 
@@ -329,8 +369,16 @@ def gen_zd_chain_resolution_one_chain_aux(resolution, pdb_id, chain):
 
 def gen_zd_resolution_aux(resolution, pdb_id):
   path_dir = gen_dir()
-  download_pdb(pdb_id, '{0}/{1}.pdb'.format(path_dir, pdb_id))
-  pdb_to_mrc_chains(True, False, resolution, '{0}/{1}.pdb'.format(path_dir, pdb_id), path_dir)
+
+  try:
+    path_of_pdb = '{0}/{1}.pdb'.format(path_dir, pdb_id)
+    download_pdb(pdb_id, path_of_pdb)
+    pdb_to_mrc_chains(True, False, resolution, path_of_pdb, path_dir)
+  except:
+    path_of_cif = '{0}/{1}.cif'.format(path_dir, pdb_id)
+    download_cif(pdb_id, path_of_cif)
+    cif_to_mrc_chains(True, False, resolution, path_of_cif, path_dir)
+
   local_path = path_dir + "/" + pdb_id
   father_ZD = get_mrc_one('{0}/{1}.mrc'.format(local_path, pdb_id))[1].zd_descriptors
   free_dir(path_dir)

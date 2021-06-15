@@ -5,19 +5,14 @@ import pickle
 import time
 import random
 import os
-import shutil
 import pandas as pd
 from ftplib import FTP
 
 import numpy as np
 import requests
 import re
-from Bio import SeqIO
 
 from general_utils.string_utils import change_string
-from Bio.PDB import PDBParser
-from Bio.SeqUtils import seq1
-from pymol import cmd
 
 from general_utils.temp_utils import gen_dir, free_dir
 
@@ -491,6 +486,38 @@ def get_chains_pdb(input_file):
   return list_result
 
 
+def get_atoms_of_list_pdb(input_file, list_chains):
+  result = {}
+  for chain in list_chains:
+    result[chain] = []
+
+  input_file = os.path.abspath(input_file)
+  initial_post = 0
+
+  flag_error = False
+
+  with open(input_file) as origin_file:
+    for line in origin_file:
+      actual_chain = list_chains[initial_post]
+
+      if line[0:4] == "ATOM":
+        line_list = list(line)
+        line_list[21] = "A"
+        line_list = "".join(line_list)
+        result[actual_chain].append(line_list)
+
+      elif line[0:3] == "TER":
+        if initial_post+1 < len(list_chains):
+          initial_post += 1
+        else:
+          if flag_error:
+            raise ValueError("More chains than can be parse")
+          else:
+            flag_error = True
+
+  return result
+
+
 def get_cube_pdb(input_file):
   input_file = os.path.abspath(input_file)
   x_actual = 0.0
@@ -550,16 +577,6 @@ def move_pdb_center(pdb_path):
 
 
 def get_pdb_chain_sequence(pdb_path, pdb_name, chain):
-  from general_utils.database_utils import delete_pdb_db, get_chains_pdb_db
-  try:
-    return get_pdb_chain_sequence_aux(pdb_path, pdb_name, chain)
-  except Exception as e:
-    delete_pdb_db(pdb_name)
-    get_chains_pdb_db(pdb_name)
-    return get_pdb_chain_sequence_aux(pdb_path, pdb_name, chain)
-
-
-def get_pdb_chain_sequence_aux(pdb_path, pdb_name, chain):
   input_file = os.path.abspath(pdb_path)
 
   list_chain_residue = []
@@ -590,15 +607,6 @@ def get_pdb_chain_sequence_aux(pdb_path, pdb_name, chain):
   if result == "":
     raise Exception("Chain not exist")
   return result
-
-
-def mmCIF_to_pdb(mmCIF_path, exit_pdb_path):
-  exit_pdb_path = os.path.abspath(exit_pdb_path)
-  input_file = os.path.abspath(mmCIF_path)
-  pdb_name = os.path.basename(input_file).split('.')[0]
-  cmd.load(input_file, pdb_name)
-  cmd.save(exit_pdb_path)
-  # cmd.quit()
 
 
 def get_all_pdb_name_online():

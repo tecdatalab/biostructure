@@ -118,12 +118,21 @@ def download_pdb(id_code, exit_path, create_progress_bar=False):
       ok_flag = False
 
   if not ok_flag:
-    try:
-      download_pdb_in_mmCIF(id_code, exit_path, create_progress_bar)
-      ok_flag = True
-    except Exception as e:
-      er = e
-      ok_flag = False
+    raise er
+  else:
+    return True
+
+
+def download_cif(id_code, exit_path, create_progress_bar=False):
+  id_code = id_code.lower()
+  ok_flag = False
+  er = None
+  try:
+    download_pdb_in_mmCIF(id_code, exit_path, create_progress_bar)
+    ok_flag = True
+  except Exception as e:
+    er = e
+    ok_flag = False
 
   if not ok_flag:
     try:
@@ -173,7 +182,7 @@ def download_pdb_in_http(id_code, exit_path, create_progress_bar=False):
 
 
 def download_pdb_in_mmCIF_http(id_code, exit_path, create_progress_bar=False):
-  from general_utils.pdb_utils import mmCIF_to_pdb
+  from general_utils.cif_utils import cif_to_pdb
   er = None
   can_try = 30
   url_format_principal_list = ['https://files.rcsb.org/download/{0}.cif']
@@ -183,9 +192,7 @@ def download_pdb_in_mmCIF_http(id_code, exit_path, create_progress_bar=False):
     for url_format_string in url_format_principal_list:
       try:
         path_temp = gen_dir()
-        temp_file_path = path_temp + "/" + os.path.basename(exit_path).split(".")[0] + ".cif"
-        download_biomolecular_file(id_code.upper(), temp_file_path, url_format_string, create_progress_bar)
-        mmCIF_to_pdb(temp_file_path, exit_path)
+        download_biomolecular_file(id_code.upper(), exit_path, url_format_string, create_progress_bar)
         free_dir(path_temp)
         flag = True
         break
@@ -248,7 +255,7 @@ def download_pdb_in_pdb(id_code, exit_path, create_progress_bar=False):
 
 
 def download_pdb_in_mmCIF(id_code, exit_path, create_progress_bar=False):
-  from general_utils.pdb_utils import mmCIF_to_pdb
+  from general_utils.cif_utils import cif_to_pdb
   er = None
   can_try = 30
   url_format_principal_list = ['ftp://ftp.wwpdb.org/pub/pdb/data/structures/all/mmCIF/{0}.cif.gz',
@@ -261,10 +268,8 @@ def download_pdb_in_mmCIF(id_code, exit_path, create_progress_bar=False):
     for url_format_string in url_format_principal_list:
       try:
         path_temp = gen_dir()
-        temp_file_path = path_temp + "/" + os.path.basename(exit_path).split(".")[0] + ".cif"
-        download_biomolecular_zip_file(id_code, temp_file_path, url_format_string, '{0}.cif.gz', '{0}.cif',
+        download_biomolecular_zip_file(id_code, exit_path, url_format_string, '{0}.cif.gz', '{0}.cif',
                                        create_progress_bar)
-        mmCIF_to_pdb(temp_file_path, exit_path)
         free_dir(path_temp)
         flag = True
         break

@@ -18,7 +18,7 @@ from general_utils.workspace_utils import is_work_in_cluster
 from csv_modules.csv_writer import write_in_file
 from general_utils.download_utils import download_pdb
 from general_utils.pdb_utils import get_chains_pdb
-from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
+from to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_mrc.generate import get_mrc_synthetic_segments_pdb
 from general_utils.database_utils import get_chains_pdb_db
 from general_utils.temp_utils import clean_work_dir, gen_dir, free_dir

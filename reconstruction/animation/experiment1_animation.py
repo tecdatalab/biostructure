@@ -5,7 +5,7 @@ from shutil import copyfile
 
 from general_utils.download_utils import download_pdb
 from general_utils.pdb_utils import get_chains_pdb
-from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
+from to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 
 
 def get_point_draw(shape, pos, point_percentage):

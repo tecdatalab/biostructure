@@ -13,7 +13,7 @@ from csv_modules.csv_writer import write_in_file
 from general_utils.pdb_utils import get_ignore_pdbs, get_chains_pdb
 from general_utils.download_utils import download_pdb
 from general_utils.list_utils import generate_binary_matrix
-from pdb_to_mrc.pdb_2_mrc import pdb_to_mrc_chains
+from to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_mrc.generate import get_mrc_one
 from reconstruction.DLX import solve, gen_y_dicc, gen_x_dicc
 from reconstruction.semi_exact_cover import get_semi_exact_s
