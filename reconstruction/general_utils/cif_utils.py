@@ -37,30 +37,30 @@ def cif_to_pdb(mmCIF_path, exit_pdb_path):
 def get_cif_chain_sequence(cif_path, pdb_name, chain):
   cif_path = os.path.abspath(cif_path)
 
-  from Bio import SeqIO
+  # from Bio import SeqIO
+  #
+  # for record in SeqIO.parse(cif_path, "cif-seqres"):
+  #   print("Record id %s, chain %s" % (record.id, record.annotations["chain"]))
+  #   print(record.dbxrefs)
 
-  for record in SeqIO.parse(cif_path, "cif-seqres"):
-    print("Record id %s, chain %s" % (record.id, record.annotations["chain"]))
-    print(record.dbxrefs)
+  cif_path = os.path.abspath(cif_path)
 
-  # cif_path = os.path.abspath(cif_path)
-  #
-  # work_dir = gen_dir()
-  # pdb_path = os.path.join(work_dir, "pdbFile.pdb")
-  # cif_to_pdb(cif_path, pdb_path)
-  #
-  # move_pdb_center(pdb_path)
-  # all_chains = get_chains_cif(cif_path)
-  # information_atoms = get_atoms_of_list_pdb(pdb_path, all_chains)
-  #
-  # final_text = "".join(information_atoms[chain])
-  #
-  # pdb_chain_path = work_dir + "/" + pdb_name + "_Chain.pdb"
-  # f = open(pdb_chain_path, "w+")
-  # f.write(final_text)
-  # f.close()
-  #
-  # sequence = get_pdb_chain_sequence(pdb_chain_path, pdb_name, "A")
-  #
-  # free_dir(work_dir)
-  # return sequence
+  work_dir = gen_dir()
+  pdb_path = os.path.join(work_dir, "pdbFile.pdb")
+  cif_to_pdb(cif_path, pdb_path)
+
+  move_pdb_center(pdb_path)
+  all_chains = get_chains_cif(cif_path)
+  information_atoms = get_atoms_of_list_pdb(pdb_path, all_chains)
+
+  final_text = "".join(information_atoms[chain])
+
+  pdb_chain_path = work_dir + "/" + pdb_name + "_Chain.pdb"
+  f = open(pdb_chain_path, "w+")
+  f.write(final_text)
+  f.close()
+
+  sequence = get_pdb_chain_sequence(pdb_chain_path, pdb_name, "A")
+
+  free_dir(work_dir)
+  return sequence

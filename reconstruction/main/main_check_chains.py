@@ -21,11 +21,13 @@ def get_chains(pdb_name):
 
   from general_utils.pdb_utils import get_chains_pdb
 
+  flag_PDB = True
   try:
     path_of_pdb = '{0}/{1}.pdb'.format(dir_path, pdb_name)
     download_pdb(pdb_name, path_of_pdb)
     chains = get_chains_pdb(path_of_pdb)
   except:
+    flag_PDB = False
     path_of_cif = '{0}/{1}.cif'.format(dir_path, pdb_name)
     download_cif(pdb_name, path_of_cif)
     chains = get_chains_cif(path_of_cif)
@@ -35,12 +37,13 @@ def get_chains(pdb_name):
 
   free_dir(dir_path)
 
-  return chains
+  return flag_PDB, chains
 
 
 def check_pdb(pdb_name):
   # print("Enter", pdb_name, flush=True)
-  if get_chains(pdb_name) != get_chains_pdb_db(pdb_name):
+  flag_PDB, chains = get_chains(pdb_name)
+  if (not flag_PDB) or (chains != get_chains_pdb_db(pdb_name)):
     delete_pdb_db(pdb_name)
     print("To update", pdb_name, flush=True)
     # get_chains_pdb_db(pdb_name)

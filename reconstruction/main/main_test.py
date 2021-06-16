@@ -509,12 +509,12 @@ print(chains)
 #
 # #cif_to_mrc_chains(True, False, 5.0, cif_path, "./", chains, len(chains))
 #
-# sequence = get_cif_chain_sequence(cif_path, "4v4r", "A")
-# print(sequence)
-# print("\n\n\n")
+sequence = get_cif_chain_sequence(cif_path, "4v4r", "A")
+print(sequence)
+print("\n\n\n")
 
 
 
 pdb_name = "4v4r"
-delete_pdb_db(pdb_name)
-get_chains_pdb_db(pdb_name)
+#delete_pdb_db(pdb_name)
+#get_chains_pdb_db(pdb_name)
