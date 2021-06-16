@@ -87,33 +87,24 @@ def pdb_percentage(percentage, executor=None, min_can_chains=0):
   # Gen data use
   pd_data_frame = pd.read_csv(know_can_chains_pdb_path,
                               converters={"Cube dimension": literal_eval})
-  can_chains_list = pd_data_frame.values.tolist()
-  can_chains_list_dic = {value[0]: value[1] for value in can_chains_list}
-  can_chains_list = []
-  for i in get_all_pdb_work():
-    can_chains_list.append([i, can_chains_list_dic[i]])
+  can_chains_list_dic = {}
 
-  # Dic with can chains to pdbs
-  dic_chains = {}
-  for i in can_chains_list:
-    can = i[1]
-    pdb_name = i[0]
-
-    if can in dic_chains:
-      dic_chains[can].append(pdb_name)
-
+  for value in pd_data_frame.values.tolist():
+    exist_flag = can_chains_list_dic.get(value[1], None)
+    if exist_flag == None:
+      can_chains_list_dic[value[1]] = [value[0]]
     else:
-      dic_chains[can] = [pdb_name]
+      can_chains_list_dic[value[1]].append(value[0])
 
   # Gen result
   result = []
   percentage_value = percentage / 100
 
-  for i in dic_chains.keys():
+  for i in can_chains_list_dic.keys():
     if i >= min_can_chains:
-      real_can_add = ceil(len(dic_chains[i]) * percentage_value)
-      random.shuffle(dic_chains[i])
-      result += dic_chains[i][:real_can_add]
+      real_can_add = ceil(len(can_chains_list_dic[i]) * percentage_value)
+      random.shuffle(can_chains_list_dic[i])
+      result += can_chains_list_dic[i][:real_can_add]
 
   return result
 

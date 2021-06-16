@@ -43,7 +43,7 @@ def check_pdb(pdb_name):
   if get_chains(pdb_name) != get_chains_pdb_db(pdb_name):
     delete_pdb_db(pdb_name)
     print("To update", pdb_name, flush=True)
-    get_chains_pdb_db(pdb_name)
+    # get_chains_pdb_db(pdb_name)
     # print("Update", pdb_name, flush=True)
 
 
