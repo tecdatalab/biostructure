@@ -31,9 +31,6 @@ def get_chains(pdb_name):
     path_of_cif = '{0}/{1}.cif'.format(dir_path, pdb_name)
     download_cif(pdb_name, path_of_cif)
     chains = get_chains_cif(path_of_cif)
-    path_of_pdb = os.path.join(dir_path, "pdbFile.pdb")
-    cif_to_pdb(path_of_cif, path_of_pdb)
-    os.remove(path_of_cif)
 
   free_dir(dir_path)
 
@@ -60,6 +57,7 @@ def check_chains():
 
       all_names = get_all_archive_pdb()
       total_to_do = len(all_names)
+      all_names[all_names.index("5xxb"):]
 
       parallel_jobs = []
       actual_do = 0
@@ -72,7 +70,7 @@ def check_chains():
           print(f[0], e, flush=True)
 
         actual_do += 1
-        print("Done", total_to_do, actual_do, actual_do / total_to_do, flush=True)
+        print("Done", f[0], total_to_do, actual_do, actual_do / total_to_do, flush=True)
 
 
 if __name__ == '__main__':
