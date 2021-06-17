@@ -60,7 +60,7 @@ def check_chains():
 
       all_names = get_all_archive_pdb()
       total_to_do = len(all_names)
-      all_names[all_names.index("5xxb"):]
+      all_names[99282:]
 
       if os.path.exists("./all_check.txt"):
         with open("./all_check.txt") as f:
