@@ -5,7 +5,7 @@ sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
-
+import numpy as np
 import general_utils
 from general_utils.cif_utils import get_chains_cif, cif_to_pdb
 from general_utils.database_utils import get_all_archive_pdb, get_chains_pdb_db, delete_pdb_db
@@ -45,6 +45,9 @@ def check_pdb(pdb_name):
     print("To update", pdb_name, flush=True)
     # get_chains_pdb_db(pdb_name)
     # print("Update", pdb_name, flush=True)
+  else:
+    with open("./all_check.txt", 'a+') as f:
+      f.write(pdb_name)
 
 
 def check_chains():
@@ -58,6 +61,11 @@ def check_chains():
       all_names = get_all_archive_pdb()
       total_to_do = len(all_names)
       all_names[all_names.index("5xxb"):]
+
+      if os.path.exists("./all_check.txt"):
+        with open("./all_check.txt") as f:
+          lines = f.read().splitlines()
+          all_names = np.setdiff1d(np.array(all_names), np.array(lines)).tolist()
 
       parallel_jobs = []
       actual_do = 0
