@@ -47,7 +47,7 @@ def check_pdb(pdb_name):
     # print("Update", pdb_name, flush=True)
   else:
     with open("./all_check.txt", 'a+') as f:
-      f.write(pdb_name)
+      f.write(pdb_name, "\n")
 
 
 def check_chains():
