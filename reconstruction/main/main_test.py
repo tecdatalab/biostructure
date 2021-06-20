@@ -504,14 +504,15 @@ K, L, M, N, O, P, Q, R, S, T
 # print(graph1.nodes[1])
 # print(len(get_all_archive_pdb()))
 cif_path = "./4v4r.cif"
+#cif_path = "./1brs.cif"
 chains = get_chains_cif(cif_path)
 print(chains)
 #
-# #cif_to_mrc_chains(True, False, 5.0, cif_path, "./", chains, len(chains))
+cif_to_mrc_chains(True, False, 5.0, cif_path, "./", chains, len(chains))
 #
-sequence = get_cif_chain_sequence(cif_path, "4v4r", "A")
-print(sequence)
-print("\n\n\n")
+#sequence = get_cif_chain_sequence(cif_path, "4v4r", "A")
+#print(sequence)
+#print("\n\n\n")
 
 
 

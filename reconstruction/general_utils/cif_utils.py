@@ -4,26 +4,29 @@ from pymol import cmd
 
 from general_utils.pdb_utils import move_pdb_center, get_atoms_of_list_pdb, get_pdb_chain_sequence
 from general_utils.temp_utils import gen_dir, free_dir
-
+import numpy as np
+import biotite.structure.io.pdbx as pdbx
 
 def get_chains_cif(input_file):
   input_file = os.path.abspath(input_file)
-  list_result = []
-  with open(input_file) as origin_file:
-    actual_chain = ''
-    for line in origin_file:
-      if line[0:4] == "ATOM":
-        if actual_chain == '':
-          actual_chain = line[28:31].replace(" ", "")
-        elif actual_chain != line[28:31].replace(" ", ""):
-          if actual_chain not in list_result:
-            list_result.append(actual_chain)
-          actual_chain = line[28:31].replace(" ", "")
 
-    if actual_chain not in list_result:
-      list_result.append(actual_chain)
-  return list_result
+  # Read file
+  file = pdbx.PDBxFile()
+  file.read(input_file)
+  # Get 'pdbx_struct_assembly_gen' category as dictionary
+  assembly_dict = file["pdbx_struct_assembly_gen"]
 
+  result = []
+  if type(assembly_dict["asym_id_list"]) == str:
+    result = assembly_dict["asym_id_list"].split(",")
+    return result
+  else:
+    for asym_id_list in assembly_dict["asym_id_list"]:
+      chain_ids = asym_id_list.split(",")
+      for chain in chain_ids:
+        if chain not in result:
+          result.append(chain)
+    return result
 
 def cif_to_pdb(mmCIF_path, exit_pdb_path):
   exit_pdb_path = os.path.abspath(exit_pdb_path)

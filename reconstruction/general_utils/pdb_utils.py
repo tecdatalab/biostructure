@@ -492,29 +492,23 @@ def get_atoms_of_list_pdb(input_file, list_chains):
     result[chain] = []
 
   input_file = os.path.abspath(input_file)
-  initial_post = 0
-
-  flag_error = False
 
   with open(input_file) as origin_file:
     for line in origin_file:
-      actual_chain = list_chains[initial_post]
 
       if line[0:4] == "ATOM":
         line_list = list(line)
         line_list[21] = "A"
         line_list = "".join(line_list)
-        result[actual_chain].append(line_list)
 
-      elif line[0:3] == "TER":
-        if initial_post+1 < len(list_chains):
-          initial_post += 1
+        if line[72:76].replace(" ", "") in list_chains:
+          result[line[72:76].replace(" ", "")].append(line_list)
         else:
-          if flag_error:
-            raise ValueError("More chains than can be parse")
-          else:
-            flag_error = True
+          raise ValueError("Error in get atoms for chain, invalid chain")
 
+  for key in result.keys():
+    if result[key] == []:
+      raise ValueError("Error in get atoms for chain, chain not exist")
   return result
 
 

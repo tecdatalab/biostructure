@@ -112,3 +112,6 @@ pip3 install progress
 
 #k-means-constrained
 pip3 install k-means-constrained
+
+#Biotite
+pip3 install biotite
