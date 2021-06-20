@@ -505,10 +505,11 @@ K, L, M, N, O, P, Q, R, S, T
 # print(len(get_all_archive_pdb()))
 #cif_path = "./4v4r.cif"
 cif_path = "./1brs.cif"
+pdb_path = "./1brs.cif"
 chains = get_chains_cif(cif_path)
 print(chains)
-#
-cif_to_mrc_chains(True, False, 5.0, cif_path, "./", chains, len(chains))
+# #
+# cif_to_mrc_chains(True, False, 5.0, cif_path, "./", chains, len(chains))
 #
 #sequence = get_cif_chain_sequence(cif_path, "4v4r", "A")
 #print(sequence)
@@ -519,3 +520,11 @@ cif_to_mrc_chains(True, False, 5.0, cif_path, "./", chains, len(chains))
 pdb_name = "4v4r"
 #delete_pdb_db(pdb_name)
 #get_chains_pdb_db(pdb_name)
+from Bio import SeqIO
+
+
+PDBFile = pdb_path
+with open(PDBFile, 'r') as pdb_file:
+    for record in SeqIO.parse(pdb_file, 'pdb-atom'):
+        print('>' + record.id)
+        print(record.seq)

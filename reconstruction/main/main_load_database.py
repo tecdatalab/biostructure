@@ -33,8 +33,10 @@ def get_to_load():
 
 
 def add_pdb(pdb_name):
-  print("Added", pdb_name, flush=True)
+  print("Start adding", pdb_name, flush=True)
   get_chains_pdb_db(pdb_name)
+
+  print("Added", pdb_name, flush=True)
   with open("./all_check.txt", 'a+') as f:
     f.write(str(pdb_name) + "\n")
 
