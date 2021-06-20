@@ -56,6 +56,7 @@ def gen_load_database():
     if executor is not None:
 
       all_names = get_to_load()
+      random.shuffle(all_names)
       print("To load", len(all_names), flush=True)
 
       parallel_jobs = []
