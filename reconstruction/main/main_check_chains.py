@@ -60,13 +60,13 @@ def check_chains():
 
       all_names = get_all_archive_pdb()
       total_to_do = len(all_names)
-      all_names[99282:]
 
       if os.path.exists("./all_check.txt"):
         with open("./all_check.txt") as f:
           lines = f.read().splitlines()
           all_names = np.setdiff1d(np.array(all_names), np.array(lines)).tolist()
 
+      total_to_do = len(all_names)
       parallel_jobs = []
       actual_do = 0
       for pdb_name in all_names:
