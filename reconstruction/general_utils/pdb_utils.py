@@ -508,7 +508,31 @@ def get_atoms_of_list_pdb(input_file, list_chains):
 
   for key in result.keys():
     if result[key] == []:
+      print(result)
       raise ValueError("Error in get atoms for chain, chain not exist")
+  return result
+
+
+def get_chain_mmcif_2_pdb(input_file):
+  result = []
+
+  input_file = os.path.abspath(input_file)
+
+  with open(input_file) as origin_file:
+    for line in origin_file:
+
+      if line[0:4] == "ATOM":
+        check_list = list(line[72:76])
+        chain_id = ""
+        for i in check_list:
+          if i == " ":
+            break
+          else:
+            chain_id += i
+
+        if chain_id not in result:
+          result.append(chain_id)
+
   return result
 
 

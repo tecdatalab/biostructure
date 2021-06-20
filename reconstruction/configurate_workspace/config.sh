@@ -114,4 +114,5 @@ pip3 install progress
 pip3 install k-means-constrained
 
 #Biotite
+## conda install -c conda-forge biotite
 pip3 install biotite

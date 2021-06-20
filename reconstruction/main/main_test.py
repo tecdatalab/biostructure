@@ -503,8 +503,8 @@ K, L, M, N, O, P, Q, R, S, T
 #
 # print(graph1.nodes[1])
 # print(len(get_all_archive_pdb()))
-cif_path = "./4v4r.cif"
-#cif_path = "./1brs.cif"
+#cif_path = "./4v4r.cif"
+cif_path = "./1brs.cif"
 chains = get_chains_cif(cif_path)
 print(chains)
 #

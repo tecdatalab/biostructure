@@ -2,13 +2,19 @@ import os
 
 from pymol import cmd
 
-from general_utils.pdb_utils import move_pdb_center, get_atoms_of_list_pdb, get_pdb_chain_sequence
+from general_utils.pdb_utils import move_pdb_center, get_atoms_of_list_pdb, get_pdb_chain_sequence, \
+  get_chain_mmcif_2_pdb
 from general_utils.temp_utils import gen_dir, free_dir
 import numpy as np
 import biotite.structure.io.pdbx as pdbx
-
+import biotite
 def get_chains_cif(input_file):
   input_file = os.path.abspath(input_file)
+
+  work_dir = gen_dir()
+  pdb_path = os.path.join(work_dir, "pdbFile.pdb")
+  cif_to_pdb(input_file, pdb_path)
+  ok_chains = get_chain_mmcif_2_pdb(pdb_path)
 
   # Read file
   file = pdbx.PDBxFile()
@@ -19,14 +25,24 @@ def get_chains_cif(input_file):
   result = []
   if type(assembly_dict["asym_id_list"]) == str:
     result = assembly_dict["asym_id_list"].split(",")
-    return result
   else:
     for asym_id_list in assembly_dict["asym_id_list"]:
       chain_ids = asym_id_list.split(",")
       for chain in chain_ids:
         if chain not in result:
           result.append(chain)
-    return result
+
+
+  for chain in ok_chains:
+    if chain not in result:
+      raise ValueError("Error parse chains in cif")
+
+  for chain in result[:]:
+    if chain not in ok_chains:
+      result.remove(chain)
+
+  free_dir(work_dir)
+  return result
 
 def cif_to_pdb(mmCIF_path, exit_pdb_path):
   exit_pdb_path = os.path.abspath(exit_pdb_path)
