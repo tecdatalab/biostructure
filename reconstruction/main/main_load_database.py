@@ -17,6 +17,12 @@ from general_utils.database_utils import get_chains_pdb_db, get_all_archive_pdb
 from general_utils.temp_utils import clean_work_dir
 
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--use_local',  action='store_true')
+args = parser.parse_args()
+
 def get_to_load():
   know_pdb_path = os.path.dirname(__file__) + '/../files/pdb_list.csv'
 
@@ -69,9 +75,13 @@ def gen_load_database():
 
 
 if __name__ == '__main__':
-  if is_work_in_cluster():
-    general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_load_database_file"
-  else:
+  print(args.use_local)
+  if args.use_local:
     general_utils.temp_utils.global_temp_dir = None
-  # clean_work_dir()
+  else:
+    if is_work_in_cluster():
+      general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_load_database_file"
+    else:
+      general_utils.temp_utils.global_temp_dir = None
+    # clean_work_dir()
   gen_load_database()
