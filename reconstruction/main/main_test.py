@@ -1,3 +1,4 @@
+import re
 import sys
 import pathlib
 
@@ -16,7 +17,8 @@ from process_graph.process_graph_utils import draw_graph_similarity, draw_graph_
 
 import matplotlib.pyplot as plt
 from general_utils.database_utils import get_graph_pdb_db, get_chains_pdb_db, exists_mongo_db, get_all_archive_pdb, \
-  memory_use, save_collection, load_collection, clear_collection, get_chain_to_number_chain, delete_pdb_db
+  memory_use, save_collection, load_collection, clear_collection, get_chain_to_number_chain, delete_pdb_db, \
+  get_online_sequences, get_sequence_pdb_db
 from process_graph.graph_algorithm import graph_aligning
 import networkx as nx
 
@@ -506,8 +508,8 @@ K, L, M, N, O, P, Q, R, S, T
 #cif_path = "./4v4r.cif"
 cif_path = "./1brs.cif"
 pdb_path = "./1brs.cif"
-chains = get_chains_cif(cif_path)
-print(chains)
+# chains = get_chains_cif(cif_path)
+# print(chains)
 # #
 # cif_to_mrc_chains(True, False, 5.0, cif_path, "./", chains, len(chains))
 #
@@ -515,16 +517,13 @@ print(chains)
 #print(sequence)
 #print("\n\n\n")
 
+sequence = get_sequence_pdb_db("1brs", "A")
+print(sequence)
 
+# pdb_name = "1brs"
+# result = get_online_sequences(pdb_name)
+#
+# for i in result.keys():
+#   print(i)
+#   print(result[i])
 
-pdb_name = "4v4r"
-#delete_pdb_db(pdb_name)
-#get_chains_pdb_db(pdb_name)
-from Bio import SeqIO
-
-
-PDBFile = pdb_path
-with open(PDBFile, 'r') as pdb_file:
-    for record in SeqIO.parse(pdb_file, 'pdb-atom'):
-        print('>' + record.id)
-        print(record.seq)

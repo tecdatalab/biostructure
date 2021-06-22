@@ -274,13 +274,8 @@ def type_sequence(sequence):
 
 
 def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
-  from general_utils.download_utils import download_pdb
-  path_temp = gen_dir()
-  path_temp = os.path.abspath(path_temp)
-  temp_file_path = path_temp + "/" + pdb_name + ".pdb"
-  download_pdb(pdb_name, temp_file_path)
-  sequence = get_pdb_chain_sequence(temp_file_path, pdb_name, chain)
-  free_dir(path_temp)
+  from general_utils.database_utils import get_sequence_pdb_db
+  sequence = get_sequence_pdb_db(pdb_name, chain)
 
   try:
     type_s = type_sequence(sequence)

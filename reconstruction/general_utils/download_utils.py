@@ -342,3 +342,39 @@ def download_biomolecular_file(id_code, exit_path, url_format_string, create_pro
     urllib.request.urlretrieve(file_url, exit_path, MyProgressBar())
   else:
     urllib.request.urlretrieve(file_url, exit_path)
+
+
+def download_pdb_fasta(pdb_code, exit_path, create_progress_bar=False):
+  from general_utils.cif_utils import cif_to_pdb
+  er = None
+  can_try = 30
+  url_format_principal_list = ['https://www.rcsb.org/fasta/entry/{0}']
+  while True:
+    random.shuffle(url_format_principal_list)
+    flag = False
+    for url_format_string in url_format_principal_list:
+      try:
+        path_temp = gen_dir()
+        download_biomolecular_file(pdb_code.upper(), exit_path, url_format_string, create_progress_bar)
+        free_dir(path_temp)
+        flag = True
+        break
+      except Exception as e:
+        er = e
+        permit_errors_codes = ["421", "104"]
+        flag_error = False
+        for i in permit_errors_codes:
+          if str(e).find(i) != -1:
+            flag_error = True
+            break
+        if not flag_error:
+          raise e
+
+    if not flag:
+      can_try -= 1
+      if can_try < 0:
+        raise er
+      else:
+        time.sleep(15)
+    else:
+      break

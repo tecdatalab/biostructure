@@ -1,12 +1,15 @@
+import re
+
 import pymongo
 import zlib, json, base64
 import numpy as np
 import os
 
 from tqdm import tqdm
+from Bio import SeqIO
 
 from general_utils.cif_utils import get_chains_cif
-from general_utils.download_utils import download_pdb, download_cif
+from general_utils.download_utils import download_pdb, download_cif, download_pdb_fasta
 from general_utils.pdb_utils import get_chains_pdb
 from general_utils.temp_utils import gen_dir, free_dir
 from general_utils.workspace_utils import is_work_in_cluster
@@ -246,6 +249,67 @@ def get_chains_pdb_db(pdb_id):
     return chains
 
 
+def get_sequence_pdb_db(pdb_id, chain):
+  pdb_id = pdb_id.lower()
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
+    if pdb_data != None:
+      if 'all_sequences' in pdb_data.keys():
+        dicc = pdb_data["all_sequences"]
+        return dicc[chain]
+      else:
+        insert_sequences_db(pdb_id)
+        return get_sequence_pdb_db(pdb_id, chain)
+
+    else:
+      insert_pdb_information(col, pdb_id)
+      return get_sequence_pdb_db(pdb_id, chain)
+
+  else:
+    all_sequences = get_online_sequences(pdb_id)
+    return all_sequences[chain]
+
+
+def insert_sequences_db(pdb_id):
+  pdb_id = pdb_id.lower()
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    all_sequences = get_online_sequences(pdb_id)
+    col.update_one(
+      {"pdbID": pdb_id},
+      {"$set": {'all_sequences': all_sequences}},
+    )
+
+
+def get_online_sequences(pdb):
+  work_dir = gen_dir()
+  fasta_path = os.path.join(work_dir, "pdb.fasta")
+  download_pdb_fasta(pdb, fasta_path, create_progress_bar=False)
+
+  result = {}
+  fasta_sequences = SeqIO.parse(open(fasta_path), 'fasta')
+  for fasta in fasta_sequences:
+    sequence = str(fasta.seq)
+    description = str(fasta.description)
+    chains_sec = description.split("|")[1]
+    chains_sec = re.sub(r'\[[^)]*\]', '', chains_sec)
+
+    chains = chains_sec.split(" ")[1:]
+
+    for chain in chains:
+      chain = chain.replace(",","")
+      chain = chain.replace(" ", "")
+      result[chain] = sequence
+
+  free_dir(work_dir)
+  return result
+
+
 def delete_pdb_db(pdb_id):
   pdb_id = pdb_id.lower()
   if exists_mongo_db():
@@ -272,6 +336,7 @@ def insert_pdb_information(col, pdb_id):
   new_pdb = {}
   # new_pdb['pdbID'] = pdb_id
   new_pdb['chains'] = chains
+  new_pdb['all_sequences'] = get_online_sequences(pdb_id)
   for i in [4, 6, 8, 10]:
     graph, father_ZD = gen_graph_resolution_aux(chains, i, path_dir, pdb_id, path_of_file, is_pdb, True)
     for j in graph.nodes():
