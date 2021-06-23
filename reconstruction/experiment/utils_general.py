@@ -16,17 +16,10 @@ from general_utils.temp_utils import gen_dir, free_dir
 
 def pdb_percentage(percentage, executor=None, min_can_chains=0):
   from general_utils.database_utils import get_chains_pdb_db
+  from general_utils.database_utils import get_dicc_pdbs_can_chains
 
   # Process
-  can_chains_list_dic = {}
-  all_names = get_all_pdb_work()  # 169315
-  for pdb_name in all_names:
-    chains_len = len(get_chains_pdb_db(pdb_name))
-    exist_flag = can_chains_list_dic.get(chains_len, None)
-    if exist_flag is None:
-      can_chains_list_dic[chains_len] = [pdb_name]
-    else:
-      can_chains_list_dic[chains_len].append(pdb_name)
+  can_chains_list_dic = get_dicc_pdbs_can_chains()
 
   # Gen result
   result = []

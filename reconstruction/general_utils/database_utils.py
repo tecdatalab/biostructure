@@ -548,6 +548,21 @@ def save_collection(export_json_path):
       file.write(']')
 
 
+def get_dicc_pdbs_can_chains():
+  result = {}
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    cursor = col.find({}, no_cursor_timeout=True)
+    for pdb_data in cursor:
+      chains_len = len(pdb_data["chains"])
+      if not (chains_len in result.keys()):
+        result[chains_len] = [pdb_data["pdbID"]]
+      else:
+        result[chains_len].append(pdb_data["pdbID"])
+
+
 def load_collection(json_path):
   if exists_mongo_db():
     client = get_mongo_client()
