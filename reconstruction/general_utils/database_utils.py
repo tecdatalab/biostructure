@@ -562,6 +562,8 @@ def get_dicc_pdbs_can_chains():
       else:
         result[chains_len].append(pdb_data["pdbID"])
 
+  return result
+
 
 def load_collection(json_path):
   if exists_mongo_db():
