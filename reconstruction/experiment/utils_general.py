@@ -20,10 +20,10 @@ def pdb_percentage(percentage, executor=None, min_can_chains=0):
   # Process
   can_chains_list_dic = {}
   all_names = get_all_pdb_work()  # 169315
-  for pdb_name in all_names:
-    chains_len = get_chains_pdb_db(pdb_name)
+  for pdb_name in all_names[:2]:
+    chains_len = len(get_chains_pdb_db(pdb_name))
     exist_flag = can_chains_list_dic.get(chains_len, None)
-    if exist_flag == None:
+    if exist_flag is None:
       can_chains_list_dic[chains_len] = [pdb_name]
     else:
       can_chains_list_dic[chains_len].append(pdb_name)

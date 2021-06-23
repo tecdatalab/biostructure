@@ -2,6 +2,7 @@ import re
 import sys
 import pathlib
 
+from experiment.utils_general import pdb_percentage
 from general_utils.cif_utils import get_chains_cif, get_cif_chain_sequence
 from to_mrc.cif_2_mrc import cif_to_mrc_chains
 
@@ -517,8 +518,10 @@ pdb_path = "./1brs.cif"
 #print(sequence)
 #print("\n\n\n")
 
-sequence = get_sequence_pdb_db("1brs", "A")
-print(sequence)
+# sequence = get_sequence_pdb_db("1brs", "A")
+# print(sequence)
+
+all_pdb_names = pdb_percentage(10)
 
 # pdb_name = "1brs"
 # result = get_online_sequences(pdb_name)
