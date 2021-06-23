@@ -259,7 +259,11 @@ def get_sequence_pdb_db(pdb_id, chain):
     if pdb_data != None:
       if 'all_sequences' in pdb_data.keys():
         dicc = pdb_data["all_sequences"]
-        return dicc[chain]
+        try:
+          return dicc[chain]
+        except:
+          all_sequences = insert_sequences_db(pdb_id)
+          return all_sequences[chain]
       else:
         insert_sequences_db(pdb_id)
         return get_sequence_pdb_db(pdb_id, chain)
@@ -285,30 +289,77 @@ def insert_sequences_db(pdb_id):
       {"$set": {'all_sequences': all_sequences}},
     )
 
+    return all_sequences
 
-def get_online_sequences(pdb):
+
+def get_online_sequences(pdb, chains_check=None):
+  if chains_check is None:
+    chains_check = get_chains_pdb_db(pdb)
+
   work_dir = gen_dir()
   fasta_path = os.path.join(work_dir, "pdb.fasta")
   download_pdb_fasta(pdb, fasta_path, create_progress_bar=False)
 
   result = {}
+  result_original = {}
   fasta_sequences = SeqIO.parse(open(fasta_path), 'fasta')
   for fasta in fasta_sequences:
     sequence = str(fasta.seq)
     description = str(fasta.description)
     chains_sec = description.split("|")[1]
-    chains_sec = re.sub(r'\[[^)]*\]', '', chains_sec)
 
-    chains = chains_sec.split(" ")[1:]
+    chains_sec = chains_sec.replace("auths ", "")
+    chains_sec = chains_sec.replace("auth ", "")
+
+    chains_sec = chains_sec.replace("Chains ", "")
+    chains_sec = chains_sec.replace("Chain ", "")
+
+    chains_sec = chains_sec.replace(" ", "")
+
+
+    #chains_sec = re.sub(r'\[[^)]*\]', '', chains_sec)
+
+    # chains = chains_sec.split(",")
+    # chains = re.split(r'\[*\]', chains_sec)
+    chains = re.findall(r'[A-Za-z0-9]+\[[^]]*\]|[A-Za-z0-9]+', chains_sec)
 
     for chain in chains:
-      chain = chain.replace(",","")
-      chain = chain.replace(" ", "")
-      result[chain] = sequence
+      list_temp = chain.split("[")
+      chain_cif = list_temp[0]
+      chain_cif = chain_cif.replace(",", "")
+
+      result[chain_cif] = sequence
+
+      if len(list_temp)>1:
+        chains_quivalent = list_temp[1].replace("],", "")
+        chains_quivalent = chains_quivalent.replace("]", "")
+        chains_quivalent = chains_quivalent.split(",")
+        for i in chains_quivalent:
+          result_original[i] = sequence
+      else:
+        result_original[chain_cif] = sequence
 
   free_dir(work_dir)
-  return result
 
+  origin_in = True
+  for i in result_original.keys():
+    if i not in chains_check:
+      origin_in = False
+      break
+
+  if origin_in:
+    return result_original
+
+  cif_in = True
+  for i in result.keys():
+    if i not in chains_check:
+      cif_in = False
+      break
+
+  if cif_in:
+    return result
+
+  raise ValueError("Cant not mapping sequence")
 
 def delete_pdb_db(pdb_id):
   pdb_id = pdb_id.lower()
@@ -336,7 +387,7 @@ def insert_pdb_information(col, pdb_id):
   new_pdb = {}
   # new_pdb['pdbID'] = pdb_id
   new_pdb['chains'] = chains
-  new_pdb['all_sequences'] = get_online_sequences(pdb_id)
+  new_pdb['all_sequences'] = get_online_sequences(pdb_id, chains)
   for i in [4, 6, 8, 10]:
     graph, father_ZD = gen_graph_resolution_aux(chains, i, path_dir, pdb_id, path_of_file, is_pdb, True)
     for j in graph.nodes():

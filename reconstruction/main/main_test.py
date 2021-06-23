@@ -509,8 +509,8 @@ K, L, M, N, O, P, Q, R, S, T
 #cif_path = "./4v4r.cif"
 cif_path = "./1brs.cif"
 pdb_path = "./1brs.cif"
-# chains = get_chains_cif(cif_path)
-# print(chains)
+chains = get_chains_cif(cif_path)
+print(chains)
 # #
 # cif_to_mrc_chains(True, False, 5.0, cif_path, "./", chains, len(chains))
 #
@@ -521,12 +521,23 @@ pdb_path = "./1brs.cif"
 # sequence = get_sequence_pdb_db("1brs", "A")
 # print(sequence)
 
-all_pdb_names = pdb_percentage(10)
+# all_pdb_names = pdb_percentage(10)
 
-# pdb_name = "1brs"
-# result = get_online_sequences(pdb_name)
+pdb_name = "7d92"
+chains = get_chains_pdb_db(pdb_name)
+print(chains)
+result = get_online_sequences(pdb_name)
 #
-# for i in result.keys():
-#   print(i)
-#   print(result[i])
-
+for i in result.keys():
+  print(i)
+  print(result[i])
+# chains_sec = "AB[B,C],C[D],E[F],G,P"
+# chains_sec = "BA[B,C],C[D],E[F],G,P"
+#
+# #chains = re.split(r'\],|,', chains_sec)
+# chains = re.findall(r'[A-Za-z0-9]+\[[^]]*\]|[A-Za-z0-9]+', chains_sec)
+#
+# chain_cif = re.findall(r'\[[^]]*\]', chains[0])
+#
+# print(chains)
+# print(chain_cif)
