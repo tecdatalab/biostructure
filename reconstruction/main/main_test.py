@@ -507,8 +507,8 @@ K, L, M, N, O, P, Q, R, S, T
 # print(graph1.nodes[1])
 # print(len(get_all_archive_pdb()))
 #cif_path = "./4v4r.cif"
-cif_path = "./1brs.cif"
-pdb_path = "./1brs.cif"
+cif_path = "./3j79.cif"
+pdb_path = "./3j79.cif"
 chains = get_chains_cif(cif_path)
 print(chains)
 # #
@@ -523,7 +523,7 @@ print(chains)
 
 # all_pdb_names = pdb_percentage(10)
 
-pdb_name = "7d92"
+pdb_name = "6u6x"
 chains = get_chains_pdb_db(pdb_name)
 print(chains)
 result = get_online_sequences(pdb_name)

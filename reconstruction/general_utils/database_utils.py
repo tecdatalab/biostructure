@@ -342,8 +342,8 @@ def get_online_sequences(pdb, chains_check=None):
   free_dir(work_dir)
 
   origin_in = True
-  for i in result_original.keys():
-    if i not in chains_check:
+  for i in chains_check:
+    if i not in result_original.keys():
       origin_in = False
       break
 
@@ -351,8 +351,8 @@ def get_online_sequences(pdb, chains_check=None):
     return result_original
 
   cif_in = True
-  for i in result.keys():
-    if i not in chains_check:
+  for i in chains_check:
+    if i not in result.keys():
       cif_in = False
       break
 
