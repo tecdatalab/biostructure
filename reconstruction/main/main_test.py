@@ -560,5 +560,5 @@ pdb_name = "3whe"
 # print(chains)
 # result = get_online_sequences(pdb_name)
 
-result = get_online_chain_map_pdb2cif("1nnj")
+result = get_online_chain_map_pdb2cif("6v5k")
 print(result)

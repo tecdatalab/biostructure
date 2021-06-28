@@ -112,7 +112,17 @@ def get_similar_pdb_struct(pdb_name, can=10):
     status_code = response.status_code
     time.sleep(random.randint(2, 15))
     if status_code != 200 and status_code != 204:
-      print(response, response.status_code, response.text, "\n\n\n", flush=True)
+      print("Check why\n",
+            "Only pdb",
+            pdb_name,
+            "\n",
+            response,
+            "\n",
+            response.status_code,
+            "\n",
+            response.text,
+            "\n\n\n",
+            flush=True)
     elif status_code == 204:
       # if response.text == "":
       #   print("Return empy struct\n")
@@ -244,7 +254,19 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
     status_code = response.status_code
     time.sleep(random.randint(2, 15))
     if status_code != 200 and status_code != 204:
-      print(response, response.status_code, response.text, "\n\n\n", flush=True)
+      print("Check why\n",
+            "Only chain struct",
+            pdb_name,
+            "\n",
+            chain + "=>" + chain_searh,
+            "\n",
+            response,
+            "\n",
+            response.status_code,
+            "\n",
+            response.text,
+            "\n\n\n",
+            flush=True)
     elif status_code == 204:
       # if response.text == "":
       #   print("Return empy chain struc\n")
@@ -252,7 +274,7 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
             "Only chain struct",
             pdb_name,
             "\n",
-            chain,
+            chain + "=>" + chain_searh,
             "\n",
             response,
             "\n",
@@ -363,7 +385,21 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
     status_code = response.status_code
     time.sleep(random.randint(2, 15))
     if status_code != 200 and status_code != 204:
-      print(response, response.status_code, response.text, "\n\n\n", flush=True)
+      print("Check why\n",
+            "Only chain sequence",
+            pdb_name,
+            "\n",
+            chain,
+            "\n",
+            sequence,
+            "\n",
+            response,
+            "\n",
+            response.status_code,
+            "\n",
+            response.text,
+            "\n\n\n",
+            flush=True)
     elif status_code == 204:
       # if response.text == "":
       #   print("Return empy sequence\n")
@@ -372,6 +408,8 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
             pdb_name,
             "\n",
             chain,
+            "\n",
+            sequence,
             "\n",
             response,
             "\n",
