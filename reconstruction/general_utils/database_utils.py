@@ -25,7 +25,7 @@ database_name = "lcastillo_biostructures"
 collection_name = "pdb_collection"
 exists_mongo_db_var = None
 valid_resolutions = [4, 6, 8, 10]
-
+not_sequence = ["6v2y", "7lj6", "7lj8", "6v32", "6yz6", "7jml"]
 
 def json_zip(j):
   j = {
@@ -296,6 +296,12 @@ def get_online_sequences(pdb, chains_check=None):
   if chains_check is None:
     chains_check = get_chains_pdb_db(pdb)
 
+  if pdb in not_sequence:
+    result = {}
+    for i in chains_check:
+      result[i] = ""
+    return result
+
   work_dir = gen_dir()
   fasta_path = os.path.join(work_dir, "pdb.fasta")
   download_pdb_fasta(pdb, fasta_path, create_progress_bar=False)
@@ -316,8 +322,7 @@ def get_online_sequences(pdb, chains_check=None):
 
     chains_sec = chains_sec.replace(" ", "")
 
-
-    #chains_sec = re.sub(r'\[[^)]*\]', '', chains_sec)
+    # chains_sec = re.sub(r'\[[^)]*\]', '', chains_sec)
 
     # chains = chains_sec.split(",")
     # chains = re.split(r'\[*\]', chains_sec)
@@ -330,7 +335,7 @@ def get_online_sequences(pdb, chains_check=None):
 
       result[chain_cif] = sequence
 
-      if len(list_temp)>1:
+      if len(list_temp) > 1:
         chains_quivalent = list_temp[1].replace("],", "")
         chains_quivalent = chains_quivalent.replace("]", "")
         chains_quivalent = chains_quivalent.split(",")
@@ -360,6 +365,7 @@ def get_online_sequences(pdb, chains_check=None):
     return result
 
   raise ValueError("Cant not mapping sequence")
+
 
 def delete_pdb_db(pdb_id):
   pdb_id = pdb_id.lower()

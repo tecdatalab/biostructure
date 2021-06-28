@@ -2,11 +2,16 @@ import re
 import sys
 import pathlib
 
+from general_utils.temp_utils import clean_work_dir
+
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
+
+
+
 from experiment.utils_general import pdb_percentage
 from general_utils.cif_utils import get_chains_cif, get_cif_chain_sequence
 from to_mrc.cif_2_mrc import cif_to_mrc_chains
 
-sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 from general_utils.emd_utils import get_all_emd_name, get_associated_pdb
 
 import matplotlib
@@ -30,6 +35,12 @@ from general_utils.download_utils import download_pdb, download_emd_xml
 from general_utils.pdb_utils import get_pdb_chain_sequence, get_similar_pdb_struct, get_similar_pdb_chain_structural, \
   get_similar_pdb_chain_sequential, get_chains_pdb, get_pdb_no_work
 from to_mrc.pdb_2_mrc import pdb_to_mrc_chains
+import general_utils
+if is_work_in_cluster():
+  general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_main_test"
+else:
+  general_utils.temp_utils.global_temp_dir = None
+clean_work_dir()
 
 # pdb = '5T4P'
 
@@ -507,10 +518,10 @@ K, L, M, N, O, P, Q, R, S, T
 # print(graph1.nodes[1])
 # print(len(get_all_archive_pdb()))
 #cif_path = "./4v4r.cif"
-cif_path = "./3j79.cif"
-pdb_path = "./3j79.cif"
-chains = get_chains_cif(cif_path)
-print(chains)
+# cif_path = "./3j79.cif"
+# pdb_path = "./3j79.cif"
+# chains = get_chains_cif(cif_path)
+# print(chains)
 # #
 # cif_to_mrc_chains(True, False, 5.0, cif_path, "./", chains, len(chains))
 #
@@ -523,14 +534,14 @@ print(chains)
 
 # all_pdb_names = pdb_percentage(10)
 
-pdb_name = "6u6x"
-chains = get_chains_pdb_db(pdb_name)
-print(chains)
-result = get_online_sequences(pdb_name)
-#
-for i in result.keys():
-  print(i)
-  print(result[i])
+# pdb_name = "3whe"
+# chains = get_chains_pdb_db(pdb_name)
+# print(chains)
+# result = get_online_sequences(pdb_name)
+# #
+# for i in result.keys():
+#   print(i)
+#   print(result[i])
 # chains_sec = "AB[B,C],C[D],E[F],G,P"
 # chains_sec = "BA[B,C],C[D],E[F],G,P"
 #
@@ -541,3 +552,10 @@ for i in result.keys():
 #
 # print(chains)
 # print(chain_cif)
+
+
+pdb_name = "3whe"
+delete_pdb_db(pdb_name)
+chains = get_chains_pdb_db(pdb_name)
+print(chains)
+result = get_online_sequences(pdb_name)
