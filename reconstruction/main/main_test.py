@@ -39,7 +39,7 @@ import general_utils
 if is_work_in_cluster():
   general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_main_test"
 else:
-  general_utils.temp_utils.global_temp_dir = None
+  general_utils.temp_utils.global_temp_dir = "./main_test"
 clean_work_dir()
 
 # pdb = '5T4P'
