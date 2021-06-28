@@ -24,7 +24,7 @@ from process_graph.process_graph_utils import draw_graph_similarity, draw_graph_
 import matplotlib.pyplot as plt
 from general_utils.database_utils import get_graph_pdb_db, get_chains_pdb_db, exists_mongo_db, get_all_archive_pdb, \
   memory_use, save_collection, load_collection, clear_collection, get_chain_to_number_chain, delete_pdb_db, \
-  get_online_sequences, get_sequence_pdb_db
+  get_online_sequences, get_sequence_pdb_db, get_online_chain_map_pdb2cif
 from process_graph.graph_algorithm import graph_aligning
 import networkx as nx
 
@@ -555,7 +555,10 @@ K, L, M, N, O, P, Q, R, S, T
 
 
 pdb_name = "3whe"
-delete_pdb_db(pdb_name)
-chains = get_chains_pdb_db(pdb_name)
-print(chains)
-result = get_online_sequences(pdb_name)
+# delete_pdb_db(pdb_name)
+# chains = get_chains_pdb_db(pdb_name)
+# print(chains)
+# result = get_online_sequences(pdb_name)
+
+result = get_online_chain_map_pdb2cif("1nnj")
+print(result)

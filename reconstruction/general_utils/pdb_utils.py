@@ -117,7 +117,17 @@ def get_similar_pdb_struct(pdb_name, can=10):
       # if response.text == "":
       #   print("Return empy struct\n")
       #   return []
-      print("Check why\n", response, "\n", response.status_code, "\n", response.text, "\n\n\n", flush=True)
+      print("Check why\n",
+            "Only pdb",
+            pdb_name,
+            "\n",
+            response,
+            "\n",
+            response.status_code,
+            "\n",
+            response.text,
+            "\n\n\n",
+            flush=True)
 
   if response.status_code == 204 or response.status_code == 400:
     return []
@@ -139,6 +149,8 @@ def get_similar_pdb_struct(pdb_name, can=10):
 
 
 def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
+  from general_utils.database_utils import get_pdb2cif_db
+  chain_searh = get_pdb2cif_db(pdb_name)[chain.upper()]
   search_request = {
     "query": {
       "type": "group",
@@ -203,7 +215,7 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
           "parameters": {
             "value": {
               "entry_id": pdb_name.upper(),
-              "asym_id": chain.upper()
+              "asym_id": chain_searh.upper()
             },
             "operator": "relaxed_shape_match"
           }
@@ -236,8 +248,19 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
     elif status_code == 204:
       # if response.text == "":
       #   print("Return empy chain struc\n")
-      print("Check why\n", response, "\n", response.status_code, "\n", response.text, "\n\n\n", flush=True)
-
+      print("Check why\n",
+            "Only chain struct",
+            pdb_name,
+            "\n",
+            chain,
+            "\n",
+            response,
+            "\n",
+            response.status_code,
+            "\n",
+            response.text,
+            "\n\n\n",
+            flush=True)
   if response.status_code == 204 or response.status_code == 400:
     return []
   var_result = json.loads(response.text)
@@ -344,8 +367,19 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
     elif status_code == 204:
       # if response.text == "":
       #   print("Return empy sequence\n")
-      print("Check why\n", response, "\n", response.status_code, "\n", response.text, "\n\n\n", flush=True)
-
+      print("Check why\n",
+            "Only chain sequence",
+            pdb_name,
+            "\n",
+            chain,
+            "\n",
+            response,
+            "\n",
+            response.status_code,
+            "\n",
+            response.text,
+            "\n\n\n",
+            flush=True)
   if response.status_code == 204 or response.status_code == 400:
     return []
   var_result = json.loads(response.text)

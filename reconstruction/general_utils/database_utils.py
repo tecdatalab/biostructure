@@ -27,6 +27,7 @@ exists_mongo_db_var = None
 valid_resolutions = [4, 6, 8, 10]
 not_sequence = ["6v2y", "7lj6", "7lj8", "6v32", "6yz6", "7jml"]
 
+
 def json_zip(j):
   j = {
     ZIPJSON_KEY: base64.b64encode(
@@ -367,6 +368,92 @@ def get_online_sequences(pdb, chains_check=None):
   raise ValueError("Cant not mapping sequence")
 
 
+def get_pdb2cif_db(pdb_id):
+  pdb_id = pdb_id.lower()
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
+    if pdb_data != None:
+      if 'map_pdb2cif' in pdb_data.keys():
+        dicc = pdb_data["map_pdb2cif"]
+        return dicc
+      else:
+        insert_map_pdb2cif_db(pdb_id)
+        return get_pdb2cif_db(pdb_id)
+
+    else:
+      insert_pdb_information(col, pdb_id)
+      return get_pdb2cif_db(pdb_id)
+
+  else:
+    dicc = get_online_chain_map_pdb2cif(pdb_id)
+    return dicc
+
+def insert_map_pdb2cif_db(pdb_id):
+  pdb_id = pdb_id.lower()
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    map_pdb2cif = get_online_chain_map_pdb2cif(pdb_id)
+    col.update_one(
+      {"pdbID": pdb_id},
+      {"$set": {'map_pdb2cif': map_pdb2cif}},
+    )
+
+    return map_pdb2cif
+
+
+def get_online_chain_map_pdb2cif(pdb, chains_check=None):
+  if chains_check is None:
+    chains_check = get_chains_pdb_db(pdb)
+
+  work_dir = gen_dir()
+  fasta_path = os.path.join(work_dir, "pdb.fasta")
+  download_pdb_fasta(pdb, fasta_path, create_progress_bar=False)
+
+  temp_result = {}
+  fasta_sequences = SeqIO.parse(open(fasta_path), 'fasta')
+  for fasta in fasta_sequences:
+    description = str(fasta.description)
+    chains_sec = description.split("|")[1]
+
+    chains_sec = chains_sec.replace("auths ", "")
+    chains_sec = chains_sec.replace("auth ", "")
+
+    chains_sec = chains_sec.replace("Chains ", "")
+    chains_sec = chains_sec.replace("Chain ", "")
+
+    chains_sec = chains_sec.replace(" ", "")
+
+    chains = re.findall(r'[A-Za-z0-9]+\[[^]]*\]|[A-Za-z0-9]+', chains_sec)
+
+    for chain in chains:
+      list_temp = chain.split("[")
+      chain_cif = list_temp[0]
+      chain_cif = chain_cif.replace(",", "")
+
+      temp_result[chain_cif] = []
+
+      if len(list_temp) > 1:
+        chains_quivalent = list_temp[1].replace("],", "")
+        chains_quivalent = chains_quivalent.replace("]", "")
+        chains_quivalent = chains_quivalent.split(",")
+        for i in chains_quivalent:
+          temp_result[chain_cif].append(i)
+      else:
+        temp_result[chain_cif].append(chain_cif)
+
+  final_result = {}
+  for i in temp_result.keys():
+    for j in temp_result[i]:
+      final_result[j] = i
+
+  return final_result
+
+
 def delete_pdb_db(pdb_id):
   pdb_id = pdb_id.lower()
   if exists_mongo_db():
@@ -394,6 +481,7 @@ def insert_pdb_information(col, pdb_id):
   # new_pdb['pdbID'] = pdb_id
   new_pdb['chains'] = chains
   new_pdb['all_sequences'] = get_online_sequences(pdb_id, chains)
+  new_pdb['map_pdb2cif'] = get_online_chain_map_pdb2cif(pdb_id)
   for i in [4, 6, 8, 10]:
     graph, father_ZD = gen_graph_resolution_aux(chains, i, path_dir, pdb_id, path_of_file, is_pdb, True)
     for j in graph.nodes():
