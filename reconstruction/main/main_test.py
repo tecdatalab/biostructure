@@ -556,9 +556,9 @@ K, L, M, N, O, P, Q, R, S, T
 
 pdb_name = "3whe"
 # delete_pdb_db(pdb_name)
-# chains = get_chains_pdb_db(pdb_name)
-# print(chains)
+chains = get_chains_pdb_db(pdb_name)
+print(chains)
 # result = get_online_sequences(pdb_name)
 
-result = get_online_chain_map_pdb2cif("6v5k")
+result = get_online_chain_map_pdb2cif("7dco")
 print(result)
