@@ -112,6 +112,8 @@ def get_similar_pdb_struct(pdb_name, can=10):
     status_code = response.status_code
     time.sleep(random.randint(2, 15))
     if status_code != 200 and status_code != 204:
+      if status_code == 500 and response.text.find("ERROR") != -1:
+        return []
       print("Check why\n",
             "Only pdb",
             pdb_name,
@@ -124,9 +126,8 @@ def get_similar_pdb_struct(pdb_name, can=10):
             "\n\n\n",
             flush=True)
     elif status_code == 204:
-      # if response.text == "":
-      #   print("Return empy struct\n")
-      #   return []
+      if response.text == "":
+        return []
       print("Check why\n",
             "Only pdb",
             pdb_name,
@@ -254,6 +255,8 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
     status_code = response.status_code
     time.sleep(random.randint(2, 15))
     if status_code != 200 and status_code != 204:
+      if status_code == 500 and response.text.find("ERROR") != -1:
+        return []
       print("Check why\n",
             "Only chain struct",
             pdb_name,
@@ -268,8 +271,8 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
             "\n\n\n",
             flush=True)
     elif status_code == 204:
-      # if response.text == "":
-      #   print("Return empy chain struc\n")
+      if response.text == "":
+        return []
       print("Check why\n",
             "Only chain struct",
             pdb_name,
@@ -385,6 +388,8 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
     status_code = response.status_code
     time.sleep(random.randint(2, 15))
     if status_code != 200 and status_code != 204:
+      if status_code == 500 and response.text.find("ERROR") != -1:
+        return []
       print("Check why\n",
             "Only chain sequence",
             pdb_name,
@@ -401,8 +406,8 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
             "\n\n\n",
             flush=True)
     elif status_code == 204:
-      # if response.text == "":
-      #   print("Return empy sequence\n")
+      if response.text == "":
+        return []
       print("Check why\n",
             "Only chain sequence",
             pdb_name,
