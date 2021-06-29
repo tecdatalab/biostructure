@@ -554,8 +554,8 @@ K, L, M, N, O, P, Q, R, S, T
 # print(chain_cif)
 
 
-pdb_name = "3whe"
-# delete_pdb_db(pdb_name)
+pdb_name = "100d"
+delete_pdb_db(pdb_name)
 chains = get_chains_pdb_db(pdb_name)
 print(chains)
 # result = get_online_sequences(pdb_name)

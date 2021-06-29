@@ -406,9 +406,7 @@ def insert_map_pdb2cif_db(pdb_id):
     return map_pdb2cif
 
 
-def get_online_chain_map_pdb2cif(pdb, chains_check=None):
-  if chains_check is None:
-    chains_check = get_chains_pdb_db(pdb)
+def get_online_chain_map_pdb2cif(pdb):
 
   work_dir = gen_dir()
   fasta_path = os.path.join(work_dir, "pdb.fasta")
