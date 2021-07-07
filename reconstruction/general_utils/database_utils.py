@@ -25,7 +25,8 @@ database_name = "lcastillo_biostructures"
 collection_name = "pdb_collection"
 exists_mongo_db_var = None
 valid_resolutions = [4, 6, 8, 10]
-not_sequence = ["6v2y", "7lj6", "7lj8", "6v32", "6yz6", "7jml"]
+not_sequence = ["6v2y", "7lj6", "7lj8", "6v32", "6yz6", "7jml",
+                "7lj8", "6v2y", "6v32", "7jml", "6yz6"]
 
 
 def json_zip(j):
@@ -378,9 +379,11 @@ def get_pdb2cif_db(pdb_id):
     if pdb_data != None:
       if 'map_pdb2cif' in pdb_data.keys():
         dicc = pdb_data["map_pdb2cif"]
+        if dicc == {}:
+          dicc = insert_map_pdb2cif_db(pdb_id, pdb_data["chains"])
         return dicc
       else:
-        insert_map_pdb2cif_db(pdb_id)
+        insert_map_pdb2cif_db(pdb_id, pdb_data["chains"])
         return get_pdb2cif_db(pdb_id)
 
     else:
@@ -391,13 +394,13 @@ def get_pdb2cif_db(pdb_id):
     dicc = get_online_chain_map_pdb2cif(pdb_id)
     return dicc
 
-def insert_map_pdb2cif_db(pdb_id):
+def insert_map_pdb2cif_db(pdb_id, chains):
   pdb_id = pdb_id.lower()
   if exists_mongo_db():
     client = get_mongo_client()
     db = client[database_name]
     col = db[collection_name]
-    map_pdb2cif = get_online_chain_map_pdb2cif(pdb_id)
+    map_pdb2cif = get_online_chain_map_pdb2cif(pdb_id, chains)
     col.update_one(
       {"pdbID": pdb_id},
       {"$set": {'map_pdb2cif': map_pdb2cif}},
@@ -405,8 +408,30 @@ def insert_map_pdb2cif_db(pdb_id):
 
     return map_pdb2cif
 
+def havePDBFile(pdb_id):
+  work_local_dir = gen_dir()
+  is_pdb = True
+  try:
+    path_of_file = '{0}/{1}.pdb'.format(work_local_dir, pdb_id)
+    download_pdb(pdb_id, path_of_file)
+    chains = get_chains_pdb(path_of_file)
+  except:
+    is_pdb = False
+    path_of_file = '{0}/{1}.cif'.format(work_local_dir, pdb_id)
+    download_cif(pdb_id, path_of_file)
+    chains = get_chains_cif(path_of_file)
 
-def get_online_chain_map_pdb2cif(pdb):
+  free_dir(work_local_dir)
+  return is_pdb
+
+
+def get_online_chain_map_pdb2cif(pdb, chains):
+
+  if pdb in not_sequence or not havePDBFile(pdb):
+    result = {}
+    for i in chains:
+      result[i] = i
+    return result
 
   work_dir = gen_dir()
   fasta_path = os.path.join(work_dir, "pdb.fasta")
@@ -479,7 +504,7 @@ def insert_pdb_information(col, pdb_id):
   # new_pdb['pdbID'] = pdb_id
   new_pdb['chains'] = chains
   new_pdb['all_sequences'] = get_online_sequences(pdb_id, chains)
-  new_pdb['map_pdb2cif'] = get_online_chain_map_pdb2cif(pdb_id)
+  new_pdb['map_pdb2cif'] = get_online_chain_map_pdb2cif(pdb_id, chains)
   for i in [4, 6, 8, 10]:
     graph, father_ZD = gen_graph_resolution_aux(chains, i, path_dir, pdb_id, path_of_file, is_pdb, True)
     for j in graph.nodes():
