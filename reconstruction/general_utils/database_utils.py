@@ -394,6 +394,7 @@ def get_pdb2cif_db(pdb_id):
     dicc = get_online_chain_map_pdb2cif(pdb_id)
     return dicc
 
+
 def insert_map_pdb2cif_db(pdb_id, chains):
   pdb_id = pdb_id.lower()
   if exists_mongo_db():
@@ -407,6 +408,7 @@ def insert_map_pdb2cif_db(pdb_id, chains):
     )
 
     return map_pdb2cif
+
 
 def havePDBFile(pdb_id):
   work_local_dir = gen_dir()
@@ -426,7 +428,6 @@ def havePDBFile(pdb_id):
 
 
 def get_online_chain_map_pdb2cif(pdb, chains):
-
   if pdb in not_sequence or not havePDBFile(pdb):
     result = {}
     for i in chains:

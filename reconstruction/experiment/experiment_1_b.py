@@ -51,8 +51,8 @@ def do_parallel_test(path_data,
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor)
-      # all_names = ['2kmu']
+      # all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor)
+      all_names = ['4u0d']
       path = os.path.abspath(path_data)
 
       if not os.path.isdir(path):
@@ -124,6 +124,7 @@ def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, re
       for i in temp:
         add_data = [pdb_name, i[0], i[1], chain]
         result_chain_struct.append(add_data)
+      break
 
     result_chain_sequence = []
     for chain in chains:
@@ -131,6 +132,7 @@ def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, re
       for i in temp:
         add_data = [pdb_name, i[0], i[1], chain]
         result_chain_sequence.append(add_data)
+      break
 
     # Clen not do
     result_struct = get_experiments_to_do(result_struct, can_struct_test)
