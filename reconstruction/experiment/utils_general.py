@@ -83,7 +83,11 @@ def make_dir_pdb(work_dir, pdb_id):
   complete_path = os.path.abspath(work_dir)
   dirs = os.listdir(complete_path)
 
-  if pdb_id in dirs: return
+  if pdb_id in dirs:
+    if len(os.listdir(os.path.join(complete_path, pdb_id))) > 0:
+      return
+    else:
+      os.rmdir(os.path.join(complete_path, pdb_id))
 
   work_local_dir = gen_dir()
 
@@ -136,8 +140,8 @@ def check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, 
     path_chain_i = work_dir + "/" + pdb_chaini + "/" + "{}_{}.pdb".format(pdb_chaini, chain1)
     path_chain_j = work_dir + "/" + pdb_chainj + "/" + "{}_{}.pdb".format(pdb_chainj, chain2)
 
-    namei = "{}_{}".format(pdb_chaini+"i", chain1)
-    namej = "{}_{}".format(pdb_chainj+"j", chain2)
+    namei = "{}_{}".format(pdb_chaini + "i", chain1)
+    namej = "{}_{}".format(pdb_chainj + "j", chain2)
 
     cmd.load(path_chain_i, namei)
     cmd.load(path_chain_j, namej)

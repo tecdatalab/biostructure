@@ -1,15 +1,23 @@
 import sys
 import pathlib
 
-from experiment.utils_general import check_RMSD_result_algorithm, make_dir_pdb
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
-
+from experiment.utils_general import check_RMSD_result_algorithm, make_dir_pdb
+import numpy as np
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 import pandas as pd
 from ast import literal_eval
 import os
+
+
+def checkFile(work_dir, pdb_name):
+  pdb_name = pdb_name.replace("+", "")
+  pdb_name = pdb_name.replace("5000000000000.0", "5e12")
+
+  make_dir_pdb(work_dir, pdb_name)
+  return True
 
 def main():
   comm = MPI.COMM_WORLD
@@ -33,20 +41,43 @@ def main():
                                                     "Match": literal_eval
                                                     })
 
+      col_names_dowloand = csv_file['Pdb'].tolist()
+      col_names_dowloand += csv_file['Pdb work'].tolist()
+      col_names_dowloand = np.unique(col_names_dowloand).tolist()
+
+      parallel_dow = []
+      for i in col_names_dowloand:
+        parallel_dow.append([executor.submit(checkFile,
+                                             work_dir,
+                                             i),
+                             i])
+
+      for i in range(len(parallel_dow)):
+        print(parallel_dow[i][1], i/len(parallel_dow), flush=True)
+        print(parallel_dow[i][0].result(), flush=True)
+
       parallel_jobs = []
       results = []
 
       for index, row in csv_file.iterrows():
+        pdb = row['Pdb']
+        pdb_work = row['Pdb work']
 
-        make_dir_pdb(work_dir, row['Pdb'])
-        make_dir_pdb(work_dir, row['Pdb work'])
+        pdb = pdb.replace("+", "")
+        pdb = pdb.replace("5000000000000.0", "5e12")
+
+        pdb_work = pdb_work.replace("+", "")
+        pdb_work = pdb_work.replace("5000000000000.0", "5e12")
+
+        make_dir_pdb(work_dir, pdb)
+        make_dir_pdb(work_dir, pdb_work)
 
         parallel_jobs.append(executor.submit(check_RMSD_result_algorithm,
                                              work_dir,
                                              row['Chains'],
                                              row['Match'],
-                                             row['Pdb'],
-                                             row['Pdb work'],
+                                             pdb,
+                                             pdb_work,
                                              row['Changed chain'],
                                              row['Changed chain Pdb work']))
 
@@ -56,5 +87,6 @@ def main():
 
       csv_file['RMSD'] = results
       csv_file.to_csv(file_name)
+
 
 main()
