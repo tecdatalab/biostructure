@@ -3,6 +3,12 @@ import pandas as pd
 from os import listdir
 from ast import literal_eval
 import numpy as np
+from mpi4py import MPI
+from mpi4py.futures import MPICommExecutor
+
+from experiment.utils_general import make_dir_pdb, check_RMSD_result_algorithm
+from general_utils.workspace_utils import is_work_in_cluster
+
 
 def find_csv_filenames(path_to_dir, result, suffix=".csv"):
   filenames = listdir(path_to_dir)
@@ -119,62 +125,112 @@ def combine_files_exp_1a(exit_file_struct, exit_file_chain, parent_path):
   combined_csv_chains.to_csv(exit_file_chain, index=False, encoding='utf-8-sig')
 
 
+def add_RSM(dataFrame, executor, work_dir):
+  col_names_dowloand = dataFrame['Pdb'].tolist()
+  col_names_dowloand += dataFrame['Pdb work'].tolist()
+  col_names_dowloand = np.unique(col_names_dowloand).tolist()
+
+  parallel_dow = []
+  for i in col_names_dowloand:
+    parallel_dow.append([executor.submit(make_dir_pdb,
+                                         work_dir,
+                                         i),
+                         i])
+
+    for i in range(len(parallel_dow)):
+      print(parallel_dow[i][1], i / len(parallel_dow), flush=True)
+      print(parallel_dow[i][0].result(), flush=True)
+
+    parallel_jobs = []
+    results = []
+
+    for index, row in dataFrame.iterrows():
+      pdb = row['Pdb']
+      pdb_work = row['Pdb work']
+
+      parallel_jobs.append(executor.submit(check_RMSD_result_algorithm,
+                                           work_dir,
+                                           row['Chains'],
+                                           row['Match'],
+                                           pdb,
+                                           pdb_work,
+                                           row['Changed chain'],
+                                           row['Changed chain Pdb work']))
+
+    for i in parallel_jobs:
+      add_result = i.result()
+      results.append(add_result)
+
+    dataFrame['RMSD'] = results
+    return dataFrame
+
 def combine_files_exp_1b(exit_file_struct, exit_file_chain, exit_file_secuencial, parent_path):
-  result_struct = []
-  result_chain = []
-  result_sequence = []
-  find_csv_filenames(parent_path, result_struct, suffix="struct.csv")
-  find_csv_filenames(parent_path, result_chain, suffix="chain.csv")
-  find_csv_filenames(parent_path, result_sequence, suffix="secuencial.csv")
-  # print(result_struct, result_chain)
+  comm = MPI.COMM_WORLD
+  size = comm.Get_size()
 
-  # combine all files in the list
-  combined_csv_struct = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
-                                                              "Work Chains": literal_eval,
-                                                              "Match": literal_eval}) for f in result_struct])
+  with MPICommExecutor(comm, root=0, worker_size=size) as executor:
+    if executor is not None:
 
-  combined_csv_sequence = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
-                                                              "Match": literal_eval}) for f in result_sequence])
+      result_struct = []
+      result_chain = []
+      result_sequence = []
+      find_csv_filenames(parent_path, result_struct, suffix="struct.csv")
+      find_csv_filenames(parent_path, result_chain, suffix="chain.csv")
+      find_csv_filenames(parent_path, result_sequence, suffix="secuencial.csv")
+      # print(result_struct, result_chain)
 
-  combined_csv_chain = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
-                                                              "Match": literal_eval}) for f in result_chain])
+      # combine all files in the list
+      combined_csv_struct = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
+                                                                  "Work Chains": literal_eval,
+                                                                  "Match": literal_eval}) for f in result_struct])
+
+      combined_csv_sequence = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
+                                                                  "Match": literal_eval}) for f in result_sequence])
+
+      combined_csv_chain = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
+                                                                  "Match": literal_eval}) for f in result_chain])
 
 
 
-  combined_csv_struct['number_chains'] = combined_csv_struct['Chains'].apply(lambda x: len(x))
-  combined_csv_struct['number_test_chains'] = combined_csv_struct['Work Chains'].apply(lambda x: len(x))
+      combined_csv_struct['number_chains'] = combined_csv_struct['Chains'].apply(lambda x: len(x))
+      combined_csv_struct['number_test_chains'] = combined_csv_struct['Work Chains'].apply(lambda x: len(x))
 
-  combined_csv_sequence['number_chains'] = combined_csv_sequence['Chains'].apply(lambda x: len(x))
-  combined_csv_sequence['number_test_chains'] = combined_csv_sequence['Chains'].apply(lambda x: len(x))
-  combined_csv_sequence['total_matched'] = combined_csv_sequence['Match'].apply(lambda x: len(x))
-  combined_csv_sequence['number_wrong_chains'] = combined_csv_sequence['Match'].apply(count_error)
-  combined_csv_sequence['number_ok_chains'] = combined_csv_sequence['Match'].apply(count_ok)
-  combined_csv_sequence['number_no_match_chains'] = combined_csv_sequence.apply(count_no_match_chains, axis=1)
-  combined_csv_sequence['percentage_wrong'] = combined_csv_sequence.apply(percentage_wrong, axis=1)
-  combined_csv_sequence['percentage_ok'] = combined_csv_sequence.apply(percentage_ok, axis=1)
-  combined_csv_sequence['percentage_no_match'] = combined_csv_sequence.apply(percentage_no_match, axis=1)
-  combined_csv_sequence['percentage_match'] = combined_csv_sequence.apply(percentage_match, axis=1)
+      combined_csv_sequence['number_chains'] = combined_csv_sequence['Chains'].apply(lambda x: len(x))
+      combined_csv_sequence['number_test_chains'] = combined_csv_sequence['Chains'].apply(lambda x: len(x))
+      combined_csv_sequence['total_matched'] = combined_csv_sequence['Match'].apply(lambda x: len(x))
+      combined_csv_sequence['number_wrong_chains'] = combined_csv_sequence['Match'].apply(count_error)
+      combined_csv_sequence['number_ok_chains'] = combined_csv_sequence['Match'].apply(count_ok)
+      combined_csv_sequence['number_no_match_chains'] = combined_csv_sequence.apply(count_no_match_chains, axis=1)
+      combined_csv_sequence['percentage_wrong'] = combined_csv_sequence.apply(percentage_wrong, axis=1)
+      combined_csv_sequence['percentage_ok'] = combined_csv_sequence.apply(percentage_ok, axis=1)
+      combined_csv_sequence['percentage_no_match'] = combined_csv_sequence.apply(percentage_no_match, axis=1)
+      combined_csv_sequence['percentage_match'] = combined_csv_sequence.apply(percentage_match, axis=1)
 
-  combined_csv_chain['number_chains'] = combined_csv_chain['Chains'].apply(lambda x: len(x))
-  combined_csv_chain['number_test_chains'] = combined_csv_chain['Chains'].apply(lambda x: len(x))
-  combined_csv_chain['total_matched'] = combined_csv_chain['Match'].apply(lambda x: len(x))
-  combined_csv_chain['number_wrong_chains'] = combined_csv_chain['Match'].apply(count_error)
-  combined_csv_chain['number_ok_chains'] = combined_csv_chain['Match'].apply(count_ok)
-  combined_csv_chain['number_no_match_chains'] = combined_csv_chain.apply(count_no_match_chains, axis=1)
-  combined_csv_chain['percentage_wrong'] = combined_csv_chain.apply(percentage_wrong, axis=1)
-  combined_csv_chain['percentage_ok'] = combined_csv_chain.apply(percentage_ok, axis=1)
-  combined_csv_chain['percentage_no_match'] = combined_csv_chain.apply(percentage_no_match, axis=1)
-  combined_csv_chain['percentage_match'] = combined_csv_chain.apply(percentage_match, axis=1)
+      combined_csv_chain['number_chains'] = combined_csv_chain['Chains'].apply(lambda x: len(x))
+      combined_csv_chain['number_test_chains'] = combined_csv_chain['Chains'].apply(lambda x: len(x))
+      combined_csv_chain['total_matched'] = combined_csv_chain['Match'].apply(lambda x: len(x))
+      combined_csv_chain['number_wrong_chains'] = combined_csv_chain['Match'].apply(count_error)
+      combined_csv_chain['number_ok_chains'] = combined_csv_chain['Match'].apply(count_ok)
+      combined_csv_chain['number_no_match_chains'] = combined_csv_chain.apply(count_no_match_chains, axis=1)
+      combined_csv_chain['percentage_wrong'] = combined_csv_chain.apply(percentage_wrong, axis=1)
+      combined_csv_chain['percentage_ok'] = combined_csv_chain.apply(percentage_ok, axis=1)
+      combined_csv_chain['percentage_no_match'] = combined_csv_chain.apply(percentage_no_match, axis=1)
+      combined_csv_chain['percentage_match'] = combined_csv_chain.apply(percentage_match, axis=1)
 
-  combined_csv_struct['number_chains'] = combined_csv_struct['Chains'].apply(lambda x: len(x))
-  combined_csv_struct['number_test_chains'] = combined_csv_struct['Work Chains'].apply(lambda x: len(x))
-  combined_csv_struct['total_matched'] = combined_csv_struct['Match'].apply(lambda x: len(x))
-  combined_csv_struct['percentage_match'] = combined_csv_struct.apply(percentage_match, axis=1)
+      combined_csv_struct['number_chains'] = combined_csv_struct['Chains'].apply(lambda x: len(x))
+      combined_csv_struct['number_test_chains'] = combined_csv_struct['Work Chains'].apply(lambda x: len(x))
+      combined_csv_struct['total_matched'] = combined_csv_struct['Match'].apply(lambda x: len(x))
+      combined_csv_struct['percentage_match'] = combined_csv_struct.apply(percentage_match, axis=1)
 
-  # export to csv
-  combined_csv_struct.to_csv(exit_file_struct, index=False, encoding='utf-8-sig')
-  combined_csv_chain.to_csv(exit_file_chain, index=False, encoding='utf-8-sig')
-  combined_csv_sequence.to_csv(exit_file_secuencial, index=False, encoding='utf-8-sig')
+      if is_work_in_cluster():
+        add_RSM(combined_csv_sequence, executor, "/work/lcastillo/RMSD")
+      else:
+        add_RSM(combined_csv_sequence, executor, "./RMSD")
+
+      # export to csv
+      combined_csv_struct.to_csv(exit_file_struct, index=False, encoding='utf-8-sig')
+      combined_csv_chain.to_csv(exit_file_chain, index=False, encoding='utf-8-sig')
+      combined_csv_sequence.to_csv(exit_file_secuencial, index=False, encoding='utf-8-sig')
 
 
 

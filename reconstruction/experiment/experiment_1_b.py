@@ -12,13 +12,14 @@ from mpi4py.futures import MPICommExecutor
 from sklearn.metrics import mean_squared_error
 
 from csv_modules.csv_writer import write_in_file
-from experiment.utils_general import remove_get_dirs
+from experiment.utils_general import remove_get_dirs, check_RMSD_result_all, check_RMSD_result_algorithm
 from general_utils.database_utils import get_chains_pdb_db, get_graph_pdb_db, get_zd_pdb_db, get_zd_chain_pdb_db, \
   get_zd_chains_pdb_db
 from general_utils.list_utils import get_element_list
 from general_utils.math_utils import distance_3d_points
 from general_utils.pdb_utils import get_similar_pdb_struct, get_similar_pdb_chain_structural, get_ignore_pdbs, \
   get_similar_pdb_chain_sequential, get_percentage_pbs_check_file
+from general_utils.temp_utils import gen_dir, free_dir
 from process_graph.graph_algorithm import graph_aligning
 from process_mrc.miscellaneous import get_center_point_by_graph
 
@@ -27,14 +28,16 @@ headers_chain = ['Pdb', 'Pdb work', 'Chains', 'Point Original', 'Point Test', 'P
                  'Resolution', 'Match',
                  'Score PDB', '3D ZD note', 'Alignment note',
                  'Changed chain', 'Changed chain Pdb work',
-                 'Time segment', 'Time center', 'Time test', 'Time graph', 'Time alignment', 'Time EMAN2']
+                 'Time segment', 'Time center', 'Time test', 'Time graph', 'Time alignment', 'Time EMAN2',
+                 'RMSD']
 
 headers_struct = ['Pdb', 'Pdb work', 'Chains', 'Work Chains', 'Point Original', 'Point Test', 'Point Original syn',
                   'Point Test syn',
                   'Point Original syn dis', 'Point Test syn dis',
                   'Resolution', 'Match',
                   'Score PDB', '3D ZD note (complete)', 'Alignment note',
-                  'Time segment', 'Time center', 'Time test', 'Time graph', 'Time alignment', 'Time EMAN2']
+                  'Time segment', 'Time center', 'Time test', 'Time graph', 'Time alignment', 'Time EMAN2',
+                  'RMSD']
 
 
 def do_parallel_test(path_data,
@@ -51,8 +54,8 @@ def do_parallel_test(path_data,
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      # all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor)
-      all_names = ['4u0d']
+      all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor)
+      # all_names = ['4u0d']
       path = os.path.abspath(path_data)
 
       if not os.path.isdir(path):
@@ -110,6 +113,7 @@ def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, re
     if not os.path.exists(local_path):
       os.makedirs(local_path)
 
+    RMSD_dir = gen_dir()
     chains = get_chains_pdb_db(pdb_name)
 
     result_struct = []
@@ -124,7 +128,6 @@ def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, re
       for i in temp:
         add_data = [pdb_name, i[0], i[1], chain]
         result_chain_struct.append(add_data)
-      break
 
     result_chain_sequence = []
     for chain in chains:
@@ -132,7 +135,6 @@ def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, re
       for i in temp:
         add_data = [pdb_name, i[0], i[1], chain]
         result_chain_sequence.append(add_data)
-      break
 
     # Clen not do
     result_struct = get_experiments_to_do(result_struct, can_struct_test)
@@ -140,21 +142,22 @@ def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, re
     result_chain_sequence = get_experiments_to_do(result_chain_sequence, can_secuencial_test)
 
     for struct_score in result_struct:
-      do_test_struct(local_path, struct_score, resolution, result_cvs_struct)
+      do_test_struct(local_path, struct_score, resolution, result_cvs_struct, RMSD_dir)
     if result_struct == []:
-      do_test_struct(local_path, None, resolution, result_cvs_struct)
+      do_test_struct(local_path, None, resolution, result_cvs_struct, RMSD_dir)
 
     for chain_score in result_chain_struct:
-      do_test_chain(local_path, chain_score, resolution, result_cvs_chain)
+      do_test_chain(local_path, chain_score, resolution, result_cvs_chain, RMSD_dir)
     if result_chain_struct == []:
-      do_test_chain(local_path, None, resolution, result_cvs_chain)
+      do_test_chain(local_path, None, resolution, result_cvs_chain, RMSD_dir)
 
     for sequential_score in result_chain_sequence:
-      do_test_chain(local_path, sequential_score, resolution, result_cvs_secuencial)
+      do_test_chain(local_path, sequential_score, resolution, result_cvs_secuencial, RMSD_dir)
     if result_chain_sequence == []:
-      do_test_chain(local_path, None, resolution, result_cvs_secuencial)
+      do_test_chain(local_path, None, resolution, result_cvs_secuencial, RMSD_dir)
 
     dirs = os.listdir(local_path)
+    free_dir(RMSD_dir)
 
     for directory in dirs:
       if directory.find('.') == -1 or directory.split('.')[1] != 'csv':
@@ -196,7 +199,7 @@ def get_experiments_to_do(list_possibles, cant_by_range):
   return result
 
 
-def do_test_struct(path, struct_score, resolution, result_cvs_struct):
+def do_test_struct(path, struct_score, resolution, result_cvs_struct, RMSD_dir):
   if struct_score == None:
     write_in_file('{0}/{1}'.format(path, result_cvs_struct), headers_struct, [[]])
     return
@@ -258,13 +261,20 @@ def do_test_struct(path, struct_score, resolution, result_cvs_struct):
                  0,
                  time_center, time_center_test,
                  time_graph,
-                 time_aligning, 0]]
+                 time_aligning, 0,
+                 check_RMSD_result_all(RMSD_dir,
+                                       get_chains_pdb_db(pdb_test),
+                                       get_chains_pdb_db(pdb_work),
+                                       result,
+                                       pdb_test,
+                                       pdb_work)
+                 ]]
 
   write_in_file('{0}/{1}'.format(path, result_cvs_struct), headers_struct, data_write)
   shutil.rmtree(local_path)
 
 
-def do_test_chain(path, chain_score, resolution, result_cvs_chain):
+def do_test_chain(path, chain_score, resolution, result_cvs_chain, RMSD_dir):
   if chain_score == None:
     write_in_file('{0}/{1}'.format(path, result_cvs_chain), headers_chain, [[]])
     return
@@ -336,7 +346,14 @@ def do_test_chain(path, chain_score, resolution, result_cvs_chain):
                  0,
                  time_center, time_center_test,
                  time_graph,
-                 time_aligning, 0]]
+                 time_aligning, 0,
+                 check_RMSD_result_algorithm(RMSD_dir,
+                                             get_chains_pdb_db(pdb_test),
+                                             result,
+                                             pdb_test,
+                                             pdb_work,
+                                             chain_work,
+                                             chain_changed)]]
 
   write_in_file('{0}/{1}'.format(path, result_cvs_chain), headers_chain, data_write)
   shutil.rmtree(local_path)

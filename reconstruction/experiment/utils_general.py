@@ -164,3 +164,48 @@ def averageOfList(num):
 
   avg = sumOfNumbers / len(num)
   return avg
+
+
+def check_RMSD_result_all(work_dir,
+                          all_chains_A,
+                          all_chains_B,
+                          check_list,
+                          pdb_A,
+                          pdb_B):
+  final_result = {}
+  final_result_list = []
+
+  if not os.path.exists(work_dir):
+    os.mkdir(work_dir)
+
+  make_dir_pdb(work_dir, pdb_A)
+  make_dir_pdb(work_dir, pdb_B)
+
+  for i in check_list:
+    pdb_chaini = pdb_A
+    pdb_chainj = pdb_B
+
+    ipos = i[0]
+    jpos = i[1]
+
+    chain1 = all_chains_A[ipos - 1]
+    chain2 = all_chains_B[jpos - 1]
+
+    path_chain_i = work_dir + "/" + pdb_chaini + "/" + "{}_{}.pdb".format(pdb_chaini, chain1)
+    path_chain_j = work_dir + "/" + pdb_chainj + "/" + "{}_{}.pdb".format(pdb_chainj, chain2)
+
+    namei = "{}_{}".format(pdb_chaini + "i", chain1)
+    namej = "{}_{}".format(pdb_chainj + "j", chain2)
+
+    cmd.load(path_chain_i, namei)
+    cmd.load(path_chain_j, namej)
+
+    result = cmd.align(namei, namej)
+
+    add_data = [cmd.count_atoms(namei), cmd.count_atoms(namej), result[0], result[1], result[5]]
+
+    final_result[namei + "_" + namej] = add_data
+    final_result_list.append(result[0])
+
+  final_result["avg"] = averageOfList(final_result_list)
+  return final_result
