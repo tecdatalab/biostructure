@@ -43,13 +43,15 @@ def count_ok(x):
       cont += 1
   return cont
 
+
 def percentage_wrong(x):
   can_chains = x['total_matched']
   can_wrong = x['number_wrong_chains']
 
   if can_chains == 0:
     return 1.0
-  return can_wrong/can_chains
+  return can_wrong / can_chains
+
 
 def percentage_ok(x):
   can_chains = x['total_matched']
@@ -57,16 +59,18 @@ def percentage_ok(x):
 
   if can_chains == 0:
     return 1.0
-  return can_ok/can_chains
+  return can_ok / can_chains
+
 
 def percentage_no_match(x):
   can_chains_f = x['number_chains']
   can_chains_t = x['number_test_chains']
-  can_no_match_chains= x['number_no_match_chains']
+  can_no_match_chains = x['number_no_match_chains']
 
   if min(can_chains_f, can_chains_t) == 0:
     return 1.0
-  return can_no_match_chains/min(can_chains_f, can_chains_t)
+  return can_no_match_chains / min(can_chains_f, can_chains_t)
+
 
 def percentage_match(x):
   can_match = x['total_matched']
@@ -75,7 +79,7 @@ def percentage_match(x):
 
   if min(can_chains_f, can_chains_t) == 0:
     return 1.0
-  return can_match/min(can_chains_f, can_chains_t)
+  return can_match / min(can_chains_f, can_chains_t)
 
 
 def combine_files_exp_1(exit_file, parent_path):
@@ -113,7 +117,7 @@ def combine_files_exp_1a(exit_file_struct, exit_file_chain, parent_path):
 
   # combine all files in the list
   combined_csv_struct = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
-                                                       "Work Chains": literal_eval}) for f in result_struct])
+                                                              "Work Chains": literal_eval}) for f in result_struct])
   combined_csv_struct['number_chains'] = combined_csv_struct['Chains'].apply(lambda x: len(x))
   combined_csv_struct['number_work_chains'] = combined_csv_struct['Work Chains'].apply(lambda x: len(x))
 
@@ -164,6 +168,7 @@ def add_RSM(dataFrame, executor, work_dir):
     dataFrame['RMSD'] = results
     return dataFrame
 
+
 def combine_files_exp_1b(exit_file_struct, exit_file_chain, exit_file_secuencial, parent_path):
   comm = MPI.COMM_WORLD
   size = comm.Get_size()
@@ -182,15 +187,24 @@ def combine_files_exp_1b(exit_file_struct, exit_file_chain, exit_file_secuencial
       # combine all files in the list
       combined_csv_struct = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
                                                                   "Work Chains": literal_eval,
-                                                                  "Match": literal_eval}) for f in result_struct])
+                                                                  "Match": literal_eval,
+                                                                  "Pdb": literal_eval,
+                                                                  "Pdb work": literal_eval,
+                                                                  "RMSD": literal_eval
+                                                                  }) for f in result_struct])
 
       combined_csv_sequence = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
-                                                                  "Match": literal_eval}) for f in result_sequence])
+                                                                    "Match": literal_eval,
+                                                                    "Pdb": literal_eval,
+                                                                    "Pdb work": literal_eval,
+                                                                    "RMSD": literal_eval
+                                                                    }) for f in result_sequence])
 
       combined_csv_chain = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
-                                                                  "Match": literal_eval}) for f in result_chain])
-
-
+                                                                 "Match": literal_eval,
+                                                                 "Pdb": literal_eval,
+                                                                 "Pdb work": literal_eval,
+                                                                 "RMSD": literal_eval}) for f in result_chain])
 
       combined_csv_struct['number_chains'] = combined_csv_struct['Chains'].apply(lambda x: len(x))
       combined_csv_struct['number_test_chains'] = combined_csv_struct['Work Chains'].apply(lambda x: len(x))
@@ -233,7 +247,6 @@ def combine_files_exp_1b(exit_file_struct, exit_file_chain, exit_file_secuencial
       combined_csv_sequence.to_csv(exit_file_secuencial, index=False, encoding='utf-8-sig')
 
 
-
 def combine_files_exp_1c(exit_file, parent_path):
   result = []
   find_csv_filenames(parent_path, result)
@@ -256,7 +269,6 @@ def combine_files_exp_1c(exit_file, parent_path):
   combined_csv['percentage_ok'] = combined_csv.apply(percentage_ok, axis=1)
   combined_csv['percentage_no_match'] = combined_csv.apply(percentage_no_match, axis=1)
   combined_csv['percentage_match'] = combined_csv.apply(percentage_match, axis=1)
-
 
   # export to csv
   combined_csv.to_csv(exit_file, index=False, encoding='utf-8-sig')
