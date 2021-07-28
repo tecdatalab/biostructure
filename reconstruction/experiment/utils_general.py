@@ -162,6 +162,8 @@ def averageOfList(num):
   for t in num:
     sumOfNumbers = sumOfNumbers + t
 
+  if len(num) == 0:
+    return -1
   avg = sumOfNumbers / len(num)
   return avg
 
