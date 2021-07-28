@@ -2,13 +2,12 @@ import re
 import sys
 import pathlib
 
-from general_utils.temp_utils import clean_work_dir
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
+from general_utils.temp_utils import clean_work_dir
 
-
-from experiment.utils_general import pdb_percentage
+from experiment.utils_general import pdb_percentage, check_RMSD_result_algorithm, make_dir_pdb
 from general_utils.cif_utils import get_chains_cif, get_cif_chain_sequence
 from to_mrc.cif_2_mrc import cif_to_mrc_chains
 
@@ -24,10 +23,9 @@ from process_graph.process_graph_utils import draw_graph_similarity, draw_graph_
 import matplotlib.pyplot as plt
 from general_utils.database_utils import get_graph_pdb_db, get_chains_pdb_db, exists_mongo_db, get_all_archive_pdb, \
   memory_use, save_collection, load_collection, clear_collection, get_chain_to_number_chain, delete_pdb_db, \
-  get_online_sequences, get_sequence_pdb_db, get_online_chain_map_pdb2cif
+  get_online_sequences, get_sequence_pdb_db, get_online_chain_map_pdb2cif, get_pdb2cif_db
 from process_graph.graph_algorithm import graph_aligning
 import networkx as nx
-
 
 import os
 
@@ -36,6 +34,7 @@ from general_utils.pdb_utils import get_pdb_chain_sequence, get_similar_pdb_stru
   get_similar_pdb_chain_sequential, get_chains_pdb, get_pdb_no_work
 from to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 import general_utils
+
 if is_work_in_cluster():
   general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_main_test"
 else:
@@ -166,10 +165,10 @@ clean_work_dir()
 #
 # draw_graph_similarity_same_image(graph1, graph2, result)
 
-#save_collection('./collection.json')
-#clear_collection()
-#load_collection('./collection.json')
-#print(get_all_archive_pdb())
+# save_collection('./collection.json')
+# clear_collection()
+# load_collection('./collection.json')
+# print(get_all_archive_pdb())
 #
 # result = combinations_i2jInK(10, 2, 5)
 # print(result)
@@ -227,7 +226,6 @@ clean_work_dir()
 # zd = z.computeDescriptors(myMolecule.getEmMap().data())
 
 
-
 # # Import math Library
 # import math
 #
@@ -241,8 +239,7 @@ clean_work_dir()
 # print(total)
 
 
-
-#Gen PDB with chains
+# Gen PDB with chains
 
 # path = "./"
 #
@@ -261,7 +258,6 @@ clean_work_dir()
 3LEL
 6h7w
 '''
-
 
 '''
 1is8
@@ -350,7 +346,6 @@ P, Q, R, S, T, K, L, M, N, O
 2HOD
 '''
 
-
 '''
 2hod
 
@@ -416,8 +411,6 @@ G, H, I, J, K, L, Q, R, S, T
 3lel
 '''
 
-
-
 '''
 3lel
 
@@ -475,7 +468,7 @@ K, L, M, N, O, P, Q, R, S, T
 # remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'I'))
 # remove_node_by_name(graph2, get_chain_to_number_chain(pdb, 'J'))
 #
-#load_collection("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/collection.json")
+# load_collection("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/collection.json")
 
 # alignment_note, result = graph_aligning(graph1, graph2, 2, False)
 # print(alignment_note, result)
@@ -517,7 +510,7 @@ K, L, M, N, O, P, Q, R, S, T
 #
 # print(graph1.nodes[1])
 # print(len(get_all_archive_pdb()))
-#cif_path = "./4v4r.cif"
+# cif_path = "./4v4r.cif"
 # cif_path = "./3j79.cif"
 # pdb_path = "./3j79.cif"
 # chains = get_chains_cif(cif_path)
@@ -525,9 +518,9 @@ K, L, M, N, O, P, Q, R, S, T
 # #
 # cif_to_mrc_chains(True, False, 5.0, cif_path, "./", chains, len(chains))
 #
-#sequence = get_cif_chain_sequence(cif_path, "4v4r", "A")
-#print(sequence)
-#print("\n\n\n")
+# sequence = get_cif_chain_sequence(cif_path, "4v4r", "A")
+# print(sequence)
+# print("\n\n\n")
 
 # sequence = get_sequence_pdb_db("1brs", "A")
 # print(sequence)
@@ -554,11 +547,47 @@ K, L, M, N, O, P, Q, R, S, T
 # print(chain_cif)
 
 
-pdb_name = "100d"
-delete_pdb_db(pdb_name)
-chains = get_chains_pdb_db(pdb_name)
-print(chains)
-# result = get_online_sequences(pdb_name)
+# pdb_name = "1vy7"
+# # delete_pdb_db(pdb_name)
+# # chains = get_chains_pdb_db(pdb_name)
+# # print(chains)
+# equivalent = get_pdb2cif_db(pdb_name)
+# print(equivalent)
+# # result = get_online_sequences(pdb_name)
+#
+# result = get_pdb2cif_db("7lj8")
+# print(result)
 
-result = get_online_chain_map_pdb2cif("7dco")
-print(result)
+all_chains = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R']
+
+check_list = [
+  [2, 15],
+  [1, 1],
+  [6, 6],
+  [16, 16],
+  [13, 13],
+  [4, 3],
+  [12, 5],
+  [11, 10],
+  [5, 9],
+  [8, 2],
+  [14, 8],
+  [17, 14],
+  [10, 18],
+  [15, 11],
+  [18, 4],
+  [9, 12],
+  [7, 17]]
+
+original_pdb = "4u0d"
+changed_pdb = "1gwp"
+changed_chain = "G"
+pdb_work_chain = "A"
+
+work_dir = "./RMSD"
+
+# result = check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, changed_pdb,
+#                                      changed_chain, pdb_work_chain)
+# print(result)
+
+make_dir_pdb(work_dir, "6e29")
