@@ -148,10 +148,15 @@ def check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, 
 
     try:
       result = cmd.align(namei, namej)
-    except Exception as e:
-      raise Exception(f"Error in alinament {namei}, {namej}").with_traceback(e.__traceback__)
+      add_data = [cmd.count_atoms(namei), cmd.count_atoms(namej), result[0], result[1], result[5]]
 
-    add_data = [cmd.count_atoms(namei), cmd.count_atoms(namej), result[0], result[1], result[5]]
+    except Exception as e:
+      print(f"Error in alinament {namei}, {namej}", flush=True)
+      result = [9999999, 0, 0, 9999999, 0, 0, 0]
+      add_data = [0, 0, result[0], result[1], result[5]]
+
+      ##raise Exception(f"Error in alinament {namei}, {namej}").with_traceback(e.__traceback__)
+
 
     final_result[namei + "_" + namej] = add_data
     final_result_list.append(result[0])
@@ -207,10 +212,15 @@ def check_RMSD_result_all(work_dir,
 
     try:
       result = cmd.align(namei, namej)
-    except Exception as e:
-      raise Exception(f"Error in alinament {namei}, {namej}").with_traceback(e.__traceback__)
+      add_data = [cmd.count_atoms(namei), cmd.count_atoms(namej), result[0], result[1], result[5]]
 
-    add_data = [cmd.count_atoms(namei), cmd.count_atoms(namej), result[0], result[1], result[5]]
+    except Exception as e:
+      print(f"Error in alinament {namei}, {namej}", flush=True)
+      result = [9999999, 0, 0, 9999999, 0, 0, 0]
+      add_data = [0, 0, result[0], result[1], result[5]]
+
+      ##raise Exception(f"Error in alinament {namei}, {namej}").with_traceback(e.__traceback__)
+
 
     final_result[namei + "_" + namej] = add_data
     final_result_list.append(result[0])
