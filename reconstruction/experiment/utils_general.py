@@ -146,7 +146,10 @@ def check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, 
     cmd.load(path_chain_i, namei)
     cmd.load(path_chain_j, namej)
 
-    result = cmd.align(namei, namej)
+    try:
+      result = cmd.align(namei, namej)
+    except Exception as e:
+      raise Exception(f"Error in alinament {namei}, {namej}").with_traceback(e.__traceback__)
 
     add_data = [cmd.count_atoms(namei), cmd.count_atoms(namej), result[0], result[1], result[5]]
 
