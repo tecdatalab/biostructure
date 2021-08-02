@@ -218,8 +218,8 @@ def check_RMSD_result_all(work_dir,
     if (not os.path.exists(path_chain_i)):
       raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path_chain_i)
 
-    if (not os.path.exists(pdb_chainj)):
-      raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), pdb_chainj)
+    if (not os.path.exists(path_chain_j)):
+      raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path_chain_j)
 
     cmd.load(path_chain_i, namei)
     cmd.load(path_chain_j, namej)
