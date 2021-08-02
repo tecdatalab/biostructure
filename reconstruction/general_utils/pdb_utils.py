@@ -574,6 +574,13 @@ def get_atoms_of_list_pdb(input_file, list_chains):
         line_list = "".join(line_list)
 
         chain_check = line[72:76].replace(" ", "")
+        if chain_check == "" or \
+          chain_check is None or \
+          chain_check == " " or \
+          chain_check == '' or \
+          chain_check == ' ':
+          continue
+
         if chain_check in list_chains:
           result[chain_check].append(line_list)
         else:
@@ -606,10 +613,10 @@ def get_chain_mmcif_2_pdb(input_file):
             chain_id += i
 
         if chain_id not in result:
-          if chain_id == None or\
-            chain_id == "" or\
-            chain_id == " " or\
-            chain_id == '' or\
+          if chain_id == None or \
+            chain_id == "" or \
+            chain_id == " " or \
+            chain_id == '' or \
             chain_id == '':
             continue
           else:
