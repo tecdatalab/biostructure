@@ -603,7 +603,14 @@ def get_chain_mmcif_2_pdb(input_file):
             chain_id += i
 
         if chain_id not in result:
-          result.append(chain_id)
+          if chain_id == None or\
+            chain_id == "" or\
+            chain_id == " " or\
+            chain_id == '' or\
+            chain_id == '':
+            continue
+          else:
+            result.append(chain_id)
 
   return result
 

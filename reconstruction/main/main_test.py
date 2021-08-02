@@ -558,36 +558,39 @@ K, L, M, N, O, P, Q, R, S, T
 # result = get_pdb2cif_db("7lj8")
 # print(result)
 
-all_chains = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R']
-
-check_list = [
-  [2, 15],
-  [1, 1],
-  [6, 6],
-  [16, 16],
-  [13, 13],
-  [4, 3],
-  [12, 5],
-  [11, 10],
-  [5, 9],
-  [8, 2],
-  [14, 8],
-  [17, 14],
-  [10, 18],
-  [15, 11],
-  [18, 4],
-  [9, 12],
-  [7, 17]]
-
-original_pdb = "4u0d"
-changed_pdb = "1gwp"
-changed_chain = "G"
-pdb_work_chain = "A"
-
-work_dir = "./RMSD"
-
-# result = check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, changed_pdb,
-#                                      changed_chain, pdb_work_chain)
-# print(result)
-
-make_dir_pdb(work_dir, "6e29")
+# all_chains = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R']
+#
+# check_list = [
+#   [2, 15],
+#   [1, 1],
+#   [6, 6],
+#   [16, 16],
+#   [13, 13],
+#   [4, 3],
+#   [12, 5],
+#   [11, 10],
+#   [5, 9],
+#   [8, 2],
+#   [14, 8],
+#   [17, 14],
+#   [10, 18],
+#   [15, 11],
+#   [18, 4],
+#   [9, 12],
+#   [7, 17]]
+#
+# original_pdb = "4u0d"
+# changed_pdb = "1gwp"
+# changed_chain = "G"
+# pdb_work_chain = "A"
+#
+# work_dir = "./RMSD"
+#
+# # result = check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, changed_pdb,
+# #                                      changed_chain, pdb_work_chain)
+# # print(result)
+#
+# make_dir_pdb(work_dir, "6e29")
+cif_path = "./3j6b.cif"
+chains = get_chains_cif(cif_path)
+print(chains)

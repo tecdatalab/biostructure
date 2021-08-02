@@ -8,6 +8,8 @@ from general_utils.temp_utils import gen_dir, free_dir
 import numpy as np
 import biotite.structure.io.pdbx as pdbx
 import biotite
+
+
 def get_chains_cif(input_file):
   input_file = os.path.abspath(input_file)
 
@@ -32,10 +34,11 @@ def get_chains_cif(input_file):
         if chain not in result:
           result.append(chain)
 
-
   for chain in ok_chains:
     if chain not in result:
-      raise ValueError("Error parse chains in cif")
+      error_msg = "Error chain:" + chain + ", error parse chains in cif, input_file: " + input_file + ", result: " + str(
+        result) + ", ok_chains: " + str(ok_chains)
+      raise ValueError(error_msg)
 
   for chain in result[:]:
     if chain not in ok_chains:
@@ -43,6 +46,7 @@ def get_chains_cif(input_file):
 
   free_dir(work_dir)
   return result
+
 
 def cif_to_pdb(mmCIF_path, exit_pdb_path):
   exit_pdb_path = os.path.abspath(exit_pdb_path)
