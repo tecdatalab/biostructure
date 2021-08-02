@@ -573,10 +573,13 @@ def get_atoms_of_list_pdb(input_file, list_chains):
         line_list[21] = "A"
         line_list = "".join(line_list)
 
-        if line[72:76].replace(" ", "") in list_chains:
-          result[line[72:76].replace(" ", "")].append(line_list)
+        chain_check = line[72:76].replace(" ", "")
+        if chain_check in list_chains:
+          result[chain_check].append(line_list)
         else:
-          raise ValueError("Error in get atoms for chain, invalid chain")
+          raise ValueError("Error in get atoms for chain, invalid chain, chain check:" + chain_check
+                           + ",list_chains:" + str(list_chains)
+                           + ",file:" + input_file)
 
   for key in result.keys():
     if result[key] == []:
