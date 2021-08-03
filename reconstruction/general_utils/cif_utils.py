@@ -38,6 +38,12 @@ def get_chains_cif(input_file):
     if chain not in result:
       error_msg = "Error chain:" + chain + ", error parse chains in cif, input_file: " + input_file + ", result: " + str(
         result) + ", ok_chains: " + str(ok_chains)
+
+      name_pdb_id = os.path.splitext(os.path.basename(input_file))[0]
+      from general_utils.database_utils import delete_pdb_db
+      delete_pdb_db(name_pdb_id)
+      from general_utils.database_utils import get_chains_pdb_db
+      get_chains_pdb_db(name_pdb_id)
       raise ValueError(error_msg)
 
   for chain in result[:]:
