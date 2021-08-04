@@ -7,7 +7,7 @@ import pandas as pd
 import errno
 
 from csv_modules.csv_writer import write_in_file
-from general_utils.cif_utils import get_chains_cif, cif_to_pdb
+from general_utils.cif_utils import get_chains_cif, cif_to_pdb, cif_to_chains_pdb_files
 from general_utils.download_utils import download_pdb, download_cif
 from math import ceil
 from pymol import cmd
@@ -109,7 +109,7 @@ def make_dir_pdb(work_dir, pdb_id):
     pdb_to_chains_file(path_of_file, complete_path, chains, len(chains))
   else:
     from to_mrc.cif_2_mrc import cif_to_mrc_chains
-    cif_to_mrc_chains(path_of_file, complete_path, chains, len(chains))
+    cif_to_chains_pdb_files(path_of_file, complete_path, chains, len(chains))
 
   free_dir(work_local_dir)
 
@@ -146,9 +146,17 @@ def check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, 
     namej = "{}_{}".format(pdb_chainj + "j", chain2)
 
     if (not os.path.exists(path_chain_i)):
+      from general_utils.database_utils import delete_pdb_db
+      delete_pdb_db(pdb_chaini)
+      from general_utils.database_utils import get_chains_pdb_db
+      get_chains_pdb_db(pdb_chaini)
       raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path_chain_i)
 
     if (not os.path.exists(path_chain_j)):
+      from general_utils.database_utils import delete_pdb_db
+      delete_pdb_db(pdb_chainj)
+      from general_utils.database_utils import get_chains_pdb_db
+      get_chains_pdb_db(pdb_chainj)
       raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path_chain_j)
 
     cmd.load(path_chain_i, namei)
