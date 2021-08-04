@@ -224,9 +224,17 @@ def check_RMSD_result_all(work_dir,
     namej = "{}_{}".format(pdb_chainj + "j", chain2)
 
     if (not os.path.exists(path_chain_i)):
+      from general_utils.database_utils import delete_pdb_db
+      delete_pdb_db(pdb_chaini)
+      from general_utils.database_utils import get_chains_pdb_db
+      get_chains_pdb_db(pdb_chaini)
       raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path_chain_i)
 
     if (not os.path.exists(path_chain_j)):
+      from general_utils.database_utils import delete_pdb_db
+      delete_pdb_db(pdb_chainj)
+      from general_utils.database_utils import get_chains_pdb_db
+      get_chains_pdb_db(pdb_chainj)
       raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path_chain_j)
 
     cmd.load(path_chain_i, namei)
