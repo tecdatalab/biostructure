@@ -66,5 +66,5 @@ if __name__ == '__main__':
     general_utils.temp_utils.global_temp_dir = None
 
   clean_work_dir()
-  experiment_1_b()
-  # union_test()
+  # experiment_1_b()
+  union_test()
