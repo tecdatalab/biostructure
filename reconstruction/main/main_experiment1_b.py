@@ -1,10 +1,9 @@
 import sys
 import pathlib
 
-from experiment.utils_general import remove_get_dirs
-
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
+from experiment.utils_general import remove_get_dirs
 import general_utils
 from general_utils.workspace_utils import is_work_in_cluster
 from general_utils.temp_utils import clean_work_dir
