@@ -57,7 +57,7 @@ def remove_get_dirs(path, add_to_ignore_files=False, can_csv=1):
       if not i.split('.')[1] == 'csv':
         flag = False
         break
-
+    print(check_path, files_dir, flush=True)
     if len(files_dir) == can_csv and flag:
       result.append(dir_name)
 
