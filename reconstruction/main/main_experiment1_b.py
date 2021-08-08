@@ -1,6 +1,8 @@
 import sys
 import pathlib
 
+from experiment.utils_general import remove_get_dirs
+
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 import general_utils
@@ -49,6 +51,8 @@ def union_test():
     local_path = "/work/lcastillo/{0}".format(folder_work)
   else:
     local_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/{0}".format(folder_work)
+
+  _complete_pdb = remove_get_dirs(local_path, can_csv=3, add_to_ignore_files=False)
 
   combine_files_exp_1b('salida_struct_exe_{}.csv'.format(args.number_exe),
                        'salida_chain_exe_{}.csv'.format(args.number_exe),
