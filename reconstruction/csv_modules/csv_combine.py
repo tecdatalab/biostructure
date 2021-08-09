@@ -188,22 +188,22 @@ def combine_files_exp_1b(exit_file_struct, exit_file_chain, exit_file_secuencial
       combined_csv_struct = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
                                                                   "Work Chains": literal_eval,
                                                                   "Match": literal_eval,
-                                                                  "Pdb": literal_eval,
-                                                                  "Pdb work": literal_eval,
+                                                                  "Pdb": str,
+                                                                  "Pdb work": str,
                                                                   "RMSD": literal_eval
                                                                   }) for f in result_struct])
 
       combined_csv_sequence = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
                                                                     "Match": literal_eval,
-                                                                    "Pdb": literal_eval,
-                                                                    "Pdb work": literal_eval,
+                                                                    "Pdb": str,
+                                                                    "Pdb work": str,
                                                                     "RMSD": literal_eval
                                                                     }) for f in result_sequence])
 
       combined_csv_chain = pd.concat([pd.read_csv(f, converters={"Chains": literal_eval,
                                                                  "Match": literal_eval,
-                                                                 "Pdb": literal_eval,
-                                                                 "Pdb work": literal_eval,
+                                                                 "Pdb": str,
+                                                                 "Pdb work": str,
                                                                  "RMSD": literal_eval}) for f in result_chain])
 
       combined_csv_struct['number_chains'] = combined_csv_struct['Chains'].apply(lambda x: len(x))
