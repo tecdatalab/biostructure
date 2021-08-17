@@ -348,10 +348,13 @@ def get_db_chains_files_db(pdb_id, path):
       else:
         dicc_add = get_dicc_chains_files_info(path, pdb_id)
 
-        col.update_one(
-          {"pdbID": pdb_id},
-          {"$set": {'chains_files_info': dicc_add}},
-        )
+        try:
+          col.update_one(
+            {"pdbID": pdb_id},
+            {"$set": {'chains_files_info': dicc_add}},
+          )
+        except:
+          pass
     else:
       insert_pdb_information(col, pdb_id)
       return get_db_chains_files_db(pdb_id, path)
@@ -583,9 +586,7 @@ def insert_pdb_information(col, pdb_id):
   new_pdb['chains'] = chains
   new_pdb['all_sequences'] = get_online_sequences(pdb_id, chains)
   new_pdb['map_pdb2cif'] = get_online_chain_map_pdb2cif(pdb_id, chains)
-  chains_dir = gen_dir()
-  new_pdb['chains_files_info'] = get_dicc_chains_files_info(chains_dir, pdb_id)
-  free_dir(chains_dir)
+
   for i in [4, 6, 8, 10]:
     graph, father_ZD = gen_graph_resolution_aux(chains, i, path_dir, pdb_id, path_of_file, is_pdb, True)
     for j in graph.nodes():

@@ -591,7 +591,7 @@ work_dir = "./RMSD"
 # # # #                                      changed_chain, pdb_work_chain)
 # # # # print(result)
 # # #
-make_dir_pdb(work_dir, "3sdd")
+make_dir_pdb(work_dir, "6pxh")
 #cif_path = "./4ayb.cif"
 #chains = get_chains_cif(cif_path)
 #print(chains)
@@ -599,11 +599,11 @@ make_dir_pdb(work_dir, "3sdd")
 
 
 
-pdbf1 = '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/RMSD/3sdd/3sdd_D.pdb';
-pdbf2 = '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/RMSD/3sdd/3sdd_D.pdb'
+pdbf1 = '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/RMSD/3sdd/3sdd_A.pdb';
+pdbf2 = '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/RMSD/6pxh/6pxh_A.pdb'
 
-cmd.load(pdbf1, "3sddi_D")
-cmd.load(pdbf2, "3sddj_D")
+cmd.load(pdbf1, "PDB1_D")
+cmd.load(pdbf2, "PDB2_D")
 
-result = cmd.align("3sddi_D", "3sddj_D")
+result = cmd.align("PDB1_D", "PDB2_D")
 print(result)
