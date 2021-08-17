@@ -91,27 +91,8 @@ def make_dir_pdb(work_dir, pdb_id):
     else:
       os.rmdir(os.path.join(complete_path, pdb_id))
 
-  work_local_dir = gen_dir()
-
-  is_pdb = True
-  try:
-    path_of_file = '{0}/{1}.pdb'.format(work_local_dir, pdb_id)
-    download_pdb(pdb_id, path_of_file)
-    chains = get_chains_pdb(path_of_file)
-  except:
-    is_pdb = False
-    path_of_file = '{0}/{1}.cif'.format(work_local_dir, pdb_id)
-    download_cif(pdb_id, path_of_file)
-    chains = get_chains_cif(path_of_file)
-
-  if is_pdb:
-    from to_mrc.pdb_2_mrc import pdb_to_chains_file
-    pdb_to_chains_file(path_of_file, complete_path, chains, len(chains))
-  else:
-    from to_mrc.cif_2_mrc import cif_to_mrc_chains
-    cif_to_chains_pdb_files(path_of_file, complete_path, chains, len(chains))
-
-  free_dir(work_local_dir)
+  from general_utils.database_utils import get_db_chains_files_db
+  get_db_chains_files_db(pdb_id, work_dir)
 
 
 def check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, changed_pdb, changed_chain,
@@ -126,6 +107,9 @@ def check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, 
   make_dir_pdb(work_dir, changed_pdb)
 
   for i in check_list:
+    #Restar
+    cmd.reinitialize()
+
     pdb_chaini = original_pdb
     pdb_chainj = original_pdb
 
@@ -163,7 +147,7 @@ def check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, 
     cmd.load(path_chain_j, namej)
 
     try:
-      result = cmd.align(namei, namej)
+      result = cmd.align(namei, namej, cycles=1000)
       add_data = [cmd.count_atoms(namei), cmd.count_atoms(namej), result[0], result[1], result[5]]
 
     except Exception as e:
@@ -208,6 +192,9 @@ def check_RMSD_result_all(work_dir,
   make_dir_pdb(work_dir, pdb_B)
 
   for i in check_list:
+    #Restar
+    cmd.reinitialize()
+
     pdb_chaini = pdb_A
     pdb_chainj = pdb_B
 

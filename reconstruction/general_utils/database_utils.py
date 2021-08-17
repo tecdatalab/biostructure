@@ -1,4 +1,5 @@
 import re
+import shutil
 
 import pymongo
 import zlib, json, base64
@@ -294,6 +295,82 @@ def insert_sequences_db(pdb_id):
     return all_sequences
 
 
+def make_pdb_dir_temp(work_dir, pdb_id):
+  complete_path = os.path.abspath(work_dir)
+  dirs = os.listdir(complete_path)
+
+  if pdb_id in dirs:
+    if len(os.listdir(os.path.join(complete_path, pdb_id))) > 0:
+      return
+    else:
+      os.rmdir(os.path.join(complete_path, pdb_id))
+
+  work_local_dir = gen_dir()
+
+  is_pdb = True
+  try:
+    path_of_file = '{0}/{1}.pdb'.format(work_local_dir, pdb_id)
+    download_pdb(pdb_id, path_of_file)
+    chains = get_chains_pdb(path_of_file)
+  except:
+    is_pdb = False
+    path_of_file = '{0}/{1}.cif'.format(work_local_dir, pdb_id)
+    download_cif(pdb_id, path_of_file)
+    chains = get_chains_cif(path_of_file)
+
+  if is_pdb:
+    from to_mrc.pdb_2_mrc import pdb_to_chains_file
+    pdb_to_chains_file(path_of_file, complete_path, chains, len(chains))
+  else:
+    from general_utils.cif_utils import cif_to_chains_pdb_files
+    cif_to_chains_pdb_files(path_of_file, complete_path, chains, len(chains))
+
+
+def get_db_chains_files_db(pdb_id, path):
+  pdb_id = pdb_id.lower()
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
+    if pdb_data != None:
+      if 'chains_files_info' in pdb_data.keys():
+        dicc = pdb_data["chains_files_info"]
+
+        path_result = os.path.join(path, pdb_id)
+        shutil.rmtree(path_result, ignore_errors=True)
+        os.mkdir(path_result)
+
+        for i in dicc.keys():
+          f = open(os.path.join(path_result, i), 'w')
+          f.write("".join(dicc[i]))
+          f.close()
+      else:
+        dicc_add = get_dicc_chains_files_info(path, pdb_id)
+
+        col.update_one(
+          {"pdbID": pdb_id},
+          {"$set": {'chains_files_info': dicc_add}},
+        )
+    else:
+      insert_pdb_information(col, pdb_id)
+      return get_db_chains_files_db(pdb_id, path)
+
+  else:
+    make_pdb_dir_temp(path, pdb_id)
+
+
+def get_dicc_chains_files_info(path, pdb_id):
+  make_pdb_dir_temp(path, pdb_id)
+  dicc_add = {}
+  path_pdb = os.path.join(path, pdb_id)
+  for chain_file in os.listdir(path_pdb):
+    path_chain = os.path.join(path_pdb, chain_file)
+    with open(path_chain) as f:
+      dicc_add[os.path.basename(chain_file)] = f.readlines()
+  return dicc_add
+
+
 def get_online_sequences(pdb, chains_check=None):
   if chains_check is None:
     chains_check = get_chains_pdb_db(pdb)
@@ -506,6 +583,9 @@ def insert_pdb_information(col, pdb_id):
   new_pdb['chains'] = chains
   new_pdb['all_sequences'] = get_online_sequences(pdb_id, chains)
   new_pdb['map_pdb2cif'] = get_online_chain_map_pdb2cif(pdb_id, chains)
+  chains_dir = gen_dir()
+  new_pdb['chains_files_info'] = get_dicc_chains_files_info(chains_dir, pdb_id)
+  free_dir(chains_dir)
   for i in [4, 6, 8, 10]:
     graph, father_ZD = gen_graph_resolution_aux(chains, i, path_dir, pdb_id, path_of_file, is_pdb, True)
     for j in graph.nodes():
@@ -521,6 +601,7 @@ def insert_pdb_information(col, pdb_id):
   )
 
   free_dir(path_dir)
+  return new_pdb
 
 
 def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_file, is_pdb, return_OZD=False):

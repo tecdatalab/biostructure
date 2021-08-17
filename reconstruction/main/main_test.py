@@ -1,10 +1,11 @@
+
 import re
 import sys
 import pathlib
 
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
-
+from pymol import cmd
 from general_utils.temp_utils import clean_work_dir
 
 from experiment.utils_general import pdb_percentage, check_RMSD_result_algorithm, make_dir_pdb
@@ -584,13 +585,25 @@ K, L, M, N, O, P, Q, R, S, T
 # changed_chain = "G"
 # pdb_work_chain = "A"
 #
-# work_dir = "./RMSD"
-#
-# # result = check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, changed_pdb,
-# #                                      changed_chain, pdb_work_chain)
-# # print(result)
-#
-# make_dir_pdb(work_dir, "6e29")
-cif_path = "./3j6b.cif"
-chains = get_chains_cif(cif_path)
-print(chains)
+work_dir = "./RMSD"
+# # #
+# # # # result = check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, changed_pdb,
+# # # #                                      changed_chain, pdb_work_chain)
+# # # # print(result)
+# # #
+make_dir_pdb(work_dir, "3sdd")
+#cif_path = "./4ayb.cif"
+#chains = get_chains_cif(cif_path)
+#print(chains)
+
+
+
+
+pdbf1 = '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/RMSD/3sdd/3sdd_D.pdb';
+pdbf2 = '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/RMSD/3sdd/3sdd_D.pdb'
+
+cmd.load(pdbf1, "3sddi_D")
+cmd.load(pdbf2, "3sddj_D")
+
+result = cmd.align("3sddi_D", "3sddj_D")
+print(result)

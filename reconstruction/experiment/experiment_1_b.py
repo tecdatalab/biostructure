@@ -55,7 +55,7 @@ def do_parallel_test(path_data,
     if executor is not None:
 
       all_names = get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor)
-      # all_names = ['4u0d']
+      # all_names = ['3sdd']
       path = os.path.abspath(path_data)
 
       if not os.path.isdir(path):

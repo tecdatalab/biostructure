@@ -55,6 +55,8 @@ def get_chains_cif(input_file):
 
 
 def cif_to_pdb(mmCIF_path, exit_pdb_path):
+  # Restar
+  cmd.reinitialize()
   exit_pdb_path = os.path.abspath(exit_pdb_path)
   input_file = os.path.abspath(mmCIF_path)
   pdb_name = os.path.basename(input_file).split('.')[0]
