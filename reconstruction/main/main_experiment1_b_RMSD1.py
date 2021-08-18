@@ -18,8 +18,8 @@ import os
 file_path = "/home/lcastillo/workspaces/project_biostructure/salida_chain_exe_3.csv"
 # temp_csv = "./temp_struct.csv"
 
-temp_csv = "/home/lcastillo/workspaces/project_biostructure/salida_secuencial_exe_3_RMSD_repare_chain.csv"
-temp_csv = "/home/lcastillo/workspaces/project_biostructure/salida_secuencial_exe_3_RMSD_repare_chain_v1.csv"
+temp_csv = "/home/lcastillo/workspaces/project_biostructure/salida_chain_exe_3_RMSD_repare.csv"
+temp_csv_v1 = "/home/lcastillo/workspaces/project_biostructure/salida_chain_exe_3_RMSD_repare_v1.csv"
 
 def experiment_1_b_RMSD_chain():
   # Parale
