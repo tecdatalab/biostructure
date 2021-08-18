@@ -18,7 +18,8 @@ import os
 file_path = "/home/lcastillo/workspaces/project_biostructure/salida_secuencial_exe_3.csv"
 # temp_csv = "./temp_struct.csv"
 
-temp_csv = "/home/lcastillo/workspaces/project_biostructure/salida_secuencial_exe_3_RMSD_repare.csv"
+temp_csv = "/home/lcastillo/workspaces/project_biostructure/salida_secuencial_exe_3_RMSD_repare_sequence.csv"
+temp_csv_v1 = "/home/lcastillo/workspaces/project_biostructure/salida_secuencial_exe_3_RMSD_repare_sequence_v1.csv"
 
 
 def experiment_1_b_RMSD_chain():
@@ -77,12 +78,16 @@ def experiment_1_b_RMSD_chain():
 
         if total_updated != 0 and total_updated % 10 == 0:
           csv_file["RMSD"] = new_RMSD_list_update
-          csv_file.to_csv(temp_csv, index=False)
+          csv_file.to_csv(temp_csv_v1, index=False)
+          os.remove(temp_csv)
+          os.rename(temp_csv_v1, temp_csv)
 
         pos += 1
 
       csv_file["RMSD"] = new_RMSD_list_update
-      csv_file.to_csv(temp_csv, index=False)
+      csv_file.to_csv(temp_csv_v1, index=False)
+      os.remove(temp_csv)
+      os.rename(temp_csv_v1, temp_csv)
 
       print("Finish")
 
@@ -141,12 +146,15 @@ def experiment_1_b_RMSD_struct():
 
         if total_updated != 0 and total_updated % 10 == 0:
           csv_file["RMSD"] = new_RMSD_list_update
-          csv_file.to_csv(temp_csv, index=False)
-
+          csv_file.to_csv(temp_csv_v1, index=False)
+          os.remove(temp_csv)
+          os.rename(temp_csv_v1, temp_csv)
         pos += 1
 
       csv_file["RMSD"] = new_RMSD_list_update
-      csv_file.to_csv(temp_csv, index=False)
+      csv_file.to_csv(temp_csv_v1, index=False)
+      os.remove(temp_csv)
+      os.rename(temp_csv_v1, temp_csv)
 
       print("Finish")
 
