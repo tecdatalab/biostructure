@@ -74,7 +74,7 @@ def experiment_1_b_RMSD_chain():
           RMSD_new = list_update[pos][1].result()
           new_RMSD_list_update[pos] = RMSD_new
           total_updated += 1
-          print("To repare:", total_updated / con_update, total_updated)
+          print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
 
         if total_updated != 0 and total_updated % 10 == 0:
           csv_file["RMSD"] = new_RMSD_list_update
@@ -142,7 +142,7 @@ def experiment_1_b_RMSD_struct():
           RMSD_new = list_update[pos][1].result()
           new_RMSD_list_update[pos] = RMSD_new
           total_updated += 1
-          print("To repare:", total_updated / con_update, total_updated)
+          print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
 
         if total_updated != 0 and total_updated % 10 == 0:
           csv_file["RMSD"] = new_RMSD_list_update
