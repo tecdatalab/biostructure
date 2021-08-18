@@ -75,7 +75,7 @@ def experiment_1_b_RMSD_chain():
           total_updated += 1
           print("To repare:", total_updated / con_update, total_updated)
 
-        if total_updated % 10 == 0:
+        if total_updated != 0 and total_updated % 10 == 0:
           csv_file["RMSD"] = new_RMSD_list_update
           csv_file.to_csv(temp_csv, index=False)
 
