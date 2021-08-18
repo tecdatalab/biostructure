@@ -1,9 +1,9 @@
 import sys
 import pathlib
 
-from general_utils.database_utils import get_chains_pdb_db
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
+from general_utils.database_utils import get_chains_pdb_db
 
 from experiment.utils_general import remove_get_dirs, check_RMSD_result_algorithm
 import general_utils
