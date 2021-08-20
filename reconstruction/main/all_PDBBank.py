@@ -25,7 +25,7 @@ def downloadModelsPDB():
       actual_file = os.path.dirname(file)
       actual_file = os.path.join(actual_file,  'pdb{0}.ent'.format(base_name))
 
-      get_out("gunzip", file)
+      get_out("gunzip", "-d", "--force", file)
       get_out("mv", actual_file, final_path)
 
 
