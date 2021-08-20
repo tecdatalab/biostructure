@@ -11,7 +11,7 @@ from general_utils.terminal_utils import get_out
 
 
 def downloadModelsPDB():
-  list_dirs = glob.glob("./work/lcastillo/allPDBS/*.ent.gz")
+  list_dirs = glob.glob("/work/lcastillo/allPDBS/*.ent.gz")
 
   with tqdm(total=len(list_dirs)) as pbar:
 
@@ -20,7 +20,7 @@ def downloadModelsPDB():
       base_name = base_name.split(".")[0]
       base_name = base_name[3:]
 
-      final_path = "./work/lcastillo/allPDBS_unzip/{}.pdb".format(base_name)
+      final_path = "/work/lcastillo/allPDBS_unzip/{}.pdb".format(base_name)
 
       actual_file = os.path.dirname(file)
       actual_file = os.path.join(actual_file,  'pdb{0}.ent'.format(base_name))
