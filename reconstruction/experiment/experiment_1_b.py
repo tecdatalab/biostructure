@@ -89,6 +89,7 @@ def do_parallel_test(path_data,
                               resolution])
         # do_parallel_test_a_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, resolution, can_chain_test,
         # can_struct_test)
+      con = 0
       for f in parallel_jobs:
         try:
           f[1].result()
@@ -104,6 +105,9 @@ def do_parallel_test(path_data,
             myfile.write("\n")
             myfile.write(str(traceback.format_exc()))
             myfile.write("\n\n\n\n")
+
+        print("Actual:", con, "To do:", len(all_names), "%:", con / len(all_names), flush=True)
+        con += 1
 
 
 def do_parallel_test_aux(path, pdb_name, result_cvs_chain, result_cvs_struct, result_cvs_secuencial, resolution,
