@@ -25,3 +25,5 @@ def downloadModelsPDB():
 
 
       pbar.update(1)
+
+downloadModelsPDB()
