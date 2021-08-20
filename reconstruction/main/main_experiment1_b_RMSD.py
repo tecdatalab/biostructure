@@ -71,7 +71,10 @@ def experiment_1_b_RMSD_chain():
       total_updated = 0
       for _row in csv_file.iterrows():
         if list_update[pos][0]:
-          RMSD_new = list_update[pos][1].result()
+          try:
+            RMSD_new = list_update[pos][1].result()
+          except:
+            RMSD_new = False
           new_RMSD_list_update[pos] = RMSD_new
           total_updated += 1
           print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
@@ -139,7 +142,10 @@ def experiment_1_b_RMSD_struct():
       total_updated = 0
       for _row in csv_file.iterrows():
         if list_update[pos][0]:
-          RMSD_new = list_update[pos][1].result()
+          try:
+            RMSD_new = list_update[pos][1].result()
+          except:
+            RMSD_new = False
           new_RMSD_list_update[pos] = RMSD_new
           total_updated += 1
           print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
