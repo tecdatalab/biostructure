@@ -1,3 +1,8 @@
+import sys
+import pathlib
+
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
+
 import glob, os
 
 from tqdm import tqdm
@@ -18,7 +23,7 @@ def downloadModelsPDB():
       final_path = "./work/lcastillo/allPDBS_unzip/{}.pdb".format(base_name)
 
       actual_file = os.path.dirname(file)
-      actual_file = os.path.join(base_name,  'pdb{0}.ent'.format(base_name))
+      actual_file = os.path.join(actual_file,  'pdb{0}.ent'.format(base_name))
 
       get_out("gunzip", file)
       get_out("mv", actual_file, final_path)
