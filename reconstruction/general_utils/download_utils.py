@@ -2,6 +2,7 @@ import os
 import urllib.request
 import progressbar
 import shutil
+from shutil import copyfile
 
 from general_utils.temp_utils import gen_dir, free_dir
 from general_utils.terminal_utils import get_out
@@ -99,6 +100,20 @@ def download_emd_xml(id_code, exit_path, create_progress_bar=False):
 
 
 def download_pdb(id_code, exit_path, create_progress_bar=False):
+  possible_local_path = "/work/lcastillov/allPDBS/"
+
+  if os.path.exists(possible_local_path):
+    possible_pdb_path = os.path.join(possible_local_path, "{}.pdb".format(possible_local_path))
+
+    if os.path.exists(possible_pdb_path):
+      copyfile(possible_pdb_path, exit_path)
+    else:
+      download_pdb_online(id_code, exit_path, create_progress_bar)
+  else:
+    download_pdb_online(id_code, exit_path, create_progress_bar)
+
+
+def download_pdb_online(id_code, exit_path, create_progress_bar=False):
   id_code = id_code.lower()
   ok_flag = False
   er = None
@@ -124,6 +139,20 @@ def download_pdb(id_code, exit_path, create_progress_bar=False):
 
 
 def download_cif(id_code, exit_path, create_progress_bar=False):
+  possible_local_path = "/work/lcastillov/allCIFS/"
+
+  if os.path.exists(possible_local_path):
+    possible_cif_path = os.path.join(possible_local_path, "{}.cif".format(possible_local_path))
+
+    if os.path.exists(possible_cif_path):
+      copyfile(possible_cif_path, exit_path)
+    else:
+      download_cif_online(id_code, exit_path, create_progress_bar)
+  else:
+    download_cif_online(id_code, exit_path, create_progress_bar)
+
+
+def download_cif_online(id_code, exit_path, create_progress_bar=False):
   id_code = id_code.lower()
   ok_flag = False
   er = None
