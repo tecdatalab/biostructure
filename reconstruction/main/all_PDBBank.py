@@ -10,6 +10,14 @@ from tqdm import tqdm
 
 from general_utils.terminal_utils import get_out
 
+def execute_command(cmd):
+  try:
+    subprocess.check_call([cmd], shell=True)
+  except subprocess.CalledProcessError:
+    raise RuntimeError('Command "%s" does not work' % cmd)
+  except OSError:
+    raise Exception('Command "%s" does not exist' % cmd)
+
 
 def downloadModelsPDB():
   execute_command("rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/pdb/ /work/lcastillo/allPDBS_tmp/")
@@ -38,10 +46,4 @@ print("PDB")
 downloadModelsPDB()
 
 
-def execute_command(cmd):
-  try:
-    subprocess.check_call([cmd], shell=True)
-  except subprocess.CalledProcessError:
-    raise RuntimeError('Command "%s" does not work' % cmd)
-  except OSError:
-    raise Exception('Command "%s" does not exist' % cmd)
+
