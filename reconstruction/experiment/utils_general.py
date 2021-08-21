@@ -147,7 +147,7 @@ def check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, 
     cmd.load(path_chain_j, namej)
 
     try:
-      result = cmd.align(namei, namej, cycles=1000)
+      result = cmd.align(namei, namej)
       add_data = [cmd.count_atoms(namei), cmd.count_atoms(namej), result[0], result[1], result[5]]
 
     except Exception as e:
