@@ -3,7 +3,7 @@ import pathlib
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 from general_utils.database_utils import get_chains_pdb_db
-
+import time
 from experiment.utils_general import remove_get_dirs, check_RMSD_result_algorithm, check_RMSD_result_all
 import general_utils
 from general_utils.workspace_utils import is_work_in_cluster
@@ -70,6 +70,7 @@ def experiment_1_b_RMSD_chain():
       total_updated = 0
 
       while total_updated < con_update:
+        time.sleep(30)
         pos = 0
         for _row in csv_file.iterrows():
           if list_update[pos][0] and list_update[pos][1].done():
@@ -145,6 +146,7 @@ def experiment_1_b_RMSD_struct():
       total_updated = 0
 
       while total_updated < con_update:
+        time.sleep(30)
         pos = 0
         for _row in csv_file.iterrows():
           if list_update[pos][0] and list_update[pos][1].done():

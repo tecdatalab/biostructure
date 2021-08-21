@@ -3,7 +3,7 @@ import pathlib
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 from general_utils.database_utils import get_chains_pdb_db
-
+import time
 from experiment.utils_general import remove_get_dirs, check_RMSD_result_algorithm, check_RMSD_result_all
 import general_utils
 from general_utils.workspace_utils import is_work_in_cluster
@@ -67,25 +67,29 @@ def experiment_1_b_RMSD_chain():
           list_update.append([False])
           new_RMSD_list_update.append(row[1].RMSD)
 
-      pos = 0
       total_updated = 0
-      for _row in csv_file.iterrows():
-        if list_update[pos][0]:
-          try:
-            RMSD_new = list_update[pos][1].result()
-          except:
-            RMSD_new = False
-          new_RMSD_list_update[pos] = RMSD_new
-          total_updated += 1
-          print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
 
-        if total_updated != 0 and total_updated % 10 == 0:
-          csv_file["RMSD"] = new_RMSD_list_update
-          csv_file.to_csv(temp_csv_v1, index=False)
-          os.remove(temp_csv)
-          os.rename(temp_csv_v1, temp_csv)
+      while total_updated < con_update:
+        time.sleep(30)
+        pos = 0
+        for _row in csv_file.iterrows():
+          if list_update[pos][0] and list_update[pos][1].done():
+            try:
+              RMSD_new = list_update[pos][1].result()
+            except:
+              RMSD_new = False
+            new_RMSD_list_update[pos] = RMSD_new
+            total_updated += 1
+            print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
 
-        pos += 1
+            list_update[pos][0] = False
+
+          if total_updated != 0 and total_updated % 10 == 0:
+            csv_file["RMSD"] = new_RMSD_list_update
+            csv_file.to_csv(temp_csv_v1, index=False)
+            os.remove(temp_csv)
+            os.rename(temp_csv_v1, temp_csv)
+          pos += 1
 
       csv_file["RMSD"] = new_RMSD_list_update
       csv_file.to_csv(temp_csv_v1, index=False)
@@ -138,24 +142,29 @@ def experiment_1_b_RMSD_struct():
           list_update.append([False])
           new_RMSD_list_update.append(row[1].RMSD)
 
-      pos = 0
       total_updated = 0
-      for _row in csv_file.iterrows():
-        if list_update[pos][0]:
-          try:
-            RMSD_new = list_update[pos][1].result()
-          except:
-            RMSD_new = False
-          new_RMSD_list_update[pos] = RMSD_new
-          total_updated += 1
-          print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
 
-        if total_updated != 0 and total_updated % 10 == 0:
-          csv_file["RMSD"] = new_RMSD_list_update
-          csv_file.to_csv(temp_csv_v1, index=False)
-          os.remove(temp_csv)
-          os.rename(temp_csv_v1, temp_csv)
-        pos += 1
+      while total_updated < con_update:
+        time.sleep(30)
+        pos = 0
+        for _row in csv_file.iterrows():
+          if list_update[pos][0] and list_update[pos][1].done():
+            try:
+              RMSD_new = list_update[pos][1].result()
+            except:
+              RMSD_new = False
+            new_RMSD_list_update[pos] = RMSD_new
+            total_updated += 1
+            print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
+
+            list_update[pos][0] = False
+
+          if total_updated != 0 and total_updated % 10 == 0:
+            csv_file["RMSD"] = new_RMSD_list_update
+            csv_file.to_csv(temp_csv_v1, index=False)
+            os.remove(temp_csv)
+            os.rename(temp_csv_v1, temp_csv)
+          pos += 1
 
       csv_file["RMSD"] = new_RMSD_list_update
       csv_file.to_csv(temp_csv_v1, index=False)
