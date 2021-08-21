@@ -100,7 +100,7 @@ def download_emd_xml(id_code, exit_path, create_progress_bar=False):
 
 
 def download_pdb(id_code, exit_path, create_progress_bar=False):
-  possible_local_path = "/work/lcastillov/allPDBS/"
+  possible_local_path = "/work/lcastillov/allPDBS_unzip/"
 
   if os.path.exists(possible_local_path):
     possible_pdb_path = os.path.join(possible_local_path, "{}.pdb".format(possible_local_path))
@@ -139,7 +139,7 @@ def download_pdb_online(id_code, exit_path, create_progress_bar=False):
 
 
 def download_cif(id_code, exit_path, create_progress_bar=False):
-  possible_local_path = "/work/lcastillov/allCIFS/"
+  possible_local_path = "/work/lcastillov/allCIFS_unzip/"
 
   if os.path.exists(possible_local_path):
     possible_cif_path = os.path.join(possible_local_path, "{}.cif".format(possible_local_path))
