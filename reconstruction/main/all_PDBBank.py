@@ -1,3 +1,4 @@
+import subprocess
 import sys
 import pathlib
 
@@ -11,7 +12,7 @@ from general_utils.terminal_utils import get_out
 
 
 def downloadModelsPDB():
-  get_out("rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/pdb/ /work/lcastillo/allPDBS_tmp/")
+  execute_command("rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/pdb/ /work/lcastillo/allPDBS_tmp/")
 
   list_dirs = glob.glob("/work/lcastillo/allPDBS_tmp/*.ent.gz")
 
@@ -35,3 +36,12 @@ def downloadModelsPDB():
 
 print("PDB")
 downloadModelsPDB()
+
+
+def execute_command(cmd):
+  try:
+    subprocess.check_call([cmd], shell=True)
+  except subprocess.CalledProcessError:
+    raise RuntimeError('Command "%s" does not work' % cmd)
+  except OSError:
+    raise Exception('Command "%s" does not exist' % cmd)
