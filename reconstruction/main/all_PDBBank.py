@@ -22,8 +22,8 @@ def execute_command(cmd):
 def downloadModelsPDB():
   execute_command("rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/pdb/ /work/lcastillo/allPDBS_tmp/")
 
-  for root, dirs, files in os.walk("/work/lcastillo/allPDBS_tmp/"):
-    for file in tqdm(files):
+  for root, dirs, files in tqdm(os.walk("/work/lcastillo/allPDBS_tmp/")):
+    for file in files:
       if file.endswith('.ent.gz'):
         file = os.path.join(root, file)
 
@@ -33,11 +33,13 @@ def downloadModelsPDB():
 
         final_path = "/work/lcastillo/allPDBS_unzip/{}.pdb".format(base_name)
 
-        actual_file = os.path.dirname(file)
-        actual_file = os.path.join(actual_file, 'pdb{0}.ent'.format(base_name))
+        if not (os.path.exists(final_path)):
 
-        get_out("gunzip", "--force", file)
-        get_out("mv", actual_file, final_path)
+          actual_file = os.path.dirname(file)
+          actual_file = os.path.join(actual_file, 'pdb{0}.ent'.format(base_name))
+
+          get_out("gunzip", "--force", file)
+          get_out("mv", actual_file, final_path)
 
 
 
