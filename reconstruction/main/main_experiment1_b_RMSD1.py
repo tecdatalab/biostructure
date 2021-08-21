@@ -84,13 +84,13 @@ def experiment_1_b_RMSD_chain():
 
             list_update[pos][0] = False
 
-          if total_updated != 0 and total_updated % 10 == 0:
-            csv_file["RMSD"] = new_RMSD_list_update
-            csv_file.to_csv(temp_csv_v1, index=False)
-            os.remove(temp_csv)
-            os.rename(temp_csv_v1, temp_csv)
-
           pos += 1
+
+        if total_updated != 0 and total_updated % 10 == 0:
+          csv_file["RMSD"] = new_RMSD_list_update
+          csv_file.to_csv(temp_csv_v1, index=False)
+          os.remove(temp_csv)
+          os.rename(temp_csv_v1, temp_csv)
 
       csv_file["RMSD"] = new_RMSD_list_update
       csv_file.to_csv(temp_csv_v1, index=False)
@@ -160,12 +160,13 @@ def experiment_1_b_RMSD_struct():
 
             list_update[pos][0] = False
 
-          if total_updated != 0 and total_updated % 10 == 0:
-            csv_file["RMSD"] = new_RMSD_list_update
-            csv_file.to_csv(temp_csv_v1, index=False)
-            os.remove(temp_csv)
-            os.rename(temp_csv_v1, temp_csv)
           pos += 1
+
+        if total_updated != 0 and total_updated % 10 == 0:
+          csv_file["RMSD"] = new_RMSD_list_update
+          csv_file.to_csv(temp_csv_v1, index=False)
+          os.remove(temp_csv)
+          os.rename(temp_csv_v1, temp_csv)
 
       csv_file["RMSD"] = new_RMSD_list_update
       csv_file.to_csv(temp_csv_v1, index=False)
