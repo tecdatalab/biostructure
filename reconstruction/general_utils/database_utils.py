@@ -356,8 +356,9 @@ def get_db_chains_files_db(pdb_id, path):
         except:
           pass
     else:
-      insert_pdb_information(col, pdb_id)
-      return get_db_chains_files_db(pdb_id, path)
+      make_pdb_dir_temp(path, pdb_id)
+      # insert_pdb_information(col, pdb_id)
+      # return get_db_chains_files_db(pdb_id, path)
 
   else:
     make_pdb_dir_temp(path, pdb_id)
