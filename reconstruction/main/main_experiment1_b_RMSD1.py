@@ -21,6 +21,7 @@ file_path = "/home/lcastillo/workspaces/project_biostructure/salida_chain_exe_3.
 temp_csv = "/home/lcastillo/workspaces/project_biostructure/salida_chain_exe_3_RMSD_repare.csv"
 temp_csv_v1 = "/home/lcastillo/workspaces/project_biostructure/salida_chain_exe_3_RMSD_repare_v1.csv"
 
+
 def experiment_1_b_RMSD_chain():
   # Parale
   comm = MPI.COMM_WORLD
@@ -66,25 +67,28 @@ def experiment_1_b_RMSD_chain():
           list_update.append([False])
           new_RMSD_list_update.append(row[1].RMSD)
 
-      pos = 0
       total_updated = 0
-      for _row in csv_file.iterrows():
-        if list_update[pos][0]:
-          try:
-            RMSD_new = list_update[pos][1].result()
-          except:
-            RMSD_new = False
-          new_RMSD_list_update[pos] = RMSD_new
-          total_updated += 1
-          print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
 
-        if total_updated != 0 and total_updated % 10 == 0:
-          csv_file["RMSD"] = new_RMSD_list_update
-          csv_file.to_csv(temp_csv_v1, index=False)
-          os.remove(temp_csv)
-          os.rename(temp_csv_v1, temp_csv)
+      while total_updated < con_update:
+        pos = 0
+        for _row in csv_file.iterrows():
+          if list_update[pos][1].done():
+            if list_update[pos][0]:
+              try:
+                RMSD_new = list_update[pos][1].result()
+              except:
+                RMSD_new = False
+              new_RMSD_list_update[pos] = RMSD_new
+              total_updated += 1
+              print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
 
-        pos += 1
+          if total_updated != 0 and total_updated % 10 == 0:
+            csv_file["RMSD"] = new_RMSD_list_update
+            csv_file.to_csv(temp_csv_v1, index=False)
+            os.remove(temp_csv)
+            os.rename(temp_csv_v1, temp_csv)
+
+          pos += 1
 
       csv_file["RMSD"] = new_RMSD_list_update
       csv_file.to_csv(temp_csv_v1, index=False)
@@ -137,24 +141,27 @@ def experiment_1_b_RMSD_struct():
           list_update.append([False])
           new_RMSD_list_update.append(row[1].RMSD)
 
-      pos = 0
       total_updated = 0
-      for _row in csv_file.iterrows():
-        if list_update[pos][0]:
-          try:
-            RMSD_new = list_update[pos][1].result()
-          except:
-            RMSD_new = False
-          new_RMSD_list_update[pos] = RMSD_new
-          total_updated += 1
-          print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
 
-        if total_updated != 0 and total_updated % 10 == 0:
-          csv_file["RMSD"] = new_RMSD_list_update
-          csv_file.to_csv(temp_csv_v1, index=False)
-          os.remove(temp_csv)
-          os.rename(temp_csv_v1, temp_csv)
-        pos += 1
+      while total_updated < con_update:
+        pos = 0
+        for _row in csv_file.iterrows():
+          if list_update[pos][0]:
+            if list_update[pos][1].done():
+              try:
+                RMSD_new = list_update[pos][1].result()
+              except:
+                RMSD_new = False
+              new_RMSD_list_update[pos] = RMSD_new
+              total_updated += 1
+              print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
+
+          if total_updated != 0 and total_updated % 10 == 0:
+            csv_file["RMSD"] = new_RMSD_list_update
+            csv_file.to_csv(temp_csv_v1, index=False)
+            os.remove(temp_csv)
+            os.rename(temp_csv_v1, temp_csv)
+          pos += 1
 
       csv_file["RMSD"] = new_RMSD_list_update
       csv_file.to_csv(temp_csv_v1, index=False)

@@ -32,7 +32,13 @@ def get_chains_cif(input_file):
       chain_ids = asym_id_list.split(",")
       for chain in chain_ids:
         if chain not in result:
-          result.append(chain)
+          chain = chain.replace(" ", "")
+          if not (chain == "" or \
+                  chain is None or \
+                  chain == " " or \
+                  chain == '' or \
+                  chain == ' '):
+            result.append(chain)
 
   for chain in ok_chains:
     if chain not in result:
