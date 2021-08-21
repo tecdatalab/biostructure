@@ -19,8 +19,10 @@ def execute_command(cmd):
   except OSError:
     raise Exception('Command "%s" does not exist' % cmd)
 
+
 def downloadModelsCIF():
-  execute_command("rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/mmCIF/ /work/lcastillo/allCIFS_tmp/")
+  execute_command(
+    "rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/mmCIF/ /work/lcastillo/allCIFS_tmp/")
 
   for root, dirs, files in tqdm(os.walk("/work/lcastillo/allCIFS_tmp/")):
     for file in files:
@@ -33,15 +35,12 @@ def downloadModelsCIF():
         final_path = "/work/lcastillo/allCIFS_unzip/{}.cif".format(base_name)
 
         if not (os.path.exists(final_path)):
-
           actual_file = os.path.dirname(file)
           actual_file = os.path.join(actual_file, 'pdb{0}.cif'.format(base_name))
 
-          get_out("gunzip", "-c", "--force", file, ">", final_path)
-
+          commad = "gunzip -c --force " + file + " > " + final_path
+          execute_command(commad)
 
 
 print("CIF")
 downloadModelsCIF()
-
-
