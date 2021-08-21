@@ -37,7 +37,7 @@ def downloadModelsCIF():
           actual_file = os.path.dirname(file)
           actual_file = os.path.join(actual_file, 'pdb{0}.cif'.format(base_name))
 
-          get_out("gunzip", "--keep", "--force", file)
+          get_out("gunzip", "-k", "--force", file)
           get_out("mv", actual_file, final_path)
 
 
