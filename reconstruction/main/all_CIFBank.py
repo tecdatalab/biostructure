@@ -22,22 +22,22 @@ def execute_command(cmd):
 def downloadModelsCIF():
   execute_command("rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/mmCIF/ /work/lcastillo/allCIFS_tmp/")
 
-  list_dirs = glob.glob("/work/lcastillo/allCIFS_tmp/*.cif.gz")
+  for root, dirs, files in os.walk("/work/lcastillo/allCIFS_tmp/"):
+    for file in tqdm(files):
+      if file.endswith('.cif.gz'):
+        file = os.path.join(root, file)
 
-  with tqdm(total=len(list_dirs)) as pbar:
-    for file in list_dirs:
-      base_name = os.path.basename(file)
-      base_name = base_name.split(".")[0]
+        base_name = os.path.basename(file)
+        base_name = base_name.split(".")[0]
 
-      final_path = "/work/lcastillo/allCIFS_unzip/{}.cif".format(base_name)
+        final_path = "/work/lcastillo/allCIFS_unzip/{}.cif".format(base_name)
 
-      actual_file = os.path.dirname(file)
-      actual_file = os.path.join(actual_file, 'pdb{0}.cif'.format(base_name))
+        actual_file = os.path.dirname(file)
+        actual_file = os.path.join(actual_file, 'pdb{0}.cif'.format(base_name))
 
-      get_out("gunzip", "--force", file)
-      get_out("mv", actual_file, final_path)
+        get_out("gunzip", "--force", file)
+        get_out("mv", actual_file, final_path)
 
-      pbar.update(1)
 
 
 print("CIF")
