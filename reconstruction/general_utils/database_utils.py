@@ -328,40 +328,41 @@ def make_pdb_dir_temp(work_dir, pdb_id):
 
 def get_db_chains_files_db(pdb_id, path):
   pdb_id = pdb_id.lower()
-  if exists_mongo_db():
-    client = get_mongo_client()
-    db = client[database_name]
-    col = db[collection_name]
-    pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
-    if pdb_data != None:
-      if 'chains_files_info' in pdb_data.keys():
-        dicc = pdb_data["chains_files_info"]
-
-        path_result = os.path.join(path, pdb_id)
-        shutil.rmtree(path_result, ignore_errors=True)
-        os.mkdir(path_result)
-
-        for i in dicc.keys():
-          f = open(os.path.join(path_result, i), 'w')
-          f.write("".join(dicc[i]))
-          f.close()
-      else:
-        dicc_add = get_dicc_chains_files_info(path, pdb_id)
-
-        try:
-          col.update_one(
-            {"pdbID": pdb_id},
-            {"$set": {'chains_files_info': dicc_add}},
-          )
-        except:
-          pass
-    else:
-      make_pdb_dir_temp(path, pdb_id)
-      # insert_pdb_information(col, pdb_id)
-      # return get_db_chains_files_db(pdb_id, path)
-
-  else:
-    make_pdb_dir_temp(path, pdb_id)
+  make_pdb_dir_temp(path, pdb_id)
+  # if exists_mongo_db():
+  #   client = get_mongo_client()
+  #   db = client[database_name]
+  #   col = db[collection_name]
+  #   pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
+  #   if pdb_data != None:
+  #     if 'chains_files_info' in pdb_data.keys():
+  #       dicc = pdb_data["chains_files_info"]
+  #
+  #       path_result = os.path.join(path, pdb_id)
+  #       shutil.rmtree(path_result, ignore_errors=True)
+  #       os.mkdir(path_result)
+  #
+  #       for i in dicc.keys():
+  #         f = open(os.path.join(path_result, i), 'w')
+  #         f.write("".join(dicc[i]))
+  #         f.close()
+  #     else:
+  #       dicc_add = get_dicc_chains_files_info(path, pdb_id)
+  #
+  #       try:
+  #         col.update_one(
+  #           {"pdbID": pdb_id},
+  #           {"$set": {'chains_files_info': dicc_add}},
+  #         )
+  #       except:
+  #         pass
+  #   else:
+  #     make_pdb_dir_temp(path, pdb_id)
+  #     # insert_pdb_information(col, pdb_id)
+  #     # return get_db_chains_files_db(pdb_id, path)
+  #
+  # else:
+  #   make_pdb_dir_temp(path, pdb_id)
 
 
 def get_dicc_chains_files_info(path, pdb_id):
