@@ -21,7 +21,7 @@ file_path = "/home/lcastillo/workspaces/project_biostructure/salida_secuencial_e
 temp_csv = "/home/lcastillo/workspaces/project_biostructure/salida_secuencial_exe_3_RMSD_repare.csv"
 temp_csv_v1 = "/home/lcastillo/workspaces/project_biostructure/salida_secuencial_exe_3_RMSD_repare_v1.csv"
 
-RMSD_dir = "/work/lcastillov/chain_pdb/"
+RMSD_dir = "/work/lcastillo/chain_pdb/"
 
 def experiment_1_b_RMSD_chain():
   # Parale

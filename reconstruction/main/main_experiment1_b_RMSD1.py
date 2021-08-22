@@ -14,14 +14,16 @@ from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 import os
 
-# file_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/data_experiment_1_b_v1_exe_1/3sdd/result_struct.csv"
-file_path = "/home/lcastillo/workspaces/project_biostructure/salida_chain_exe_3.csv"
-# temp_csv = "./temp_struct.csv"
+# file_path = "/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/data_experiment_1_b_v1_exe_1/3sdd/result_chain.csv"
+# temp_csv = "./temp_chain.csv"
+# temp_csv_v1 = "./temp_chain_v1.csv"
+# RMSD_dir = "./RMSD/"
 
+file_path = "/home/lcastillo/workspaces/project_biostructure/salida_chain_exe_3.csv"
 temp_csv = "/home/lcastillo/workspaces/project_biostructure/salida_chain_exe_3_RMSD_repare.csv"
 temp_csv_v1 = "/home/lcastillo/workspaces/project_biostructure/salida_chain_exe_3_RMSD_repare_v1.csv"
+RMSD_dir = "/work/lcastillo/chain_pdb/"
 
-RMSD_dir = "/work/lcastillov/chain_pdb/"
 
 def experiment_1_b_RMSD_chain():
   # Parale
