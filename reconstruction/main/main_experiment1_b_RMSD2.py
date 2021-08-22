@@ -21,6 +21,7 @@ file_path = "/home/lcastillo/workspaces/project_biostructure/salida_struct_exe_3
 temp_csv = "/home/lcastillo/workspaces/project_biostructure/salida_struct_exe_3_RMSD_repare.csv"
 temp_csv_v1 = "/home/lcastillo/workspaces/project_biostructure/salida_struct_exe_3_RMSD_repare_v1.csv"
 
+RMSD_dir = "/work/lcastillov/chain_pdb/"
 
 def experiment_1_b_RMSD_chain():
   # Parale
@@ -177,7 +178,6 @@ def experiment_1_b_RMSD_struct():
 
 
 def calculate_RMSD_chain(row):
-  RMSD_dir = gen_dir()
   result = check_RMSD_result_algorithm(RMSD_dir,
                                        get_chains_pdb_db(row[1][0]),
                                        row[1].Match,
@@ -186,12 +186,10 @@ def calculate_RMSD_chain(row):
                                        row[1][14],
                                        row[1][15])
 
-  free_dir(RMSD_dir)
   return result
 
 
 def calculate_RMSD_struct(row):
-  RMSD_dir = gen_dir()
   result = check_RMSD_result_all(RMSD_dir,
                                  get_chains_pdb_db(row[1][0]),
                                  get_chains_pdb_db(row[1][1]),
@@ -199,7 +197,6 @@ def calculate_RMSD_struct(row):
                                  row[1][0],
                                  row[1][1])
 
-  free_dir(RMSD_dir)
   return result
 
 
