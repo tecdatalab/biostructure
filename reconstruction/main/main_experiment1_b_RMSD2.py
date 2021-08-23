@@ -87,14 +87,6 @@ def experiment_1_b_RMSD_chain():
 
           pos += 1
 
-          if total_updated != 0 and total_updated % 1000 == 0:
-            print("Star save process", flush=True)
-            csv_file["RMSD"] = new_RMSD_list_update
-            csv_file.to_csv(temp_csv_v1, index=False)
-            os.remove(temp_csv)
-            os.rename(temp_csv_v1, temp_csv)
-            print("Finish save process", flush=True)
-
         if total_updated != 0 and total_updated % 1000 == 0:
           print("Star save process", flush=True)
           csv_file["RMSD"] = new_RMSD_list_update
@@ -172,14 +164,6 @@ def experiment_1_b_RMSD_struct():
             list_update[pos][0] = False
 
           pos += 1
-
-          if total_updated != 0 and total_updated % 1000 == 0:
-            print("Star save process", flush=True)
-            csv_file["RMSD"] = new_RMSD_list_update
-            csv_file.to_csv(temp_csv_v1, index=False)
-            os.remove(temp_csv)
-            os.rename(temp_csv_v1, temp_csv)
-            print("Finish save process", flush=True)
 
         if total_updated != 0 and total_updated % 1000 == 0:
           print("Star save process", flush=True)
