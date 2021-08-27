@@ -78,8 +78,9 @@ def experiment_1_b_RMSD_chain():
           if list_update[pos][0] and list_update[pos][1].done():
             try:
               RMSD_new = list_update[pos][1].result()
-            except:
-              RMSD_new = False
+            except Exception as e:
+              print(e)
+              RMSD_new = {"avg":-1}
             new_RMSD_list_update[pos] = RMSD_new
             total_updated += 1
             print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
@@ -168,8 +169,9 @@ def experiment_1_b_RMSD_struct():
           if list_update[pos][0] and list_update[pos][1].done():
             try:
               RMSD_new = list_update[pos][1].result()
-            except:
-              RMSD_new = False
+            except Exception as e:
+              print(e)
+              RMSD_new = {"avg":-1}
             new_RMSD_list_update[pos] = RMSD_new
             total_updated += 1
             print("To repare:", total_updated / con_update, total_updated, con_update, flush=True)
