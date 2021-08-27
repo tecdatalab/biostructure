@@ -129,19 +129,15 @@ def check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, 
     namei = "{}_{}".format(pdb_chaini + "i", chain1)
     namej = "{}_{}".format(pdb_chainj + "j", chain2)
 
-    if (not os.path.exists(path_chain_i)):
-      # from general_utils.database_utils import delete_pdb_db
-      # delete_pdb_db(pdb_chaini)
-      # from general_utils.database_utils import get_chains_pdb_db
-      # get_chains_pdb_db(pdb_chaini)
-      raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path_chain_i)
+    if (not os.path.exists(path_chain_i)) or (not os.path.exists(path_chain_j)):
+      print(f"Error in alinament {namei}, {namej}", flush=True)
+      result = [9999999, 0, 0, 9999999, 0, 0, 0]
+      add_data = [0, 0, result[0], result[1], result[5]]
 
-    if (not os.path.exists(path_chain_j)):
-      # from general_utils.database_utils import delete_pdb_db
-      # delete_pdb_db(pdb_chainj)
-      # from general_utils.database_utils import get_chains_pdb_db
-      # get_chains_pdb_db(pdb_chainj)
-      raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path_chain_j)
+      final_result[namei + "_" + namej] = add_data
+      final_result_list.append(result[0])
+
+      continue
 
     cmd.load(path_chain_i, namei)
     cmd.load(path_chain_j, namej)
@@ -210,19 +206,15 @@ def check_RMSD_result_all(work_dir,
     namei = "{}_{}".format(pdb_chaini + "i", chain1)
     namej = "{}_{}".format(pdb_chainj + "j", chain2)
 
-    if (not os.path.exists(path_chain_i)):
-      # from general_utils.database_utils import delete_pdb_db
-      # delete_pdb_db(pdb_chaini)
-      # from general_utils.database_utils import get_chains_pdb_db
-      # get_chains_pdb_db(pdb_chaini)
-      raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path_chain_i)
+    if (not os.path.exists(path_chain_i)) or (not os.path.exists(path_chain_j)):
+      print(f"Error in alinament {namei}, {namej}", flush=True)
+      result = [9999999, 0, 0, 9999999, 0, 0, 0]
+      add_data = [0, 0, result[0], result[1], result[5]]
 
-    if (not os.path.exists(path_chain_j)):
-      # from general_utils.database_utils import delete_pdb_db
-      # delete_pdb_db(pdb_chainj)
-      # from general_utils.database_utils import get_chains_pdb_db
-      # get_chains_pdb_db(pdb_chainj)
-      raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path_chain_j)
+      final_result[namei + "_" + namej] = add_data
+      final_result_list.append(result[0])
+
+      continue
 
     cmd.load(path_chain_i, namei)
     cmd.load(path_chain_j, namej)
