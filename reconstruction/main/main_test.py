@@ -242,15 +242,15 @@ clean_work_dir()
 
 # Gen PDB with chains
 
-# path = "./"
-#
-# pdb = '7no3'
-#
-# download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
-# chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb))
-#
-# pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path, pdb), path, chains,
-#                     len(chains))
+path = "/home/lcastillo/workspaces/project_biostructure/"
+
+pdb = '7nyr'
+
+#download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
+chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb))
+
+pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path, pdb), path, chains,
+                    len(chains))
 
 
 '''
@@ -585,25 +585,25 @@ K, L, M, N, O, P, Q, R, S, T
 # changed_chain = "G"
 # pdb_work_chain = "A"
 #
-work_dir = "./RMSD"
-# # #
-# # # # result = check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, changed_pdb,
-# # # #                                      changed_chain, pdb_work_chain)
-# # # # print(result)
-# # #
-make_dir_pdb(work_dir, "6pxh")
+# work_dir = "./RMSD"
+# # # #
+# # # # # result = check_RMSD_result_algorithm(work_dir, all_chains, check_list, original_pdb, changed_pdb,
+# # # # #                                      changed_chain, pdb_work_chain)
+# # # # # print(result)
+# # # #
+# make_dir_pdb(work_dir, "6pxh")
 #cif_path = "./4ayb.cif"
 #chains = get_chains_cif(cif_path)
 #print(chains)
-
-
-
-
-pdbf1 = '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/RMSD/3sdd/3sdd_A.pdb';
-pdbf2 = '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/RMSD/6pxh/6pxh_A.pdb'
-
-cmd.load(pdbf1, "PDB1_D")
-cmd.load(pdbf2, "PDB2_D")
-
-result = cmd.align("PDB1_D", "PDB2_D")
-print(result)
+#
+#
+#
+#
+# pdbf1 = '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/RMSD/3sdd/3sdd_A.pdb';
+# pdbf2 = '/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/RMSD/6pxh/6pxh_A.pdb'
+#
+# cmd.load(pdbf1, "PDB1_D")
+# cmd.load(pdbf2, "PDB2_D")
+#
+# result = cmd.align("PDB1_D", "PDB2_D")
+# print(result)
