@@ -246,7 +246,7 @@ path = "/home/lcastillo/workspaces/project_biostructure/"
 
 pdb = '7nyr'
 
-#download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
+download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
 chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb))
 
 pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path, pdb), path, chains,
