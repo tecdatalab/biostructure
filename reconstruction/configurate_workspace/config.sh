@@ -5,114 +5,113 @@
 #Pymol
 echo y | conda install -c schrodinger pymol
 
-
 #Mpi4py
 echo y | conda install -c anaconda mpi4py
 
 
 #Numpy
-pip3 install -U numpy
+python3 -m pip install -U numpy
 
 
 #MatPlotlib
-pip3 install matplotlib
+python3 -m pip install matplotlib
 
 
 #NetworkX
-pip3 install networkx
+python3 -m pip install networkx
 
 
 #scikit-learn
-pip3 install -U scikit-learn
+python3 -m pip install -U scikit-learn
 
 
 #Pymongo
-pip3 install pymongo
+python3 -m pip install pymongo
 
 
 #Progressbar
-pip3 install progressbar2
+python3 -m pip install progressbar2
 
 
 #Pandas
-pip3 install pandas
+python3 -m pip install pandas
 
 
 #Requests
-pip3 install requests
+python3 -m pip install requests
 
 
 #Biopython
-pip3 install biopython
+python3 -m pip install biopython
 
 
 #Opengl
-pip3 install pyopengl
+python3 -m pip install pyopengl
 
 
 #Cython
-pip3 install Cython
+python3 -m pip install Cython
 
 
 #Glumpy
-pip3 install -U glumpy
+python3 -m pip install -U glumpy
 
 
 #Scikit-image
-pip3 install -U scikit-image
+python3 -m pip install -U scikit-image
 
 
 #Biopandas
-pip3 install -U biopandas
+python3 -m pip install -U biopandas
 
 
 #Scipy
-pip3 install -U scipy
+python3 -m pip install -U scipy
 
 
 #Packaging
-pip3 install -U packaging
+python3 -m pip install -U packaging
 
 
 #Appdirs
-pip3 install -U appdirs
+python3 -m pip install -U appdirs
 
 
 #Glfw
-pip3 install -U glfw
+python3 -m pip install -U glfw
 
 
 #Pyqt5
-pip3 install -U pyqt5
+python3 -m pip install -U pyqt5
 
 
 #Psycopg2-binary
-pip3 install -U psycopg2-binary
+python3 -m pip install -U psycopg2-binary
 
 
 #Clint
-pip3 install -U clint
+python3 -m pip install -U clint
 
 
 #Psutil
-pip3 install -U psutil
+python3 -m pip install -U psutil
 
 
 #Mrcfile
-pip3 install mrcfile
+python3 -m pip install mrcfile
 
 
 #Tqdm
-pip3 install tqdm
+python3 -m pip install tqdm
 
 
 #Progress
-pip3 install progress
+python3 -m pip install progress
 
 
 #k-means-constrained
-pip3 install k-means-constrained
+python3 -m pip install k-means-constrained
 
 #Biotite
 ## conda install -c conda-forge biotite
-pip3 install biotite
+python3 -m pip install biotite

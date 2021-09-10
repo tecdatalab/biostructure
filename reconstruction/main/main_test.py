@@ -3,6 +3,9 @@ import re
 import sys
 import pathlib
 
+from skimage.metrics import mean_squared_error
+
+from process_mrc.generate import get_mrc_one
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 from pymol import cmd
@@ -242,15 +245,15 @@ clean_work_dir()
 
 # Gen PDB with chains
 
-path = "/home/lcastillo/workspaces/project_biostructure/"
-
-pdb = '7nyr'
-
-download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
-chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb))
-
-pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path, pdb), path, chains,
-                    len(chains))
+# path = "/home/lcastillo/workspaces/project_biostructure/"
+#
+# pdb = '7nyr'
+#
+# download_pdb(pdb, '{0}/{1}.pdb'.format(path, pdb))
+# chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb))
+#
+# pdb_to_mrc_chains(True, False, 5.0, '{0}/{1}.pdb'.format(path, pdb), path, chains,
+#                     len(chains))
 
 
 '''
@@ -607,3 +610,22 @@ K, L, M, N, O, P, Q, R, S, T
 #
 # result = cmd.align("PDB1_D", "PDB2_D")
 # print(result)
+
+
+path = "/home/lcastillo98/Downloads"
+pdb1 = '5r5q'
+
+# chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb1))
+# pdb_to_mrc_chains(True, False, 8.0, '{0}/{1}.pdb'.format(path, pdb1), path, chains, len(chains))
+
+pdb2 = '5j8i'
+# chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb2))
+#
+# pdb_to_mrc_chains(True, False, 8.0, '{0}/{1}.pdb'.format(path, pdb2), path, chains, len(chains))
+
+
+pdb1_ZD = get_mrc_one('{0}/{1}/{1}.mrc'.format(path, pdb1), recommendedContour_p=100)[1].zd_descriptors
+pdb2_ZD = get_mrc_one('{0}/{1}/{1}.mrc'.format(path, pdb2), recommendedContour_p=6.6)[1].zd_descriptors
+
+mse = mean_squared_error(pdb1_ZD, pdb2_ZD)
+print(mse)
