@@ -3,7 +3,7 @@ import shutil
 
 from general_utils.string_utils import get_float_between_ss, get_float_value
 from general_utils.temp_utils import gen_dir, free_dir
-from general_utils.terminal_utils import get_out
+from general_utils.terminal_utils import get_out, execute_command
 
 
 def get_mass_angstrom(map_path):
@@ -80,3 +80,13 @@ def get_cube_len_angstrom(map_path):
   free_dir(path)
 
   return [x, y, z]
+
+
+def mrc_to_pdb(mrc_path, pdb_result_path, threshold_mrc=0.0):
+  temp_dir = gen_dir()
+
+  execute_command("echo 1|../binaries/Situs_3.1/bin/map2map {0} {1}/tempPDB.situs".format(mrc_path, temp_dir))
+  execute_command(
+    "../binaries/MAINMAST/MAINMAST -m {0}/tempPDB.situs -t 9 -filter 0.3 -Dkeep 1.0 -Ntb 10 -Rlocal 5 -Nlocal 50 -Nround 50 -t {1} > {2}".format(
+      temp_dir, threshold_mrc, pdb_result_path))
+  free_dir(temp_dir)

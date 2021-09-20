@@ -9,11 +9,10 @@ from process_mrc.biomolecular_structure import Biomolecular_structure
 import glob
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../../em")
-import visualizer
-import processing
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../../em/src")
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../../em/src/em")
+
 import molecule
-import configparser
-import argparse
 
 import numpy as np
 
@@ -128,9 +127,11 @@ def get_mrc_one(mrc_path, recommendedContour_p=None, calculate_Z3D=True):
   actual_id = 1
   result = []
   myMolecule = molecule.Molecule(mrc_path, recommendedContour=recommendedContour_p)
-  densities = np.copy(myMolecule.getEmMap().data())
+  tmp = myMolecule.getDataAtContour(1)
+  print(np.sum(tmp)*myMolecule.emMap.voxelVol())
+  densities = np.copy(myMolecule.getDataAtContour(1))
   # Set voxels outside segment to 0
-  densitie = np.copy(myMolecule.getEmMap().data())
+  densitie = np.copy(myMolecule.getDataAtContour(1))
   result.append(Segment(actual_id, densitie, None))
 
   # then you can compute zernike descriptors for each segment, lets create a dict to store descriptors for each
@@ -144,7 +145,7 @@ def get_mrc_one(mrc_path, recommendedContour_p=None, calculate_Z3D=True):
 
   # print("Can_points", len(np.where(myMolecule.getEmMap().data() > 0)[0]))
   original_structure = \
-    Biomolecular_structure(myMolecule.getEmMap().data(),
+    Biomolecular_structure(myMolecule.getDataAtContour(1),
                            result[0].zd_descriptors)
 
   return result, original_structure

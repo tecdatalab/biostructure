@@ -21,9 +21,16 @@ def get_out(*args):
 
 
 # Excecute command
-def execute_command(cmd):
+def execute_command(cmd, printExit=False):
   try:
-    subprocess.check_call([cmd], shell=True)
+    if printExit:
+      subprocess.check_call([cmd], shell=True)
+    else:
+      subprocess.check_call([cmd],
+                            shell=True,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.STDOUT)
+
   except subprocess.CalledProcessError:
     raise RuntimeError('Command "%s" does not work' % cmd)
   except OSError:

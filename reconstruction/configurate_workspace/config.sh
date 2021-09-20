@@ -115,3 +115,7 @@ python3 -m pip install k-means-constrained
 #Biotite
 ## conda install -c conda-forge biotite
 python3 -m pip install biotite
+
+# Pyqt
+python3 -m pip install -U PyQt5==5.9.2
+

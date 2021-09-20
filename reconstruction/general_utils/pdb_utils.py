@@ -15,6 +15,7 @@ import re
 from general_utils.string_utils import change_string
 
 from general_utils.temp_utils import gen_dir, free_dir
+from models.PDBsAlingResult import PDBsAlingResult
 
 adn_arn_online_list = []
 
@@ -775,3 +776,29 @@ def get_percentage_pbs_check_file(percentage_data_set, file_checkpoint, executor
     open_file.close()
 
   return all_names
+
+
+def align_pdb_file_1_in_2(pdb_file1, pdb_file2):
+  from pymol import cmd
+  cmd.reinitialize()
+
+  name1 = "PDBN1"
+  name2 = "PDBN2"
+
+  cmd.load(pdb_file1, name1)
+  cmd.load(pdb_file2, name2)
+
+  try:
+    result = cmd.align(name1, name2)
+    finalResult = PDBsAlingResult(cmd.count_atoms(name1),
+                                  cmd.count_atoms(name2),
+                                  result[0],
+                                  result[1],
+                                  result[2],
+                                  result[3],
+                                  result[4],
+                                  result[5],
+                                  result[6])
+    return finalResult
+  except:
+    return None

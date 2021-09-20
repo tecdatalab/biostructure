@@ -1,0 +1,11 @@
+prefix=/home/lcastillo98/Downloads/Situs_3.1/fftw3/fftw-3.3.4/../../fftw3
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: FFTW
+Description: fast Fourier transform library
+Version: 3.3.4
+Libs: -L${libdir} -lfftw3 
+Libs.private: -lm
+Cflags: -I${includedir}

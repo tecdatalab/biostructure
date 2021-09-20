@@ -1,0 +1,2 @@
+2021/09/19 19:48:28	incomplete         	 80784/    -1	ubuntu	/home/lcastillo98/eman2-sphire-sparx/bin/e2pdb2mrc.py 1yfq.pdb 1yfq_2.mrc --res 5.0
+2021/09/19 19:48:45	incomplete         	 80803/    -1	ubuntu	/home/lcastillo98/eman2-sphire-sparx/bin/e2pdb2mrc.py 1yfq.pdb 1yfq_2.mrc --res 5.0

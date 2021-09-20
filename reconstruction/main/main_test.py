@@ -5,6 +5,7 @@ import pathlib
 
 from skimage.metrics import mean_squared_error
 
+from general_utils.mrc_uilts import mrc_to_pdb
 from process_mrc.generate import get_mrc_one
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
@@ -35,7 +36,7 @@ import os
 
 from general_utils.download_utils import download_pdb, download_emd_xml
 from general_utils.pdb_utils import get_pdb_chain_sequence, get_similar_pdb_struct, get_similar_pdb_chain_structural, \
-  get_similar_pdb_chain_sequential, get_chains_pdb, get_pdb_no_work
+  get_similar_pdb_chain_sequential, get_chains_pdb, get_pdb_no_work, align_pdb_file_1_in_2
 from to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 import general_utils
 
@@ -612,20 +613,33 @@ K, L, M, N, O, P, Q, R, S, T
 # print(result)
 
 
-path = "/home/lcastillo98/Downloads"
-pdb1 = '5r5q'
-
-# chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb1))
-# pdb_to_mrc_chains(True, False, 8.0, '{0}/{1}.pdb'.format(path, pdb1), path, chains, len(chains))
-
-pdb2 = '5j8i'
-# chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb2))
+# path = "/home/lcastillo98/Downloads"
+# pdb1 = '5r5q'
 #
-# pdb_to_mrc_chains(True, False, 8.0, '{0}/{1}.pdb'.format(path, pdb2), path, chains, len(chains))
+# # chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb1))
+# # pdb_to_mrc_chains(True, False, 8.0, '{0}/{1}.pdb'.format(path, pdb1), path, chains, len(chains))
+#
+# pdb2 = '5j8i'
+# # chains = get_chains_pdb('{0}/{1}.pdb'.format(path, pdb2))
+# #
+# # pdb_to_mrc_chains(True, False, 8.0, '{0}/{1}.pdb'.format(path, pdb2), path, chains, len(chains))
+#
+#
+# pdb1_ZD = get_mrc_one('{0}/{1}/{1}.mrc'.format(path, pdb1), recommendedContour_p=33)[1].zd_descriptors
+# pdb2_ZD = get_mrc_one('{0}/{1}/{1}.mrc'.format(path, pdb2), recommendedContour_p=36.6)[1].zd_descriptors
+#
+# mse = mean_squared_error(pdb1_ZD, pdb2_ZD)
+# print(mse)
 
+pdb_to_mrc_chains(True, False, 5.0, "/home/lcastillo98/Downloads/1yfq.pdb", "/home/lcastillo98/Downloads/")
 
-pdb1_ZD = get_mrc_one('{0}/{1}/{1}.mrc'.format(path, pdb1), recommendedContour_p=100)[1].zd_descriptors
-pdb2_ZD = get_mrc_one('{0}/{1}/{1}.mrc'.format(path, pdb2), recommendedContour_p=6.6)[1].zd_descriptors
+mrc_to_pdb("/home/lcastillo98/Downloads/1yfq/1yfq.mrc", "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
 
-mse = mean_squared_error(pdb1_ZD, pdb2_ZD)
-print(mse)
+result = align_pdb_file_1_in_2("/home/lcastillo98/Downloads/1yfq.pdb",
+                               "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
+
+print(result.RMSDAfterRefinement)
+print(result.PercentageAtomsAlignedAfterRefinement)
+print(result.pdb1Atoms)
+print(result.pdb1Atoms)
+print(result.NumberAlignedAtomsAfterRefinement)
