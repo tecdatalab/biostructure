@@ -36,7 +36,7 @@ import os
 
 from general_utils.download_utils import download_pdb, download_emd_xml
 from general_utils.pdb_utils import get_pdb_chain_sequence, get_similar_pdb_struct, get_similar_pdb_chain_structural, \
-  get_similar_pdb_chain_sequential, get_chains_pdb, get_pdb_no_work, align_pdb_file_1_in_2
+  get_similar_pdb_chain_sequential, get_chains_pdb, get_pdb_no_work, align_pdb_file_1_in_2, pdb_onlyCA
 from to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 import general_utils
 
@@ -635,11 +635,13 @@ pdb_to_mrc_chains(True, False, 5.0, "/home/lcastillo98/Downloads/1yfq.pdb", "/ho
 
 mrc_to_pdb("/home/lcastillo98/Downloads/1yfq/1yfq.mrc", "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
 
-result = align_pdb_file_1_in_2("/home/lcastillo98/Downloads/1yfq.pdb",
+pdb_onlyCA("/home/lcastillo98/Downloads/1yfq.pdb", "/home/lcastillo98/Downloads/1yfq_CA.pdb")
+
+result = align_pdb_file_1_in_2("/home/lcastillo98/Downloads/1yfq_CA.pdb",
                                "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
 
 print(result.RMSDAfterRefinement)
 print(result.PercentageAtomsAlignedAfterRefinement)
 print(result.pdb1Atoms)
-print(result.pdb1Atoms)
+print(result.pdb2Atoms)
 print(result.NumberAlignedAtomsAfterRefinement)

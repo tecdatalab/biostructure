@@ -675,7 +675,7 @@ def move_pdb_center(pdb_path):
         line = change_string(30, 37, line, text_x)
         line = change_string(38, 45, line, text_y)
         line = change_string(46, 53, line, text_z)
-      all_lines.append(line)
+        all_lines.append(line)
 
   final_text = "".join(all_lines)
   os.remove(pdb_path)
@@ -802,3 +802,23 @@ def align_pdb_file_1_in_2(pdb_file1, pdb_file2):
     return finalResult
   except:
     return None
+
+
+def pdb_onlyCA(pdb_path, exit_path):
+  input_file = os.path.abspath(pdb_path)
+  linesCA = []
+
+  with open(input_file) as origin_file:
+    for line in origin_file:
+      if line[0:4] == "ATOM" and line[12:15] == " CA":
+        #line = 'ALA'.join([line[:17], line[20:]])
+        #line = 'ALA'.join([line[:17], line[22:]])
+        #line = line[0:69] + line[-1]
+        linesCA.append(line)
+
+  final_text = "".join(linesCA)
+  if os.path.exists(exit_path):
+    os.remove(exit_path)
+  exit_file = open(exit_path, "w")
+  exit_file.write(final_text)
+  exit_file.close()
