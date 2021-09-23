@@ -1,10 +1,13 @@
 import numpy as np
-from torch.optim import Adam
+import torch
+from torch.optim import Adam, AdamW, SGD
 from torch.utils.data import DataLoader
+
+import ignite.distributed as idist
 
 from SegmentationDataset import SegmentationDataset
 from SegmentationUNet import SegmentationUNet
-from CrossEntropyLoss import CrossEntropyLoss
+from CustomLoss import CustomLoss
 
 from em.molecule import Molecule
 from scipy.ndimage import zoom
@@ -28,62 +31,100 @@ def compute_class_weights(df, labels):
         weights += np.array(w)
     return total/weights
         
-    
+
+def set_seed(seed):
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+
+def get_optimizer(name, parameters, learning_rate, momentum, weight_decay):
+    print(name)
+    if name=='SGD':
+        return SGD(parameters, lr=learning_rate,momentum=momentum, weight_decay=weight_decay)
+    elif name=='Adam':
+        return Adam(parameters, lr=learning_rate)
+
 
 class SegmentationAgent:
-    def __init__(self, val_percentage, test_num, num_classes,
-                 batch_size, img_size, csv_path, shuffle_data,
-                 learning_rate, depth, device):
+    def __init__(self, val_percentage, test_ids, num_classes, optimizer, loss_func,
+        pool_size, extra_width, batch_size, img_size, csv_path, seed, learning_rate, 
+        momentum, weight_decay, depth, device, mixed_precision, idist):
         """
         A helper class to facilitate the training of the model
         """
         self.device = device
+        self.seed = seed
+        set_seed(self.seed)
+        self.randg = torch.Generator() 
         self.num_classes = num_classes
         self.batch_size = batch_size
         self.img_size = img_size
         self.dataframe = pd.read_csv(csv_path)
         self.depth = depth
-        train_split, val_split, test_split = self.make_splits(val_percentage, test_num, shuffle_data)
-        #train_split, val_split = self.make_splits(val_percentage, test_num, shuffle_data)
-        self.train_loader = self.get_dataloader(train_split)
-        self.validation_loader = self.get_dataloader(val_split)
-        self.test_loader = self.get_dataloader(test_split,'test')
-        self.model = SegmentationUNet(self.num_classes, self.device, depth=self.depth)
-        self.class_weights = compute_class_weights(train_split, [0,1])
-        print("Class weights {}".format(self.class_weights))
-        self.criterion = CrossEntropyLoss(self.num_classes, self.class_weights, self.device)
-        self.optimizer = Adam(self.model.parameters(), lr=learning_rate)
-        self.model.to(self.device)
+        self.loss_func = loss_func
+        #  Ensure that only local rank 0 split data
+        if idist.get_local_rank() > 0:
+            idist.barrier()
 
-    def make_splits(self, val_percentage=0.2, test_num=10, shuffle=True):
+        train_split, val_split, test_split = self.make_splits(val_percentage, test_ids, seed)
+        train_dataset = SegmentationDataset(train_split, self.num_classes, self.img_size, self.randg, extra_width)
+        validation_dataset = SegmentationDataset(val_split, self.num_classes, self.img_size, self.randg, extra_width)
+        test_dataset = SegmentationDataset(test_split, self.num_classes, self.img_size, self.randg, extra_width)
+        if idist.get_local_rank() == 0:
+            idist.barrier()
+
+        self.train_loader = idist.auto_dataloader(train_dataset, batch_size=batch_size, shuffle=True, worker_init_fn=np.random.seed(self.seed))
+        self.validation_loader = idist.auto_dataloader(train_dataset, batch_size=batch_size, shuffle=False, worker_init_fn=np.random.seed(self.seed))
+        self.test_loader = DataLoader(test_dataset, batch_size=2*batch_size, shuffle=False, worker_init_fn=np.random.seed(self.seed), pin_memory=True)
+
+        self.model = idist.auto_model(SegmentationUNet(self.num_classes, self.device, depth=self.depth))
+        self.criterion = CustomLoss(loss_func, self.num_classes, None, self.device, mixed_precision)
+        self.optimizer = idist.auto_optim(get_optimizer(optimizer, self.model.parameters(), learning_rate, momentum, weight_decay))
+        
+
+    def make_splits(self, val_percentage, test_ids, seed=42):
         """
         Split the data into train, validation and test datasets
         :param val_percentage: A decimal number which tells the percentage of
                 data to use for validation
-        :param test_num: The number of images to use for testing
-        :param shuffle: Shuffle the data before making splits
+        :param test_ids: Id of EM maps to use for testing
+        :param seed: Set seed for reproductivity
         :return: tuples of splits
         """
-        if shuffle:
-            self.dataframe = self.dataframe.sample(frac=1)
+        # Get id list of EM maps in data
+        id_list = self.dataframe.groupby('id')['id'].unique().index.tolist()
+        # Shuffle list to split data into train, validation and testing
+        np.random.shuffle(id_list)
+        # Select validation, training and test samples
+        val_num = int(val_percentage * len(id_list))
+        print("Val EM maps {}".format(val_num))
+        test_maps = [test_id for test_id in test_ids if test_id in id_list ]
+        samples = [sample_id for sample_id in id_list if sample_id not in test_maps ] 
+        validation_maps = samples[:val_num]
+        train_maps = samples[val_num:]
+        print("Number of EM Maps in total: {}, Training: {}, Validation: {}, Testing: {}".format(len(id_list), len(train_maps), len(validation_maps), len(test_maps)))
+        validation_segments = self.dataframe[self.dataframe['id'].isin(validation_maps)]
+        train_segments = self.dataframe[self.dataframe['id'].isin(train_maps)]
+        test_segments = self.dataframe[self.dataframe['id'].isin(test_maps)].drop_duplicates(subset=['id','subunit'])
+        print("Number of Segments in total: Training: {}, Validation: {}, Testing: {}".format(len(train_segments.drop_duplicates(subset=['id','subunit'])), len(validation_segments.drop_duplicates(subset=['id','subunit'])), len(test_segments)))
+        print("Training samples: {}".format(train_maps))
+        print("Validation samples: {}".format(validation_maps))
+        print("Testing samples: {}".format(test_maps))
+        return train_segments, validation_segments, test_segments
 
-        val_num = int(val_percentage * len(self.dataframe))
-        print("val num {}".format(val_num))
-        validation_samples = self.dataframe.iloc[:val_num]
-        train_samples = self.dataframe.iloc[val_num:-test_num]
-        test_samples = self.dataframe.iloc[-test_num:]
-        print("Number of samples: {} Training {} Validation {} Testing {}".format(len(self.dataframe), len(train_samples), len(validation_samples), len(test_samples)))
-        return train_samples, validation_samples, test_samples
-
-    def get_dataloader(self, split, split_name=None):
+    def get_dataloader(self, split, pool_size=1, extra_width=0, split_name=None, shuffle=False):
         """
         Create a DataLoader for the given split
         :param split: train split, validation split or test split of the data
+        :param pool_size: Number of samples in extreme points pool
         :return: DataLoader
         """
-        dataset = SegmentationDataset(split, self.num_classes, self.img_size,self.device)
+        dataset = SegmentationDataset(split, self.num_classes, self.img_size, self.randg, self.device, extra_width)
         if split_name == 'test':
             batch_size = len(dataset)
         else:
             batch_size = self.batch_size
-        return DataLoader(dataset, batch_size, shuffle=True)
+        return DataLoader(dataset, batch_size, shuffle=shuffle, worker_init_fn=np.random.seed(self.seed))
+
