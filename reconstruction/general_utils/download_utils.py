@@ -108,8 +108,9 @@ def download_pdb(id_code, exit_path, create_progress_bar=False):
     if os.path.exists(possible_pdb_path):
       copyfile(possible_pdb_path, exit_path)
     else:
-      print("Not found: ", possible_pdb_path, flush=True)
-      raise FileNotFoundError
+      download_pdb_online(id_code, exit_path, create_progress_bar)
+      #print("Not found: ", possible_pdb_path, flush=True)
+      #raise FileNotFoundError
   else:
     download_pdb_online(id_code, exit_path, create_progress_bar)
 
@@ -148,8 +149,9 @@ def download_cif(id_code, exit_path, create_progress_bar=False):
     if os.path.exists(possible_cif_path):
       copyfile(possible_cif_path, exit_path)
     else:
-      print("Not found: ", possible_cif_path, flush=True)
-      raise FileNotFoundError
+      download_cif_online(id_code, exit_path, create_progress_bar)
+      #print("Not found: ", possible_cif_path, flush=True)
+      #raise FileNotFoundError
   else:
     download_cif_online(id_code, exit_path, create_progress_bar)
 

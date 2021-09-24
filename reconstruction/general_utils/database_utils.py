@@ -2,6 +2,7 @@ import re
 import shutil
 
 import pymongo
+
 import zlib, json, base64
 import numpy as np
 import os
@@ -11,9 +12,10 @@ from Bio import SeqIO
 
 from general_utils.cif_utils import get_chains_cif
 from general_utils.download_utils import download_pdb, download_cif, download_pdb_fasta
-from general_utils.pdb_utils import get_chains_pdb
+from general_utils.pdb_utils import get_chains_pdb, make_pdb_dir_temp
 from general_utils.temp_utils import gen_dir, free_dir
 from general_utils.workspace_utils import is_work_in_cluster
+from miscellaneous_utils.database_mis import put_bigfile_db, get_dicc_chains_files_info
 from to_mrc.cif_2_mrc import cif_to_mrc_chains
 from to_mrc.pdb_2_mrc import pdb_to_mrc_chains
 from process_graph.process_graph_utils import generate_graph
@@ -21,7 +23,6 @@ from process_mrc.generate import get_mrc_one
 from networkx.readwrite import json_graph
 from bson.json_util import dumps
 
-ZIPJSON_KEY = 'base64(zip(o))'
 database_name = "lcastillo_biostructures"
 collection_name = "pdb_collection"
 exists_mongo_db_var = None
@@ -30,53 +31,7 @@ not_sequence = ["6v2y", "7lj6", "7lj8", "6v32", "6yz6", "7jml",
                 "7lj8", "6v2y", "6v32", "7jml", "6yz6"]
 
 
-def json_zip(j):
-  j = {
-    ZIPJSON_KEY: base64.b64encode(
-      zlib.compress(
-        json.dumps(j).encode('utf-8')
-      )
-    ).decode('ascii')
-  }
-
-  return j
-
-
-def json_unzip(j, insist=True):
-  try:
-    assert (j[ZIPJSON_KEY])
-    assert (set(j.keys()) == {ZIPJSON_KEY})
-  except:
-    if insist:
-      raise RuntimeError("JSON not in the expected format {" + str(ZIPJSON_KEY) + ": zipstring}")
-    else:
-      return j
-
-  try:
-    j = zlib.decompress(base64.b64decode(j[ZIPJSON_KEY]))
-  except:
-    raise RuntimeError("Could not decode/unzip the contents")
-
-  try:
-    j = json.loads(j)
-  except:
-    raise RuntimeError("Could interpret the unzipped contents")
-
-  return j
-
-
-def get_mongo_client():
-  if is_work_in_cluster():
-    client = pymongo.MongoClient(host="11.0.0.21",
-                                 port=27017,
-                                 username='lcastilloAdmin',
-                                 password='LPtYJpA3',
-                                 authSource='lcastillo_biostructures')
-  else:
-    client = pymongo.MongoClient()
-  return client
-
-
+# General mongo
 def exists_mongo_db():
   # return False
   global exists_mongo_db_var
@@ -92,6 +47,212 @@ def exists_mongo_db():
   except:
     exists_mongo_db_var = False
     return False
+
+
+def get_mongo_client():
+  if is_work_in_cluster():
+    client = pymongo.MongoClient(host="11.0.0.21",
+                                 port=27017,
+                                 username='lcastilloAdmin',
+                                 password='LPtYJpA3',
+                                 authSource='lcastillo_biostructures')
+  else:
+    client = pymongo.MongoClient()
+  return client
+
+
+def clear_collection():
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    col.drop()
+
+
+def save_collection(export_json_path):
+  if os.path.exists(export_json_path):
+    os.remove(export_json_path)
+
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    cursor = col.find({}, no_cursor_timeout=True)
+    with open(export_json_path, 'w') as file:
+      file.write('[')
+
+      flag_1 = True
+      for document in cursor:
+        if not flag_1:
+          file.write(',')
+        else:
+          flag_1 = False
+        file.write(dumps(document))
+      file.write(']')
+
+
+def load_collection(json_path):
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    with open(json_path) as f:
+      file_data = json.load(f)
+      if isinstance(file_data, list):
+        with tqdm(total=len(file_data)) as pbar:
+          for add_pdb in file_data:
+            add_pdb.pop("_id")
+            col.update_one(
+              {"pdbID": add_pdb["pdbID"]},
+              {"$setOnInsert": add_pdb},
+              True
+            )
+            pbar.update(1)
+      else:
+        file_data.pop("_id")
+        col.update_one(
+          {"pdbID": file_data["pdbID"]},
+          {"$setOnInsert": file_data},
+          True
+        )
+
+
+def memory_use():
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    result = db.command("collstats", collection_name)
+    final_size = result["totalIndexSize"] + result["storageSize"]
+    return final_size / (1024 * 1024)
+  return 0
+
+
+# Creation
+def create_pdb_db(pdb_id):
+  pdb_id = pdb_id.lower()
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
+    if pdb_data != None:
+      return
+    else:
+      insert_pdb_information(db, col, pdb_id)
+
+
+def insert_pdb_information(db, col, pdb_id):
+  global valid_resolutions
+  from general_utils.pdb_utils import get_similar_pdb_struct, \
+    get_similar_pdb_chain_structural, \
+    get_similar_pdb_chain_sequential
+
+  path_dir = gen_dir()
+  is_pdb = True
+  try:
+    path_of_file = '{0}/{1}.pdb'.format(path_dir, pdb_id)
+    download_pdb(pdb_id, path_of_file)
+    chains = get_chains_pdb(path_of_file)
+  except:
+    is_pdb = False
+    path_of_file = '{0}/{1}.cif'.format(path_dir, pdb_id)
+    download_cif(pdb_id, path_of_file)
+    chains = get_chains_cif(path_of_file)
+
+  new_pdb = {}
+  new_pdb['chains'] = put_bigfile_db(db, chains)
+  new_pdb['all_sequences'] = put_bigfile_db(db, get_online_sequences(pdb_id, chains))
+
+  map_pdb2cif = get_online_chain_map_pdb2cif(pdb_id, chains)
+  new_pdb['map_pdb2cif'] = put_bigfile_db(db, map_pdb2cif)
+
+  new_pdb['similars_pdbs'] = put_bigfile_db(get_similar_pdb_struct(pdb_id, -1))
+
+  dicc_chain_struct = {chain: get_similar_pdb_chain_structural(map_pdb2cif[pdb_id], chain, -1) for chain in chains}
+  new_pdb['similars_chain_struct'] = put_bigfile_db(db, dicc_chain_struct)
+
+  dicc_chain_sequential = {chain: get_similar_pdb_chain_sequential(map_pdb2cif[pdb_id], chain, -1) for chain in chains}
+  new_pdb['similars_chain_sequential'] = put_bigfile_db(db, dicc_chain_sequential)
+
+  new_pdb['chains_files_info'] = put_bigfile_db(db, get_dicc_chains_files_info(pdb_id))
+
+  for resolution in valid_resolutions:
+    insert_resolution_pdb_information(col, db, resolution, pdb_id, chains, path_dir, path_of_file, is_pdb)
+
+  col.update_one(
+    {"pdbID": pdb_id},
+    {"$setOnInsert": new_pdb},
+    True
+  )
+
+  free_dir(path_dir)
+  return new_pdb
+
+
+def insert_resolution_pdb_information(col, db, resolution, pdb_id, chains, path_dir, path_of_file, is_pdb):
+  graph, father_ZD = gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_of_file, is_pdb, True)
+
+  for j in graph.nodes():
+    graph.nodes[j]["zd_descriptors"] = graph.nodes[j]["zd_descriptors"].tolist()
+
+  new_pdb_chain = {}
+
+  new_pdb_chain["G"] = put_bigfile_db(db, graph)
+  new_pdb_chain["OZD"] = put_bigfile_db(db, father_ZD)
+
+  key_mongo = pdb_id + "_" + resolution
+  col.update_one(
+    {"pdbID": key_mongo},
+    {"$setOnInsert": new_pdb_chain},
+    True
+  )
+
+
+# Get online
+def get_pdb_chains_online(pdb_id):
+  path_dir = gen_dir()
+
+  is_pdb = True
+  try:
+    path_of_file = '{0}/{1}.pdb'.format(path_dir, pdb_id)
+    download_pdb(pdb_id, path_of_file)
+    chains = get_chains_pdb(path_of_file)
+  except:
+    is_pdb = False
+    path_of_file = '{0}/{1}.cif'.format(path_dir, pdb_id)
+    download_cif(pdb_id, path_of_file)
+    chains = get_chains_cif(path_of_file)
+
+  free_dir(path_dir)
+  return is_pdb, chains
+
+
+# Delete
+def delete_pdb_db(pdb_id):
+  pdb_id = pdb_id.lower()
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    _result = col.delete_one({'pdbID': pdb_id})
+
+
+# General PDBS funtions
+def get_all_archive_pdb():
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    pdbs_data = col.find(no_cursor_timeout=True)
+    if pdbs_data.count() == 0:
+      return []
+    result = []
+    for i in pdbs_data:
+      result.append(i['pdbID'])
+    return result
+
+  else:
+    return []
 
 
 def get_graph_pdb_db(pdb_id, resolution):
@@ -295,85 +456,43 @@ def insert_sequences_db(pdb_id):
     return all_sequences
 
 
-def make_pdb_dir_temp(work_dir, pdb_id):
-  complete_path = os.path.abspath(work_dir)
-  dirs = os.listdir(complete_path)
-
-  if pdb_id in dirs:
-    if len(os.listdir(os.path.join(complete_path, pdb_id))) > 0:
-      return
-    else:
-      os.rmdir(os.path.join(complete_path, pdb_id))
-
-  work_local_dir = gen_dir()
-
-  is_pdb = True
-  try:
-    path_of_file = '{0}/{1}.pdb'.format(work_local_dir, pdb_id)
-    download_pdb(pdb_id, path_of_file)
-    chains = get_chains_pdb(path_of_file)
-  except:
-    is_pdb = False
-    path_of_file = '{0}/{1}.cif'.format(work_local_dir, pdb_id)
-    download_cif(pdb_id, path_of_file)
-    chains = get_chains_cif(path_of_file)
-
-  if is_pdb:
-    from to_mrc.pdb_2_mrc import pdb_to_chains_file
-    pdb_to_chains_file(path_of_file, complete_path, chains, len(chains))
-  else:
-    from general_utils.cif_utils import cif_to_chains_pdb_files
-    cif_to_chains_pdb_files(path_of_file, complete_path, chains, len(chains))
-
-
 def get_db_chains_files_db(pdb_id, path):
   pdb_id = pdb_id.lower()
   make_pdb_dir_temp(path, pdb_id)
-  # if exists_mongo_db():
-  #   client = get_mongo_client()
-  #   db = client[database_name]
-  #   col = db[collection_name]
-  #   pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
-  #   if pdb_data != None:
-  #     if 'chains_files_info' in pdb_data.keys():
-  #       dicc = pdb_data["chains_files_info"]
-  #
-  #       path_result = os.path.join(path, pdb_id)
-  #       shutil.rmtree(path_result, ignore_errors=True)
-  #       os.mkdir(path_result)
-  #
-  #       for i in dicc.keys():
-  #         f = open(os.path.join(path_result, i), 'w')
-  #         f.write("".join(dicc[i]))
-  #         f.close()
-  #     else:
-  #       dicc_add = get_dicc_chains_files_info(path, pdb_id)
-  #
-  #       try:
-  #         col.update_one(
-  #           {"pdbID": pdb_id},
-  #           {"$set": {'chains_files_info': dicc_add}},
-  #         )
-  #       except:
-  #         pass
-  #   else:
-  #     make_pdb_dir_temp(path, pdb_id)
-  #     # insert_pdb_information(col, pdb_id)
-  #     # return get_db_chains_files_db(pdb_id, path)
-  #
-  # else:
-  #   make_pdb_dir_temp(path, pdb_id)
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+    col = db[collection_name]
+    pdb_data = col.find_one({'pdbID': pdb_id}, no_cursor_timeout=True)
+    if pdb_data != None:
+      if 'chains_files_info' in pdb_data.keys():
+        dicc = pdb_data["chains_files_info"]
 
+        path_result = os.path.join(path, pdb_id)
+        shutil.rmtree(path_result, ignore_errors=True)
+        os.mkdir(path_result)
 
-def get_dicc_chains_files_info(path, pdb_id):
-  make_pdb_dir_temp(path, pdb_id)
-  dicc_add = {}
-  path_pdb = os.path.join(path, pdb_id)
-  for chain_file in os.listdir(path_pdb):
-    path_chain = os.path.join(path_pdb, chain_file)
-    with open(path_chain) as f:
-      dicc_add[os.path.basename(chain_file)] = f.readlines()
-  return dicc_add
+        for i in dicc.keys():
+          f = open(os.path.join(path_result, i), 'w')
+          f.write("".join(dicc[i]))
+          f.close()
+      else:
+        dicc_add = get_dicc_chains_files_info(path, pdb_id)
+
+        try:
+          col.update_one(
+            {"pdbID": pdb_id},
+            {"$set": {'chains_files_info': dicc_add}},
+          )
+        except:
+          pass
+    else:
+      make_pdb_dir_temp(path, pdb_id)
+      # insert_pdb_information(col, pdb_id)
+      # return get_db_chains_files_db(pdb_id, path)
+
+  else:
+    make_pdb_dir_temp(path, pdb_id)
 
 
 def get_online_sequences(pdb, chains_check=None):
@@ -560,51 +679,7 @@ def get_online_chain_map_pdb2cif(pdb, chains):
   return final_result
 
 
-def delete_pdb_db(pdb_id):
-  pdb_id = pdb_id.lower()
-  if exists_mongo_db():
-    client = get_mongo_client()
-    db = client[database_name]
-    col = db[collection_name]
-    result = col.delete_one({'pdbID': pdb_id})
 
-
-def insert_pdb_information(col, pdb_id):
-  path_dir = gen_dir()
-
-  is_pdb = True
-  try:
-    path_of_file = '{0}/{1}.pdb'.format(path_dir, pdb_id)
-    download_pdb(pdb_id, path_of_file)
-    chains = get_chains_pdb(path_of_file)
-  except:
-    is_pdb = False
-    path_of_file = '{0}/{1}.cif'.format(path_dir, pdb_id)
-    download_cif(pdb_id, path_of_file)
-    chains = get_chains_cif(path_of_file)
-
-  new_pdb = {}
-  # new_pdb['pdbID'] = pdb_id
-  new_pdb['chains'] = chains
-  new_pdb['all_sequences'] = get_online_sequences(pdb_id, chains)
-  new_pdb['map_pdb2cif'] = get_online_chain_map_pdb2cif(pdb_id, chains)
-
-  for i in [4, 6, 8, 10]:
-    graph, father_ZD = gen_graph_resolution_aux(chains, i, path_dir, pdb_id, path_of_file, is_pdb, True)
-    for j in graph.nodes():
-      graph.nodes[j]["zd_descriptors"] = graph.nodes[j]["zd_descriptors"].tolist()
-    g_json = json_graph.node_link_data(graph)
-    new_pdb[str(i) + "A_G"] = json_zip(g_json)
-    new_pdb[str(i) + "A_OZD"] = json_zip(json.dumps(father_ZD.tolist()))
-
-  col.update_one(
-    {"pdbID": pdb_id},
-    {"$setOnInsert": new_pdb},
-    True
-  )
-
-  free_dir(path_dir)
-  return new_pdb
 
 
 def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_file, is_pdb, return_OZD=False):
@@ -703,51 +778,7 @@ def gen_zd_resolution_aux(resolution, pdb_id):
   return father_ZD
 
 
-def get_all_archive_pdb():
-  if exists_mongo_db():
-    client = get_mongo_client()
-    db = client[database_name]
-    col = db[collection_name]
-    pdbs_data = col.find(no_cursor_timeout=True)
-    if pdbs_data.count() == 0:
-      return []
-    result = []
-    for i in pdbs_data:
-      result.append(i['pdbID'])
-    return result
 
-  else:
-    return []
-
-
-def clear_collection():
-  if exists_mongo_db():
-    client = get_mongo_client()
-    db = client[database_name]
-    col = db[collection_name]
-    col.drop()
-
-
-def save_collection(export_json_path):
-  if os.path.exists(export_json_path):
-    os.remove(export_json_path)
-
-  if exists_mongo_db():
-    client = get_mongo_client()
-    db = client[database_name]
-    col = db[collection_name]
-    cursor = col.find({}, no_cursor_timeout=True)
-    with open(export_json_path, 'w') as file:
-      file.write('[')
-
-      flag_1 = True
-      for document in cursor:
-        if not flag_1:
-          file.write(',')
-        else:
-          flag_1 = False
-        file.write(dumps(document))
-      file.write(']')
 
 
 def get_dicc_pdbs_can_chains():
@@ -765,42 +796,6 @@ def get_dicc_pdbs_can_chains():
         result[chains_len].append(pdb_data["pdbID"])
 
   return result
-
-
-def load_collection(json_path):
-  if exists_mongo_db():
-    client = get_mongo_client()
-    db = client[database_name]
-    col = db[collection_name]
-    with open(json_path) as f:
-      file_data = json.load(f)
-      if isinstance(file_data, list):
-        with tqdm(total=len(file_data)) as pbar:
-          for add_pdb in file_data:
-            add_pdb.pop("_id")
-            col.update_one(
-              {"pdbID": add_pdb["pdbID"]},
-              {"$setOnInsert": add_pdb},
-              True
-            )
-            pbar.update(1)
-      else:
-        file_data.pop("_id")
-        col.update_one(
-          {"pdbID": file_data["pdbID"]},
-          {"$setOnInsert": file_data},
-          True
-        )
-
-
-def memory_use():
-  if exists_mongo_db():
-    client = get_mongo_client()
-    db = client[database_name]
-    result = db.command("collstats", collection_name)
-    final_size = result["totalIndexSize"] + result["storageSize"]
-    return final_size / (1024 * 1024)
-  return 0
 
 # client = get_mongo_client()
 # Issue the serverStatus command and print the results

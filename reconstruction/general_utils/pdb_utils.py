@@ -12,6 +12,9 @@ import numpy as np
 import requests
 import re
 
+from general_utils.cif_utils import get_chains_cif
+from general_utils.download_utils import download_pdb, download_cif
+
 from general_utils.string_utils import change_string
 
 from general_utils.temp_utils import gen_dir, free_dir
@@ -822,3 +825,40 @@ def pdb_onlyCA(pdb_path, exit_path):
   exit_file = open(exit_path, "w")
   exit_file.write(final_text)
   exit_file.close()
+
+
+def make_pdb_dir_temp(work_dir, pdb_id):
+  complete_path = os.path.abspath(work_dir)
+  dirs = os.listdir(complete_path)
+
+  if pdb_id in dirs:
+    if len(os.listdir(os.path.join(complete_path, pdb_id))) > 0:
+      return
+    else:
+      os.rmdir(os.path.join(complete_path, pdb_id))
+
+  work_local_dir = gen_dir()
+
+  is_pdb = True
+  try:
+    path_of_file = '{0}/{1}.pdb'.format(work_local_dir, pdb_id)
+    download_pdb(pdb_id, path_of_file)
+    chains = get_chains_pdb(path_of_file)
+  except:
+    is_pdb = False
+    path_of_file = '{0}/{1}.cif'.format(work_local_dir, pdb_id)
+    download_cif(pdb_id, path_of_file)
+    chains = get_chains_cif(path_of_file)
+
+  if is_pdb:
+    from to_mrc.pdb_2_mrc import pdb_to_chains_file
+    pdb_to_chains_file(path_of_file, complete_path, chains, len(chains))
+  else:
+    from general_utils.cif_utils import cif_to_chains_pdb_files
+    cif_to_chains_pdb_files(path_of_file, complete_path, chains, len(chains))
+
+
+def align_tmaling(pdb1_path, pdb2_path):
+  from general_utils.terminal_utils import get_out
+  _error, exit_binary_text = get_out("./binaries/TMtools/TMalign", pdb1_path, pdb2_path)
+  print(exit_binary_text)
