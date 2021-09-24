@@ -487,7 +487,7 @@ def generateSimulatedSegments(index, df, sim_model_path):
         #print(command)
         #execute_command(command)
         # Generate map without specify box dimension
-        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py --het -B '+str(int(map_box_length))+ '  '+ pdb_filename_chain + ' ' + generated_segment_path
+        command = '/work/mzumbado/EMAN2/bin/python /work/mzumbado/EMAN2/bin/e2pdb2mrc.py -B '+str(int(map_box_length))+ '  '+ pdb_filename_chain + ' ' + generated_segment_path
         print(command)
         execute_command(command)
     except Exception as e:
@@ -828,8 +828,8 @@ def main():
                         df_synthetic_selected.loc[res_index, 'resolution'] = res
                         df_synthetic_selected.loc[res_index, 'map_path'] = path
                         df_synthetic_selected.loc[res_index, 'map_length'] = map_length
-                    except ValueError as error:
-                        print("Error calculating volume for simulated {}: {}".format(df_volume.loc[i,'fitted_entries'],error))
+                    except Exception as error:
+                        print("Error calculating volume for simulated {}: {}".format(i,error))
                 df_synthetic_selected.to_csv('synthetic_selected.csv', index=False)
     
     

@@ -4,7 +4,7 @@ from glob import glob
 import argparse
 import sys 
 from em import molecule
-from em.dataset import metrics
+from dataset import metrics
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 from concurrent.futures import wait
@@ -37,6 +37,7 @@ def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
     map_path = df.at[indexes[0], columns['map_path']]
     annotated_path = os.path.join(output_dir,map_path.replace('.','_gt.'))
     contourLvl = float(df.at[indexes[0], columns['contourLevel']])
+    print(map_path)
     map_to_annotate =  molecule.Molecule(map_path, recommendedContour=contourLvl)
     data_map = map_to_annotate.emMap.data()
     map_mask = map_to_annotate.getContourMasks()[1]
@@ -51,11 +52,12 @@ def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
     labels = []
     chain_label_id_dict = {}
     print('Tagging em map {}'.format(os.path.basename(map_path)))
-    for i in indexes:
-        segment_path = df.at[i, columns['subunit_path']]
-        if os.path.exists(segment_path):
+    try:
+        for i in indexes:
+            segment_path = df.at[i, columns['subunit_path']]
             segment_label = int(float(df.at[i, columns['chain_label']]))
             chain_label_id_dict[df.at[i,columns['chain_label']]] = df.at[i,columns['chain_id']]
+            print(segment_path)
             segment_map = molecule.Molecule(segment_path, recommendedContour=0.001)
             segment_mask = segment_map.getContourMasks()[1]
             print("Number of voxels in segment {}".format(np.sum(segment_mask)))
@@ -65,8 +67,8 @@ def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
             labels.append(segment_label)
             print("Chain {}, voxels {}".format(segment_label,segment_map.getVolume()[1]))
             print("	Matching {} of {} voxels".format(np.sum(masks_intersec), np.sum(segment_mask)))
-        else:
-            return ValueError('There is a problem getting segments for {}'.format(aligned_path))
+    except Exception as e:
+            return ValueError('There is a problem getting segments for {}:'.format(segment_path, e))
     # Get non assigned voxels
     dim1,dim2,dim3 = np.where(data_map == marker)
     nonassigned_points = np.array(list(map(list,zip(dim1,dim2,dim3))))
@@ -79,6 +81,7 @@ def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
     print("Total number of voxels: {}".format(map_to_annotate.getVolume()[1]))
     # If any voxel remain
     if (len(nonassigned_points) > 0) & (len(assigned_points)>0):
+        print("Attempt to assign {} voxels left".format(nonassigned_points))
         # Create KDTree with assigned points
         tree = cKDTree(assigned_points)
         # Search for nearest point
@@ -104,19 +107,20 @@ def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
         print("	No more voxels to assign")
         result['voxels_reasigned'] = 0
         result['voxels_discarted'] = 0
-    dim1,dim2,dim3 = np.where(data_map == marker)
-    if len(dim1)>0:
-        print("there shuldnt be markers in array of labels.. check this {}".format(os.path.basename(map_path)))
+    marker_left = np.sum(data_map == marker)
+    if marker_left>0:
+        print("there shuldnt be {} markers in array of labels.. check this {}".format(marker_left,os.path.basename(map_path)))
     # print labels
     voxels_dict = {}
     for l in labels:
         voxels_dict[l]=np.sum(data_map==l)
-        filename = map_path.replace(str(map_path[-4:]), '_'+chain_label_id_dict[l]+'.npy')
+        filename = map_path.replace(str(map_path[-4:]), '_'+str(l)+'.npy')
         map_masked = np.copy(data_map)
         print("Voxels for label {} :{}".format(l, voxels_dict[l])) 
-        map_masked[data_map==l] = 1.0
-        map_masked[data_map!=l] = 0.0
-        print("saved volume of {}".format(map_masked.sum()))
+        map_masked[data_map==l] = 2.0
+        map_masked[data_map!=l] = 1.0
+        map_masked[data_map==0] = 0.0        
+        print("saved volume of {}".format(np.sum(map_masked == 2)))
         np.save(filename, map_masked)
         print("saved {}".format(filename))
     # Compute euler numbers
@@ -126,42 +130,47 @@ def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
     # Save map
     result['euler_segments'] = json.dumps(euler_dict, default=convert)
     result['voxels_assigned'] = json.dumps(voxels_dict, default=convert)
-    result['tag_path'] = annotated_path
+    result['tagged_path'] = annotated_path
     result['map_id'] = map_id
     map_to_annotate.setData(data_map)
     map_to_annotate.save(annotated_path)    
     return result
 
-def annotatePoints(df, i, output_path, number_points=3, gaussian_std=3):
-    output_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path'])
+def annotatePoints(df, i, output_path, number_points=3, gaussian_std=3, pool_size=3):
+    map_path = df.iloc[i]['map_path']
+    output_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
     #print("aa{}".format(df.iloc[i]['tagged_path']))
     tagged_map = molecule.Molecule(df.iloc[i]['tagged_path'], 0.001).getEmMap().data()
     #print("unique",np.unique(tagged_map))
+    bbox = None
     for region in regionprops(tagged_map.astype(np.int32)):
         label = int(region.label)
+        bbox = region.bbox
         region_gt = np.copy(tagged_map)
         region_gt[ region_gt != label ] = 0.0
         region_gt[ region_gt == label ] = 1.0
-        #print("number",np.sum(region_gt==1.0))
-        #print("in label {}".format(label))
-        basename = df.iloc[i]['id']+'_'+str(label)+'.npy'
-        region_path = os.path.join(output_path,basename)
-        #print("pathh {}".format(region_path))
         distance = distance_transform_edt(region_gt)
         distance[distance != 1] = 0
-        index_x, index_y, index_z = np.where(distance == 1)
-        chosen_indexes = np.random.choice(len(index_x), number_points, replace=False)
-        #print("indexes:",chosen_indexes)
-        index_x = index_x[chosen_indexes]
-        index_y = index_y[chosen_indexes]
-        index_z = index_z[chosen_indexes]
-        point_array = np.zeros_like(region_gt)
-        point_array[index_x,index_y,index_z] = 1.0
-        point_array = gaussian_filter(point_array, gaussian_std)
-        np.save(region_path,point_array) 
-        #print("saved {}".format(np.sum(point_array)))
-        output_df = output_df.append({'id':df.iloc[i]['id'], 'map_path':df.iloc[i]['map_path'], 'contourLevel':df.iloc[i]['contourLevel'], 'subunit':label, 'tagged_path':df.iloc[i]['tagged_path'], 'number_points':number_points, 'tagged_points_path':region_path}, ignore_index=True)
-    #print("output_df: ", output_df)
+        print("creating point set for region {} with volume {} of EM map {}".format(label, np.sum(region_gt), df.iloc[i]['tagged_path'])) 
+        if np.sum(region_gt)==0.0:
+            print("Tagged path {} does not have assigned voxels, ommiting extreme point anotation".format(df.iloc[i]['tagged_path']))
+            continue
+        # Fix to include numpy array path
+        tagged_path = map_path.replace(str(df.iloc[i]['map_path'][-4:]), '_'+str(label)+'.npy')
+        for p in range(pool_size):
+            basename = df.iloc[i]['id']+'_'+str(label)+'_'+str(p)+'.npy'
+            print("Creating pointsample {} for annotated {} ".format(p,basename))
+            region_path = os.path.join(output_path,basename)
+            index_x, index_y, index_z = np.where(distance == 1)
+            chosen_indexes = np.random.choice(len(index_x), number_points, replace=False)
+            index_x = index_x[chosen_indexes]
+            index_y = index_y[chosen_indexes]
+            index_z = index_z[chosen_indexes]
+            point_array = np.zeros_like(region_gt)
+            point_array[index_x,index_y,index_z] = 1.0
+            point_array = gaussian_filter(point_array, gaussian_std)
+            np.save(region_path,point_array)
+            output_df = output_df.append({'id':df.iloc[i]['id'], 'map_path':df.iloc[i]['map_path'], 'contourLevel':df.iloc[i]['contourLevel'], 'subunit':label, 'tagged_path':tagged_path, 'number_points':number_points, 'tagged_points_path':region_path,'min_x':bbox[0], 'min_y':bbox[1],'min_z':bbox[2],'max_x':bbox[3],'max_y':bbox[4],'max_z':bbox[5]}, ignore_index=True) 
     return output_df
         
 def compute_adjacency(df, i):
@@ -257,7 +266,7 @@ def doParallelTagging(df, fullness, gt_path, columns):
                     euler_segments = json.loads(res['euler_segments'])
                     voxels_reassigned = res['voxels_reasigned']
                     voxels_discarted = res['voxels_discarted']
-                    tagged_path = res['tag_path']
+                    tagged_path = res['tagged_path']
                     map_path = res['map_path']
                     contour = res['contourLevel']
                     voxels_num = res['total']
@@ -306,9 +315,9 @@ def doParallelAdjacency(df):
         output_df = output_df.append(res, ignore_index=True)
     return output_df
 
-def doParallelExtremePointAnnotation(df, output_path):
+def doParallelExtremePointAnnotation(df, pool_size, output_path):
     indexes = df.index.tolist()
-    output_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path'])
+    output_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
     comm = MPI.COMM_WORLD
     size = comm.Get_size()
     with MPICommExecutor(comm, root=0, worker_size=size) as executor:
@@ -316,7 +325,7 @@ def doParallelExtremePointAnnotation(df, output_path):
             futures = []
         # For each map, perform annotation
         for i in indexes:
-            futures.append(executor.submit(annotatePoints, df, i, output_path))
+            futures.append(executor.submit(annotatePoints, df, i, output_path, pool_size))
         wait(futures)
         for f in futures:
             try:
@@ -332,6 +341,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--a', required=False, default=3, help='Annotate data with a fullness parameter')
+    parser.add_argument('--p', required=False, default=1, help='Generate p number of samples for each segment') 
     parser.add_argument('--result_dir', default='output', required=False, help='output directory to store results')
 
     opt = parser.parse_args()
@@ -341,16 +351,19 @@ def main():
     gt_path = os.path.join(current_dir, 'ground_truth')
     if not(os.path.exists(gt_path)):
         os.mkdir(gt_path)
+
+    # Fullness parameter
     fullness = int(opt.a)
-    df_exp_merged = pd.read_csv('dataset_exp_merged.csv')
+    # Pool size parameter
+    pool_size= int(opt.p)
+    #df_exp_merged = pd.read_csv('dataset_exp_merged.csv')
     # Do parallel computation, one process for each map
     # Get index list to schedule processess 
     # Get id unique values to extract indexes of respective molecule subunits 
-    #exp_sim_metrics = doParallelTagging(df_exp_merged, fullness, gt_path, {'id':'id','map_path':'simulated_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label', 'chain_id':'chain_id'}) 
     #exp_tagged = doParallelTagging(df_exp_merged, fullness, gt_path, {'id':'id','map_path':'aligned_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label','chain_id':'chain_id'})
     # Perform same procedure for simulated data.
     #df_sim = pd.read_csv('dataset_sim_merged.csv')
-    #sim_tagged=  doParallelTagging(df_sim, fullness, gt_path, {'id':'entries','map_path':'simulated_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label','chain_id':'chain_id'})
+    #sim_tagged=  doParallelTagging(df_sim, fullness, gt_path, {'id':'entries','map_path':'map_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label','chain_id':'chain_id'})
 
     #match_exp = dict(zip(exp_tagged['id'], exp_tagged['tagged_path']))
     #match_exp_sim = dict(zip(sim_tagged['id'], sim_tagged['tagged_path']))
@@ -363,13 +376,14 @@ def main():
     #exp_tagged.to_csv('dataset_exp_tagged.csv', index=False)
     #sim_metrics.to_csv('dataset_sim_metrics.csv', index = False)         
     #sim_tagged.to_csv('dataset_sim_tagged.csv', index=False) 
-    
-    #extreme_points_df = doParallelExtremePointAnnotation(exp_metrics, os.path.join(current_dir,'extreme_points/'))
-    #extreme_points_df.to_csv('dataset_extreme_points.csv', index = False)
-    #extreme_points_df = doParallelExtremePointAnnotation(sim_metrics, os.path.join(current_dir,'extreme_points/'))
-    #extreme_points_df.to_csv('dataset_extreme_points_sim.csv', index = False)
-    selected_df = pd.read_csv('dataset_selected.csv')
-    result_df = doParallelAdjacency(selected_df)
-    result_df.to_csv('dataset_selected_adjacency.csv', index=False)
+    exp_tagged = pd.read_csv('dataset_exp_tagged.csv')
+    extreme_points_df = doParallelExtremePointAnnotation(exp_tagged, pool_size, os.path.join(current_dir,'extreme_points/'))
+    extreme_points_df.to_csv('dataset_extreme_points.csv', index = False)
+    sim_tagged = pd.read_csv('dataset_sim_tagged.csv')
+    extreme_points_df = doParallelExtremePointAnnotation(sim_tagged, pool_size, os.path.join(current_dir,'extreme_points/'))
+    extreme_points_df.to_csv('dataset_extreme_points_sim.csv', index = False)
+    #selected_df = pd.read_csv('dataset_selected.csv')
+    #result_df = doParallelAdjacency(selected_df)
+    #result_df.to_csv('dataset_selected_adjacency.csv', index=False)
 if __name__ == '__main__':
     main()

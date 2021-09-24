@@ -10,13 +10,13 @@
 ##SBATCH --time=1-00:00:00
 
 #Dribe
-#SBATCH --job-name=protpipe
-#SBATCH --output=%j.%N.out
-#SBATCH --nodes=1
-#SBATCH --tasks-per-node=70
-#SBATCH --partition=dribe
-#SBATCH --ntasks=70
-#SBATCH --time=3-00:00:00
+##SBATCH --job-name=protpipe
+##SBATCH --output=%j.%N.out
+##SBATCH --nodes=1
+##SBATCH --tasks-per-node=36
+##SBATCH --partition=dribe
+##SBATCH --ntasks=36
+##SBATCH --time=3-00:00:00
 
 #ANDALAN
 ##SBATCH --job-name=proteins
@@ -28,24 +28,24 @@
 ##SBATCH --time=24:00:00
 
 #NUKWA
-##SBATCH --job-name=proteins
-##SBATCH --output=%j.%N.out
-##SBATCH --nodes=1
-##SBATCH --tasks-per-node=48
-##SBATCH --partition=nukwa
-##SBATCH --ntasks=48    
-##SBATCH --time=1-00:00:00
-##SBATCH --nodelist=nukwa-04.cnca
+#SBATCH --job-name=proteins
+#SBATCH --output=%j.%N.out
+#SBATCH --nodes=1
+#SBATCH --tasks-per-node=48
+#SBATCH --partition=nukwa-debug
+#SBATCH --ntasks=48    
+#SBATCH --time=04:00:00
+#SBATCH --nodelist=nukwa-07.cnca
 module load gcc/9.3.0
 module load mpich/3.3.2-gcc-9.3.0 
 
 source ~/.bashrc 
 conda activate visual
 
-export PYTHONPATH=$PYTHONPATH:/work/mzumbado/biostructure
+export PYTHONPATH=$PYTHONPATH:/work/mzumbado/biostructure/em/src
 
-#time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures process_data.py --d 0 --v 1 --s 22 29 --g 30 --f 1 --p 1
-time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures feature_extraction.py
+#time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures process_data.py --d 0 --v 0 --g 30 --f 0 --p 1
+time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures feature_extraction.py --p 5
 
 #time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures process_data.py --d 1  --v 1 --s 22 29 --g 30 --f 1 --p 1
 
