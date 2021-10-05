@@ -12,7 +12,7 @@ import numpy as np
 import requests
 import re
 
-from general_utils.cif_utils import get_chains_cif
+
 from general_utils.download_utils import download_pdb, download_cif
 
 from general_utils.string_utils import change_string
@@ -25,88 +25,51 @@ adn_arn_online_list = []
 
 def get_similar_pdb_struct(pdb_name, can=10):
   search_request = {
-    "query": {
-      "type": "group",
-      "logical_operator": "and",
-      "nodes": [
-        {
-          "type": "group",
-          "logical_operator": "and",
-          "nodes": [
-            {
-              "type": "group",
-              "logical_operator": "and",
-              "nodes": [
-                {
-                  "type": "terminal",
-                  "service": "text",
-                  "parameters": {
-                    "attribute": "struct_keywords.pdbx_keywords",
-                    "negation": True,
-                    "operator": "contains_phrase",
-                    "value": "DNA-RNA"
+                    "query": {
+                      "type": "group",
+                      "logical_operator": "and",
+                      "nodes": [
+                        {
+                          "type": "group",
+                          "nodes": [
+                            {
+                              "type": "terminal",
+                              "service": "text",
+                              "parameters": {
+                                "attribute": "rcsb_entry_container_identifiers.entry_id",
+                                "operator": "in",
+                                "negation": True,
+                                "value": list(map(lambda x: x.upper(), get_pdb_no_work())),
+                              }
+                            }
+                          ],
+                          "logical_operator": "and"
+                        },
+                        {
+                          "type": "terminal",
+                          "service": "structure",
+                          "parameters": {
+                            "operator": "relaxed_shape_match",
+                            "value": {
+                              "entry_id": pdb_name.upper(),
+                              "assembly_id": "1"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "return_type": "entry",
+                    "request_options": {
+                      "return_all_hits": True,
+                      "scoring_strategy": "combined",
+                      "sort": [
+                        {
+                          "sort_by": "score",
+                          "direction": "desc"
+                        }
+                      ]
+                    }
                   }
-                },
-                {
-                  "type": "terminal",
-                  "service": "text",
-                  "parameters": {
-                    "attribute": "struct_keywords.pdbx_keywords",
-                    "negation": True,
-                    "operator": "contains_phrase",
-                    "value": "RNA"
-                  }
-                },
-                {
-                  "type": "terminal",
-                  "service": "text",
-                  "parameters": {
-                    "attribute": "struct_keywords.pdbx_keywords",
-                    "negation": True,
-                    "operator": "contains_phrase",
-                    "value": "DNA"
-                  }
-                }
-              ],
-              "label": "input-group"
-            },
-            {
-              "type": "terminal",
-              "service": "text",
-              "parameters": {
-                "operator": "in",
-                "negation": True,
-                "value": list(map(lambda x: x.upper(), get_pdb_no_work())),
-                "attribute": "rcsb_entry_container_identifiers.entry_id"
-              }
-            }
-          ]
-        },
-        {
-          "type": "terminal",
-          "service": "structure",
-          "parameters": {
-            "value": {
-              "entry_id": pdb_name.upper(),
-              "assembly_id": "1"
-            },
-            "operator": "relaxed_shape_match"
-          }
-        }
-      ]
-    },
-    "return_type": "entry",
-    "request_options": {
-      "return_all_hits": True,
-      "scoring_strategy": "combined",
-      "sort": [
-        {
-          "sort_by": "score",
-          "direction": "desc"
-        }
-      ]
-    }
-  }
   json_dump = json.dumps(search_request)
   url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
 
@@ -156,16 +119,17 @@ def get_similar_pdb_struct(pdb_name, can=10):
       dirty_list.append(i["identifier"].split("-")[0].lower())
       chain_score[i["identifier"].split("-")[0].lower()] = i["score"]
 
-  clean_list = np.intersect1d(np.array(dirty_list), np.array(get_all_pdb_work())).tolist()
-  for i in clean_list[:can]:
+  # clean_list = np.intersect1d(np.array(dirty_list), np.array(get_all_pdb_work())).tolist()
+  # for i in clean_list[:can]:
+  #   result.append([i, chain_score[i]])
+
+  for i in dirty_list[:can]:
     result.append([i, chain_score[i]])
 
   return result
 
 
 def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
-  from general_utils.database_utils import get_pdb2cif_db
-  chain_searh = get_pdb2cif_db(pdb_name)[chain]
   search_request = {
     "query": {
       "type": "group",
@@ -230,7 +194,7 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
           "parameters": {
             "value": {
               "entry_id": pdb_name.upper(),
-              "asym_id": chain_searh
+              "asym_id": chain.upper()
             },
             "operator": "relaxed_shape_match"
           }
@@ -265,7 +229,7 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
             "Only chain struct",
             pdb_name,
             "\n",
-            chain + "=>" + chain_searh,
+            chain + "=>" + chain,
             "\n",
             response,
             "\n",
@@ -281,7 +245,7 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
             "Only chain struct",
             pdb_name,
             "\n",
-            chain + "=>" + chain_searh,
+            chain + "=>" + chain,
             "\n",
             response,
             "\n",
@@ -303,8 +267,11 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
       dirty_list.append(i["identifier"].split("-")[0].lower())
       chain_score[i["identifier"].split("-")[0].lower()] = i["score"]
 
-  clean_list = np.intersect1d(np.array(dirty_list), np.array(get_all_pdb_work())).tolist()
-  for i in clean_list[:can]:
+  # clean_list = np.intersect1d(np.array(dirty_list), np.array(get_all_pdb_work())).tolist()
+  # for i in clean_list[:can]:
+  #   result.append([i, chain_score[i]])
+
+  for i in dirty_list[:can]:
     result.append([i, chain_score[i]])
 
   return result
@@ -325,9 +292,10 @@ def type_sequence(sequence):
     raise NameError('Can not get type of sequence')
 
 
-def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
-  from general_utils.database_utils import get_sequence_pdb_db
-  sequence = get_sequence_pdb_db(pdb_name, chain)
+def get_similar_pdb_chain_sequential(pdb_name, chain, can=10, sequence=None):
+  if sequence is None:
+    from general_utils.database_utils import get_sequence_pdb_db
+    sequence = get_sequence_pdb_db(pdb_name, chain)
 
   try:
     type_s = type_sequence(sequence)
@@ -440,8 +408,11 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10):
       dirty_list.append(i["identifier"].split("-")[0].lower())
       chain_score[i["identifier"].split("-")[0].lower()] = i["score"]
 
-  clean_list = np.intersect1d(np.array(dirty_list), np.array(get_all_pdb_work())).tolist()
-  for i in clean_list[:can]:
+  # clean_list = np.intersect1d(np.array(dirty_list), np.array(get_all_pdb_work())).tolist()
+  # for i in clean_list[:can]:
+  #   result.append([i, chain_score[i]])
+
+  for i in dirty_list[:can]:
     result.append([i, chain_score[i]])
 
   return result
@@ -828,6 +799,7 @@ def pdb_onlyCA(pdb_path, exit_path):
 
 
 def make_pdb_dir_temp(work_dir, pdb_id):
+  from general_utils.cif_utils import get_chains_cif
   complete_path = os.path.abspath(work_dir)
   dirs = os.listdir(complete_path)
 

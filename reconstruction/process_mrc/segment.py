@@ -10,10 +10,11 @@ class Segment(object):
   classdocs
   '''
 
-  def __init__(self, id_segment, mask, zd_descriptors):
+  def __init__(self, id_segment, mask, zd_descriptors, volume=0):
     '''
     Constructor
     '''
     self.id_segment = id_segment
     self.mask = mask
     self.zd_descriptors = zd_descriptors
+    self.volume = volume

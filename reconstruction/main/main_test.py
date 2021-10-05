@@ -27,8 +27,8 @@ from process_graph.process_graph_utils import draw_graph_similarity, draw_graph_
 
 import matplotlib.pyplot as plt
 from general_utils.database_utils import get_graph_pdb_db, get_chains_pdb_db, exists_mongo_db, get_all_archive_pdb, \
-  memory_use, save_collection, load_collection, clear_collection, get_chain_to_number_chain, delete_pdb_db, \
-  get_online_sequences, get_sequence_pdb_db, get_online_chain_map_pdb2cif, get_pdb2cif_db
+  memory_use, save_collection, load_collection, clear_collection, delete_pdb_db, \
+  get_online_sequences, get_sequence_pdb_db, get_online_chain_map_pdb2cif, get_pdb2cif_db, create_get_pdb_db
 from process_graph.graph_algorithm import graph_aligning
 import networkx as nx
 
@@ -647,4 +647,6 @@ K, L, M, N, O, P, Q, R, S, T
 # print(result.NumberAlignedAtomsAfterRefinement)
 
 
-align_tmaling("/home/lcastillo98/Downloads/1yfq_CA.pdb", "/home/lcastillo98/Downloads/tmp.pdb")
+# align_tmaling("/home/lcastillo98/Downloads/1yfq_CA.pdb", "/home/lcastillo98/Downloads/tmp.pdb")
+
+create_get_pdb_db("7fih")

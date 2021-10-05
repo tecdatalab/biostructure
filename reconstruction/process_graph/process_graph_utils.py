@@ -66,7 +66,7 @@ def generate_graph(segments, n_points_face, filter_value, max_distance, min_poin
 
     # Add nodes in gaphs
   for i in segments:
-    g_result.add_node(i.id_segment, zd_descriptors=i.zd_descriptors, cube_xyz_can=get_sum_xyz_can(i))
+    g_result.add_node(i.id_segment, zd_descriptors=i.zd_descriptors, cube_xyz_can=get_sum_xyz_can(i), volume=i.volume)
 
   for item in itertools.combinations(np.arange(len(segments)), 2):
     if item[0] == item[1]:

@@ -38,10 +38,11 @@ def get_mrc_segments(mrc_path, steps, sigma, recommendedContour_p=None, calculat
   result = []
   for key in segments_masks:
     # Create a copy of map densities
-    densities = np.copy(myMolecule.getEmMap().data())
+    densities = np.copy(myMolecule.getDataAtContour(1))
     # Set voxels outside segment to 0
     densities[np.logical_not(segments_masks[key])] = 0
-    result.append(Segment(key, densities, None))
+    volume = np.sum(densities) * myMolecule.emMap.voxelVol()
+    result.append(Segment(key, densities, None, volume))
 
   # then you can compute zernike descriptors for each segment, lets create a dict to store descriptors for each
   # segment # lets import the module
@@ -52,9 +53,14 @@ def get_mrc_segments(mrc_path, steps, sigma, recommendedContour_p=None, calculat
       zd = z.computeDescriptors(i.mask)
       i.zd_descriptors = zd
 
+  original_mask = myMolecule.getDataAtContour(1)
+  original_volume = np.sum(original_mask) * myMolecule.emMap.voxelVol()
+
   # print("Can_points", len(np.where(myMolecule.getEmMap().data() > 0)[0]))
   original_structure = \
-    Biomolecular_structure(myMolecule.getEmMap().data(), z.computeDescriptors(myMolecule.getEmMap().data()))
+    Biomolecular_structure(myMolecule.getDataAtContour(1),
+                           z.computeDescriptors(myMolecule.getDataAtContour(1)),
+                           original_volume)
 
   return result, original_structure
 
@@ -71,8 +77,9 @@ def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour
     # print(path)
     ## Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off ratios.
     myMolecule = molecule.Molecule(path, recommendedContour=recommendedContour_p)
-    densitie = np.copy(myMolecule.getEmMap().data())
-    result.append(Segment(actual_id, densitie, None))
+    densitie = np.copy(myMolecule.getDataAtContour(1))
+    volume = np.sum(densitie) * myMolecule.emMap.voxelVol()
+    result.append(Segment(actual_id, densitie, None, volume))
     actual_id += 1
     # print(myMolecule.contour_masks.shape)
 
@@ -82,9 +89,13 @@ def get_mrc_synthetic_segments_pdb(mrc_path, folder_segments, recommendedContour
       zd = z.computeDescriptors(i.mask)
       i.zd_descriptors = zd
 
+  original_mask = myMolecule_complete.getDataAtContour(1)
+  original_volume = np.sum(original_mask) * myMolecule_complete.emMap.voxelVol()
+
   original_structure = \
-    Biomolecular_structure(myMolecule_complete.getEmMap().data(),
-                           z.computeDescriptors(myMolecule_complete.getEmMap().data()))
+    Biomolecular_structure(myMolecule_complete.getDataAtContour(1),
+                           z.computeDescriptors(myMolecule_complete.getDataAtContour(1)),
+                           original_volume)
 
   return result, original_structure
 
@@ -101,8 +112,9 @@ def get_mrc_synthetic_segments_pdb_list(mrc_path, folder_segments, list_segments
     # print(path)
     ## Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off ratios.
     myMolecule = molecule.Molecule(path, recommendedContour=recommendedContour_p)
-    densitie = np.copy(myMolecule.getEmMap().data())
-    result.append(Segment(actual_id, densitie, None))
+    densitie = np.copy(myMolecule.getDataAtContour(1))
+    volume = np.sum(densitie) * myMolecule.emMap.voxelVol()
+    result.append(Segment(actual_id, densitie, None, volume))
     actual_id += 1
     # print(myMolecule.contour_masks.shape)
 
@@ -112,27 +124,32 @@ def get_mrc_synthetic_segments_pdb_list(mrc_path, folder_segments, list_segments
       zd = z.computeDescriptors(i.mask)
       i.zd_descriptors = zd
 
-    original_structure = \
-      Biomolecular_structure(myMolecule_complete.getEmMap().data(),
-                             z.computeDescriptors(myMolecule_complete.getEmMap().data()))
+  original_mask = myMolecule_complete.getDataAtContour(1)
+  original_volume = np.sum(original_mask) * myMolecule_complete.emMap.voxelVol()
+
+  original_structure = \
+    Biomolecular_structure(myMolecule_complete.getDataAtContour(1),
+                           z.computeDescriptors(myMolecule_complete.getDataAtContour(1)),
+                           original_volume)
 
   return result, original_structure
 
 
-def get_mrc_one(mrc_path, recommendedContour_p=None, calculate_Z3D=True):
+def get_mrc_one(mrc_path, recommendedContour_p=None, calculate_Z3D=True, actual_id=1):
   if recommendedContour_p == None:
     recommendedContour_p = get_mrc_level(mrc_path)
   # Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off
   # ratios.
-  actual_id = 1
+
   result = []
   myMolecule = molecule.Molecule(mrc_path, recommendedContour=recommendedContour_p)
-  tmp = myMolecule.getDataAtContour(1)
-  print(np.sum(tmp)*myMolecule.emMap.voxelVol())
-  densities = np.copy(myMolecule.getDataAtContour(1))
+
+  mask = myMolecule.getDataAtContour(1)
+  volume = np.sum(mask)*myMolecule.emMap.voxelVol()
+
   # Set voxels outside segment to 0
   densitie = np.copy(myMolecule.getDataAtContour(1))
-  result.append(Segment(actual_id, densitie, None))
+  result.append(Segment(actual_id, densitie, None, volume))
 
   # then you can compute zernike descriptors for each segment, lets create a dict to store descriptors for each
   # segment # lets import the module
@@ -143,9 +160,12 @@ def get_mrc_one(mrc_path, recommendedContour_p=None, calculate_Z3D=True):
       zd = z.computeDescriptors(i.mask)
       i.zd_descriptors = zd
 
-  # print("Can_points", len(np.where(myMolecule.getEmMap().data() > 0)[0]))
+  original_mask = myMolecule.getDataAtContour(1)
+  original_volume = np.sum(original_mask) * myMolecule.emMap.voxelVol()
+
   original_structure = \
     Biomolecular_structure(myMolecule.getDataAtContour(1),
-                           result[0].zd_descriptors)
+                           result[0].zd_descriptors,
+                           original_volume)
 
   return result, original_structure
