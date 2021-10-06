@@ -10,7 +10,7 @@ class Segment(object):
   classdocs
   '''
 
-  def __init__(self, id_segment, mask, zd_descriptors, volume=0):
+  def __init__(self, id_segment, mask, zd_descriptors, volume=0, textSimulatePDB=None):
     '''
     Constructor
     '''
@@ -18,3 +18,4 @@ class Segment(object):
     self.mask = mask
     self.zd_descriptors = zd_descriptors
     self.volume = volume
+    self.textSimulatePDB = textSimulatePDB

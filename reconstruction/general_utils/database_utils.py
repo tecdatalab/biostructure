@@ -12,8 +12,9 @@ from Bio import SeqIO
 
 from general_utils.cif_utils import get_chains_cif
 from general_utils.download_utils import download_pdb, download_cif, download_pdb_fasta
+from general_utils.mrc_uilts import mrc_to_pdb
 from general_utils.pdb_utils import get_chains_pdb, make_pdb_dir_temp
-from general_utils.temp_utils import gen_dir, free_dir
+from general_utils.temp_utils import gen_dir, free_dir, gen_file
 from general_utils.workspace_utils import is_work_in_cluster
 from miscellaneous_utils.database_mis import put_bigfile_db, get_dicc_chains_files_info, get_bigfile_db
 from to_mrc.cif_2_mrc import cif_to_mrc_chains
@@ -532,6 +533,7 @@ def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_file, is
 
     segment = segments_graph_simulate[0]
     segment.id_segment = chain
+    segment.textSimulatePDB = get_text_simulate_PDB('{0}/{1}_{2}.mrc'.format(local_path, pdb_id, chain))
     # segment.id_segment = chain
     segments.append(segment)
   graph = generate_graph(segments, 100, 0, 6, 1)
@@ -542,6 +544,18 @@ def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_file, is
   else:
     free_dir(local_path)
     return graph
+
+def get_text_simulate_PDB(mrc_file):
+  file_tem = gen_file()
+  mrc_to_pdb(mrc_file, file_tem, clean=True)
+
+  result = None
+  with open(file_tem) as f:
+    lines = f.readlines()
+    result = "".join(lines)
+  os.remove(file_tem)
+  return result
+
 
 # client = get_mongo_client()
 # Issue the serverStatus command and print the results

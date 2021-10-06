@@ -1,6 +1,7 @@
 import os
 import shutil
 
+from general_utils.pdb_utils import move_pdb_center
 from general_utils.string_utils import get_float_between_ss, get_float_value
 from general_utils.temp_utils import gen_dir, free_dir
 from general_utils.terminal_utils import get_out, execute_command
@@ -82,7 +83,7 @@ def get_cube_len_angstrom(map_path):
   return [x, y, z]
 
 
-def mrc_to_pdb(mrc_path, pdb_result_path, threshold_mrc=0.0):
+def mrc_to_pdb(mrc_path, pdb_result_path, threshold_mrc=0.0, clean=False):
   temp_dir = gen_dir()
 
   execute_command("echo 1|../binaries/Situs_3.1/bin/map2map {0} {1}/tempPDB.situs".format(mrc_path, temp_dir))
@@ -90,3 +91,8 @@ def mrc_to_pdb(mrc_path, pdb_result_path, threshold_mrc=0.0):
     "../binaries/MAINMAST/MAINMAST -m {0}/tempPDB.situs -t 9 -filter 0.3 -Dkeep 1.0 -Ntb 10 -Rlocal 5 -Nlocal 50 -Nround 50 -t {1} > {2}".format(
       temp_dir, threshold_mrc, pdb_result_path))
   free_dir(temp_dir)
+
+  if clean:
+    from general_utils.pdb_utils import only_first_model
+    only_first_model(pdb_result_path)
+  move_pdb_center(pdb_result_path)

@@ -12,7 +12,6 @@ import numpy as np
 import requests
 import re
 
-
 from general_utils.download_utils import download_pdb, download_cif
 
 from general_utils.string_utils import change_string
@@ -25,51 +24,51 @@ adn_arn_online_list = []
 
 def get_similar_pdb_struct(pdb_name, can=10):
   search_request = {
-                    "query": {
-                      "type": "group",
-                      "logical_operator": "and",
-                      "nodes": [
-                        {
-                          "type": "group",
-                          "nodes": [
-                            {
-                              "type": "terminal",
-                              "service": "text",
-                              "parameters": {
-                                "attribute": "rcsb_entry_container_identifiers.entry_id",
-                                "operator": "in",
-                                "negation": True,
-                                "value": list(map(lambda x: x.upper(), get_pdb_no_work())),
-                              }
-                            }
-                          ],
-                          "logical_operator": "and"
-                        },
-                        {
-                          "type": "terminal",
-                          "service": "structure",
-                          "parameters": {
-                            "operator": "relaxed_shape_match",
-                            "value": {
-                              "entry_id": pdb_name.upper(),
-                              "assembly_id": "1"
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    "return_type": "entry",
-                    "request_options": {
-                      "return_all_hits": True,
-                      "scoring_strategy": "combined",
-                      "sort": [
-                        {
-                          "sort_by": "score",
-                          "direction": "desc"
-                        }
-                      ]
-                    }
-                  }
+    "query": {
+      "type": "group",
+      "logical_operator": "and",
+      "nodes": [
+        {
+          "type": "group",
+          "nodes": [
+            {
+              "type": "terminal",
+              "service": "text",
+              "parameters": {
+                "attribute": "rcsb_entry_container_identifiers.entry_id",
+                "operator": "in",
+                "negation": True,
+                "value": list(map(lambda x: x.upper(), get_pdb_no_work())),
+              }
+            }
+          ],
+          "logical_operator": "and"
+        },
+        {
+          "type": "terminal",
+          "service": "structure",
+          "parameters": {
+            "operator": "relaxed_shape_match",
+            "value": {
+              "entry_id": pdb_name.upper(),
+              "assembly_id": "1"
+            }
+          }
+        }
+      ]
+    },
+    "return_type": "entry",
+    "request_options": {
+      "return_all_hits": True,
+      "scoring_strategy": "combined",
+      "sort": [
+        {
+          "sort_by": "score",
+          "direction": "desc"
+        }
+      ]
+    }
+  }
   json_dump = json.dumps(search_request)
   url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
 
@@ -785,9 +784,9 @@ def pdb_onlyCA(pdb_path, exit_path):
   with open(input_file) as origin_file:
     for line in origin_file:
       if line[0:4] == "ATOM" and line[12:15] == " CA":
-        #line = 'ALA'.join([line[:17], line[20:]])
-        #line = 'ALA'.join([line[:17], line[22:]])
-        #line = line[0:69] + line[-1]
+        # line = 'ALA'.join([line[:17], line[20:]])
+        # line = 'ALA'.join([line[:17], line[22:]])
+        # line = line[0:69] + line[-1]
         linesCA.append(line)
 
   final_text = "".join(linesCA)
@@ -834,3 +833,21 @@ def align_tmaling(pdb1_path, pdb2_path):
   from general_utils.terminal_utils import get_out
   _error, exit_binary_text = get_out("./binaries/TMtools/TMalign", pdb1_path, pdb2_path)
   print(exit_binary_text)
+
+
+def only_first_model(pdb_path):
+  input_file = os.path.abspath(pdb_path)
+  all_lines = []
+
+  with open(input_file) as origin_file:
+    for line in origin_file:
+      if line[0:4] == "ATOM":
+        all_lines.append(line)
+      if line[0:6] == "ENDMDL":
+        break
+
+  final_text = "".join(all_lines)
+  os.remove(pdb_path)
+  exit_file = open(pdb_path, "w")
+  exit_file.write(final_text)
+  exit_file.close()
