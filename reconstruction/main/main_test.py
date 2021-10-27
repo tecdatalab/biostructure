@@ -649,25 +649,26 @@ K, L, M, N, O, P, Q, R, S, T
 
 # align_tmaling("/home/lcastillo98/Downloads/1yfq_CA.pdb", "/home/lcastillo98/Downloads/tmp.pdb")
 
-# create_get_pdb_db("7fih")
-print("Holiwis")
-mrc_to_pdb("//home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/main_test/tmpf3kpkggj/7fih/7fih.mrc",
+#create_get_pdb_db("7fih")
+# print("Holiwis")
+mrc_to_pdb("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/7fih/7fih.mrc",
            "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
 print("7fih.mrc")
-mrc_to_pdb("//home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/main_test/tmpf3kpkggj/7fih/7fih_A.mrc",
-           "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
-print("7fih_A.mrc")
-mrc_to_pdb("//home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/main_test/tmpf3kpkggj/7fih/7fih_B.mrc",
-           "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
-print("7fih_B.mrc")
-mrc_to_pdb("//home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/main_test/tmpf3kpkggj/7fih/7fih_G.mrc",
-           "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
-print("7fih_G.mrc")
-mrc_to_pdb("//home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/main_test/tmpf3kpkggj/7fih/7fih_R.mrc",
-           "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
-print("7fih_R.mrc")
-mrc_to_pdb("//home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/main_test/tmpf3kpkggj/7fih/7fih_X.mrc",
-           "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
-print("7fih_Y.mrc")
-mrc_to_pdb("//home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/main_test/tmpf3kpkggj/7fih/7fih_Y.mrc",
-           "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
+
+# mrc_to_pdb("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/7fih/7fih_A.mrc",
+#            "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
+# print("7fih_A.mrc")
+# mrc_to_pdb("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/7fih/7fih_B.mrc",
+#            "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
+# print("7fih_B.mrc")
+# mrc_to_pdb("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/7fih/7fih_G.mrc",
+#            "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
+# print("7fih_G.mrc")
+# mrc_to_pdb("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/7fih/7fih_R.mrc",
+#            "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
+# print("7fih_R.mrc")
+# mrc_to_pdb("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/7fih/7fih_X.mrc",
+#            "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
+# print("7fih_Y.mrc")
+# mrc_to_pdb("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/7fih/7fih_Y.mrc",
+#            "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
