@@ -32,10 +32,10 @@ from SegmentationAgent import SegmentationAgent
 
 import os
 import glob
+import random
 
 
-
-def training(local_rank, config):
+def training(local_rank, config, current_fold, run_id):
 
     rank = idist.get_rank()
     manual_seed(config["seed"] + rank)
@@ -52,7 +52,7 @@ def training(local_rank, config):
         else:
             now = "stop-on-{}".format({config['stop_iteration']})
 
-        folder_name = "3DUnet-{}-_backend-{}-{}_{}".format(config['depth'],idist.backend(),idist.get_world_size(),now)
+        folder_name = "3DUnet-{}-_fold-{}-{}_{}".format(run_id,current_fold,idist.get_world_size(),now)
         output_path = Path(output_path) / folder_name
         if not output_path.exists():
             output_path.mkdir(parents=True)
@@ -69,27 +69,29 @@ def training(local_rank, config):
         hyper_params = [
             "model",
             "depth",
-            "pool_size",
             "extra_width",
             "batch_size",
             "momentum",
             "input_size",
             "depth",
             "weight_decay",
+            "alpha",
+            "beta",
             "optim",
             "criterion",
             "with_amp",
             "num_epochs",
+            "num_folds",
             "learning_rate",
         ]
         task.connect({k: config[k] for k in hyper_params})
 
 
     # Setup Segmentation Agent
-    agent = SegmentationAgent(config['val_percentage'], config['test_ids'], config['num_classes'],config['optim'], config['criterion'],
-                            config['pool_size'], int(config['extra_width']), config['batch_size'], (config['input_size'],config['input_size'],config['input_size']), 
-                            config['data_path'], config['seed'], config['learning_rate'], config['momentum'], config['weight_decay'], 
-                            config['depth'], device, config['with_amp'], idist)
+    agent = SegmentationAgent(config['test_ids'], config['num_classes'], config['num_folds'], current_fold, config['optim'], config['criterion'],
+                            int(config['extra_width']), config['batch_size'], (config['input_size'],config['input_size'],config['input_size']), 
+                            config['data_path'], config['seed'], config['learning_rate'], config['momentum'], config['weight_decay'],
+                            config['depth'], device, config['with_amp'],config['alpha'],config['beta'], idist)
 
     config["num_iters_per_epoch"] = len(agent.train_loader)
     print("Num iters per epoch: {}".format(config["num_iters_per_epoch"]))
@@ -130,7 +132,7 @@ def training(local_rank, config):
             log_metrics(logger, config['num_epochs'], state.times["COMPLETED"], "Test model {}".format(os.path.basename(m)), state.metrics)
         
 
-    trainer.add_event_handler(Events.EPOCH_COMPLETED(every=config["validate_every"]) | Events.COMPLETED, run_validation)
+    trainer.add_event_handler(Events.EPOCH_COMPLETED, run_validation)
 
     if rank == 0:
         # Setup TensorBoard logging on trainer and evaluators. Logged values are:
@@ -163,17 +165,16 @@ def training(local_rank, config):
     best_model_handler = Checkpoint(
         {"model": agent.model},
         get_save_handler(config),
-        #filename_prefix="best",
-        n_saved=None,
+        filename_prefix="best",
+        n_saved=2,
         global_step_transform=global_step_from_engine(trainer),
-        #score_name="test_accuracy",
-        #score_function=score_function,
+        score_function=score_function,
     )
     evaluator.add_event_handler(
-        Events.COMPLETED(lambda *_: trainer.state.epoch % 2 == 0), best_model_handler
+        Events.COMPLETED, best_model_handler
     )
-    evaluator.add_event_handler(
-        Events.COMPLETED(lambda *_: trainer.state.epoch == config["num_epochs"]), run_testing
+    trainer.add_event_handler(
+        Events.COMPLETED, run_testing
     )
     # In order to check training resuming we can stop training on a given iteration
     if config["stop_iteration"] is not None:
@@ -191,7 +192,7 @@ def training(local_rank, config):
 
     if rank == 0:
         tb_logger.close()
-
+        task.close()
 
 
 def run(
@@ -200,20 +201,21 @@ def run(
     data_path="dataset/dataset_extreme_points.csv",
     output_path="results",
     num_classes=3,
+    num_folds= 3,
     optim='SGD',
     criterion='CrossEntropy',
     depth=4,
-    pool_size=1,
     extra_width=0,
     batch_size=1,
     test_ids = ["emd-8528", "emd-8682", "6uph", "emd-5275", "emd-11686", "4ez4", "emd-8336"],
-    val_percentage=0.2,
     input_size=128,
     num_workers=1,
     num_epochs=100,
     learning_rate=0.001,
     momentum=0.9,
     weight_decay=0.0005,
+    alpha = 0.5,
+    beta = 0.5,
     validate_every=1,
     checkpoint_every=1000,
     backend=None,
@@ -254,7 +256,9 @@ def run(
     del config["spawn_kwargs"]
 
     with idist.Parallel(backend=backend, **spawn_kwargs) as parallel:
-    	parallel.run(training, config)
+        run_id = hex(random.getrandbits(16))
+        #for fold in range(config['num_folds']):
+        parallel.run(training, config, 2, run_id)
 
 
 def create_trainer(model, optimizer, criterion, train_sampler, config, logger):
@@ -380,22 +384,6 @@ def log_basic_info(logger, config):
         logger.info(f"\tworld size: {idist.get_world_size()}")
         logger.info("\n")
 
-def log_weights_hist(parameters, logger, status='before'):
-    fig = plt.figure(figsize=(15,5))
-    w_index = 0
-    for i in range(1,4):
-        ax = fig.add_subplot(1,3,i)
-        weights_list = parameters[w_index:w_index+3]
-        for k,p in enumerate(weights_list):
-            current_flat = torch.flatten(p[1].clone().detach().cpu())
-            ax.hist(current_flat.numpy(),histtype='step',bins='auto',label=str(p[0]))
-            ax.legend()
-        ax.set_title('rom Layer : '+str(w_index+1)+' to '+str(w_index+3))
-        w_index +=3
-        plt.title('weights_'+str(status)+"_training.png")
-        logger.report_matplotlib_figure(title='From Layer : '+str(w_index+1)+' to '+str(w_index+3), series=status, iteration=0, figure=plt ) 
-        plt.clf()
-    plt.close('all')
 
 def get_save_handler(config):
     return ClearMLSaver(dirname=config["output_path"])

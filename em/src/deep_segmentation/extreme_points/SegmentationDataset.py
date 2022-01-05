@@ -12,7 +12,7 @@ from em.molecule import Molecule
          
 
 class SegmentationDataset(Dataset):
-    def __init__(self, df, num_classes, image_size, randg, extra_width=0):
+    def __init__(self, df, num_classes, image_size, randg, augmentate=False, extra_width=0):
         """
         Dataset class for EM data 
         :param num_classes: number of classes to classify
@@ -27,6 +27,7 @@ class SegmentationDataset(Dataset):
         self.num_classes = num_classes
         self.image_size = image_size
         self.randg = randg
+        self.augmentate = augmentate
 
     def __len__(self):
         return len(self.unique_dataframe)
@@ -71,12 +72,12 @@ class SegmentationDataset(Dataset):
         max_z = min(self.bbox_coords[5][idx]+self.extra_width, map_data.shape[2]-1)
         try:
             # Remove noise
-            map_data[mask_data==0] = 0
+            #map_data[mask_data==0] = 0
             mask_data = mask_data[min_x:max_x,min_y:max_y,min_z:max_z]
             map_data = map_data[min_x:max_x,min_y:max_y,min_z:max_z]
             # Load points according pool sample size
             points_df = self.points_df[(self.points_df['id']==map_id) & (self.points_df['subunit']==segment_id)]
-            point_data_filename = points_df.sample(1)['tagged_points_path'].item()
+            point_data_filename = points_df.sample(1, random_state=self.randg.seed() % 2**(32)-1)['tagged_points_path'].item()
             #print("fetching map {} subunit {} points {}".format(map_id,segment_id,point_data_filename))
             point_data =  np.load(point_data_filename)
             point_data = point_data[min_x:max_x,min_y:max_y,min_z:max_z]
@@ -96,7 +97,8 @@ class SegmentationDataset(Dataset):
             input_data = np.vstack([norm_data[np.newaxis], point_data[np.newaxis]])
             x = from_numpy(input_data).float()
             y = from_numpy(mask_data).long()
-            x,y = self.transform(x,y)
+            if self.augmentate:
+                x,y = self.transform(x,y)
             return x,y
         except Exception as e:
             print(e)
@@ -104,17 +106,3 @@ class SegmentationDataset(Dataset):
             print(map_data.shape)
             print(self.image_size)
 
-def compute_points(mask_map, number_points=3, gaussian_std=3):
-    #print("unique",np.unique(tagged_map))
-        #print("pathh {}".format(region_path))
-    distance = distance_transform_edt(mask_map)
-    distance[distance != 1] = 0
-    index_x, index_y, index_z = np.where(distance == 1)
-    chosen_indexes = np.random.choice(len(index_x), number_points, replace=False)
-    index_x = index_x[chosen_indexes]
-    index_y = index_y[chosen_indexes]
-    index_z = index_z[chosen_indexes]
-    point_array = np.zeros_like(mask_map)
-    point_array[index_x,index_y,index_z] = 1.0
-    point_array = gaussian_filter(point_array, gaussian_std)
-    return point_array 

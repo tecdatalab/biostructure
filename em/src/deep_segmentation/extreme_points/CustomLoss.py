@@ -5,18 +5,19 @@ from torch.nn.functional import cross_entropy, softmax
 
 
 class CustomLoss(Module):
-    def __init__(self, name, num_classes, weights, device, f16=False):
+    def __init__(self, name, num_classes, device, alpha, beta, f16=False):
         """
         A wrapper Module for a custom loss function
         """
         super(CustomLoss, self).__init__()
         self.name = name
         self.num_classes = num_classes
-        self.weights = weights
+        self.alpha = alpha
+        self.beta = beta
         self.device = device
         self.half_precision = f16
 
-    def tversky_loss(self, pred, target, alpha=0.5, beta=0.5):
+    def tversky_loss(self, pred, target, alpha, beta):
         """
         Calculate the Tversky loss for the input batches
         :param pred: predicted batch from model
@@ -97,7 +98,7 @@ class CustomLoss(Module):
             return loss
  
         elif self.name == 'Tversky':
-            loss = self.tversky_loss(pred, target)
+            loss = self.tversky_loss(pred, target, self.alpha, self.beta)
             return loss
         elif self.name == 'Weigthed':
             if cross_entropy_weight + tversky_weight != 1:
@@ -105,6 +106,6 @@ class CustomLoss(Module):
                              'sum to 1')
             ce = cross_entropy(pred, target,
                                weight=self.class_dice(pred,target).to(self.device))
-            tv = self.tversky_loss(pred, target)
+            tv = self.tversky_loss(pred, target, self.alpha, self.beta)
             loss = (cross_entropy_weight * ce) + (tversky_weight * tv)
             return loss

@@ -11,26 +11,9 @@ from CustomLoss import CustomLoss
 
 from em.molecule import Molecule
 from scipy.ndimage import zoom
+from sklearn.model_selection import KFold
 
 import pandas as pd
-
-def compute_class_weights(df, labels):
-    """
-    Helper method to compute class weights for training data
-    :param df: Dataframe of samples
-    :param label: List of numerical class labels to compute weights
-    :return: tensor of weights for corresponding label
-    """
-    masks = df['tagged_path'].tolist()
-    weights = np.zeros(len(labels))
-    total = 0
-    for mask in masks:
-        mask_array = np.load(mask)
-        w = [ np.sum(mask_array==l) for l in labels ]
-        total += np.sum(w)
-        weights += np.array(w)
-    return total/weights
-        
 
 def set_seed(seed):
     torch.backends.cudnn.deterministic = True
@@ -48,30 +31,36 @@ def get_optimizer(name, parameters, learning_rate, momentum, weight_decay):
 
 
 class SegmentationAgent:
-    def __init__(self, val_percentage, test_ids, num_classes, optimizer, loss_func,
-        pool_size, extra_width, batch_size, img_size, csv_path, seed, learning_rate, 
-        momentum, weight_decay, depth, device, mixed_precision, idist):
-        """
+    def __init__(self, test_ids, num_classes, num_folds, current_fold, optimizer, loss_func,
+        extra_width, batch_size, img_size, csv_path, seed, learning_rate, 
+        momentum, weight_decay, depth, device, mixed_precision, alpha, beta, idist):
+        '''
         A helper class to facilitate the training of the model
-        """
+        '''
+
         self.device = device
         self.seed = seed
         set_seed(self.seed)
         self.randg = torch.Generator() 
+        self.randg.manual_seed(self.seed)
         self.num_classes = num_classes
+        self.num_folds = num_folds
+        self.current_fold = current_fold
         self.batch_size = batch_size
         self.img_size = img_size
         self.dataframe = pd.read_csv(csv_path)
         self.depth = depth
         self.loss_func = loss_func
+        self.alpha = alpha
+        self.beta = beta
         #  Ensure that only local rank 0 split data
         if idist.get_local_rank() > 0:
             idist.barrier()
 
-        train_split, val_split, test_split = self.make_splits(val_percentage, test_ids, seed)
-        train_dataset = SegmentationDataset(train_split, self.num_classes, self.img_size, self.randg, extra_width)
-        validation_dataset = SegmentationDataset(val_split, self.num_classes, self.img_size, self.randg, extra_width)
-        test_dataset = SegmentationDataset(test_split, self.num_classes, self.img_size, self.randg, extra_width)
+        train_split, val_split, test_split = self.make_splits(num_folds, test_ids, seed)
+        train_dataset = SegmentationDataset(train_split, self.num_classes, self.img_size, self.randg, augmentate=True, extra_width)
+        validation_dataset = SegmentationDataset(val_split, self.num_classes, self.img_size, self.randg, augmentate=False, extra_width)
+        test_dataset = SegmentationDataset(test_split, self.num_classes, self.img_size, self.randg, augmentate=False, extra_width)
         if idist.get_local_rank() == 0:
             idist.barrier()
 
@@ -80,11 +69,11 @@ class SegmentationAgent:
         self.test_loader = DataLoader(test_dataset, batch_size=2*batch_size, shuffle=False, worker_init_fn=np.random.seed(self.seed), pin_memory=True)
 
         self.model = idist.auto_model(SegmentationUNet(self.num_classes, self.device, depth=self.depth))
-        self.criterion = CustomLoss(loss_func, self.num_classes, None, self.device, mixed_precision)
+        self.criterion = CustomLoss(loss_func, self.num_classes, self.device, self.alpha, self.beta,  mixed_precision)
         self.optimizer = idist.auto_optim(get_optimizer(optimizer, self.model.parameters(), learning_rate, momentum, weight_decay))
         
 
-    def make_splits(self, val_percentage, test_ids, seed=42):
+    def make_splits(self, num_folds, test_ids, nfolds, seed=42):
         """
         Split the data into train, validation and test datasets
         :param val_percentage: A decimal number which tells the percentage of
@@ -95,15 +84,20 @@ class SegmentationAgent:
         """
         # Get id list of EM maps in data
         id_list = self.dataframe.groupby('id')['id'].unique().index.tolist()
-        # Shuffle list to split data into train, validation and testing
-        np.random.shuffle(id_list)
-        # Select validation, training and test samples
-        val_num = int(val_percentage * len(id_list))
-        print("Val EM maps {}".format(val_num))
+        # Generate folds for cross validation
+        splits = KFold(n_splits=num_folds,shuffle=True,random_state=seed)
+        # Select testing maps from dataset
         test_maps = [test_id for test_id in test_ids if test_id in id_list ]
         samples = [sample_id for sample_id in id_list if sample_id not in test_maps ] 
-        validation_maps = samples[:val_num]
-        train_maps = samples[val_num:]
+        # Generate folds for cross validation
+        splits = KFold(n_splits=num_folds,shuffle=True,random_state=seed)
+        train_idx = []
+        val_idx = []
+        for t,v in splits.split(samples):
+            train_idx.append(t)
+            val_idx.append(v)
+        validation_maps = [ samples[i] for i in val_idx[self.current_fold] ] 
+        train_maps = [ samples[i] for i in train_idx[self.current_fold] ]
         print("Number of EM Maps in total: {}, Training: {}, Validation: {}, Testing: {}".format(len(id_list), len(train_maps), len(validation_maps), len(test_maps)))
         validation_segments = self.dataframe[self.dataframe['id'].isin(validation_maps)]
         train_segments = self.dataframe[self.dataframe['id'].isin(train_maps)]
@@ -114,11 +108,10 @@ class SegmentationAgent:
         print("Testing samples: {}".format(test_maps))
         return train_segments, validation_segments, test_segments
 
-    def get_dataloader(self, split, pool_size=1, extra_width=0, split_name=None, shuffle=False):
+    def get_dataloader(self, split, extra_width=0, split_name=None, shuffle=False):
         """
         Create a DataLoader for the given split
         :param split: train split, validation split or test split of the data
-        :param pool_size: Number of samples in extreme points pool
         :return: DataLoader
         """
         dataset = SegmentationDataset(split, self.num_classes, self.img_size, self.randg, self.device, extra_width)
