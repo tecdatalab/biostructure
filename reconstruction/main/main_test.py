@@ -2,13 +2,14 @@
 import re
 import sys
 import pathlib
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 from skimage.metrics import mean_squared_error
 
 from general_utils.mrc_uilts import mrc_to_pdb
+from general_utils.statistics_utils import get_dicc_pdbs_can_chains_file
 from process_mrc.generate import get_mrc_one
 
-sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 from pymol import cmd
 from general_utils.temp_utils import clean_work_dir
 
@@ -38,13 +39,13 @@ from general_utils.download_utils import download_pdb, download_emd_xml
 from general_utils.pdb_utils import get_pdb_chain_sequence, get_similar_pdb_struct, get_similar_pdb_chain_structural, \
   get_similar_pdb_chain_sequential, get_chains_pdb, get_pdb_no_work, align_pdb_file_1_in_2, pdb_onlyCA, align_tmaling
 from to_mrc.pdb_2_mrc import pdb_to_mrc_chains
-import general_utils
-
-if is_work_in_cluster():
-  general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_main_test"
-else:
-  general_utils.temp_utils.global_temp_dir = "./main_test"
-clean_work_dir()
+# import general_utils
+#
+# if is_work_in_cluster():
+#   general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_main_test"
+# else:
+#   general_utils.temp_utils.global_temp_dir = "./main_test"
+# clean_work_dir()
 
 # pdb = '5T4P'
 
@@ -651,11 +652,11 @@ K, L, M, N, O, P, Q, R, S, T
 
 #create_get_pdb_db("7fih")
 # print("Holiwis")
-mrc_to_pdb("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/7fih/7fih.mrc",
-           "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
-print("7fih.mrc")
-
-# mrc_to_pdb("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/7fih/7fih_A.mrc",
+# mrc_to_pdb("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/7fih/7fih.mrc",
+#            "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
+# print("7fih.mrc")
+#
+# # mrc_to_pdb("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/7fih/7fih_A.mrc",
 #            "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
 # print("7fih_A.mrc")
 # mrc_to_pdb("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/7fih/7fih_B.mrc",
@@ -672,3 +673,5 @@ print("7fih.mrc")
 # print("7fih_Y.mrc")
 # mrc_to_pdb("/home/lcastillo98/Documents/git_projects/biostructure/reconstruction/main/7fih/7fih_Y.mrc",
 #            "/home/lcastillo98/Downloads/1yfq_simulate.pdb")
+
+get_dicc_pdbs_can_chains_file()
