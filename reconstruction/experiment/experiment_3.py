@@ -141,6 +141,7 @@ def do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, resolution, 
   for i in range(len(all_segments)):
     initial_matrix.append(all_segments[i].mask.ravel())
 
+  # Todo: Check this code
   for i in range(len(initial_matrix)):
     points_i = np.where(initial_matrix[i] > 0)[0]
     initial_matrix[i][points_i] = 1
@@ -150,6 +151,7 @@ def do_test_a(pdb_name, headers_csv, result_cvs_file, all_segments, resolution, 
       change_points = np.intersect1d(points_i, points_j)
       initial_matrix[j][change_points] = 0
 
+  # Todo: Final check
   free_points = np.where(aux_cube == 0)
   initial_matrix[0][free_points] = 1
 
