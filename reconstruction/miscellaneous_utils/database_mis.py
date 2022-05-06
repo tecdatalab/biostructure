@@ -11,19 +11,9 @@ ZIPJSON_KEY = 'base64(zip(o))'
 
 # Big Files
 def put_bigfile_db(db, data_save):
-  file_write = gen_file()
-  output = open(file_write, 'wb')
-  pickle.dump(data_save, output)
-  output.close()
-
-  output = open(file_write, 'rb')
-  data_stream = output.read()
-
+  data_stream = pickle.dumps(data_save)
   fs = gridfs.GridFS(db)
   fid = fs.put(data_stream)
-
-  output.close()
-  os.remove(file_write)
 
   return fid
 
@@ -33,16 +23,7 @@ def get_bigfile_db(db, key_file):
   fs.exists(key_file)
   data_stream = fs.get(key_file).read()
 
-  file_write = gen_file()
-  output = open(file_write, 'wb')
-  pickle.dump(data_stream, output)
-  output.close()
-
-  output = open(file_write, 'rb')
-  outputdata = pickle.load(output)
-
-  output.close()
-  os.remove(file_write)
+  outputdata = pickle.loads(data_stream)
 
   return outputdata
 

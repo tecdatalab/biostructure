@@ -496,6 +496,20 @@ def get_chains_pdb_db(pdb_id):
     return chains_result
 
 
+def test_insert_get():
+  if exists_mongo_db():
+    client = get_mongo_client()
+    db = client[database_name]
+
+    file = [1, 2, 3, 4, 5]
+
+    code = put_bigfile_db(db, file)
+    file_get = get_bigfile_db(db, code)
+
+    is_equal = file == file_get
+    print(is_equal)
+
+
 def get_sequence_pdb_db(pdb_id, chain):
   pdb_id = pdb_id.lower()
   if exists_mongo_db():
@@ -535,7 +549,7 @@ def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_file, is
     segment = segments_graph_simulate[0]
     segment.id_segment = chain
     segment.textSimulatePDB = get_text_simulate_PDB('{0}/{1}_{2}.mrc'.format(local_path, pdb_id, chain))
-    if(is_pdb):
+    if (is_pdb):
       segment.originalCA = get_CA_from_PDB(path_file)
     else:
       segment.originalCA = None
@@ -580,7 +594,6 @@ def get_CA_from_PDB(pdb_file):
   if (result == "" or result is None):
     raise Exception("Text of CA can not be null")
   return result
-
 
 # client = get_mongo_client()
 # Issue the serverStatus command and print the results
