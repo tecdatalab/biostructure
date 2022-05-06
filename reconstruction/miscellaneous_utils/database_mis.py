@@ -63,7 +63,9 @@ def get_dicc_chains_files_info(pdb_id, path=None):
   for chain_file in os.listdir(path_pdb):
     path_chain = os.path.join(path_pdb, chain_file)
     with open(path_chain) as f:
-      dicc_add[os.path.basename(chain_file)] = "".join(f.readlines())
+      name_chain = path_chain.split(".")[0]
+      name_chain = name_chain.split("_")[1]
+      dicc_add[name_chain] = "".join(f.readlines())
 
   free_dir(path)
   return dicc_add

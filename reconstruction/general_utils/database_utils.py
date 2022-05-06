@@ -170,8 +170,9 @@ def insert_pdb_information(db, col, pdb_id):
     dicc_graph = resolution_pdb_information(resolution, pdb_id, chains, path_dir, path_of_file, is_pdb)
     all_graphs[key_mongo] = dicc_graph
 
-  new_pdb['all_graphs'] = put_bigfile_db(db, all_graphs)
+  new_pdb['is_original_pdb'] = is_pdb
 
+  new_pdb['all_graphs'] = put_bigfile_db(db, all_graphs)
 
   new_pdb['chains'] = put_bigfile_db(db, chains)
   all_sequences = get_online_sequences(pdb_id, chains)
@@ -534,7 +535,11 @@ def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_file, is
     segment = segments_graph_simulate[0]
     segment.id_segment = chain
     segment.textSimulatePDB = get_text_simulate_PDB('{0}/{1}_{2}.mrc'.format(local_path, pdb_id, chain))
-    # segment.id_segment = chain
+    if(is_pdb):
+      segment.originalCA = get_CA_from_PDB(path_file)
+    else:
+      segment.originalCA = None
+      # segment.id_segment = chain
     segments.append(segment)
   graph = generate_graph(segments, 100, 0, 6, 1)
   if return_OZD:
@@ -545,6 +550,7 @@ def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_file, is
     free_dir(local_path)
     return graph
 
+
 def get_text_simulate_PDB(mrc_file):
   file_tem = gen_file()
   mrc_to_pdb(mrc_file, file_tem, clean=True)
@@ -554,6 +560,25 @@ def get_text_simulate_PDB(mrc_file):
     lines = f.readlines()
     result = "".join(lines)
   os.remove(file_tem)
+  if (result == "" or result is None):
+    raise Exception("Text simulate PDB can not be null")
+  return result
+
+
+def get_CA_from_PDB(pdb_file):
+  from general_utils.pdb_utils import pdb_onlyCA
+
+  file_tem = gen_file()
+
+  pdb_onlyCA(pdb_file, file_tem)
+
+  result = None
+  with open(file_tem) as f:
+    lines = f.readlines()
+    result = "".join(lines)
+  os.remove(file_tem)
+  if (result == "" or result is None):
+    raise Exception("Text of CA can not be null")
   return result
 
 

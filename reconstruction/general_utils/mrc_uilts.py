@@ -84,13 +84,19 @@ def get_cube_len_angstrom(map_path):
 
 
 def mrc_to_pdb(mrc_path, pdb_result_path, threshold_mrc=0.0, clean=False):
-  temp_dir = gen_dir()
+  # temp_dir = gen_dir()
 
-  execute_command("echo 1|../binaries/Situs_3.1/bin/map2map {0} {1}/tempPDB.situs".format(mrc_path, temp_dir))
+  #execute_command("echo 1|../binaries/Situs_3.1/bin/map2map {0} {1}/tempPDB.situs".format(mrc_path, temp_dir))
+
+  level = get_mrc_level(mrc_path)
+
+  if(threshold_mrc==0 or threshold_mrc==0.0):
+    threshold_mrc = level
+
   execute_command(
-    "../binaries/MAINMAST/MAINMAST -m {0}/tempPDB.situs -t 9 -filter 0.3 -Dkeep 1.0 -Ntb 10 -Rlocal 5 -Nlocal 50 -Nround 50 -t {1} > {2}".format(
-      temp_dir, threshold_mrc, pdb_result_path))
-  free_dir(temp_dir)
+    "../binaries/MAINMAST/MainmastC -i {0} -t {1} -r 50 > {2}".format(
+      mrc_path, threshold_mrc, pdb_result_path))
+  # free_dir(temp_dir)
 
   if clean:
     from general_utils.pdb_utils import only_first_model

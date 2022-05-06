@@ -36,7 +36,7 @@ def gen_load_database():
     if executor is not None:
 
       # all_names = get_percentage_pbs_check_file(15, 'check_load_all_database.pkl', executor)
-      all_names = ["2ffw"]
+      all_names = ["1yfq"]
 
       random.shuffle(all_names)
       print("To load", len(all_names), flush=True)
