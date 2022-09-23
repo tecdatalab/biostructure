@@ -1,0 +1,2 @@
+source ~/.bashrc
+source ~/anaconda3/bin/activate /home/adminuser/eman2-sphire-sparx
