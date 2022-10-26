@@ -192,3 +192,22 @@ def consistency(segmented_map, gt_map):
         return c 
 
 
+def getCorrelation(array_A, array_B):
+    if(array_A.shape != array_B.shape):
+        raise ValueError("Both maps must have same dimensions !!! {} != {}".format(array_A.shape,array_B.shape))
+    else:
+        mean_A = np.mean(array_A)
+        mean_B = np.mean(array_B)
+        A_norm = (array_A - mean_A) / np.std(array_A, ddof=1)
+        B_norm = (array_B - mean_B) / np.std(array_B, ddof=1)
+        result = 1.0/(array_A.size-1) * np.sum(np.einsum("ijk, ijk -> ijk",A_norm,B_norm))
+        return result
+
+def getRelative_Masks_Overlap(mask_1, mask_2):
+        if(mask_1.shape != mask_2.shape):
+            raise ValueError("Both masks must have same dimensions !!! {} != {}".format(mask_1.shape,mask_2.shape))
+        else:
+            overlap = np.sum(np.einsum("ijk, ijk -> ijk",mask_1,mask_2)) / np.sum(mask_1)
+            return overlap
+
+
