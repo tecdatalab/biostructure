@@ -2,9 +2,9 @@ from torch import cat
 from torch.nn import BatchNorm3d, Conv3d, ConvTranspose3d, MaxPool3d, Module, \
     ModuleList, Sequential
 from torch.nn.functional import relu
-from torch.cuda.amp import autocast
 
-def conv(in_channels, out_channels, kernel_size=3, padding=1, batch_norm=True):
+
+def conv(in_channels, out_channels, kernel_size=3, padding=1, batch_norm=False):
     """
     A convolution block with a conv layer and batch norm
     :param in_channels: number of input channels
@@ -36,8 +36,8 @@ class DownConv(Module):
         self.out_channels = out_channels
         self.pooling = pooling
 
-        self.conv_in = conv(self.in_channels, self.out_channels//2)
-        self.conv_out = conv(self.out_channels//2, self.out_channels)
+        self.conv_in = conv(self.in_channels, self.out_channels)
+        self.conv_out = conv(self.out_channels, self.out_channels)
 
         if self.pooling:
             self.pool = MaxPool3d(kernel_size=2, stride=2)
@@ -63,10 +63,10 @@ class UpConv(Module):
         self.in_channels = in_channels
         self.out_channels = out_channels
 
-        self.upconv = ConvTranspose3d(self.in_channels, self.in_channels,
+        self.upconv = ConvTranspose3d(self.in_channels, self.out_channels,
                                       kernel_size=2, stride=2)
 
-        self.conv_in = conv(self.in_channels+self.in_channels//2, self.out_channels)
+        self.conv_in = conv(2 * self.out_channels, self.out_channels)
         self.conv_out = conv(self.out_channels, self.out_channels)
 
     def forward(self, from_down, from_up):
@@ -78,7 +78,7 @@ class UpConv(Module):
 
 
 class SegmentationUNet(Module):
-    def __init__(self, num_classes, device, in_channels=2, depth=4,
+    def __init__(self, num_classes, device, in_channels=1, depth=4,
                  start_filts=32):
         """
         The UNet model
@@ -102,7 +102,7 @@ class SegmentationUNet(Module):
         outs = 0
         for i in range(depth):
             ins = self.in_channels if i == 0 else outs
-            outs = self.start_filts * (2 ** (i+1))
+            outs = self.start_filts * (2 ** i)
             pooling = True if i < depth - 1 else False
 
             down_conv = DownConv(ins, outs, pooling=pooling)
@@ -123,6 +123,7 @@ class SegmentationUNet(Module):
     def forward(self, x):
         x = x.to(self.device)
         encoder_outs = []
+
         for i, module in enumerate(self.down_convs):
             x, before_pool = module(x)
             encoder_outs.append(before_pool)
