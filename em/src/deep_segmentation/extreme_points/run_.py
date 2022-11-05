@@ -207,7 +207,7 @@ def run(
     depth=4,
     extra_width=0,
     batch_size=1,
-    test_ids = ["emd-8528", "emd-8682", "6uph", "emd-5275", "emd-11686", "4ez4", "emd-8336"],
+    test_ids = [],
     input_size=128,
     num_workers=1,
     num_epochs=100,
@@ -257,14 +257,13 @@ def run(
 
     with idist.Parallel(backend=backend, **spawn_kwargs) as parallel:
         run_id = hex(random.getrandbits(16))
-        #for fold in range(config['num_folds']):
-        parallel.run(training, config, 2, run_id)
+        for fold in range(config['num_folds']):
+            parallel.run(training, config, fold, run_id)
 
 
 def create_trainer(model, optimizer, criterion, train_sampler, config, logger):
 
     device = idist.device()
-
     # Setup Ignite trainer:
     # - let's define training step
     # - add other common handlers:
@@ -278,9 +277,7 @@ def create_trainer(model, optimizer, criterion, train_sampler, config, logger):
     scaler = GradScaler(enabled=with_amp)
 
     def train_step(engine, batch):
-
         x, y = batch[0], batch[1]
-
         if x.device != device:
             x = x.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
