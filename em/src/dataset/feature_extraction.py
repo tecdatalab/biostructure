@@ -35,7 +35,7 @@ def convert(o):
 
 def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
     map_id = df.at[indexes[0], columns['id']]
-    map_path = 'models/'+map_id+'.mrc'
+    map_path = '/net/kihara/scratch/mzumbado/biostructure/em/src/dataset/models/'+map_id+'.mrc'
     annotated_path = os.path.join(output_dir,os.path.basename(map_path).replace('.','_gt.'))
     contourLvl = float(df.at[indexes[0], columns['contourLevel']])
     print(map_path)
@@ -154,17 +154,19 @@ def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
 
     return result
 
-def annotatePoints(df, i, output_path, number_points=3, gaussian_std=3, pool_size=3):
+def annotatePoints(df, i, output_path, pool_size=3, number_points=3, gaussian_std=3):
     map_path = df.iloc[i]['map_path']
     output_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
     #print("aa{}".format(df.iloc[i]['tagged_path']))
-    tagged_map = molecule.Molecule(df.iloc[i]['tagged_path'], 0.001).getEmMap().data()
-    #print("unique",np.unique(tagged_map))
+    tagged_map_path = df.iloc[i]['tagged_path']
+    tagged_map = mrcfile.open(tagged_map_path)
+    tagged_map_data = tagged_map.data
+    print("unique",np.unique(tagged_map_data))
     bbox = None
-    for region in regionprops(tagged_map.astype(np.int32)):
+    for region in regionprops(tagged_map_data.astype(np.int32)):
         label = int(region.label)
         bbox = region.bbox
-        region_gt = np.copy(tagged_map)
+        region_gt = np.copy(tagged_map_data)
         region_gt[ region_gt != label ] = 0.0
         region_gt[ region_gt == label ] = 1.0
         distance = distance_transform_edt(region_gt)
@@ -189,6 +191,10 @@ def annotatePoints(df, i, output_path, number_points=3, gaussian_std=3, pool_siz
             point_array = gaussian_filter(point_array, gaussian_std)
             np.save(region_path,point_array)
             output_df = output_df.append({'id':df.iloc[i]['id'], 'map_path':df.iloc[i]['map_path'], 'contourLevel':df.iloc[i]['contourLevel'], 'subunit':label, 'tagged_path':tagged_path, 'number_points':number_points, 'tagged_points_path':region_path,'min_x':bbox[0], 'min_y':bbox[1],'min_z':bbox[2],'max_x':bbox[3],'max_y':bbox[4],'max_z':bbox[5]}, ignore_index=True) 
+            del point_array
+    tagged_map.close()
+    del tagged_map
+    del distance
     return output_df
         
 def compute_adjacency(df, i):
@@ -327,6 +333,123 @@ def doParallelTagging(df, fullness, gt_path, columns, comm, size ):
     ''' 
     return output_df
 
+
+def samplingPatches(df, size, extra_width, stride):
+    id_list = df.index.tolist()
+    output_df = pd.DataFrame(columns=['id','subunit','point','patch','input_path','gt_path','x_min','y_min','z_min','x_max','y_max','z_max'])
+    
+    row = df.iloc[0]
+
+
+    map_id = row['id']
+    segment_id = row['subunit']
+    map_object = mrcfile.open(row['map_path'])
+    map_data = map_object.data
+    map_data = np.copy(map_object.data)
+    map_data[map_data<float(row['contourLevel'])]=0
+    mask_data = np.load(row['tagged_path'])
+
+    data_max = np.max(map_data)
+    data_min = np.min(map_data)
+    norm_data = (map_data - data_min)/ (data_max-data_min + 1e-6)
+    
+    min_x = max(int(row['min_x'])-extra_width, 0 )
+    min_y = max(int(row['min_y'])-extra_width, 0)
+    min_z = max(int(row['min_z'])-extra_width, 0)
+    max_x = min(int(row['max_x'])+extra_width, map_data.shape[0])
+    max_y = min(int(row['max_y'])+extra_width, map_data.shape[1])
+    max_z = min(int(row['max_z'])+extra_width, map_data.shape[2])
+
+    data_shape = (max_x-min_x,max_y-min_y,max_z-min_z)
+    axis_count = [ s - size for s in data_shape]
+
+    # Slice
+    norm_data = norm_data[min_x:max_x,min_y:max_y,min_z:max_z]
+    mask_data = mask_data[min_x:max_x,min_y:max_y,min_z:max_z]
+
+    #Check padding
+    for i,c in enumerate(axis_count):
+        pad = [[0,0], [0,0], [0,0]]
+        if c <= 0:
+            pad_len = size - norm_data.shape[i]
+            pad[i][1] = pad_len
+            axis_count[i] = 0
+
+    axis_it = [ (p//stride)+1 if p//stride>0 else 1 for p in axis_count ]
+    if np.sum(pad)>0:
+        norm_data = np.pad(norm_data, pad)
+        mask_data  = np.pad(mask_data, pad)
+    number_samples = len(df)
+    number_patches = axis_it[0]*axis_it[1]*axis_it[2]
+    x_tensor = np.zeros((number_samples+1,norm_data.shape[0],norm_data.shape[1],norm_data.shape[2]))
+    x_tensor[0] = norm_data
+    y_tensor = mask_data 
+    filename_tmp = 'data_patches/{}_{}.npy'.format(map_id,segment_id)
+    mask_tmp = 'data_patches/{}_{}_mask.npy'.format(map_id,segment_id)
+    columns_out = ['id','subunit','point','patch','input_path','gt_path','x_min','y_min','z_min','x_max','y_max','z_max']
+    df_count = 0
+    for index,row in df.iterrows():
+        point_id =row['tagged_points_path'][-5:-4]
+        point_data = np.load(row['tagged_points_path'])[min_x:max_x,min_y:max_y,min_z:max_z]
+        point_data = np.pad(point_data, pad)
+        x_tensor[df_count+1] = point_data
+        # Slice and dave
+        x0 = 0
+        y0 = 0
+        z0 = 0
+        count = 0
+        for i in range(axis_it[0]):
+            for j in range(axis_it[1]):
+                for k in range(axis_it[2]):
+                    parameter_list = [map_id,segment_id,point_id,count,filename_tmp,mask_tmp,x0,y0,z0,x0+size,y0+size,z0+size ]
+                    new_row = pd.DataFrame([parameter_list], columns=columns_out)
+                    output_df = pd.concat([output_df,new_row], ignore_index=True)
+                    z0+=stride
+                    count+=1
+                y0+=stride
+                z0 = 0
+            x0+=stride
+            y0 = 0
+            z0 = 0
+        df_count +=1
+    np.save('data_patches/{}_{}.npy'.format(map_id,segment_id), x_tensor)
+    np.save('data_patches/{}_{}_mask.npy'.format(map_id,segment_id), y_tensor)
+    print("Saving id {} subunit {} with {} points. Collected {} patches".format(map_id,segment_id,number_samples,count))
+    map_object.close()
+    del map_data
+    del mask_data
+    del norm_data
+    del x_tensor
+    del y_tensor
+    return output_df
+                    
+        
+            
+def doParallelSamplingPatches(df, shape_size,stride, extra_width, comm, size ):
+    unique_df = df.groupby(['id','subunit'])
+    # Construct dataframe to store results
+    output_df = pd.DataFrame(columns=['id','subunit','point','patch','input_path','gt_path'])
+    print("Spawn procecess...")
+    
+    with MPICommExecutor(comm, root=0, worker_size=size) as executor:
+        if executor is not None:
+            futures = []
+            # For each map, perform annotation
+            for name,group in unique_df:
+                futures.append(executor.submit(samplingPatches,group, shape_size, extra_width, stride))
+            wait(futures)
+            for f in futures:
+                try:
+                    res = f.result()
+                    output_df = output_df.append(res, ignore_index=True)
+                except ValueError as error:
+                    print("Error asignating patches  for {}".format(error))
+    ''' 
+    for name,group in unique_df:
+        out = samplingPatches(group, shape_size, extra_width, stride)
+    '''
+    return output_df
+
 def doParallelAdjacency(df):
     id_list = df.index.tolist()
     print("Spawn procecess...")
@@ -355,6 +478,7 @@ def doParallelAdjacency(df):
 def doParallelExtremePointAnnotation(df, pool_size, output_path, comm, size):
     indexes = df.index.tolist()
     output_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
+    
     with MPICommExecutor(comm, root=0, worker_size=size) as executor:
         if executor is not None:
             futures = []
@@ -369,14 +493,20 @@ def doParallelExtremePointAnnotation(df, pool_size, output_path, comm, size):
                 print(res)
             except Exception as e:
                 print("Error annotating extreme points",e)
-
     return output_df
+
+
+    
+    
+
+
 
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--a', required=False, default=10, help='Annotate data with a fullness parameter')
-    parser.add_argument('--p', required=False, default=5, help='Generate p number of samples for each segment') 
+    parser.add_argument('--a', required=False, default=6, help='Annotate data with a fullness parameter')
+    parser.add_argument('--p', required=False, default=5, help='Generate p number of samples for each segment')
+    parser.add_argument('--s', required=False, default=96, help='Size of the 3d path for corresponding sample') 
     parser.add_argument('--result_dir', default='output', required=False, help='output directory to store results')
 
     opt = parser.parse_args()
@@ -394,11 +524,13 @@ def main():
     fullness = int(opt.a)
     # Pool size parameter
     pool_size= int(opt.p)
-    df_exp_merged = pd.read_csv('dataset_exp_merged.csv', dtype=str)
+    patch_size= int(opt.s)
+
+    #df_exp_merged = pd.read_csv('dataset_exp_merged.csv', dtype=str)
     # Do parallel computation, one process for each map
     # Get index list to schedule processess 
     # Get id unique values to extract indexes of respective molecule subunits 
-    exp_tagged = doParallelTagging(df_exp_merged, fullness, gt_path, {'id':'id','contourLevel':'contourLevel', 'chain_label':'chain_label','chain_id':'chain_id'}, comm, size)
+    #exp_tagged = doParallelTagging(df_exp_merged, fullness, gt_path, {'id':'id','contourLevel':'contourLevel', 'chain_label':'chain_label','chain_id':'chain_id'}, comm, size)
     # Perform same procedure for simulated data.
     #df_sim = pd.read_csv('dataset_sim_merged.csv')
     #sim_tagged=  doParallelTagging(df_sim, fullness, gt_path, {'id':'entries','map_path':'map_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label','chain_id':'chain_id'})
@@ -411,12 +543,15 @@ def main():
 
     # Create result dataframe with metrics
     #exp_metrics.to_csv('dataset_exp_metrics.csv', index=False)
-    exp_tagged.to_csv('dataset_exp_tagged.csv', index=False)
+    #exp_tagged.to_csv('dataset_exp_tagged.csv', index=False)
     #sim_metrics.to_csv('dataset_sim_metrics.csv', index = False)         
     #sim_tagged.to_csv('dataset_sim_tagged.csv', index=False) 
-    #exp_tagged = pd.read_csv('dataset_exp_tagged.csv')
-    #extreme_points_df = doParallelExtremePointAnnotation(exp_tagged, pool_size, os.path.join(current_dir,'extreme_points/'), comm, size)
-    #extreme_points_df.to_csv('dataset_extreme_points.csv', index = False)
+    exp_tagged = pd.read_csv('dataset_exp_tagged.csv', dtype=str)
+    extreme_points_df = doParallelExtremePointAnnotation(exp_tagged, pool_size, os.path.join(current_dir,'extreme_points/'), comm, size)
+    extreme_points_df.to_csv('dataset_extreme_points.csv', index = False)
+    #df = pd.read_csv('dataset_extreme_points.csv', dtype=str)
+    #output_df = doParallelSamplingPatches(df, patch_size,2, 8, comm, size) 
+    #output_df.to_csv('dataset_patches.csv', index=False)
     #sim_tagged = pd.read_csv('dataset_sim_tagged.csv')
     #extreme_points_df = doParallelExtremePointAnnotation(sim_tagged, pool_size, os.path.join(current_dir,'extreme_points/'))
     #extreme_points_df.to_csv('dataset_extreme_points_sim.csv', index = False)
