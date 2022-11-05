@@ -46,14 +46,14 @@ class CustomLoss(Module):
         :param beta: multiplier for false negatives
         :return: Tversky loss
         """
-        target_oh = torch.eye(self.num_classes)[target.squeeze(1)]
+        target_oh = torch.eye(self.num_classes, device=self.device)[target.squeeze(1)]
         target_oh = target_oh.permute(0,4,1,2,3).float()
         probs = softmax(pred, dim=1)
         target_oh = target_oh.type(pred.type())
         dims = (0,) + tuple(range(2, target.ndimension()))
-        inter = torch.sum(probs * target_oh, dims)
-        fps = torch.sum(probs * (1 - target_oh), dims)
-        fns = torch.sum((1 - probs) * target_oh, dims)
+        inter = torch.sum(probs * target_oh, dims)[1:]
+        fps = torch.sum(probs * (1 - target_oh), dims)[1:]
+        fns = torch.sum((1 - probs) * target_oh, dims)[1:]
         t = (inter / (inter + (0.5 * fps) + (0.5 * fns))).mean()
         return 1 - t
 
