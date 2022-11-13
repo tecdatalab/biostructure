@@ -30,7 +30,7 @@ def get_optimizer(name, parameters, learning_rate, momentum, weight_decay):
 class SegmentationAgent:
     def __init__(self, test_ids, num_classes, num_folds, current_fold, optimizer, loss_func,
         extra_width, batch_size, img_size, csv_path, seed, learning_rate, 
-        momentum, weight_decay, depth, device, mixed_precision, alpha, beta, idist):
+        momentum, weight_decay, depth, device, mixed_precision, alpha, beta, batch_norm, idist):
         '''
         A helper class to facilitate the training of the model
         '''
@@ -45,11 +45,12 @@ class SegmentationAgent:
         self.current_fold = current_fold
         self.batch_size = batch_size
         self.img_size = img_size
-        self.dataframe = pd.read_csv(csv_path)
+        self.dataframe = pd.read_csv(csv_path, dtype=str)
         self.depth = depth
         self.loss_func = loss_func
         self.alpha = alpha
         self.beta = beta
+        self.batch_norm = batch_norm
         #  Ensure that only local rank 0 split data
         if idist.get_local_rank() > 0:
             idist.barrier()
@@ -58,14 +59,15 @@ class SegmentationAgent:
         train_dataset = SegmentationDataset(train_split, self.num_classes, self.img_size, self.randg, self.device, augmentate=True, extra_width=extra_width)
         validation_dataset = SegmentationDataset(val_split, self.num_classes, self.img_size, self.randg, self.device, augmentate=False, extra_width=extra_width, is_validation=True)
         test_dataset = SegmentationDataset(test_split, self.num_classes, self.img_size, self.randg, self.device, augmentate=False, extra_width=extra_width, is_validation=True)
+  
         if idist.get_local_rank() == 0:
             idist.barrier()
 
-        self.train_loader = idist.auto_dataloader(train_dataset, batch_size=self.batch_size, shuffle=True, worker_init_fn=np.random.seed(self.seed))
-        self.validation_loader = idist.auto_dataloader(train_dataset, batch_size=self.batch_size, shuffle=False, worker_init_fn=np.random.seed(self.seed))
-        self.test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False, worker_init_fn=np.random.seed(self.seed), pin_memory=True)
+        self.train_loader = idist.auto_dataloader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=4, worker_init_fn=np.random.seed(self.seed), pin_memory=True)
+        self.validation_loader = idist.auto_dataloader(train_dataset, batch_size=self.batch_size, shuffle=False, num_workers=4, worker_init_fn=np.random.seed(self.seed),pin_memory=True)
+        self.test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=4, worker_init_fn=np.random.seed(self.seed), pin_memory=True)
 
-        self.model = idist.auto_model(SegmentationUNet(self.num_classes, self.device, in_channels=2, depth=self.depth))
+        self.model = idist.auto_model(SegmentationUNet(self.num_classes, self.device, in_channels=2, depth=self.depth, batch_norm=self.batch_norm))
         self.criterion = CustomLoss(loss_func, self.num_classes, self.device, self.alpha, self.beta,  mixed_precision)
         self.optimizer = idist.auto_optim(get_optimizer(optimizer, self.model.parameters(), learning_rate, momentum, weight_decay))
         
@@ -80,8 +82,8 @@ class SegmentationAgent:
         :return: tuples of splits
         """
         # Get id list of EM maps in data
-        df_subunits = self.dataframe.drop_duplicates(subset=['id','subunit'])
-        id_list = df_subunits.index.tolist()
+        df_maps = self.dataframe.drop_duplicates(subset=['id'])
+        id_list = df_maps['id'].tolist()
         # Generate folds for cross validation
         splits = KFold(n_splits=num_folds,shuffle=True,random_state=seed)
         # Select testing maps from dataset
@@ -100,14 +102,12 @@ class SegmentationAgent:
             val_idx.append(v)
         validation_maps = [ samples[i] for i in val_idx[self.current_fold] ] 
         train_maps = [ samples[i] for i in train_idx[self.current_fold] ]
-        print("Number of samples in total: {}, Training: {}, Validation: {}, Testing: {}".format(len(id_list), len(train_maps), len(validation_maps), len(test_maps)))
-        validation_segments = self.dataframe[self.dataframe['id'].isin(validation_maps)]
-        train_segments = self.dataframe[self.dataframe['id'].isin(train_maps)]
-        test_segments = self.dataframe[self.dataframe['id'].isin(test_maps)].drop_duplicates(subset=['id','subunit'])
-        #print("Number of Segments in total: Training: {}, Validation: {}, Testing: {}".format(len(train_segments.drop_duplicates(subset=['id','subunit'])), len(validation_segments.drop_duplicates(subset=['id','subunit'])), len(test_segments)))
-        print("Training samples: {}".format(train_maps))
-        print("Validation samples: {}".format(validation_maps))
+        print("Number of EM maps in total: {}, Training: {}, Validation: {}, Testing: {}".format(len(id_list), len(train_maps), len(validation_maps), len(test_maps)))
+        validation_patches = self.dataframe[self.dataframe['id'].isin(validation_maps)]
+        train_patches = self.dataframe[self.dataframe['id'].isin(train_maps)]
+        test_patches = self.dataframe[self.dataframe['id'].isin(test_maps)]
+        print("Number of Patches in total: Training: {}, Validation: {}, Testing: {}".format(len(train_patches), len(validation_patches), len(test_patches)))
         print("Testing samples: {}".format(test_maps))
-        return train_segments, validation_segments, test_segments
+        return train_patches, validation_patches, test_patches
 
 

@@ -91,7 +91,7 @@ def training(local_rank, config, current_fold, run_id):
     agent = SegmentationAgent(config['test_ids'], config['num_classes'], config['num_folds'], current_fold, config['optim'], config['criterion'],
                             int(config['extra_width']), config['batch_size'], (config['input_size'],config['input_size'],config['input_size']), 
                             config['data_path'], config['seed'], config['learning_rate'], config['momentum'], config['weight_decay'],
-                            config['depth'], device, config['with_amp'],config['alpha'],config['beta'], idist)
+                            config['depth'], device, config['with_amp'],config['alpha'],config['beta'],config['batch_norm'], idist)
 
     config["num_iters_per_epoch"] = len(agent.train_loader)
     print("Num iters per epoch: {}".format(config["num_iters_per_epoch"]))
@@ -198,7 +198,7 @@ def training(local_rank, config, current_fold, run_id):
 def run(
     seed=42,
     model='3D-Unet',
-    data_path="dataset/dataset_extreme_points.csv",
+    data_path="dataset/dataset_patches.csv",
     output_path="results",
     num_classes=3,
     num_folds= 3,
@@ -223,6 +223,7 @@ def run(
     log_every_iters=15,
     stop_iteration=None,
     with_amp=False,
+    batch_norm=False,
     **spawn_kwargs,
 ):
     """Main entry to train 3D Unet on Cryo-EM dataset.
@@ -281,7 +282,7 @@ def create_trainer(model, optimizer, criterion, train_sampler, config, logger):
         if x.device != device:
             x = x.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
-
+ 
         model.train()
 
         with autocast(enabled=with_amp):
@@ -292,7 +293,6 @@ def create_trainer(model, optimizer, criterion, train_sampler, config, logger):
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
-
         return {
             "batch loss": loss.item(),
         }
@@ -341,7 +341,9 @@ def create_evaluator(model, metrics, config, tag="val"):
 
         with autocast(enabled=with_amp):
             output = model(x)
-        return output, y
+
+        del x
+        return output, y.to(device)
 
     evaluator = Engine(evaluate_step)
 
