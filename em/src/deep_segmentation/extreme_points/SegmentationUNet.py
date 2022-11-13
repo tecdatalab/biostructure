@@ -79,7 +79,7 @@ class UpConv(Module):
 
 class SegmentationUNet(Module):
     def __init__(self, num_classes, device, in_channels=1, depth=4,
-                 start_filts=32):
+                 start_filts=32, batch_norm=False):
         """
         The UNet model
         :param num_classes: number of classes to segment
@@ -95,6 +95,7 @@ class SegmentationUNet(Module):
         self.start_filts = start_filts
         self.depth = depth
         self.device = device
+        self.batch_norm = batch_norm
 
         self.down_convs = []
         self.up_convs = []
@@ -115,7 +116,7 @@ class SegmentationUNet(Module):
             self.up_convs.append(up_conv)
 
         self.conv_final = conv(outs, self.num_classes, kernel_size=1, padding=0,
-                               batch_norm=False)
+                               batch_norm=self.batch_norm)
 
         self.down_convs = ModuleList(self.down_convs)
         self.up_convs = ModuleList(self.up_convs)
@@ -127,7 +128,6 @@ class SegmentationUNet(Module):
         for i, module in enumerate(self.down_convs):
             x, before_pool = module(x)
             encoder_outs.append(before_pool)
-
         for i, module in enumerate(self.up_convs):
             before_pool = encoder_outs[-(i + 2)]
             x = module(before_pool, x)
