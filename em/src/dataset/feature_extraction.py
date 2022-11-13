@@ -21,7 +21,7 @@ from skimage.measure import regionprops
 from scipy.ndimage import distance_transform_edt, gaussian_filter
 
 from Bio.PDB import PDBParser, PDBIO
-
+import torch
 def convert(o):
     if isinstance(o, np.generic): return o.item()  
     raise TypeError
@@ -336,10 +336,9 @@ def doParallelTagging(df, fullness, gt_path, columns, comm, size ):
 
 def samplingPatches(df, size, extra_width, stride):
     id_list = df.index.tolist()
-    output_df = pd.DataFrame(columns=['id','subunit','point','patch','input_path','gt_path','x_min','y_min','z_min','x_max','y_max','z_max'])
+    output_df = pd.DataFrame(columns=['id','subunit','patch','data_path'])
     
     row = df.iloc[0]
-
 
     map_id = row['id']
     segment_id = row['subunit']
@@ -361,66 +360,53 @@ def samplingPatches(df, size, extra_width, stride):
     max_z = min(int(row['max_z'])+extra_width, map_data.shape[2])
 
     data_shape = (max_x-min_x,max_y-min_y,max_z-min_z)
-    axis_count = [ s - size for s in data_shape]
 
     # Slice
     norm_data = norm_data[min_x:max_x,min_y:max_y,min_z:max_z]
     mask_data = mask_data[min_x:max_x,min_y:max_y,min_z:max_z]
 
     #Check padding
-    for i,c in enumerate(axis_count):
-        pad = [[0,0], [0,0], [0,0]]
-        if c <= 0:
-            pad_len = size - norm_data.shape[i]
-            pad[i][1] = pad_len
-            axis_count[i] = 0
-
-    axis_it = [ (p//stride)+1 if p//stride>0 else 1 for p in axis_count ]
-    if np.sum(pad)>0:
-        norm_data = np.pad(norm_data, pad)
-        mask_data  = np.pad(mask_data, pad)
-    number_samples = len(df)
-    number_patches = axis_it[0]*axis_it[1]*axis_it[2]
-    x_tensor = np.zeros((number_samples+1,norm_data.shape[0],norm_data.shape[1],norm_data.shape[2]))
-    x_tensor[0] = norm_data
-    y_tensor = mask_data 
+    # Calculate padding to fit the sliding windows
+    pad0_left = (data_shape[0] // stride * stride + size) - data_shape[0]
+    pad1_left = (data_shape[1] // stride * stride + size) - data_shape[1]
+    pad2_left = (data_shape[2] // stride * stride + size) - data_shape[2]
+    # Calculate symmetric padding
+    pad0_right = pad0_left // 2 if pad0_left % 2 ==0 else pad0_left // 2 + 1
+    pad1_right = pad1_left // 2 if pad1_left % 2 ==0 else pad1_left // 2 + 1
+    pad2_right = pad2_left // 2 if pad2_left % 2 ==0 else pad2_left // 2 + 1
+    pad0_left = pad0_left // 2
+    pad1_left = pad1_left // 2
+    pad2_left = pad2_left // 2
+    print("Map {} chain {}: Sizes {} and {}, Padding:{},{}:{},{}:{}".format(map_id,segment_id,norm_data.shape, pad0_left, pad0_right, pad1_left, pad1_right, pad2_left, pad2_right))
+    norm_data_padded = np.pad(norm_data, ((pad0_left, pad0_right), (pad1_left, pad1_right), (pad2_left, pad2_right)))
+    mask_data_padded = np.pad(mask_data, ((pad0_left, pad0_right), (pad1_left, pad1_right), (pad2_left, pad2_right)))
+    new_shape = norm_data_padded.shape
+    all_tensor = np.zeros((12,new_shape[0],new_shape[1],new_shape[2]))
     filename_tmp = 'data_patches/{}_{}.npy'.format(map_id,segment_id)
-    mask_tmp = 'data_patches/{}_{}_mask.npy'.format(map_id,segment_id)
-    columns_out = ['id','subunit','point','patch','input_path','gt_path','x_min','y_min','z_min','x_max','y_max','z_max']
+    all_tensor[0] = mask_data_padded
+    all_tensor[1] = norm_data_padded
     df_count = 0
+    
     for index,row in df.iterrows():
         point_id =row['tagged_points_path'][-5:-4]
         point_data = np.load(row['tagged_points_path'])[min_x:max_x,min_y:max_y,min_z:max_z]
-        point_data = np.pad(point_data, pad)
-        x_tensor[df_count+1] = point_data
-        # Slice and dave
-        x0 = 0
-        y0 = 0
-        z0 = 0
-        count = 0
-        for i in range(axis_it[0]):
-            for j in range(axis_it[1]):
-                for k in range(axis_it[2]):
-                    parameter_list = [map_id,segment_id,point_id,count,filename_tmp,mask_tmp,x0,y0,z0,x0+size,y0+size,z0+size ]
-                    new_row = pd.DataFrame([parameter_list], columns=columns_out)
-                    output_df = pd.concat([output_df,new_row], ignore_index=True)
-                    z0+=stride
-                    count+=1
-                y0+=stride
-                z0 = 0
-            x0+=stride
-            y0 = 0
-            z0 = 0
-        df_count +=1
-    np.save('data_patches/{}_{}.npy'.format(map_id,segment_id), x_tensor)
-    np.save('data_patches/{}_{}_mask.npy'.format(map_id,segment_id), y_tensor)
-    print("Saving id {} subunit {} with {} points. Collected {} patches".format(map_id,segment_id,number_samples,count))
+        point_data_padded = np.pad(point_data, ((pad0_left, pad0_right), (pad1_left, pad1_right), (pad2_left, pad2_right)))
+        all_tensor[df_count+2] = point_data_padded
+        
+    all_tensor = torch.from_numpy(all_tensor)           
+    patches_tensor = all_tensor.unfold(3, size, size//2).unfold(2, size, size//2).unfold(1, size, size//2)
+    patches_tensor = patches_tensor.contiguous().view(-1,12,size,size,size) 
+    number_patches = patches_tensor.size(0)
+    for i in range(number_patches):#['id','subunit','patch','data_path', 'min_x', 'min_y', 'min_z', 'max_x', 'max_y','max_z']
+        output_df = output_df.append({'id':map_id, 'subunit':segment_id,'patch':i,'data_path':'data_patches/{}_{}.npy'.format(map_id,segment_id)}, ignore_index=True)
+    np.save('data_patches/{}_{}.npy'.format(map_id,segment_id), all_tensor.numpy())
+    print("Saved id {} subunit {} with shape {}".format(map_id,segment_id, patches_tensor.shape))
     map_object.close()
     del map_data
     del mask_data
     del norm_data
-    del x_tensor
-    del y_tensor
+    del point_data
+    del all_tensor
     return output_df
                     
         
@@ -428,9 +414,9 @@ def samplingPatches(df, size, extra_width, stride):
 def doParallelSamplingPatches(df, shape_size,stride, extra_width, comm, size ):
     unique_df = df.groupby(['id','subunit'])
     # Construct dataframe to store results
-    output_df = pd.DataFrame(columns=['id','subunit','point','patch','input_path','gt_path'])
+    output_df = pd.DataFrame(columns=['id','subunit','patch','data_path'])
     print("Spawn procecess...")
-    
+     
     with MPICommExecutor(comm, root=0, worker_size=size) as executor:
         if executor is not None:
             futures = []
@@ -546,12 +532,12 @@ def main():
     #exp_tagged.to_csv('dataset_exp_tagged.csv', index=False)
     #sim_metrics.to_csv('dataset_sim_metrics.csv', index = False)         
     #sim_tagged.to_csv('dataset_sim_tagged.csv', index=False) 
-    exp_tagged = pd.read_csv('dataset_exp_tagged.csv', dtype=str)
-    extreme_points_df = doParallelExtremePointAnnotation(exp_tagged, pool_size, os.path.join(current_dir,'extreme_points/'), comm, size)
-    extreme_points_df.to_csv('dataset_extreme_points.csv', index = False)
-    #df = pd.read_csv('dataset_extreme_points.csv', dtype=str)
-    #output_df = doParallelSamplingPatches(df, patch_size,2, 8, comm, size) 
-    #output_df.to_csv('dataset_patches.csv', index=False)
+    #exp_tagged = pd.read_csv('dataset_exp_tagged.csv', dtype=str)
+    #extreme_points_df = doParallelExtremePointAnnotation(exp_tagged, pool_size, os.path.join(current_dir,'extreme_points/'), comm, size)
+    #extreme_points_df.to_csv('dataset_extreme_points.csv', index = False)
+    df = pd.read_csv('dataset_extreme_points.csv', dtype=str)
+    output_df = doParallelSamplingPatches(df, patch_size,patch_size//2, 8, comm, size) 
+    output_df.to_csv('dataset_patches.csv', index=False)
     #sim_tagged = pd.read_csv('dataset_sim_tagged.csv')
     #extreme_points_df = doParallelExtremePointAnnotation(sim_tagged, pool_size, os.path.join(current_dir,'extreme_points/'))
     #extreme_points_df.to_csv('dataset_extreme_points_sim.csv', index = False)
