@@ -35,7 +35,7 @@ class CustomLoss(Module):
         fps = torch.sum(probs * (1 - target_oh), dims)
         fns = torch.sum((1 - probs) * target_oh, dims)
         t = (inter / (inter + (alpha * fps) + (beta * fns))).mean()
-        return (1 - t)**1.33
+        return (1 - t)**0.75
 
     def dice_loss(self, pred, target):
         """
