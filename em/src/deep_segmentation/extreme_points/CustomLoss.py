@@ -65,18 +65,20 @@ class CustomLoss(Module):
         :return: list of DICE loss for each class
         """
         pred_class = torch.argmax(pred, dim=1)
-        dice = np.ones(self.num_classes)
+        dice = torch.ones(self.num_classes, dtype=torch.float)
         for c in range(self.num_classes):
             p = (pred_class == c)
             t = (target == c)
             inter = (p * t).sum().float() + epsilon
             union = p.sum() + t.sum() + epsilon
             d = 2 * inter / union
+            if d ==1.0:    
+                d -= epsilon
             dice[c] = 1 - d
         if self.half_precision:
-            return torch.from_numpy(dice).half()
+            return dice.half()
         else:
-            return torch.from_numpy(dice).float()
+            return dice
 
     def unified_loss(self, pred, target, gamma, delta=0.6, lambda_=0.5):
         weights=self.dice_loss(pred,target).clone().detach()
@@ -100,6 +102,8 @@ class CustomLoss(Module):
         :return: loss value for batch
         """
         if self.name == 'CrossEntropy':
+            print(self.dice_loss(pred,target).detach().cpu())
+            print(self.class_dice(pred,target).detach().cpu())
             loss = cross_entropy(pred, target,
                                weight=self.class_dice(pred,target).to(self.device))
             return loss

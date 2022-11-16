@@ -21,6 +21,7 @@ class SegmentationDataset(Dataset):
         self.augmentate = augmentate
         self.is_validation = is_validation
         self.device = device
+
  
     def __len__(self):
         return len(self.patches_df)

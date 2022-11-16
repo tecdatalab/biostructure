@@ -29,7 +29,6 @@ plt.style.use(['science','no-latex'])
 from torchsummary import summary
 
 from SegmentationAgent import SegmentationAgent
-
 import os
 import glob
 import random
@@ -277,12 +276,10 @@ def create_trainer(model, optimizer, criterion, train_sampler, config, logger):
 
     def train_step(engine, batch):
         x, y = batch[0], batch[1]
-        if x.device != device:
+        if ((x.device != device) | (y.device != device)):
             x = x.to(device, non_blocking=True)
-            y = y.to(device, non_blocking=True)
- 
+            y = y.to(device, non_blocking=True) 
         model.train()
-
         with autocast(enabled=with_amp):
             y_pred = model(x)
             loss = criterion(y_pred, y)
@@ -330,10 +327,10 @@ def create_evaluator(model, metrics, config, tag="val"):
     device = idist.device()
 
     @torch.no_grad()
-    def evaluate_step(engine: Engine, batch):
+    def evaluate_step(engine: Engine, batch): 
         model.eval()
         x, y = batch[0], batch[1]
-        if x.device != device:
+        if ((x.device != device) | (y.device != device)):
             x = x.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
 

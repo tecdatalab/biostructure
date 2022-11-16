@@ -9,4 +9,8 @@ source ~/.bashrc
 
 conda activate pytorch_gpu
 
+<<<<<<< HEAD
 python run_.py run --with_amp=False --input_size=96  --num_epochs=200 --optim=SGD --learning_rate=0.001 --gamma=0.6 --depth=4 --batch_size=16 --batch_norm=False --criterion=Unified --extra_width=8 --validate_every=1
+=======
+python run_.py run --with_amp=False --input_size=96 --alpha=0.5 --beta=0.5 --num_epochs=200 --optim=SGD --learning_rate=0.001 --depth=4 --batch_size=16 --batch_norm=False --criterion=Tversky --extra_width=8 --validate_every=1 
+>>>>>>> update to files
