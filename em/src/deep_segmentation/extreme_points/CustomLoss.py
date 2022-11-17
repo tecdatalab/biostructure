@@ -17,7 +17,7 @@ class CustomLoss(Module):
         self.device = device
         self.half_precision = f16
 
-    def tversky_loss(self, pred, target, alpha, beta):
+    def tversky_loss(self, pred, target, alpha, beta, gamma=0.75):
         """
         Calculate the Tversky loss for the input batches
         :param pred: predicted batch from model
@@ -35,7 +35,7 @@ class CustomLoss(Module):
         fps = torch.sum(probs * (1 - target_oh), dims)
         fns = torch.sum((1 - probs) * target_oh, dims)
         t = (inter / (inter + (alpha * fps) + (beta * fns))).mean()
-        return (1 - t)**0.75
+        return (1 - t)**gamma
 
     def dice_loss(self, pred, target):
         """
@@ -79,6 +79,20 @@ class CustomLoss(Module):
         else:
             return torch.from_numpy(dice).float()
 
+    def unified_loss(self, pred, target, gamma, sigma, lambda_)
+        ce = cross_entropy(pred, target, weight=self.class_dice(pred,target).to(self.device), reduction='none')
+        tv = self.tversky_loss(pred, target, sigma, 1-sigma, gamma)
+        probs = softmax(pred, dim=1)
+        dims = (0,) + tuple(range(2, target.ndimension()))
+        print(ce.size())
+        print(probs.size())
+        ce *= (1 - probs) ** gamma  # focal loss factor
+        focal_ce = torch.sum(ce, dim=dims).mean()
+
+
+        loss = (lambda_ * focal_ce) + ((1-lambda_) * tv)
+
+
     def forward(self, pred, target, cross_entropy_weight=0.5,
                 tversky_weight=0.5):
         """
@@ -100,12 +114,6 @@ class CustomLoss(Module):
         elif self.name == 'Tversky':
             loss = self.tversky_loss(pred, target, self.alpha, self.beta)
             return loss
-        elif self.name == 'Weigthed':
-            if cross_entropy_weight + tversky_weight != 1:
-                raise ValueError('Cross Entropy weight and Tversky weight should '
-                             'sum to 1')
-            ce = cross_entropy(pred, target,
-                               weight=self.class_dice(pred,target).to(self.device))
-            tv = self.tversky_loss(pred, target, self.alpha, self.beta)
-            loss = (cross_entropy_weight * ce) + (tversky_weight * tv)
+        elif self.name == 'Unified':
+            loss = self.unified_loss(pred, target, self.gamma, self.sigma, self.lambda_)
             return loss
