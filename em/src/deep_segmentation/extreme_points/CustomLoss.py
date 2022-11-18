@@ -1,19 +1,18 @@
 import numpy as np
 import torch
 from torch.nn import Module
-from torch.nn.functional import cross_entropy, softmax
+from torch.nn.functional import cross_entropy, softmax, log_softmax
 
 
 class CustomLoss(Module):
-    def __init__(self, name, num_classes, device, alpha, beta, f16=False):
+    def __init__(self, name, num_classes, device, gamma, f16=False):
         """
         A wrapper Module for a custom loss function
         """
         super(CustomLoss, self).__init__()
         self.name = name
         self.num_classes = num_classes
-        self.alpha = alpha
-        self.beta = beta
+        self.gamma = gamma
         self.device = device
         self.half_precision = f16
 
@@ -26,14 +25,14 @@ class CustomLoss(Module):
         :param beta: multiplier for false negatives
         :return: Tversky loss
         """
-        target_oh = torch.eye(self.num_classes)[target.squeeze(1)]
+        target_oh = torch.eye(self.num_classes, device=self.device)[target.squeeze(1)]
         target_oh = target_oh.permute(0,4,1,2,3).float()
         probs = softmax(pred, dim=1)
         target_oh = target_oh.type(pred.type())
         dims = (0,) + tuple(range(2, target.ndimension()))
-        inter = torch.sum(probs * target_oh, dims)
-        fps = torch.sum(probs * (1 - target_oh), dims)
-        fns = torch.sum((1 - probs) * target_oh, dims)
+        inter = torch.sum(probs * target_oh, dims)[1:]
+        fps = torch.sum(probs * (1 - target_oh), dims)[1:]
+        fns = torch.sum((1 - probs) * target_oh, dims)[1:]
         t = (inter / (inter + (alpha * fps) + (beta * fns))).mean()
         return (1 - t)**gamma
 
@@ -51,10 +50,10 @@ class CustomLoss(Module):
         probs = softmax(pred, dim=1)
         target_oh = target_oh.type(pred.type())
         dims = (0,) + tuple(range(2, target.ndimension()))
-        inter = torch.sum(probs * target_oh, dims)[1:]
-        fps = torch.sum(probs * (1 - target_oh), dims)[1:]
-        fns = torch.sum((1 - probs) * target_oh, dims)[1:]
-        t = (inter / (inter + (0.5 * fps) + (0.5 * fns))).mean()
+        inter = torch.sum(probs * target_oh, dims)
+        fps = torch.sum(probs * (1 - target_oh), dims)
+        fns = torch.sum((1 - probs) * target_oh, dims)
+        t = (inter / (inter + (0.5 * fps) + (0.5 * fns))).mean(dim=1)
         return 1 - t
 
     def class_dice(self, pred, target, epsilon=1e-6):
@@ -70,7 +69,7 @@ class CustomLoss(Module):
         for c in range(self.num_classes):
             p = (pred_class == c)
             t = (target == c)
-            inter = (p * t).sum().float()
+            inter = (p * t).sum().float() + epsilon
             union = p.sum() + t.sum() + epsilon
             d = 2 * inter / union
             dice[c] = 1 - d
@@ -79,19 +78,16 @@ class CustomLoss(Module):
         else:
             return torch.from_numpy(dice).float()
 
-    def unified_loss(self, pred, target, gamma, sigma, lambda_)
-        ce = cross_entropy(pred, target, weight=self.class_dice(pred,target).to(self.device), reduction='none')
-        tv = self.tversky_loss(pred, target, sigma, 1-sigma, gamma)
-        probs = softmax(pred, dim=1)
-        dims = (0,) + tuple(range(2, target.ndimension()))
-        print(ce.size())
-        print(probs.size())
-        ce *= (1 - probs) ** gamma  # focal loss factor
-        focal_ce = torch.sum(ce, dim=dims).mean()
-
-
+    def unified_loss(self, pred, target, gamma, delta=0.6, lambda_=0.5):
+        weights=self.dice_loss(pred,target).clone().detach()
+        ce = cross_entropy(pred, target, weight=weights, reduction='none')
+        tv = self.tversky_loss(pred, target, 1-delta, delta, gamma)
+        ce = ce.sum() / weights[target].sum()   
+        probs = torch.gather(log_softmax(pred, 1), 1, target.unsqueeze(1))
+        probs = probs.exp()
+        focal_ce = torch.mean(torch.pow(1 - probs, (1-gamma)) * ce)
         loss = (lambda_ * focal_ce) + ((1-lambda_) * tv)
-
+        return loss
 
     def forward(self, pred, target, cross_entropy_weight=0.5,
                 tversky_weight=0.5):
@@ -112,8 +108,8 @@ class CustomLoss(Module):
             return loss
  
         elif self.name == 'Tversky':
-            loss = self.tversky_loss(pred, target, self.alpha, self.beta)
+            loss = self.tversky_loss(pred, target, 0.3, 0.7)
             return loss
         elif self.name == 'Unified':
-            loss = self.unified_loss(pred, target, self.gamma, self.sigma, self.lambda_)
+            loss = self.unified_loss(pred, target, self.gamma)
             return loss

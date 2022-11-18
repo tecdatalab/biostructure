@@ -75,8 +75,7 @@ def training(local_rank, config, current_fold, run_id):
             "input_size",
             "depth",
             "weight_decay",
-            "alpha",
-            "beta",
+            "gamma",
             "optim",
             "criterion",
             "with_amp",
@@ -91,7 +90,7 @@ def training(local_rank, config, current_fold, run_id):
     agent = SegmentationAgent(config['test_ids'], config['num_classes'], config['num_folds'], current_fold, config['optim'], config['criterion'],
                             int(config['extra_width']), config['batch_size'], (config['input_size'],config['input_size'],config['input_size']), 
                             config['data_path'], config['seed'], config['learning_rate'], config['momentum'], config['weight_decay'],
-                            config['depth'], device, config['with_amp'],config['alpha'],config['beta'],config['batch_norm'], idist)
+                            config['depth'], device, config['with_amp'],config['gamma'],config['batch_norm'], idist)
 
     config["num_iters_per_epoch"] = len(agent.train_loader)
     print("Num iters per epoch: {}".format(config["num_iters_per_epoch"]))
@@ -214,8 +213,7 @@ def run(
     learning_rate=0.001,
     momentum=0.9,
     weight_decay=0.0005,
-    alpha = 0.5,
-    beta = 0.5,
+    gamma = 0.5,
     validate_every=1,
     checkpoint_every=1000,
     backend=None,

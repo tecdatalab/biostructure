@@ -3,8 +3,6 @@ import torch
 from torch.utils.data import Dataset
 from torch import from_numpy
 import pandas as pd
-from scipy.ndimage import zoom
-import mrcfile
 
         
         
@@ -61,7 +59,7 @@ class SegmentationDataset(Dataset):
         map_id = row['id'].item()
         segment_id = row['subunit'].item()
         patch_ix = int(row['patch'].item()) 
-        np_sample = np.load('/scratch/mzumbado/data_patches/{}_{}.npy'.format(map_id,segment_id))
+        np_sample = np.load('/work/mzumbado/data_patches/{}_{}.npy'.format(map_id,segment_id))
         sample = torch.from_numpy(np_sample)
         patches_tensor = sample.unfold(3, self.image_size[2], self.image_size[2]//2).unfold(2, self.image_size[1], self.image_size[1]//2).unfold(1, self.image_size[0], self.image_size[0]//2)
         patches_tensor = patches_tensor.contiguous().view(-1,12,self.image_size[0],self.image_size[1],self.image_size[2])

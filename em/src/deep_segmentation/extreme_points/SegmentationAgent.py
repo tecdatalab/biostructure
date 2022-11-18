@@ -30,7 +30,7 @@ def get_optimizer(name, parameters, learning_rate, momentum, weight_decay):
 class SegmentationAgent:
     def __init__(self, test_ids, num_classes, num_folds, current_fold, optimizer, loss_func,
         extra_width, batch_size, img_size, csv_path, seed, learning_rate, 
-        momentum, weight_decay, depth, device, mixed_precision, alpha, beta, batch_norm, idist):
+        momentum, weight_decay, depth, device, mixed_precision, gamma, batch_norm, idist):
         '''
         A helper class to facilitate the training of the model
         '''
@@ -48,8 +48,7 @@ class SegmentationAgent:
         self.dataframe = pd.read_csv(csv_path, dtype=str)
         self.depth = depth
         self.loss_func = loss_func
-        self.alpha = alpha
-        self.beta = beta
+        self.gamma = gamma
         self.batch_norm = batch_norm
         #  Ensure that only local rank 0 split data
         if idist.get_local_rank() > 0:
@@ -68,7 +67,7 @@ class SegmentationAgent:
         self.test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=4, worker_init_fn=np.random.seed(self.seed), pin_memory=True)
 
         self.model = idist.auto_model(SegmentationUNet(self.num_classes, self.device, in_channels=2, depth=self.depth, batch_norm=self.batch_norm))
-        self.criterion = CustomLoss(loss_func, self.num_classes, self.device, self.alpha, self.beta,  mixed_precision)
+        self.criterion = CustomLoss(loss_func, self.num_classes, self.device, self.gamma,  mixed_precision)
         self.optimizer = idist.auto_optim(get_optimizer(optimizer, self.model.parameters(), learning_rate, momentum, weight_decay))
         
 
