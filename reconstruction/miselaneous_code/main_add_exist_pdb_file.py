@@ -8,12 +8,12 @@ from mpi4py.futures import MPICommExecutor
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 from general_utils.temp_utils import gen_dir, free_dir
-from general_utils.download_utils import download_pdb_in_pdb
+from general_utils.download_utils import download_pdb_online
 
 
 def exist_pdb_file(pdb_id, folder_work):
   exit_file = "{}/{}.pdb".format(folder_work, pdb_id)
-  download_pdb_in_pdb(pdb_id, exit_file)
+  download_pdb_online(pdb_id, exit_file)
   if os.path.getsize(exit_file) == 0:
     return False
   os.remove(exit_file)
