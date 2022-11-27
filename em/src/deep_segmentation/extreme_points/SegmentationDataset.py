@@ -88,7 +88,7 @@ class SegmentationDataset(Dataset):
             data_min = np.min(map_data)
             norm_data = (map_data - data_min)/ (data_max-data_min + 1e-6)
             '''
-            point_data = points_data[point_idx]
+            point_data = points_data[point_idx]/3
             # Create two channel input data
             input_data = torch.stack([map_data, point_data])
             x = input_data.float()
