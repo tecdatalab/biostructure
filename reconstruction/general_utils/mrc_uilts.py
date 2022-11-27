@@ -88,7 +88,7 @@ def mrc_to_pdb(mrc_path, pdb_result_path, threshold_mrc=0.0, clean=False):
 
   #execute_command("echo 1|../binaries/Situs_3.1/bin/map2map {0} {1}/tempPDB.situs".format(mrc_path, temp_dir))
 
-  level = get_mrc_level(mrc_path)
+  level = get_mrc_level(mrc_path, original_pdb)
 
   if(threshold_mrc==0 or threshold_mrc==0.0):
     threshold_mrc = level
