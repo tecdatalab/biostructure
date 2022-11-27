@@ -24,7 +24,7 @@ def get_optimizer(name, parameters, learning_rate, momentum, weight_decay):
     if name=='SGD':
         return SGD(parameters, lr=learning_rate,momentum=momentum, weight_decay=weight_decay)
     elif name=='Adam':
-        return Adam(parameters, lr=learning_rate)
+        return Adam(parameters, lr=learning_rate, weight_decay=weight_decay)
 
 
 class SegmentationAgent:
@@ -83,6 +83,7 @@ class SegmentationAgent:
         # Get id list of EM maps in data
         df_maps = self.dataframe.drop_duplicates(subset=['id'])
         id_list = df_maps['id'].tolist()
+		
         # Generate folds for cross validation
         splits = KFold(n_splits=num_folds,shuffle=True,random_state=seed)
         # Select testing maps from dataset
@@ -91,7 +92,7 @@ class SegmentationAgent:
             samples = [sample_id for sample_id in id_list if sample_id not in test_maps ]
         else:
             samples, test_maps = train_test_split(id_list, test_size=0.2, random_state=seed) 
-            
+         
         # Generate folds for cross validation
         splits = KFold(n_splits=num_folds,shuffle=True,random_state=seed)
         train_idx = []
