@@ -21,10 +21,20 @@ def execute_command(cmd):
 
 
 def downloadModelsCIF():
-  execute_command(
-    "rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/mmCIF/ /work/lcastillo/allCIFS_tmp/")
+  from constans.directory_constans import CLUSTER_ZIPPED_CIFS_FOLDER, CLUSTER_UNZIPPED_CIFS_FOLDER
+  zipped_folder = CLUSTER_ZIPPED_CIFS_FOLDER
+  unzipped_folder = CLUSTER_UNZIPPED_CIFS_FOLDER
 
-  for root, dirs, files in tqdm(os.walk("/work/lcastillo/allCIFS_tmp/")):
+  # exist or not.
+  if not os.path.isdir(zipped_folder):
+    os.makedirs(zipped_folder)
+
+  if not os.path.isdir(unzipped_folder):
+    os.makedirs(unzipped_folder)
+
+  execute_command("rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/mmCIF/ {}/".format(zipped_folder))
+
+  for root, dirs, files in tqdm(os.walk("{}/".format(zipped_folder))):
     for file in files:
       if file.endswith('.cif.gz'):
         file = os.path.join(root, file)
@@ -32,7 +42,7 @@ def downloadModelsCIF():
         base_name = os.path.basename(file)
         base_name = base_name.split(".")[0]
 
-        final_path = "/work/lcastillo/allCIFS_unzip/{}.cif".format(base_name)
+        final_path = "{}/{}.cif".format(unzipped_folder, base_name)
 
         if not (os.path.exists(final_path)):
           actual_file = os.path.dirname(file)

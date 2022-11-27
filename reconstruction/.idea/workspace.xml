@@ -74,9 +74,13 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a1dd68e-a6a5-4f8f-a209-a4fc36a2f3ad" name="Default Changelist" comment="[ADD] - Fix file in order to use all de dataset">
-      <change beforePath="$PROJECT_DIR$/general_utils/mrc_uilts.py" beforeDir="false" afterPath="$PROJECT_DIR$/general_utils/mrc_uilts.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/miselaneous_code/main_remove_some_folders_clean_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/miselaneous_code/main_remove_some_folders_clean_db.py" afterDir="false" />
+    <list default="true" id="7a1dd68e-a6a5-4f8f-a209-a4fc36a2f3ad" name="Default Changelist" comment="[MOD] - Change logic in remove clean folder">
+      <change afterPath="$PROJECT_DIR$/constans/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/constans/directory_constans.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/general_utils/workspace_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/general_utils/workspace_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/all_CIFBank.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/all_CIFBank.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/all_PDBBank.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/all_PDBBank.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,7 +122,29 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager" selected="Python.main_remove_some_folders_clean_db">
+  <component name="RunManager" selected="Python.all_PDBBank">
+    <configuration name="all_PDBBank" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="reconstruction" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/main" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main/all_PDBBank.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="main_add_exist_pdb_file" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="reconstruction" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -185,28 +211,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="new_load_all_pdbs_database" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="reconstruction" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/main" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main/new_load_all_pdbs_database.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="test_test_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="reconstruction" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -232,17 +236,17 @@
     <list>
       <item itemvalue="Python.main_add_exist_pdb_file" />
       <item itemvalue="Python.main_test_insert_pdb_database" />
-      <item itemvalue="Python.new_load_all_pdbs_database" />
       <item itemvalue="Python.test_test_test" />
       <item itemvalue="Python.main_remove_some_folders_clean_db" />
+      <item itemvalue="Python.all_PDBBank" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.all_PDBBank" />
         <item itemvalue="Python.main_remove_some_folders_clean_db" />
         <item itemvalue="Python.main_add_exist_pdb_file" />
         <item itemvalue="Python.main_test_insert_pdb_database" />
         <item itemvalue="Python.test_test_test" />
-        <item itemvalue="Python.new_load_all_pdbs_database" />
       </list>
     </recent_temporary>
   </component>
@@ -532,7 +536,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669521000182</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="[MOD] - Change logic in remove clean folder">
+      <created>1669577666900</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1669577666900</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -561,7 +572,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Add pararell creation of temp files" />
     <MESSAGE value="Change terminal execute form" />
     <MESSAGE value="change download pdb forme" />
     <MESSAGE value="change order to start and ignore" />
@@ -586,7 +596,8 @@
     <MESSAGE value="[WIP] Fix database save big files" />
     <MESSAGE value="[MOD] - Add main_add_exist_pdb_file" />
     <MESSAGE value="Add file" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add file" />
+    <MESSAGE value="[MOD] - Change logic in remove clean folder" />
+    <option name="LAST_COMMIT_MESSAGE" value="[MOD] - Change logic in remove clean folder" />
   </component>
   <component name="WindowStateProjectService">
     <state x="1024" y="107" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1669517052928">
@@ -601,26 +612,26 @@
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state x="1099" y="311" width="424" height="491" key="FileChooserDialogImpl/72.27.2488.1053@72.27.2488.1053" timestamp="1669516677646" />
-    <state width="2442" height="361" key="GridCell.Tab.0.bottom" timestamp="1669577622622">
+    <state width="2442" height="80" key="GridCell.Tab.0.bottom" timestamp="1669581353166">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.0.bottom/72.27.1848.1053@72.27.1848.1053" timestamp="1661210516545" />
-    <state width="2442" height="361" key="GridCell.Tab.0.bottom/72.27.2488.1053@72.27.2488.1053" timestamp="1669577622622" />
-    <state width="2442" height="361" key="GridCell.Tab.0.center" timestamp="1669577622621">
+    <state width="2442" height="80" key="GridCell.Tab.0.bottom/72.27.2488.1053@72.27.2488.1053" timestamp="1669581353166" />
+    <state width="2442" height="80" key="GridCell.Tab.0.center" timestamp="1669581353165">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.0.center/72.27.1848.1053@72.27.1848.1053" timestamp="1661210516543" />
-    <state width="2442" height="361" key="GridCell.Tab.0.center/72.27.2488.1053@72.27.2488.1053" timestamp="1669577622621" />
-    <state width="2442" height="361" key="GridCell.Tab.0.left" timestamp="1669577622620">
+    <state width="2442" height="80" key="GridCell.Tab.0.center/72.27.2488.1053@72.27.2488.1053" timestamp="1669581353165" />
+    <state width="2442" height="80" key="GridCell.Tab.0.left" timestamp="1669581353164">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.0.left/72.27.1848.1053@72.27.1848.1053" timestamp="1661210516543" />
-    <state width="2442" height="361" key="GridCell.Tab.0.left/72.27.2488.1053@72.27.2488.1053" timestamp="1669577622620" />
-    <state width="2442" height="361" key="GridCell.Tab.0.right" timestamp="1669577622622">
+    <state width="2442" height="80" key="GridCell.Tab.0.left/72.27.2488.1053@72.27.2488.1053" timestamp="1669581353164" />
+    <state width="2442" height="80" key="GridCell.Tab.0.right" timestamp="1669581353165">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.0.right/72.27.1848.1053@72.27.1848.1053" timestamp="1661210516544" />
-    <state width="2442" height="361" key="GridCell.Tab.0.right/72.27.2488.1053@72.27.2488.1053" timestamp="1669577622622" />
+    <state width="2442" height="80" key="GridCell.Tab.0.right/72.27.2488.1053@72.27.2488.1053" timestamp="1669581353165" />
     <state width="2442" height="213" key="GridCell.Tab.1.bottom" timestamp="1669516623701">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
@@ -649,10 +660,14 @@
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state x="805" y="188" width="1022" height="737" key="SettingsEditor/72.27.2488.1053@72.27.2488.1053" timestamp="1669575251769" />
-    <state x="911" y="289" width="528" height="452" key="Vcs.Push.Dialog.v2" timestamp="1669517079392">
+    <state x="911" y="289" width="528" height="452" key="Vcs.Push.Dialog.v2" timestamp="1669577704432">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
-    <state x="911" y="289" width="800" height="535" key="Vcs.Push.Dialog.v2/72.27.2488.1053@72.27.2488.1053" timestamp="1669517079392" />
+    <state x="911" y="289" width="800" height="535" key="Vcs.Push.Dialog.v2/72.27.2488.1053@72.27.2488.1053" timestamp="1669577704432" />
+    <state x="803" y="150" width="1424" height="783" key="find.popup" timestamp="1669582312380">
+      <screen x="72" y="27" width="2488" height="1053" />
+    </state>
+    <state x="803" y="150" width="1424" height="783" key="find.popup/72.27.2488.1053@72.27.2488.1053" timestamp="1669582312380" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

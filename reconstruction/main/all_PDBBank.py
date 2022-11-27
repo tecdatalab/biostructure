@@ -20,9 +20,20 @@ def execute_command(cmd):
 
 
 def downloadModelsPDB():
-  execute_command("rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/pdb/ /work/lcastillo/allPDBS_tmp/")
+  from constans.directory_constans import CLUSTER_ZIPPED_PDBS_FOLDER, CLUSTER_UNZIPPED_PDBS_FOLDER
+  zipped_folder = CLUSTER_ZIPPED_PDBS_FOLDER
+  unzipped_folder = CLUSTER_UNZIPPED_PDBS_FOLDER
 
-  for root, dirs, files in tqdm(os.walk("/work/lcastillo/allPDBS_tmp/")):
+  # exist or not.
+  if not os.path.isdir(zipped_folder):
+    os.makedirs(zipped_folder)
+
+  if not os.path.isdir(unzipped_folder):
+    os.makedirs(unzipped_folder)
+
+  execute_command("rsync -rlpt --ignore-existing -v -z --delete --port=33444 rsync.rcsb.org::ftp_data/structures/divided/pdb/ {}/".format(zipped_folder))
+
+  for root, dirs, files in tqdm(os.walk("{}/".format(zipped_folder))):
     for file in files:
       if file.endswith('.ent.gz'):
         file = os.path.join(root, file)
@@ -31,7 +42,7 @@ def downloadModelsPDB():
         base_name = base_name.split(".")[0]
         base_name = base_name[3:]
 
-        final_path = "/work/lcastillo/allPDBS_unzip/{}.pdb".format(base_name)
+        final_path = "{}/{}.pdb".format(unzipped_folder, base_name)
 
         if not (os.path.exists(final_path)):
 
@@ -44,6 +55,3 @@ def downloadModelsPDB():
 
 print("PDB")
 downloadModelsPDB()
-
-
-
