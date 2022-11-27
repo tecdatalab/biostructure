@@ -50,3 +50,4 @@ Thumbs.db
 # Temporal Files
 /db/Updater/generators/temp
 *.pyc
+reconstruction/.pycharmrc
