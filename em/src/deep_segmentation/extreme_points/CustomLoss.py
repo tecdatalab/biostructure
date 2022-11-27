@@ -16,27 +16,7 @@ class CustomLoss(Module):
         self.device = device
         self.half_precision = f16
 
-    def tversky_loss(self, pred, target, alpha, beta, gamma=0.75):
-        """
-        Calculate the Tversky loss for the input batches
-        :param pred: predicted batch from model
-        :param target: target batch from input
-        :param alpha: multiplier for false positives
-        :param beta: multiplier for false negatives
-        :return: Tversky loss
-        """
-        target_oh = torch.eye(self.num_classes, device=self.device)[target.squeeze(1)]
-        target_oh = target_oh.permute(0,4,1,2,3).float()
-        probs = softmax(pred, dim=1)
-        target_oh = target_oh.type(pred.type())
-        dims = (0,) + tuple(range(2, target.ndimension()))
-        inter = torch.sum(probs * target_oh, dims)[1:]
-        fps = torch.sum(probs * (1 - target_oh), dims)[1:]
-        fns = torch.sum((1 - probs) * target_oh, dims)[1:]
-        t = (inter / (inter + (alpha * fps) + (beta * fns))).mean()
-        return (1 - t)**gamma
-
-    def dice_loss(self, pred, target):
+    def tversky_loss(self, pred, target, alpha, beta, gamma=0.75, epsilon=1e-6):
         """
         Calculate the Tversky loss for the input batches
         :param pred: predicted batch from model
@@ -53,7 +33,27 @@ class CustomLoss(Module):
         inter = torch.sum(probs * target_oh, dims)
         fps = torch.sum(probs * (1 - target_oh), dims)
         fns = torch.sum((1 - probs) * target_oh, dims)
-        t = (inter / (inter + (0.5 * fps) + (0.5 * fns))).mean(dim=1)
+        t = ((inter + epsilon)/ (inter + (alpha * fps) + (beta * fns) + epsilon)).mean()
+        return (1 - t)**gamma
+
+    def dice_loss(self, pred, target, epsilon=1e-6):
+        """
+        Calculate the Tversky loss for the input batches
+        :param pred: predicted batch from model
+        :param target: target batch from input
+        :param alpha: multiplier for false positives
+        :param beta: multiplier for false negatives
+        :return: Tversky loss
+        """
+        target_oh = torch.eye(self.num_classes, device=self.device)[target.squeeze(1)]
+        target_oh = target_oh.permute(0,4,1,2,3).float()
+        probs = softmax(pred, dim=1)
+        target_oh = target_oh.type(pred.type())
+        dims = (0,) + tuple(range(2, target.ndimension()))
+        inter = torch.sum(probs * target_oh, dims)
+        fps = torch.sum(probs * (1 - target_oh), dims)
+        fns = torch.sum((1 - probs) * target_oh, dims)
+        t = ((inter + epsilon)/ (inter + (0.5 * fps) + (0.5 * fns) + epsilon)).mean(dim=1)
         return 1 - t
 
     def class_dice(self, pred, target, epsilon=1e-6):
@@ -88,7 +88,7 @@ class CustomLoss(Module):
         probs = torch.gather(log_softmax(pred, 1), 1, target.unsqueeze(1))
         probs = probs.exp()
         focal_ce = torch.mean(torch.pow(1 - probs, (1-gamma)) * ce)
-        loss = (lambda_ * focal_ce) + ((1-lambda_) * tv)
+        loss = (lambda_ * focal_ce) + ((1-lambda_) * tv) 
         return loss
 
     def forward(self, pred, target, cross_entropy_weight=0.5,
@@ -102,13 +102,11 @@ class CustomLoss(Module):
         :return: loss value for batch
         """
         if self.name == 'CrossEntropy':
-            print(self.dice_loss(pred,target).detach().cpu())
-            print(self.class_dice(pred,target).detach().cpu())
             loss = cross_entropy(pred, target,
                                weight=self.class_dice(pred,target).to(self.device))
             return loss
         elif self.name == 'Dice':
-            loss = self.dice_loss(pred, target)
+            loss = self.dice_loss(pred, target).sum()
             return loss
  
         elif self.name == 'Tversky':
