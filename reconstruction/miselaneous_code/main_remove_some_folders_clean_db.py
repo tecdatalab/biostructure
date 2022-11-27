@@ -8,7 +8,7 @@ from mpi4py.futures import MPICommExecutor
 
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
-from general_utils.database_utils import clear_collection
+# from general_utils.database_utils import clear_collection
 
 def remove_folder_parallel(folder_delete):
   shutil.rmtree(folder_delete, ignore_errors=True)
@@ -44,7 +44,7 @@ def main():
           print(e, flush=True)
 
       print("Start clean database")
-      clear_collection()
+      # clear_collection()
 
 
 main()
