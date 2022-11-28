@@ -6,7 +6,10 @@ global_temp_dir = None
 
 
 def free_file(file_path):
-  os.remove(file_path)
+  try:
+    os.remove(file_path)
+  except:
+    pass
 
 def free_dir(path_dir):
   try:

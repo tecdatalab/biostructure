@@ -74,17 +74,10 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a1dd68e-a6a5-4f8f-a209-a4fc36a2f3ad" name="Default Changelist" comment="[MOD] - Format pdb_can_chain_with_pdb_flag">
+    <list default="true" id="7a1dd68e-a6a5-4f8f-a209-a4fc36a2f3ad" name="Default Changelist" comment="[WIP] - Add calculate MRC">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/general_utils/database_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/general_utils/database_utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/general_utils/mrc_uilts.py" beforeDir="false" afterPath="$PROJECT_DIR$/general_utils/mrc_uilts.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/general_utils/pdb_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/general_utils/pdb_utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/general_utils/temp_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/general_utils/temp_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/new_load_all_pdbs_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/new_load_all_pdbs_database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/miselaneous_code/main_add_exist_pdb_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/miselaneous_code/main_add_exist_pdb_file.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/process_graph/process_graph_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/process_graph/process_graph_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/process_mrc/generate.py" beforeDir="false" afterPath="$PROJECT_DIR$/process_mrc/generate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/process_mrc/segment.py" beforeDir="false" afterPath="$PROJECT_DIR$/process_mrc/segment.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -561,7 +554,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669583060980</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="[WIP] - Add calculate MRC">
+      <created>1669611388920</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1669611388920</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -590,7 +590,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="change order to start and ignore" />
     <MESSAGE value="Add some metrics" />
     <MESSAGE value="Repare error in chains" />
     <MESSAGE value="Flusht output" />
@@ -615,7 +614,8 @@
     <MESSAGE value="[MOD] - Change logic in remove clean folder" />
     <MESSAGE value="[MOD] - Format all_CIFBank and all_PDB_Bank" />
     <MESSAGE value="[MOD] - Format pdb_can_chain_with_pdb_flag" />
-    <option name="LAST_COMMIT_MESSAGE" value="[MOD] - Format pdb_can_chain_with_pdb_flag" />
+    <MESSAGE value="[WIP] - Add calculate MRC" />
+    <option name="LAST_COMMIT_MESSAGE" value="[WIP] - Add calculate MRC" />
   </component>
   <component name="WindowStateProjectService">
     <state x="1024" y="107" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1669517052928">
@@ -630,46 +630,46 @@
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state x="1099" y="311" width="424" height="491" key="FileChooserDialogImpl/72.27.2488.1053@72.27.2488.1053" timestamp="1669516677646" />
-    <state width="2442" height="264" key="GridCell.Tab.0.bottom" timestamp="1669610631631">
+    <state width="2442" height="464" key="GridCell.Tab.0.bottom" timestamp="1669616337137">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.0.bottom/72.27.1848.1053@72.27.1848.1053" timestamp="1661210516545" />
-    <state width="2442" height="264" key="GridCell.Tab.0.bottom/72.27.2488.1053@72.27.2488.1053" timestamp="1669610631631" />
-    <state width="2442" height="264" key="GridCell.Tab.0.center" timestamp="1669610631627">
+    <state width="2442" height="464" key="GridCell.Tab.0.bottom/72.27.2488.1053@72.27.2488.1053" timestamp="1669616337137" />
+    <state width="2442" height="464" key="GridCell.Tab.0.center" timestamp="1669616337136">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.0.center/72.27.1848.1053@72.27.1848.1053" timestamp="1661210516543" />
-    <state width="2442" height="264" key="GridCell.Tab.0.center/72.27.2488.1053@72.27.2488.1053" timestamp="1669610631627" />
-    <state width="2442" height="264" key="GridCell.Tab.0.left" timestamp="1669610631626">
+    <state width="2442" height="464" key="GridCell.Tab.0.center/72.27.2488.1053@72.27.2488.1053" timestamp="1669616337136" />
+    <state width="2442" height="464" key="GridCell.Tab.0.left" timestamp="1669616337135">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.0.left/72.27.1848.1053@72.27.1848.1053" timestamp="1661210516543" />
-    <state width="2442" height="264" key="GridCell.Tab.0.left/72.27.2488.1053@72.27.2488.1053" timestamp="1669610631626" />
-    <state width="2442" height="264" key="GridCell.Tab.0.right" timestamp="1669610631631">
+    <state width="2442" height="464" key="GridCell.Tab.0.left/72.27.2488.1053@72.27.2488.1053" timestamp="1669616337135" />
+    <state width="2442" height="464" key="GridCell.Tab.0.right" timestamp="1669616337136">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.0.right/72.27.1848.1053@72.27.1848.1053" timestamp="1661210516544" />
-    <state width="2442" height="264" key="GridCell.Tab.0.right/72.27.2488.1053@72.27.2488.1053" timestamp="1669610631631" />
-    <state width="2442" height="264" key="GridCell.Tab.1.bottom" timestamp="1669610634354">
+    <state width="2442" height="464" key="GridCell.Tab.0.right/72.27.2488.1053@72.27.2488.1053" timestamp="1669616337136" />
+    <state width="2442" height="464" key="GridCell.Tab.1.bottom" timestamp="1669616337144">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.1.bottom/72.27.1848.1053@72.27.1848.1053" timestamp="1661210520390" />
-    <state width="2442" height="264" key="GridCell.Tab.1.bottom/72.27.2488.1053@72.27.2488.1053" timestamp="1669610634354" />
-    <state width="2442" height="264" key="GridCell.Tab.1.center" timestamp="1669610634353">
+    <state width="2442" height="464" key="GridCell.Tab.1.bottom/72.27.2488.1053@72.27.2488.1053" timestamp="1669616337144" />
+    <state width="2442" height="464" key="GridCell.Tab.1.center" timestamp="1669616337138">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.1.center/72.27.1848.1053@72.27.1848.1053" timestamp="1661210520390" />
-    <state width="2442" height="264" key="GridCell.Tab.1.center/72.27.2488.1053@72.27.2488.1053" timestamp="1669610634353" />
-    <state width="2442" height="264" key="GridCell.Tab.1.left" timestamp="1669610634353">
+    <state width="2442" height="464" key="GridCell.Tab.1.center/72.27.2488.1053@72.27.2488.1053" timestamp="1669616337138" />
+    <state width="2442" height="464" key="GridCell.Tab.1.left" timestamp="1669616337137">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.1.left/72.27.1848.1053@72.27.1848.1053" timestamp="1661210520389" />
-    <state width="2442" height="264" key="GridCell.Tab.1.left/72.27.2488.1053@72.27.2488.1053" timestamp="1669610634353" />
-    <state width="2442" height="264" key="GridCell.Tab.1.right" timestamp="1669610634353">
+    <state width="2442" height="464" key="GridCell.Tab.1.left/72.27.2488.1053@72.27.2488.1053" timestamp="1669616337137" />
+    <state width="2442" height="464" key="GridCell.Tab.1.right" timestamp="1669616337143">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.1.right/72.27.1848.1053@72.27.1848.1053" timestamp="1661210520390" />
-    <state width="2442" height="264" key="GridCell.Tab.1.right/72.27.2488.1053@72.27.2488.1053" timestamp="1669610634353" />
+    <state width="2442" height="464" key="GridCell.Tab.1.right/72.27.2488.1053@72.27.2488.1053" timestamp="1669616337143" />
     <state x="659" y="237" width="663" height="640" key="RollbackChangesDialog" timestamp="1661210497191">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
@@ -678,10 +678,10 @@
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state x="805" y="188" width="1022" height="737" key="SettingsEditor/72.27.2488.1053@72.27.2488.1053" timestamp="1669575251769" />
-    <state x="911" y="289" width="528" height="452" key="Vcs.Push.Dialog.v2" timestamp="1669583066661">
+    <state x="911" y="289" width="528" height="452" key="Vcs.Push.Dialog.v2" timestamp="1669611395923">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
-    <state x="911" y="289" width="800" height="535" key="Vcs.Push.Dialog.v2/72.27.2488.1053@72.27.2488.1053" timestamp="1669583066661" />
+    <state x="911" y="289" width="800" height="535" key="Vcs.Push.Dialog.v2/72.27.2488.1053@72.27.2488.1053" timestamp="1669611395923" />
     <state x="803" y="150" width="1424" height="783" key="find.popup" timestamp="1669582312380">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
@@ -732,7 +732,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/general_utils/mrc_uilts.py</url>
-          <line>207</line>
+          <line>237</line>
           <option name="timeStamp" value="38" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -742,7 +742,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/general_utils/mrc_uilts.py</url>
-          <line>209</line>
+          <line>239</line>
           <option name="timeStamp" value="43" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -797,13 +797,23 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/general_utils/mrc_uilts.py</url>
-          <line>47</line>
+          <line>46</line>
           <option name="timeStamp" value="58" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/general_utils/mrc_uilts.py</url>
-          <line>114</line>
+          <line>144</line>
           <option name="timeStamp" value="59" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/general_utils/mrc_uilts.py</url>
+          <line>101</line>
+          <option name="timeStamp" value="63" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/general_utils/mrc_uilts.py</url>
+          <line>119</line>
+          <option name="timeStamp" value="64" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -824,6 +834,6 @@
     <SUITE FILE_PATH="coverage/reconstruction$main_test.coverage" NAME="main_test Coverage Results" MODIFIED="1650762629261" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/main" />
     <SUITE FILE_PATH="coverage/reconstruction$main_test_insert_pdb_database.coverage" NAME="main_test_insert_pdb_database Coverage Results" MODIFIED="1661210516313" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/main" />
     <SUITE FILE_PATH="coverage/reconstruction$main_remove_some_folders_clean_db.coverage" NAME="main_remove_some_folders_clean_db Coverage Results" MODIFIED="1669577622612" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/miselaneous_code" />
-    <SUITE FILE_PATH="coverage/reconstruction$new_load_all_pdbs_database.coverage" NAME="new_load_all_pdbs_database Coverage Results" MODIFIED="1669610631495" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/main" />
+    <SUITE FILE_PATH="coverage/reconstruction$new_load_all_pdbs_database.coverage" NAME="new_load_all_pdbs_database Coverage Results" MODIFIED="1669616337117" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/main" />
   </component>
 </project>

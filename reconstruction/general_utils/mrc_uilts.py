@@ -44,13 +44,12 @@ def get_mrc_level(map_path, original, best_iterations_num=8, break_sim=0.35, add
   # return the best number
   level = get_mrc_level_aux(map_path)
   if original != None:
-    level_tmp = level
     addition = addition_value
     substraction = substraction_value
     # Generate simulated pdb with this level to calculate the metric con el pdb simulado(map_path) y con el original
     # check if the metric is correct if its ok, then return the result
-    low_actual_value = level_tmp - substraction
-    high_actual_value = level_tmp + addition
+    low_actual_value = level - substraction
+    high_actual_value = level + addition
     level_to_return = level
     # get the current metric for the pdbs
 
@@ -58,18 +57,27 @@ def get_mrc_level(map_path, original, best_iterations_num=8, break_sim=0.35, add
     simulate_path = gen_file_with_extension(".pdb")
     low_simulate_path = gen_file_with_extension(".pdb")
     high_simulate_path = gen_file_with_extension(".pdb")
+    print(simulate_path)
+    print(low_simulate_path)
+    print(high_simulate_path)
 
     get_mrc_to_pdb_aux(level, map_path, simulate_path)
-    last_metric = align_pdb_file_1_in_2(simulate_path,
-                                        original).RMSDAfterRefinement  # initiates the last metric variable
+    aling_result = align_pdb_file_1_in_2(simulate_path, original)
+    print("Print 1", level)
+    print(aling_result.RMSDAfterRefinement)
+    print(aling_result.PercentageAtomsAlignedAfterRefinement)
+    print(aling_result.RawAlignmentScore)
+    print(aling_result.NumberAlignedAtomsAfterRefinement)
+    last_metric = aling_result.RMSDAfterRefinement  # initiates the last metric variable
     metric_low = last_metric
     metric_high = last_metric
 
     if last_metric <= break_sim:
-      return level_tmp
+      return level
 
     free_file(simulate_path)
-    for i in range(best_iterations_num):
+    i = 0
+    while i < best_iterations_num:
       if metric_low != float("inf"):
         pdb_simulated_low = get_mrc_to_pdb_aux(low_actual_value, map_path, low_simulate_path)
       if metric_high != float("inf"):
@@ -78,7 +86,18 @@ def get_mrc_level(map_path, original, best_iterations_num=8, break_sim=0.35, add
       try:
         if metric_low == float("inf"):
           raise Exception
-        metric_low = align_pdb_file_1_in_2(pdb_simulated_low, original).RMSDAfterRefinement
+        aling_result = align_pdb_file_1_in_2(pdb_simulated_low, original)
+
+        print("Print 2", low_actual_value)
+        print(aling_result.RMSDAfterRefinement)
+        print(aling_result.PercentageAtomsAlignedAfterRefinement)
+        print(aling_result.RawAlignmentScore)
+        metric_low = aling_result.RMSDAfterRefinement
+
+        if metric_low < 0 or low_actual_value < 0:
+          best_iterations_num += (best_iterations_num - i)
+          raise Exception
+
       except:
         metric_low = float("inf")
         substraction = 0
@@ -86,31 +105,42 @@ def get_mrc_level(map_path, original, best_iterations_num=8, break_sim=0.35, add
       try:
         if metric_high == float("inf"):
           raise Exception
-        metric_high = align_pdb_file_1_in_2(pdb_simulated_high, original).RMSDAfterRefinement
+        aling_result = align_pdb_file_1_in_2(pdb_simulated_high, original)
+        print("Print 3", high_actual_value)
+        print(aling_result.RMSDAfterRefinement)
+        print(aling_result.PercentageAtomsAlignedAfterRefinement)
+        print(aling_result.RawAlignmentScore)
+        metric_high = aling_result.RMSDAfterRefinement
+
+        if metric_high < 0:
+          best_iterations_num += (best_iterations_num - i)
+          raise Exception
+
       except:
         metric_high = float("inf")
         addition = 0
 
       if metric_low == float("inf") and metric_high == float("inf"):
         break
-      elif metric_low <= metric_high:
+      elif metric_low <= metric_high and metric_low > 0:
         if metric_low <= last_metric:
           last_metric = metric_low
           level_to_return = low_actual_value
       else:
-        if metric_high <= last_metric:
+        if metric_high <= last_metric and metric_high > 0:
           last_metric = metric_high
           level_to_return = high_actual_value
 
       if metric_low <= break_sim or metric_high <= break_sim:
-        break;
+        break
 
       low_actual_value -= substraction
       high_actual_value += addition
+      clean_file(low_simulate_path)
+      clean_file(high_simulate_path)
+      i += 1
 
     level = level_to_return
-    clean_file(low_simulate_path)
-    clean_file(high_simulate_path)
 
   free_file(low_simulate_path)
   free_file(high_simulate_path)
