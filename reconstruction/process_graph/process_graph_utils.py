@@ -70,7 +70,11 @@ def generate_graph(segments, n_points_face, filter_value, max_distance, min_poin
                       zd_descriptors=i.zd_descriptors,
                       cube_xyz_can=get_sum_xyz_can(i),
                       volume=i.volume,
-                      textSimulatePDB=i.textSimulatePDB)
+                      textSimulatePDB=i.textSimulatePDB,
+                      recommendedContour=i.recommendedContour,
+                      originalCA=i.originalCA,
+                      simulateCA=i.simulateCA
+                      )
 
   for item in itertools.combinations(np.arange(len(segments)), 2):
     if item[0] == item[1]:

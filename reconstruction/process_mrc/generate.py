@@ -135,9 +135,9 @@ def get_mrc_synthetic_segments_pdb_list(mrc_path, folder_segments, list_segments
   return result, original_structure
 
 
-def get_mrc_one(mrc_path, recommendedContour_p=None, calculate_Z3D=True, actual_id=1):
+def get_mrc_one(mrc_path, recommendedContour_p=None, calculate_Z3D=True, actual_id=1, original_pdb=None):
   if recommendedContour_p == None:
-    recommendedContour_p = get_mrc_level(mrc_path)
+    recommendedContour_p = get_mrc_level(mrc_path, original_pdb)
   # Initialize molecule object with arguments: filename, recomended contour value and an optional list of cut-off
   # ratios.
 
@@ -149,7 +149,7 @@ def get_mrc_one(mrc_path, recommendedContour_p=None, calculate_Z3D=True, actual_
 
   # Set voxels outside segment to 0
   densitie = np.copy(myMolecule.getDataAtContour(1))
-  result.append(Segment(actual_id, densitie, None, volume))
+  result.append(Segment(actual_id, densitie, None, volume, recommendedContour_p))
 
   # then you can compute zernike descriptors for each segment, lets create a dict to store descriptors for each
   # segment # lets import the module
@@ -168,4 +168,4 @@ def get_mrc_one(mrc_path, recommendedContour_p=None, calculate_Z3D=True, actual_
                            result[0].zd_descriptors,
                            original_volume)
 
-  return result, original_structure
+  return result, original_structure, recommendedContour_p

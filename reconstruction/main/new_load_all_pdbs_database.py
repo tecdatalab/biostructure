@@ -27,6 +27,33 @@ def add_pdb(pdb_name):
     f.write(str(pdb_name) + "\n")
 
 
+def get_to_load():
+  know_pdb_path = os.path.dirname(__file__) + '/../files/pdb_list.csv'
+  know_pdb_path_cif_flag = os.path.dirname(__file__) + '/../files/pdb_can_chains_with_pdb_flag.csv'
+
+  # All pdbs
+  to_load = []
+  if os.path.exists(know_pdb_path):
+    pd_data_frame = pd.read_csv(know_pdb_path)
+    for i in pd_data_frame.values.tolist():
+      if i[1] == 1:
+        to_load.append(i[0])
+
+  # All pdbs not se cif file
+  to_load_ok = []
+  if os.path.exists(know_pdb_path_cif_flag):
+    pd_data_frame = pd.read_csv(know_pdb_path_cif_flag)
+    for i in pd_data_frame.values.tolist():
+      if i[3] == True:
+        to_load_ok.append(i[0])
+
+  to_load = np.setdiff1d(np.array(to_load), np.array(get_all_archive_pdb())).tolist()
+  to_load = np.setdiff1d(np.array(to_load), np.array(get_pdb_adn_arn())).tolist()
+  to_load = np.intersect1d(np.array(to_load), np.array(to_load_ok)).tolist()
+
+  return to_load
+
+
 def gen_load_database():
   # Parale
   comm = MPI.COMM_WORLD
@@ -35,7 +62,7 @@ def gen_load_database():
   with MPICommExecutor(comm, root=0, worker_size=size) as executor:
     if executor is not None:
 
-      # all_names = get_percentage_pbs_check_file(15, 'check_load_all_database.pkl', executor)
+      #all_names = get_to_load()
       all_names = ["1yfq"]
 
       random.shuffle(all_names)

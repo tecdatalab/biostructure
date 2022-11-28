@@ -5,19 +5,25 @@ import pathlib
 from mpi4py import MPI
 from mpi4py.futures import MPICommExecutor
 
+import general_utils
+from general_utils.workspace_utils import is_work_in_cluster
+
 sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 
 from general_utils.temp_utils import gen_dir, free_dir
-from general_utils.download_utils import download_pdb_online
+from general_utils.download_utils import download_pdb
 
 
 def exist_pdb_file(pdb_id, folder_work):
-  exit_file = "{}/{}.pdb".format(folder_work, pdb_id)
-  download_pdb_online(pdb_id, exit_file)
-  if os.path.getsize(exit_file) == 0:
+  try:
+    exit_file = "{}/{}.pdb".format(folder_work, pdb_id)
+    download_pdb(pdb_id, exit_file)
+    if os.path.getsize(exit_file) == 0:
+      return False
+    os.remove(exit_file)
+    return True
+  except:
     return False
-  os.remove(exit_file)
-  return True
 
 def main():
 
@@ -78,4 +84,12 @@ def main():
 
       free_dir(folder_work)
 
-main()
+
+if __name__ == '__main__':
+  if is_work_in_cluster():
+    general_utils.temp_utils.global_temp_dir = "/work/lcastillo/temp_add_exit_pdb_file"
+  else:
+    general_utils.temp_utils.global_temp_dir = None
+  main()
+
+

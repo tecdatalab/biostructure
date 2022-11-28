@@ -3,7 +3,7 @@ import shutil
 
 from general_utils.pdb_utils import move_pdb_center
 from general_utils.string_utils import get_float_between_ss, get_float_value
-from general_utils.temp_utils import gen_dir, free_dir
+from general_utils.temp_utils import gen_dir, free_dir, gen_file, free_file, gen_file_with_extension, clean_file
 from general_utils.terminal_utils import get_out, execute_command
 from general_utils.pdb_utils import align_pdb_file_1_in_2
 
@@ -34,7 +34,8 @@ def get_mass_angstrom(map_path, original):
   return mass
 
 
-def get_mrc_level(map_path, original, best_iterations_num=8):
+def get_mrc_level(map_path, original, best_iterations_num=8, break_sim=0.35, addition_value=0.5,
+                  substraction_value=0.5):
   # best num is the number of times the sum and substraction is run
   # the bigger the number, the better
   # 0.5 +-
@@ -44,28 +45,36 @@ def get_mrc_level(map_path, original, best_iterations_num=8):
   level = get_mrc_level_aux(map_path)
   if original != None:
     level_tmp = level
-    addition = 0.5
-    substraction = 0.5
+    addition = addition_value
+    substraction = substraction_value
     # Generate simulated pdb with this level to calculate the metric con el pdb simulado(map_path) y con el original
     # check if the metric is correct if its ok, then return the result
-    low_actual_value = level_tmp
-    high_actual_value = level_tmp
+    low_actual_value = level_tmp - substraction
+    high_actual_value = level_tmp + addition
     level_to_return = level
     # get the current metric for the pdbs
-    pdb_simulated = get_mrc_to_pdb_aux(level, map_path, "simulated_1yfq.pdb")
-    last_metric = align_pdb_file_1_in_2(pdb_simulated,
+
+    # Create file for simulate pdb
+    simulate_path = gen_file_with_extension(".pdb")
+    low_simulate_path = gen_file_with_extension(".pdb")
+    high_simulate_path = gen_file_with_extension(".pdb")
+
+    get_mrc_to_pdb_aux(level, map_path, simulate_path)
+    last_metric = align_pdb_file_1_in_2(simulate_path,
                                         original).RMSDAfterRefinement  # initiates the last metric variable
-    if os.path.isfile("/tmp/simulated_1yfq.pdb"):
-      os.remove("/tmp/simulated_1yfq.pdb")
+    metric_low = last_metric
+    metric_high = last_metric
+
+    if last_metric <= break_sim:
+      return level_tmp
+
+    free_file(simulate_path)
     for i in range(best_iterations_num):
-      if os.path.isfile("/tmp/low_1yfq.pdb"):
-        os.remove("/tmp/low_1yfq.pdb")
-      if os.path.isfile("/tmp/high_1yfq.pdb"):
-        os.remove("/tmp/high_1yfq.pdb")
       if metric_low != float("inf"):
-        pdb_simulated_low = get_mrc_to_pdb_aux(low_actual_value, map_path, "low_1yfq.pdb")
+        pdb_simulated_low = get_mrc_to_pdb_aux(low_actual_value, map_path, low_simulate_path)
       if metric_high != float("inf"):
-        pdb_simulated_high = get_mrc_to_pdb_aux(high_actual_value, map_path, "high_1yfq.pdb")
+        pdb_simulated_high = get_mrc_to_pdb_aux(high_actual_value, map_path, high_simulate_path)
+
       try:
         if metric_low == float("inf"):
           raise Exception
@@ -73,6 +82,7 @@ def get_mrc_level(map_path, original, best_iterations_num=8):
       except:
         metric_low = float("inf")
         substraction = 0
+
       try:
         if metric_high == float("inf"):
           raise Exception
@@ -80,9 +90,8 @@ def get_mrc_level(map_path, original, best_iterations_num=8):
       except:
         metric_high = float("inf")
         addition = 0
-      if metric_low <= 0 or metric_high <= 0:
-        return min([metric_low, metric_high])
-      elif metric_low == float("inf") and metric_high == float("inf"):
+
+      if metric_low == float("inf") and metric_high == float("inf"):
         break
       elif metric_low <= metric_high:
         if metric_low <= last_metric:
@@ -93,19 +102,25 @@ def get_mrc_level(map_path, original, best_iterations_num=8):
           last_metric = metric_high
           level_to_return = high_actual_value
 
+      if metric_low <= break_sim or metric_high <= break_sim:
+        break;
+
       low_actual_value -= substraction
       high_actual_value += addition
 
     level = level_to_return
-    if os.path.isfile("/tmp/low_1yfq.pdb"):
-      os.remove("/tmp/low_1yfq.pdb")
-    if os.path.isfile("/tmp/high_1yfq.pdb"):
-      os.remove("/tmp/high_1yfq.pdb")
+    clean_file(low_simulate_path)
+    clean_file(high_simulate_path)
+
+  free_file(low_simulate_path)
+  free_file(high_simulate_path)
+  free_file(simulate_path)
+
   return level
 
 
 def get_mrc_to_pdb_aux(level, mrc_path, name_file):
-  pdb_path = "/tmp/" + name_file
+  pdb_path = name_file
   execute_command(
     "../binaries/MAINMAST/MainmastC -i {0} -t {1} -r 50 > {2}".format(
       mrc_path, level, pdb_path))
@@ -190,7 +205,7 @@ def mrc_to_pdb(mrc_path, pdb_result_path, threshold_mrc=0.0, clean=False):
 
   # execute_command("echo 1|../binaries/Situs_3.1/bin/map2map {0} {1}/tempPDB.situs".format(mrc_path, temp_dir))
 
-  level = get_mrc_level(mrc_path, original_pdb)
+  level = get_mrc_level(mrc_path)
   # Add flag, if original archive is here, find the best level, else, dont find best level
 
   if (threshold_mrc == 0 or threshold_mrc == 0.0):

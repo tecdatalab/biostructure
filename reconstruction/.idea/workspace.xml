@@ -74,9 +74,17 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a1dd68e-a6a5-4f8f-a209-a4fc36a2f3ad" name="Default Changelist" comment="[MOD] - Format all_CIFBank and all_PDB_Bank">
+    <list default="true" id="7a1dd68e-a6a5-4f8f-a209-a4fc36a2f3ad" name="Default Changelist" comment="[MOD] - Format pdb_can_chain_with_pdb_flag">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/files/pdb_can_chains_with_pdb_flag.csv" beforeDir="false" afterPath="$PROJECT_DIR$/files/pdb_can_chains_with_pdb_flag.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/general_utils/database_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/general_utils/database_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/general_utils/mrc_uilts.py" beforeDir="false" afterPath="$PROJECT_DIR$/general_utils/mrc_uilts.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/general_utils/pdb_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/general_utils/pdb_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/general_utils/temp_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/general_utils/temp_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/new_load_all_pdbs_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/new_load_all_pdbs_database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/miselaneous_code/main_add_exist_pdb_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/miselaneous_code/main_add_exist_pdb_file.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/process_graph/process_graph_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/process_graph/process_graph_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/process_mrc/generate.py" beforeDir="false" afterPath="$PROJECT_DIR$/process_mrc/generate.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/process_mrc/segment.py" beforeDir="false" afterPath="$PROJECT_DIR$/process_mrc/segment.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,7 +126,7 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager" selected="Python.main_add_exist_pdb_file">
+  <component name="RunManager" selected="Python.new_load_all_pdbs_database">
     <configuration name="all_PDBBank" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="reconstruction" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -207,7 +215,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test_test_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="new_load_all_pdbs_database" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="reconstruction" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -220,7 +228,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main/test_test_test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main/new_load_all_pdbs_database.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -232,17 +240,17 @@
     <list>
       <item itemvalue="Python.main_add_exist_pdb_file" />
       <item itemvalue="Python.main_test_insert_pdb_database" />
-      <item itemvalue="Python.test_test_test" />
       <item itemvalue="Python.main_remove_some_folders_clean_db" />
       <item itemvalue="Python.all_PDBBank" />
+      <item itemvalue="Python.new_load_all_pdbs_database" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.new_load_all_pdbs_database" />
         <item itemvalue="Python.main_add_exist_pdb_file" />
         <item itemvalue="Python.all_PDBBank" />
         <item itemvalue="Python.main_remove_some_folders_clean_db" />
         <item itemvalue="Python.main_test_insert_pdb_database" />
-        <item itemvalue="Python.test_test_test" />
       </list>
     </recent_temporary>
   </component>
@@ -546,7 +554,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669582608805</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="[MOD] - Format pdb_can_chain_with_pdb_flag">
+      <created>1669583060980</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1669583060980</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -575,7 +590,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="change download pdb forme" />
     <MESSAGE value="change order to start and ignore" />
     <MESSAGE value="Add some metrics" />
     <MESSAGE value="Repare error in chains" />
@@ -600,7 +614,8 @@
     <MESSAGE value="Add file" />
     <MESSAGE value="[MOD] - Change logic in remove clean folder" />
     <MESSAGE value="[MOD] - Format all_CIFBank and all_PDB_Bank" />
-    <option name="LAST_COMMIT_MESSAGE" value="[MOD] - Format all_CIFBank and all_PDB_Bank" />
+    <MESSAGE value="[MOD] - Format pdb_can_chain_with_pdb_flag" />
+    <option name="LAST_COMMIT_MESSAGE" value="[MOD] - Format pdb_can_chain_with_pdb_flag" />
   </component>
   <component name="WindowStateProjectService">
     <state x="1024" y="107" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1669517052928">
@@ -615,46 +630,46 @@
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state x="1099" y="311" width="424" height="491" key="FileChooserDialogImpl/72.27.2488.1053@72.27.2488.1053" timestamp="1669516677646" />
-    <state width="2442" height="255" key="GridCell.Tab.0.bottom" timestamp="1669582853553">
+    <state width="2442" height="264" key="GridCell.Tab.0.bottom" timestamp="1669610631631">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.0.bottom/72.27.1848.1053@72.27.1848.1053" timestamp="1661210516545" />
-    <state width="2442" height="255" key="GridCell.Tab.0.bottom/72.27.2488.1053@72.27.2488.1053" timestamp="1669582853553" />
-    <state width="2442" height="255" key="GridCell.Tab.0.center" timestamp="1669582853552">
+    <state width="2442" height="264" key="GridCell.Tab.0.bottom/72.27.2488.1053@72.27.2488.1053" timestamp="1669610631631" />
+    <state width="2442" height="264" key="GridCell.Tab.0.center" timestamp="1669610631627">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.0.center/72.27.1848.1053@72.27.1848.1053" timestamp="1661210516543" />
-    <state width="2442" height="255" key="GridCell.Tab.0.center/72.27.2488.1053@72.27.2488.1053" timestamp="1669582853552" />
-    <state width="2442" height="255" key="GridCell.Tab.0.left" timestamp="1669582853551">
+    <state width="2442" height="264" key="GridCell.Tab.0.center/72.27.2488.1053@72.27.2488.1053" timestamp="1669610631627" />
+    <state width="2442" height="264" key="GridCell.Tab.0.left" timestamp="1669610631626">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.0.left/72.27.1848.1053@72.27.1848.1053" timestamp="1661210516543" />
-    <state width="2442" height="255" key="GridCell.Tab.0.left/72.27.2488.1053@72.27.2488.1053" timestamp="1669582853551" />
-    <state width="2442" height="255" key="GridCell.Tab.0.right" timestamp="1669582853553">
+    <state width="2442" height="264" key="GridCell.Tab.0.left/72.27.2488.1053@72.27.2488.1053" timestamp="1669610631626" />
+    <state width="2442" height="264" key="GridCell.Tab.0.right" timestamp="1669610631631">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.0.right/72.27.1848.1053@72.27.1848.1053" timestamp="1661210516544" />
-    <state width="2442" height="255" key="GridCell.Tab.0.right/72.27.2488.1053@72.27.2488.1053" timestamp="1669582853553" />
-    <state width="2442" height="213" key="GridCell.Tab.1.bottom" timestamp="1669516623701">
+    <state width="2442" height="264" key="GridCell.Tab.0.right/72.27.2488.1053@72.27.2488.1053" timestamp="1669610631631" />
+    <state width="2442" height="264" key="GridCell.Tab.1.bottom" timestamp="1669610634354">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.1.bottom/72.27.1848.1053@72.27.1848.1053" timestamp="1661210520390" />
-    <state width="2442" height="213" key="GridCell.Tab.1.bottom/72.27.2488.1053@72.27.2488.1053" timestamp="1669516623701" />
-    <state width="2442" height="213" key="GridCell.Tab.1.center" timestamp="1669516623700">
+    <state width="2442" height="264" key="GridCell.Tab.1.bottom/72.27.2488.1053@72.27.2488.1053" timestamp="1669610634354" />
+    <state width="2442" height="264" key="GridCell.Tab.1.center" timestamp="1669610634353">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.1.center/72.27.1848.1053@72.27.1848.1053" timestamp="1661210520390" />
-    <state width="2442" height="213" key="GridCell.Tab.1.center/72.27.2488.1053@72.27.2488.1053" timestamp="1669516623700" />
-    <state width="2442" height="213" key="GridCell.Tab.1.left" timestamp="1669516623700">
+    <state width="2442" height="264" key="GridCell.Tab.1.center/72.27.2488.1053@72.27.2488.1053" timestamp="1669610634353" />
+    <state width="2442" height="264" key="GridCell.Tab.1.left" timestamp="1669610634353">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.1.left/72.27.1848.1053@72.27.1848.1053" timestamp="1661210520389" />
-    <state width="2442" height="213" key="GridCell.Tab.1.left/72.27.2488.1053@72.27.2488.1053" timestamp="1669516623700" />
-    <state width="2442" height="213" key="GridCell.Tab.1.right" timestamp="1669516623701">
+    <state width="2442" height="264" key="GridCell.Tab.1.left/72.27.2488.1053@72.27.2488.1053" timestamp="1669610634353" />
+    <state width="2442" height="264" key="GridCell.Tab.1.right" timestamp="1669610634353">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state width="1802" height="371" key="GridCell.Tab.1.right/72.27.1848.1053@72.27.1848.1053" timestamp="1661210520390" />
-    <state width="2442" height="213" key="GridCell.Tab.1.right/72.27.2488.1053@72.27.2488.1053" timestamp="1669516623701" />
+    <state width="2442" height="264" key="GridCell.Tab.1.right/72.27.2488.1053@72.27.2488.1053" timestamp="1669610634353" />
     <state x="659" y="237" width="663" height="640" key="RollbackChangesDialog" timestamp="1661210497191">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
@@ -663,10 +678,10 @@
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
     <state x="805" y="188" width="1022" height="737" key="SettingsEditor/72.27.2488.1053@72.27.2488.1053" timestamp="1669575251769" />
-    <state x="911" y="289" width="528" height="452" key="Vcs.Push.Dialog.v2" timestamp="1669582615227">
+    <state x="911" y="289" width="528" height="452" key="Vcs.Push.Dialog.v2" timestamp="1669583066661">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
-    <state x="911" y="289" width="800" height="535" key="Vcs.Push.Dialog.v2/72.27.2488.1053@72.27.2488.1053" timestamp="1669582615227" />
+    <state x="911" y="289" width="800" height="535" key="Vcs.Push.Dialog.v2/72.27.2488.1053@72.27.2488.1053" timestamp="1669583066661" />
     <state x="803" y="150" width="1424" height="783" key="find.popup" timestamp="1669582312380">
       <screen x="72" y="27" width="2488" height="1053" />
     </state>
@@ -687,7 +702,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/general_utils/database_utils.py</url>
-          <line>165</line>
+          <line>167</line>
           <option name="timeStamp" value="23" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -697,12 +712,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/main/new_load_all_pdbs_database.py</url>
-          <line>38</line>
+          <line>65</line>
           <option name="timeStamp" value="28" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/general_utils/database_utils.py</url>
-          <line>172</line>
+          <line>178</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -712,47 +727,32 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/general_utils/database_utils.py</url>
-          <line>508</line>
+          <line>514</line>
           <option name="timeStamp" value="34" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/miscellaneous_utils/database_mis.py</url>
-          <line>23</line>
-          <option name="timeStamp" value="36" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/miscellaneous_utils/database_mis.py</url>
-          <line>13</line>
-          <option name="timeStamp" value="37" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/general_utils/mrc_uilts.py</url>
-          <line>192</line>
+          <line>207</line>
           <option name="timeStamp" value="38" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/general_utils/database_utils.py</url>
-          <line>546</line>
-          <option name="timeStamp" value="39" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/general_utils/database_utils.py</url>
-          <line>568</line>
+          <line>596</line>
           <option name="timeStamp" value="41" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/general_utils/mrc_uilts.py</url>
-          <line>194</line>
+          <line>209</line>
           <option name="timeStamp" value="43" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/general_utils/database_utils.py</url>
-          <line>556</line>
+          <line>552</line>
           <option name="timeStamp" value="44" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/general_utils/database_utils.py</url>
-          <line>557</line>
+          <line>584</line>
           <option name="timeStamp" value="45" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -762,8 +762,48 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/miselaneous_code/main_add_exist_pdb_file.py</url>
-          <line>63</line>
+          <line>69</line>
           <option name="timeStamp" value="48" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main/new_load_all_pdbs_database.py</url>
+          <line>64</line>
+          <option name="timeStamp" value="49" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main/new_load_all_pdbs_database.py</url>
+          <line>49</line>
+          <option name="timeStamp" value="51" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main/new_load_all_pdbs_database.py</url>
+          <line>22</line>
+          <option name="timeStamp" value="53" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/general_utils/database_utils.py</url>
+          <line>495</line>
+          <option name="timeStamp" value="54" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/general_utils/database_utils.py</url>
+          <line>141</line>
+          <option name="timeStamp" value="55" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/process_mrc/generate.py</url>
+          <line>138</line>
+          <option name="timeStamp" value="57" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/general_utils/mrc_uilts.py</url>
+          <line>47</line>
+          <option name="timeStamp" value="58" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/general_utils/mrc_uilts.py</url>
+          <line>114</line>
+          <option name="timeStamp" value="59" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -780,10 +820,10 @@
     <SUITE FILE_PATH="coverage/reconstruction$main.coverage" NAME="main Coverage Results" MODIFIED="1632115663813" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/main" />
     <SUITE FILE_PATH="coverage/reconstruction$test_test_test.coverage" NAME="test_test_test Coverage Results" MODIFIED="1661210508419" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/main" />
     <SUITE FILE_PATH="coverage/reconstruction$all_PDBBank.coverage" NAME="all_PDBBank Coverage Results" MODIFIED="1669582514144" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/main" />
-    <SUITE FILE_PATH="coverage/reconstruction$main_add_exist_pdb_file.coverage" NAME="main_add_exist_pdb_file Coverage Results" MODIFIED="1669582853545" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/miselaneous_code" />
+    <SUITE FILE_PATH="coverage/reconstruction$main_add_exist_pdb_file.coverage" NAME="main_add_exist_pdb_file Coverage Results" MODIFIED="1669595149868" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/miselaneous_code" />
     <SUITE FILE_PATH="coverage/reconstruction$main_test.coverage" NAME="main_test Coverage Results" MODIFIED="1650762629261" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/main" />
-    <SUITE FILE_PATH="coverage/reconstruction$new_load_all_pdbs_database.coverage" NAME="new_load_all_pdbs_database Coverage Results" MODIFIED="1651808692743" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/main" />
     <SUITE FILE_PATH="coverage/reconstruction$main_test_insert_pdb_database.coverage" NAME="main_test_insert_pdb_database Coverage Results" MODIFIED="1661210516313" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/main" />
     <SUITE FILE_PATH="coverage/reconstruction$main_remove_some_folders_clean_db.coverage" NAME="main_remove_some_folders_clean_db Coverage Results" MODIFIED="1669577622612" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/miselaneous_code" />
+    <SUITE FILE_PATH="coverage/reconstruction$new_load_all_pdbs_database.coverage" NAME="new_load_all_pdbs_database Coverage Results" MODIFIED="1669610631495" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/main" />
   </component>
 </project>

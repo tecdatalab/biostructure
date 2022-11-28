@@ -14,7 +14,7 @@ from general_utils.cif_utils import get_chains_cif
 from general_utils.download_utils import download_pdb, download_cif, download_pdb_fasta
 from general_utils.mrc_uilts import mrc_to_pdb
 from general_utils.pdb_utils import get_chains_pdb, make_pdb_dir_temp
-from general_utils.temp_utils import gen_dir, free_dir, gen_file
+from general_utils.temp_utils import gen_dir, free_dir, gen_file, free_file, gen_file_with_extension
 from general_utils.workspace_utils import is_work_in_cluster
 from miscellaneous_utils.database_mis import put_bigfile_db, get_dicc_chains_files_info, get_bigfile_db
 from to_mrc.cif_2_mrc import cif_to_mrc_chains
@@ -163,11 +163,17 @@ def insert_pdb_information(db, col, pdb_id):
     download_cif(pdb_id, path_of_file)
     chains = get_chains_cif(path_of_file)
 
+
+
   new_pdb = {}
+
+  chains_files_info = get_dicc_chains_files_info(pdb_id)
+  new_pdb['chains_files_info'] = put_bigfile_db(db, chains_files_info)
+
   all_graphs = {}
   for resolution in valid_resolutions:
     key_mongo = pdb_id + "_" + str(resolution)
-    dicc_graph = resolution_pdb_information(resolution, pdb_id, chains, path_dir, path_of_file, is_pdb)
+    dicc_graph = resolution_pdb_information(resolution, pdb_id, chains, path_dir, path_of_file, is_pdb, chains_files_info)
     all_graphs[key_mongo] = dicc_graph
 
   new_pdb['is_original_pdb'] = is_pdb
@@ -194,8 +200,7 @@ def insert_pdb_information(db, col, pdb_id):
     dicc_chain_sequential[chain] = get_similar_pdb_chain_sequential(pdb_id, chain, -1, all_sequences[chain])
   new_pdb['similars_chain_sequential'] = put_bigfile_db(db, dicc_chain_sequential)
 
-  chains_files_info = get_dicc_chains_files_info(pdb_id)
-  new_pdb['chains_files_info'] = put_bigfile_db(db, chains_files_info)
+
 
   col.update_one(
     {"pdbID": pdb_id},
@@ -207,8 +212,8 @@ def insert_pdb_information(db, col, pdb_id):
   return new_pdb
 
 
-def resolution_pdb_information(resolution, pdb_id, chains, path_dir, path_of_file, is_pdb):
-  graph, father_ZD = gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_of_file, is_pdb, True)
+def resolution_pdb_information(resolution, pdb_id, chains, path_dir, path_of_file, is_pdb, chains_files_info):
+  graph, father_ZD, original_level = gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_of_file, is_pdb, True, chains_files_info)
 
   for j in graph.nodes():
     graph.nodes[j]["zd_descriptors"] = graph.nodes[j]["zd_descriptors"].tolist()
@@ -217,6 +222,7 @@ def resolution_pdb_information(resolution, pdb_id, chains, path_dir, path_of_fil
 
   new_pdb_chain["G"] = graph
   new_pdb_chain["OZD"] = father_ZD
+  new_pdb_chain["OLevel"] = original_level
 
   return new_pdb_chain
 
@@ -535,7 +541,7 @@ def get_pdb2cif_db(pdb_id):
 
 
 # Aux funtions
-def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_file, is_pdb, return_OZD=False):
+def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_file, is_pdb, return_OZD=False, chains_files_info={}):
   if is_pdb:
     pdb_to_mrc_chains(return_OZD, False, resolution, path_file, path_dir, chains, len(chains))
   else:
@@ -544,30 +550,52 @@ def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_file, is
   local_path = path_dir + "/" + pdb_id
   segments = []
   for chain in chains:
-    segments_graph_simulate, _ = get_mrc_one('{0}/{1}_{2}.mrc'.format(local_path, pdb_id, chain))
+    chain_file = gen_file_with_extension(".pdb")
+    chain_file_h = open(chain_file, "w+")
+    chain_file_h.write(chains_files_info[chain])
+    chain_file_h.close()
+
+    chain_file_CA = gen_file_with_extension(".pdb")
+    chain_file_CA_h = open(chain_file_CA, "w+")
+    chain_file_CA_h.write(get_CA_from_PDB(chain_file))
+    chain_file_CA_h.close()
+
+    segments_graph_simulate, _, recommended_contour = get_mrc_one('{0}/{1}_{2}.mrc'.format(local_path, pdb_id, chain), original_pdb=chain_file_CA)
 
     segment = segments_graph_simulate[0]
     segment.id_segment = chain
-    segment.textSimulatePDB = get_text_simulate_PDB('{0}/{1}_{2}.mrc'.format(local_path, pdb_id, chain))
+    segment.recommendedContour = recommended_contour
+    segment.textSimulatePDB = get_text_simulate_PDB('{0}/{1}_{2}.mrc'.format(local_path, pdb_id, chain), mrc_level=recommended_contour)
     if (is_pdb):
-      segment.originalCA = get_CA_from_PDB(path_file)
+      segment.originalCA = get_CA_from_PDB(chain_file)
     else:
       segment.originalCA = None
-      # segment.id_segment = chain
+
+    file_temp = gen_file()
+    file_h = open(file_temp, "w+")
+    file_h.write(segment.textSimulatePDB)
+    file_h.close()
+
+    segment.simulateCA = get_CA_from_PDB(file_temp)
+    free_file(file_temp)
+    free_file(chain_file)
+    free_file(chain_file_CA)
+
     segments.append(segment)
   graph = generate_graph(segments, 100, 0, 6, 1)
   if return_OZD:
-    father_ZD = get_mrc_one('{0}/{1}.mrc'.format(local_path, pdb_id))[1].zd_descriptors
+    original_graph_simulate, _, original_recommended_contour = get_mrc_one('{0}/{1}.mrc'.format(local_path, pdb_id), original_pdb=path_file)
+    father_ZD = original_graph_simulate.zd_descriptors
     free_dir(local_path)
-    return graph, father_ZD
+    return graph, father_ZD, original_recommended_contour
   else:
     free_dir(local_path)
     return graph
 
 
-def get_text_simulate_PDB(mrc_file):
+def get_text_simulate_PDB(mrc_file, mrc_level):
   file_tem = gen_file()
-  mrc_to_pdb(mrc_file, file_tem, clean=True)
+  mrc_to_pdb(mrc_file, file_tem, threshold_mrc=mrc_level, clean=True)
 
   result = None
   with open(file_tem) as f:

@@ -70,7 +70,7 @@ def get_similar_pdb_struct(pdb_name, can=10):
     }
   }
   json_dump = json.dumps(search_request)
-  url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
+  url_get = 'https://search.rcsb.org/rcsbsearch/v2/query?json={0}'.format(json_dump)
 
   status_code = 500
   while status_code != 200 and status_code != 204 and status_code != 400:
@@ -214,7 +214,7 @@ def get_similar_pdb_chain_structural(pdb_name, chain, can=10):
   }
 
   json_dump = json.dumps(search_request)
-  url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
+  url_get = 'https://search.rcsb.org/rcsbsearch/v2/query?json={0}'.format(json_dump)
 
   status_code = 500
   while status_code != 200 and status_code != 204 and status_code != 400:
@@ -351,7 +351,7 @@ def get_similar_pdb_chain_sequential(pdb_name, chain, can=10, sequence=None):
   }
 
   json_dump = json.dumps(search_request)
-  url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
+  url_get = 'https://search.rcsb.org/rcsbsearch/v2/query?json={0}'.format(json_dump)
 
   status_code = 500
   while status_code != 200 and status_code != 204 and status_code != 400:
@@ -475,15 +475,15 @@ def get_pdb_adn_arn_online_aux():
     }
   }
   json_dump = json.dumps(search_request)
-  url_get = 'https://search.rcsb.org/rcsbsearch/v1/query?json={0}'.format(json_dump)
+  url_get = 'https://search.rcsb.org/rcsbsearch/v2/query?json={0}'.format(json_dump)
 
   status_code = 500
   while status_code != 200:
     response = requests.get(url_get)
     status_code = response.status_code
-    time.sleep(random.randint(2, 15))
     if status_code != 200 and status_code != 204:
       print(response, response.status_code, response.text, "\n\n\n", flush=True)
+      time.sleep(random.randint(2, 15))
 
   var_result = json.loads(response.text)
   result = []
