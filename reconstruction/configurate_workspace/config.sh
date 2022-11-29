@@ -53,6 +53,10 @@ python3.8 -m pip install pyopengl
 python3.8 -m pip install Cython
 
 
+#TMAling
+git+https://github.com/jvkersch/tmtools.git#egg=tmtools
+python3.8 -m pip install  git+https://github.com/jvkersch/tmtools.git#egg=tmtools
+
 #Glumpy
 python3.8 -m pip install -U glumpy
 

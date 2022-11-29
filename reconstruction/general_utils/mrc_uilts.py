@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from general_utils.pdb_utils import move_pdb_center
+from general_utils.pdb_utils import move_pdb_center, align_tmaling
 from general_utils.string_utils import get_float_between_ss, get_float_value
 from general_utils.temp_utils import gen_dir, free_dir, gen_file, free_file, gen_file_with_extension, clean_file
 from general_utils.terminal_utils import get_out, execute_command
@@ -34,7 +34,7 @@ def get_mass_angstrom(map_path, original):
   return mass
 
 
-def get_mrc_level(map_path, original, best_iterations_num=8, break_sim=0.35, addition_value=0.5,
+def get_mrc_level(map_path, original=None, best_iterations_num=8, break_sim=0.35, addition_value=0.5,
                   substraction_value=0.5):
   # best num is the number of times the sum and substraction is run
   # the bigger the number, the better
@@ -57,18 +57,10 @@ def get_mrc_level(map_path, original, best_iterations_num=8, break_sim=0.35, add
     simulate_path = gen_file_with_extension(".pdb")
     low_simulate_path = gen_file_with_extension(".pdb")
     high_simulate_path = gen_file_with_extension(".pdb")
-    print(simulate_path)
-    print(low_simulate_path)
-    print(high_simulate_path)
 
     get_mrc_to_pdb_aux(level, map_path, simulate_path)
-    aling_result = align_pdb_file_1_in_2(simulate_path, original)
-    print("Print 1", level)
-    print(aling_result.RMSDAfterRefinement)
-    print(aling_result.PercentageAtomsAlignedAfterRefinement)
-    print(aling_result.RawAlignmentScore)
-    print(aling_result.NumberAlignedAtomsAfterRefinement)
-    last_metric = aling_result.RMSDAfterRefinement  # initiates the last metric variable
+    aling_result = align_tmaling(simulate_path, original)
+    last_metric = aling_result.RMSD  # initiates the last metric variable
     metric_low = last_metric
     metric_high = last_metric
 
@@ -86,13 +78,8 @@ def get_mrc_level(map_path, original, best_iterations_num=8, break_sim=0.35, add
       try:
         if metric_low == float("inf"):
           raise Exception
-        aling_result = align_pdb_file_1_in_2(pdb_simulated_low, original)
-
-        print("Print 2", low_actual_value)
-        print(aling_result.RMSDAfterRefinement)
-        print(aling_result.PercentageAtomsAlignedAfterRefinement)
-        print(aling_result.RawAlignmentScore)
-        metric_low = aling_result.RMSDAfterRefinement
+        aling_result = align_tmaling(pdb_simulated_low, original)
+        metric_low = aling_result.RMSD
 
         if metric_low < 0 or low_actual_value < 0:
           best_iterations_num += (best_iterations_num - i)
@@ -105,12 +92,8 @@ def get_mrc_level(map_path, original, best_iterations_num=8, break_sim=0.35, add
       try:
         if metric_high == float("inf"):
           raise Exception
-        aling_result = align_pdb_file_1_in_2(pdb_simulated_high, original)
-        print("Print 3", high_actual_value)
-        print(aling_result.RMSDAfterRefinement)
-        print(aling_result.PercentageAtomsAlignedAfterRefinement)
-        print(aling_result.RawAlignmentScore)
-        metric_high = aling_result.RMSDAfterRefinement
+        aling_result = align_tmaling(pdb_simulated_high, original)
+        metric_high = aling_result.RMSD
 
         if metric_high < 0:
           best_iterations_num += (best_iterations_num - i)
@@ -150,17 +133,8 @@ def get_mrc_level(map_path, original, best_iterations_num=8, break_sim=0.35, add
 
 
 def get_mrc_to_pdb_aux(level, mrc_path, name_file):
-  pdb_path = name_file
-  execute_command(
-    "../binaries/MAINMAST/MainmastC -i {0} -t {1} -r 50 > {2}".format(
-      mrc_path, level, pdb_path))
-
-  from general_utils.pdb_utils import only_first_model
-  only_first_model(pdb_path)
-
-  move_pdb_center(pdb_path)
-
-  return pdb_path
+  mrc_to_pdb(mrc_path, name_file, level)
+  return name_file
 
 
 def get_mrc_level_aux(map_path):
@@ -213,36 +187,19 @@ def get_cube_len_angstrom(map_path):
   return [x, y, z]
 
 
-def mrc_to_pdb_test(mrc_path, pdb_result_path, original_path=None, threshold_mrc=0.0, clean=False):
-  level = get_mrc_level(mrc_path, original_path)
-
-  if (threshold_mrc == 0 or threshold_mrc == 0.0):
-    threshold_mrc = level
-
-  execute_command(
-    "../binaries/MAINMAST/MainmastC -i {0} -t {1} -r 50 > {2}".format(
-      mrc_path, threshold_mrc, pdb_result_path))
-  # free_dir(temp_dir)
-
-  if clean:
-    from general_utils.pdb_utils import only_first_model
-    only_first_model(pdb_result_path)
-  move_pdb_center(pdb_result_path)
-
-
-def mrc_to_pdb(mrc_path, pdb_result_path, threshold_mrc=0.0, clean=False):
+def mrc_to_pdb(mrc_path, pdb_result_path, threshold_mrc=None, clean=True):
   # temp_dir = gen_dir()
 
   # execute_command("echo 1|../binaries/Situs_3.1/bin/map2map {0} {1}/tempPDB.situs".format(mrc_path, temp_dir))
 
-  level = get_mrc_level(mrc_path)
+
   # Add flag, if original archive is here, find the best level, else, dont find best level
 
-  if (threshold_mrc == 0 or threshold_mrc == 0.0):
-    threshold_mrc = level
+  if (threshold_mrc is None):
+    threshold_mrc = get_mrc_level(mrc_path)
 
   execute_command(
-    "../binaries/MAINMAST/MainmastC -i {0} -t {1} -r 50 > {2}".format(
+    "../binaries/MAINMAST/MainmastC -i {0} -t {1} -r 100 -s 1 > {2}".format(
       mrc_path, threshold_mrc, pdb_result_path))
   # free_dir(temp_dir)
 

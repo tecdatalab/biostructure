@@ -830,9 +830,43 @@ def make_pdb_dir_temp(work_dir, pdb_id):
 
 
 def align_tmaling(pdb1_path, pdb2_path):
+  from models.TMAlingResult import TMAlingResult
   from general_utils.terminal_utils import get_out
-  _error, exit_binary_text = get_out("./binaries/TMtools/TMalign", pdb1_path, pdb2_path)
-  print(exit_binary_text)
+
+  result = TMAlingResult()
+  _error, exit_binary_text = get_out("../binaries/TMtools/TMalign", pdb1_path, pdb2_path)
+
+  lines = exit_binary_text.split("\n")[13:]
+  for line in lines:
+    if line.find("Length of Chain_1")!=-1:
+      actual_value = line.split(":")[1]
+      actual_value = actual_value.split("residues")[0]
+      actual_value = int(actual_value)
+
+      result.length_of_Chain_1 = actual_value
+
+    elif line.find("Length of Chain_2")!=-1:
+      actual_value = line.split(":")[1]
+      actual_value = actual_value.split("residues")[0]
+      actual_value = int(actual_value)
+
+      result.length_of_Chain_2 = actual_value
+
+    elif line.find("Aligned length") != -1:
+      elements = line.split(",")
+      result.aligned_length = int(elements[0].split("=")[1])
+      result.RMSD = float(elements[1].split("=")[1])
+      result.Seq_ID = float(elements[2].split("=")[2])
+
+    elif line.find("(if normalized by length of Chain_1") != -1:
+      actual_value = line.split("=")[1].split("(")[0]
+      result.TM_score_normalized_Chain_1 = float(actual_value)
+
+    elif line.find("(if normalized by length of Chain_2") != -1:
+      actual_value = line.split("=")[1].split("(")[0]
+      result.TM_score_normalized_Chain_2 = float(actual_value)
+
+  return result
 
 
 def only_first_model(pdb_path):

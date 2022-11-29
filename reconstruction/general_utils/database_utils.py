@@ -595,7 +595,7 @@ def gen_graph_resolution_aux(chains, resolution, path_dir, pdb_id, path_file, is
 
 def get_text_simulate_PDB(mrc_file, mrc_level):
   file_tem = gen_file()
-  mrc_to_pdb(mrc_file, file_tem, threshold_mrc=mrc_level, clean=True)
+  mrc_to_pdb(mrc_file, file_tem, threshold_mrc=mrc_level)
 
   result = None
   with open(file_tem) as f:
