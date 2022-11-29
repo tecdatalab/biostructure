@@ -24,7 +24,7 @@ foreach my $k (@B){
 }
 
 print "set connect_mode=1\n";
-print "load $file, $name\n";
+print "load $file, $name,0,pdb\n";
 
 #bond resi   313 and tmp, resi   327 and tmp
 for($i=1;$i<$maxres;$i++){

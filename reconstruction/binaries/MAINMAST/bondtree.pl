@@ -13,13 +13,15 @@ if($name eq ""){
 }
 
 print "set connect_mode=1\n";
-print "load $file, $name\n";
+print "load $file, $name,0,pdb\n";
 my @B=firstfile($file);
 
 my $maxres=0;
 foreach my $k (@B){
  if($$k[0] eq "BOND"){
    printf("bond resi %d and %s, resi %d and %s\n",$$k[1],$name,$$k[2],$name);
+ }elsif($$k[0] eq "bond"){ #old format
+  printf("bond resi %d and %s, resi %d and %s\n",$$k[2],$name,$$k[6],$name);
  }
 }
 
