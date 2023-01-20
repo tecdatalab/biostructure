@@ -98,7 +98,7 @@ def training(local_rank, config, current_fold, run_id):
     print(agent.model)
     # Create trainer for current task
     trainer = create_trainer(agent.model, agent.optimizer, agent.criterion, agent.train_loader.sampler, config, logger)
-    #torch.autograd.set_detect_anomaly(True)
+    torch.autograd.set_detect_anomaly(True)
     # Let's now setup evaluator engine to perform model's validation and compute metrics
     cm = ConfusionMatrix(num_classes=config['num_classes'])
     metrics={
@@ -211,10 +211,10 @@ def run(
     num_epochs=100,
     learning_rate=0.001,
     momentum=0.9,
-    weight_decay=0.0005,
+    weight_decay=0.0,
     gamma = 0.5,
     validate_every=1,
-    checkpoint_every=1000,
+    checkpoint_every=519,
     backend=None,
     resume_from=None,
     log_every_iters=15,
@@ -286,6 +286,10 @@ def create_trainer(model, optimizer, criterion, train_sampler, config, logger):
 
         optimizer.zero_grad()
         scaler.scale(loss).backward()
+        grads = [p.grad for p in model.parameters() if p.requires_grad is True]
+        for grads_ in grads:
+            if torch.isnan(grads_).any():
+                print("grads nan")
         scaler.step(optimizer)
         scaler.update()
         return {
@@ -338,7 +342,7 @@ def create_evaluator(model, metrics, config, tag="val"):
             output = model(x)
 
         del x
-        return output, y.to(device)
+        return output, y
 
     evaluator = Engine(evaluate_step)
 

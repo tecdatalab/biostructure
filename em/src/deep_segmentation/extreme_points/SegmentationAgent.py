@@ -14,8 +14,8 @@ from sklearn.model_selection import KFold, train_test_split
 import pandas as pd
 
 def set_seed(seed):
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
+    #torch.backends.cudnn.deterministic = False
+    #torch.backends.cudnn.benchmark = True
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
@@ -83,7 +83,6 @@ class SegmentationAgent:
         # Get id list of EM maps in data
         df_maps = self.dataframe.drop_duplicates(subset=['id'])
         id_list = df_maps['id'].tolist()
-		
         # Generate folds for cross validation
         splits = KFold(n_splits=num_folds,shuffle=True,random_state=seed)
         # Select testing maps from dataset
@@ -102,6 +101,10 @@ class SegmentationAgent:
             val_idx.append(v)
         validation_maps = [ samples[i] for i in val_idx[self.current_fold] ] 
         train_maps = [ samples[i] for i in train_idx[self.current_fold] ]
+        
+        #train_maps = ['8438']
+        #validation_maps = ['8438']
+        #test_maps = ['8438']
         print("Number of EM maps in total: {}, Training: {}, Validation: {}, Testing: {}".format(len(id_list), len(train_maps), len(validation_maps), len(test_maps)))
         validation_patches = self.dataframe[self.dataframe['id'].isin(validation_maps)]
         train_patches = self.dataframe[self.dataframe['id'].isin(train_maps)]

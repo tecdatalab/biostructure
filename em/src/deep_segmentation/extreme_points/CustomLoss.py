@@ -95,9 +95,11 @@ class CustomLoss(Module):
 
     def unified_loss(self, pred, target, gamma, delta=0.6, lambda_=0.5):
         weights=self.dice_loss(pred,target).clone().detach()
+        print("W: max pred value {},".format(weights,pred.max().clone().detach()), end=" ")
         ce = cross_entropy(pred, target, weight=weights, reduction='none')
+        print(" CE max: {}".format(ce.max()))
         tv = self.tversky_loss(pred, target, 1-delta, delta, gamma)
-        ce = ce.sum() / weights[target].sum()   
+        ce = ce.sum() / weights[target].sum()  
         probs = torch.gather(log_softmax(pred, 1), 1, target.unsqueeze(1))
         probs = probs.exp()
         focal_ce = torch.mean(torch.pow(1 - probs, (1-gamma)) * ce)
