@@ -33,8 +33,17 @@ class CustomLoss(Module):
         inter = torch.sum(probs * target_oh, dims)
         fps = torch.sum(probs * (1 - target_oh), dims)
         fns = torch.sum((1 - probs) * target_oh, dims)
+<<<<<<< HEAD
         t = ((inter + epsilon)/ (inter + (alpha * fps) + (beta * fns) + epsilon)).mean()
         return (1 - t)**gamma
+=======
+        t = (inter / (inter + (alpha * fps) + (beta * fns))).mean()
+        loss = (1 - t)**gamma
+        if self.half_precision:
+            return loss.half()
+        else:
+            return loss
+>>>>>>> add half precision support
 
     def dice_loss(self, pred, target, epsilon=1e-6):
         """
@@ -54,7 +63,11 @@ class CustomLoss(Module):
         fps = torch.sum(probs * (1 - target_oh), dims)
         fns = torch.sum((1 - probs) * target_oh, dims)
         t = ((inter + epsilon)/ (inter + (0.5 * fps) + (0.5 * fns) + epsilon)).mean(dim=1)
-        return 1 - t
+        loss = 1 - t
+        if self.half_precision:
+            return loss.half()
+        else:
+            return loss
 
     def class_dice(self, pred, target, epsilon=1e-6):
         """
