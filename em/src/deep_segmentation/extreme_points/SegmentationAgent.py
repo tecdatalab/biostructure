@@ -14,15 +14,15 @@ from sklearn.model_selection import KFold, train_test_split
 import pandas as pd
 
 def set_seed(seed):
-    #torch.backends.cudnn.deterministic = False
-    #torch.backends.cudnn.benchmark = True
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = True
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
 
 def get_optimizer(name, parameters, learning_rate, momentum, weight_decay):
     if name=='SGD':
-        return SGD(parameters, lr=learning_rate,momentum=momentum, weight_decay=weight_decay)
+        return SGD(parameters, lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
     elif name=='Adam':
         return Adam(parameters, lr=learning_rate, weight_decay=weight_decay)
 
@@ -57,16 +57,16 @@ class SegmentationAgent:
         train_split, val_split, test_split = self.make_splits(num_folds, test_ids, seed)
         train_dataset = SegmentationDataset(train_split, self.num_classes, self.img_size, self.randg, self.device, augmentate=True, extra_width=extra_width)
         validation_dataset = SegmentationDataset(val_split, self.num_classes, self.img_size, self.randg, self.device, augmentate=False, extra_width=extra_width, is_validation=True)
-        test_dataset = SegmentationDataset(test_split, self.num_classes, self.img_size, self.randg, self.device, augmentate=False, extra_width=extra_width, is_validation=True)
+        test_dataset = SegmentationDataset(test_split, self.num_classes, self.img_size, self.randg, self.device, augmentate=False, extra_width=extra_width, is_validation=True, is_nonoverlap_stride=True)
   
         if idist.get_local_rank() == 0:
             idist.barrier()
 
         self.train_loader = idist.auto_dataloader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=4, worker_init_fn=np.random.seed(self.seed), pin_memory=True)
         self.validation_loader = idist.auto_dataloader(train_dataset, batch_size=self.batch_size, shuffle=False, num_workers=4, worker_init_fn=np.random.seed(self.seed),pin_memory=True)
-        self.test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=4, worker_init_fn=np.random.seed(self.seed), pin_memory=True)
+        self.test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=2, worker_init_fn=np.random.seed(self.seed), pin_memory=True)
 
-        self.model = idist.auto_model(SegmentationUNet(self.num_classes, self.device, in_channels=2, depth=self.depth, batch_norm=self.batch_norm))
+        self.model = idist.auto_model(SegmentationUNet(self.num_classes, self.device, in_channels=1, depth=self.depth, batch_norm=self.batch_norm))
         self.criterion = CustomLoss(loss_func, self.num_classes, self.device, self.gamma,  mixed_precision)
         self.optimizer = idist.auto_optim(get_optimizer(optimizer, self.model.parameters(), learning_rate, momentum, weight_decay))
         

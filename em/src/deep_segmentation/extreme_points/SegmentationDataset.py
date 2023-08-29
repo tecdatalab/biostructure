@@ -9,7 +9,7 @@ import pandas as pd
          
 
 class SegmentationDataset(Dataset):
-    def __init__(self, df, num_classes, image_size, randg, device,augmentate=False, extra_width=0, is_validation=False):
+    def __init__(self, df, num_classes, image_size, randg, device,augmentate=False, extra_width=0, is_validation=False, is_nonoverlap_stride=False):
         """
         Dataset class for EM data 
         :param num_classes: number of classes to classify
@@ -20,6 +20,7 @@ class SegmentationDataset(Dataset):
         self.randg = randg
         self.augmentate = augmentate
         self.is_validation = is_validation
+        self.is_nonoverlap_stride = is_nonoverlap_stride
         self.device = device
 
  
@@ -59,21 +60,50 @@ class SegmentationDataset(Dataset):
         row = self.patches_df.iloc[[idx]]
         map_id = row['id'].item()
         segment_id = row['subunit'].item()
-        patch_ix = int(row['patch'].item()) 
-        np_sample = np.load('/work/mzumbado/data_patches/{}_{}.npy'.format(map_id,segment_id))
-        sample = torch.from_numpy(np_sample)
-        patches_tensor = sample.unfold(3, self.image_size[2], self.image_size[2]//2).unfold(2, self.image_size[1], self.image_size[1]//2).unfold(1, self.image_size[0], self.image_size[0]//2)
-        patches_tensor = patches_tensor.contiguous().view(-1,12,self.image_size[0],self.image_size[1],self.image_size[2])
-        patch_data = patches_tensor[patch_ix]
-        mask_data = patch_data[0]
-        map_data = patch_data[1]
-        points_data = patch_data[2:12]
+        patch_ix = int(row['patch'].item())
+        #print("Getting output for {} {} {}".format(map_id,segment_id,patch_ix))
+         
+        if self.is_nonoverlap_stride:
+            stride = self.image_size[0]
+            #datapath ='/work/mzumbado/data_patches/test/{}_{}.npy'.format(map_id,segment_id)
+            datapath ='/work/mzumbado/patches/test/{}_{}_{}.torch'.format(map_id,segment_id,patch_ix)
+        else:
+            stride = self.image_size[0] //2
+            #datapath ='/work/mzumbado/data_patches/{}_{}.npy'.format(map_id,segment_id)
+            datapath = '/work/mzumbado/patches/{}_{}_{}.torch'.format(map_id,segment_id,patch_ix)
+
+        #np_array = np.load(datapath)
+        #all_tensor = torch.from_numpy(np_array)
+        all_tensor = torch.load(datapath)
+        mask_data = all_tensor[0,:]
+        map_data =  all_tensor[1,:]
+        points_data = all_tensor[2:,:]
+        
+        # Load points according pool sample size
+        if self.is_validation:
+            point_idx = -1
+        else:
+            point_idx = np.random.choice(a=points_data.size(0), size=1 ).item()
+        
+        point_data = points_data[point_idx]/3
+        '''
+        mask_patches = mask_data.unfold(0, self.image_size[0], stride).unfold(1,self.image_size[0],stride).unfold(2,self.image_size[0],stride) 
+        mask_patches = mask_patches.contiguous().view(-1,self.image_size[0],self.image_size[1],self.image_size[2])
+        map_patches = map_data.unfold(0, self.image_size[0], stride).unfold(1,self.image_size[0],stride).unfold(2,self.image_size[0],stride)    
+        map_patches = map_patches.contiguous().view(-1,self.image_size[0],self.image_size[1],self.image_size[2])
+        point_patches = point_data.unfold(0, self.image_size[0], stride).unfold(1,self.image_size[0],stride).unfold(2,self.image_size[0],stride)    
+        point_patches = point_patches.contiguous().view(-1,self.image_size[0],self.image_size[1],self.image_size[2])
+
+        #print("File shape {}, folded {}".format(np_array.shape, patches_tensor.shape))
+        mask_patch = mask_patches[patch_ix]
+        map_patch = map_patches[patch_ix]
+        point_patch = point_patches[patch_ix]
+        '''
+        mask_patch = mask_data
+        map_patch = map_data
+        point_patch = point_data
+        
         try:
-            # Load points according pool sample size
-            if self.is_validation:
-                point_idx = -1
-            else:
-                point_idx = np.random.choice(a=points_data.size(0), size=1 ).item()
             ''' 
             # Resize imput data
             zoom_factor = [ resized_shape/axis_shape for axis_shape,resized_shape in zip(map_data.shape,self.image_size) ]
@@ -88,15 +118,25 @@ class SegmentationDataset(Dataset):
             data_min = np.min(map_data)
             norm_data = (map_data - data_min)/ (data_max-data_min + 1e-6)
             '''
-            point_data = points_data[point_idx]/3
             # Create two channel input data
-            input_data = torch.stack([map_data, point_data])
-            x = input_data.float()
-            y = mask_data.long()
+            input_data = torch.stack([map_patch, point_patch])
+            #input_data = torch.stack([map_patch])
+            x = input_data.to(dtype=torch.float)
+            #mask_foreground = mask_patch==2.0
+            #y = mask_foreground.to(dtype=torch.long)
+            y = mask_patch.to(dtype=torch.long)
+            del map_patch
+            del mask_patch
+            del point_patch
+            #del mask_patches
+            #del map_patches
+            #del point_patches
+            del all_tensor
+            #del np_array
             if self.augmentate:
                 x,y = self.transform(x,y)
             return x,y
         except Exception as e:
             print(e)
-            del patches_tensor
+            
 

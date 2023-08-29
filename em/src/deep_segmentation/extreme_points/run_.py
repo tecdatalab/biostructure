@@ -94,7 +94,7 @@ def training(local_rank, config, current_fold, run_id):
     config["num_iters_per_epoch"] = len(agent.train_loader)
     print("Num iters per epoch: {}".format(config["num_iters_per_epoch"]))
     # Print model summary
-    summary(agent.model, (2, config['input_size'], config['input_size'], config['input_size'])) 
+    summary(agent.model, (1, config['input_size'], config['input_size'], config['input_size'])) 
     print(agent.model)
     # Create trainer for current task
     trainer = create_trainer(agent.model, agent.optimizer, agent.criterion, agent.train_loader.sampler, config, logger)
@@ -196,7 +196,7 @@ def training(local_rank, config, current_fold, run_id):
 def run(
     seed=42,
     model='3D-Unet',
-    data_path="dataset/dataset_patches.csv",
+    data_path="dataset/dataset_patches_final_new.csv",
     output_path="results",
     num_classes=3,
     num_folds= 3,
@@ -205,7 +205,7 @@ def run(
     depth=4,
     extra_width=0,
     batch_size=1,
-    test_ids = [],
+    test_ids = ['4671', '5140', '6618', '8723', '22423', '8722', '4156', '4400', '20495', '13387', '20613', '11838', '10274', '24578', '25971', '3435', '8438', '25980', '3353', '6207', '4057', '11688', '22964', '3355', '30239', '22754', '21693', '22115', '25972', '23064', '8721'],
     input_size=128,
     num_workers=1,
     num_epochs=100,
@@ -214,7 +214,7 @@ def run(
     weight_decay=0.0,
     gamma = 0.5,
     validate_every=1,
-    checkpoint_every=519,
+    checkpoint_every=400,
     backend=None,
     resume_from=None,
     log_every_iters=15,
@@ -256,7 +256,7 @@ def run(
     with idist.Parallel(backend=backend, **spawn_kwargs) as parallel:
         run_id = hex(random.getrandbits(16))
         for fold in range(config['num_folds']):
-            parallel.run(training, config, fold, run_id)
+            parallel.run(training, config, 2, run_id)
 
 
 def create_trainer(model, optimizer, criterion, train_sampler, config, logger):
@@ -283,13 +283,12 @@ def create_trainer(model, optimizer, criterion, train_sampler, config, logger):
         with autocast(enabled=with_amp):
             y_pred = model(x)
             loss = criterion(y_pred, y)
-
         optimizer.zero_grad()
         scaler.scale(loss).backward()
-        grads = [p.grad for p in model.parameters() if p.requires_grad is True]
-        for grads_ in grads:
-            if torch.isnan(grads_).any():
-                print("grads nan")
+        #grads = [p.grad for p in model.parameters() if p.requires_grad is True]
+        #for grads_ in grads:
+        #    if torch.isnan(grads_).any():
+        #        print("grads nan")
         scaler.step(optimizer)
         scaler.update()
         return {
