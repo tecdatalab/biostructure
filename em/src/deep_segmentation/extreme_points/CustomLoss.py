@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from torch.nn import Module
 from torch.nn.functional import cross_entropy, softmax, log_softmax
+from torchvision.ops import sigmoid_focal_loss
 
 
 class CustomLoss(Module):
@@ -30,20 +31,15 @@ class CustomLoss(Module):
         probs = softmax(pred, dim=1)
         target_oh = target_oh.type(pred.type())
         dims = (0,) + tuple(range(2, target.ndimension()))
-        inter = torch.sum(probs * target_oh, dims)
-        fps = torch.sum(probs * (1 - target_oh), dims)
-        fns = torch.sum((1 - probs) * target_oh, dims)
-<<<<<<< HEAD
+        inter = torch.sum(probs * target_oh, dims)[1:]
+        fps = torch.sum(probs * (1 - target_oh), dims)[1:]
+        fns = torch.sum((1 - probs) * target_oh, dims)[1:]
         t = ((inter + epsilon)/ (inter + (alpha * fps) + (beta * fns) + epsilon)).mean()
-        return (1 - t)**gamma
-=======
-        t = (inter / (inter + (alpha * fps) + (beta * fns))).mean()
         loss = (1 - t)**gamma
         if self.half_precision:
             return loss.half()
         else:
             return loss
->>>>>>> add half precision support
 
     def dice_loss(self, pred, target, epsilon=1e-6):
         """
@@ -59,9 +55,9 @@ class CustomLoss(Module):
         probs = softmax(pred, dim=1)
         target_oh = target_oh.type(pred.type())
         dims = (0,) + tuple(range(2, target.ndimension()))
-        inter = torch.sum(probs * target_oh, dims)
-        fps = torch.sum(probs * (1 - target_oh), dims)
-        fns = torch.sum((1 - probs) * target_oh, dims)
+        inter = torch.sum(probs * target_oh, dims)[1:]
+        fps = torch.sum(probs * (1 - target_oh), dims)[1:]
+        fns = torch.sum((1 - probs) * target_oh, dims)[1:]
         t = ((inter + epsilon)/ (inter + (0.5 * fps) + (0.5 * fns) + epsilon)).mean(dim=1)
         loss = 1 - t
         if self.half_precision:
@@ -77,33 +73,23 @@ class CustomLoss(Module):
         :param epsilon: very small number to prevent divide by 0 errors
         :return: list of DICE loss for each class
         """
-        pred_class = torch.argmax(pred, dim=1)
-        dice = torch.ones(self.num_classes, dtype=torch.float)
-        for c in range(self.num_classes):
-            p = (pred_class == c)
-            t = (target == c)
-            inter = (p * t).sum().float() + epsilon
-            union = p.sum() + t.sum() + epsilon
-            d = 2 * inter / union
-            if d ==1.0:    
-                d -= epsilon
-            dice[c] = 1 - d
-        if self.half_precision:
-            return dice.half()
-        else:
-            return dice
+        target_oh = torch.eye(self.num_classes, device=self.device)[target.squeeze(1)]
+        target_oh = target_oh.permute(0,4,1,2,3).float()
+        probs = softmax(pred, dim=1)
+        target_oh = target_oh.type(pred.type())
+        dims = (0,) + tuple(range(2, target.ndimension()))
+        inter = torch.sum(probs * target_oh, dims)
+        fps = torch.sum(probs * (1 - target_oh), dims)
+        fns = torch.sum((1 - probs) * target_oh, dims)
+        dice = (inter / (inter + (0.5 * fps) + (0.5 * fns))).mean(axis=1)
+        return 1-dice
 
     def unified_loss(self, pred, target, gamma, delta=0.6, lambda_=0.5):
-        weights=self.dice_loss(pred,target).clone().detach()
-        print("W: max pred value {},".format(weights,pred.max().clone().detach()), end=" ")
-        ce = cross_entropy(pred, target, weight=weights, reduction='none')
-        print(" CE max: {}".format(ce.max()))
+        target_oh = torch.eye(self.num_classes, device=self.device)[target.squeeze(1)]
+        target_oh = target_oh.permute(0,4,1,2,3).float()
+        focal = sigmoid_focal_loss(pred, target_oh, alpha=-1, gamma=gamma, reduction='mean')
         tv = self.tversky_loss(pred, target, 1-delta, delta, gamma)
-        ce = ce.sum() / weights[target].sum()  
-        probs = torch.gather(log_softmax(pred, 1), 1, target.unsqueeze(1))
-        probs = probs.exp()
-        focal_ce = torch.mean(torch.pow(1 - probs, (1-gamma)) * ce)
-        loss = (lambda_ * focal_ce) + ((1-lambda_) * tv) 
+        loss = (lambda_ * focal) + ((1-lambda_) * tv)
         return loss
 
     def forward(self, pred, target, cross_entropy_weight=0.5,
