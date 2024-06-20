@@ -1,5 +1,6 @@
 const benchmark_history = require("../models/benchmarkModel");
 const biomolecule_emd = require("../models/biomoleculeModelEMD");
+const parameters = require("../parameters.json");
 const sequelize = require("../database").sequelize;
 const fs = require("fs");
 var mkdirp = require("mkdirp");
@@ -54,18 +55,26 @@ exports.batchQuery = async (req, res) => {
 
 function generateFiles(text_input, IDList, benchmarkPath, idFolder, callback) {
   let final_text = [];
+  let index = 0;
   for (const item of text_input){
-    let rank = 1;
-    let text = "Rank	EMDB_ID	EUC_D	RESOLUTION \r\n ";
-    for (const molecule of item){
-      let emb_id = molecule["biomolecule"]["id"];
-      let distance = molecule["euc_distance"];
-      let resolution = molecule["biomolecule"]["resolution"];
-      let temp_txt = rank + "\t" + emb_id + "\t" + distance + "\t" + resolution + "\r\n ";
-      text += temp_txt;
-      rank += 1;
+    let id = parseInt(IDList[index], 10);
+    index++;
+    if ( id <= 729 || id >= 740){
+      let rank = 1;
+      let text = "Rank	EMDB_ID	EUC_D	RESOLUTION \r\n ";
+      for (const molecule of item){
+        let emb_id = molecule["biomolecule"]["id"];
+        let distance = molecule["euc_distance"];
+        let resolution = molecule["biomolecule"]["resolution"];
+        let temp_txt = rank + "\t" + emb_id + "\t" + distance + "\t" + resolution + "\r\n ";
+        text += temp_txt;
+        rank += 1;
+      }
+      final_text.push(text);
+    }else{
+      final_text.push(item)
     }
-    final_text.push(text);
+
   }
   let filesPaths = [];
   let file;
@@ -104,28 +113,34 @@ async function getText(req){
   try {
     // Query to DB
     let list = req.params.emdblist.split(",");
+    list = list.slice(0, parameters.benchmark_inputs_to_process);
     for (const ID of list){
-      let biomolecules = await sequelize.query(
-        "SELECT * FROM top_distance(:emd_id, :type_des, :top)",
-        {
-          replacements: {
-            emd_id: ID,
-            type_des: req.params.contour,
-            top: req.params.top
+      let id = parseInt(ID, 10);
+      if ( id <= 729 || id >= 740){
+        let biomolecules = await sequelize.query(
+          "SELECT * FROM top_distance(:emd_id, :type_des, :top)",
+          {
+            replacements: {
+              emd_id: ID,
+              type_des: req.params.contour,
+              top: req.params.top
+            }
           }
-        }
-      );
-      // final result array
-      let resultArray = [];
-      // Clasification Process
-      for (const biomoleculeItem of biomolecules[0]) {
-        let bioInfo = await searchByID(biomoleculeItem["emd_id"])
-        let distance = biomoleculeItem["distance"].toString();
-        resultArray.push({
-        biomolecule: bioInfo,
-        euc_distance: distance.substring(0, 5)
-      })}
-      result_info.push(resultArray)
+        );
+        // final result array
+        let resultArray = [];
+        // Clasification Process
+        for (const biomoleculeItem of biomolecules[0]) {
+          let bioInfo = await searchByID(biomoleculeItem["emd_id"])
+          let distance = biomoleculeItem["distance"].toString();
+          resultArray.push({
+          biomolecule: bioInfo,
+          euc_distance: distance.substring(0, 5)
+        })}
+        result_info.push(resultArray)
+      }else{
+        result_info.push("ID don't exist on in our data base")
+      }
     }
     return result_info;
   } catch (err) {

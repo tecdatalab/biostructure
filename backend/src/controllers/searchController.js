@@ -3,7 +3,7 @@ const biomolecule_pdb = require("../models/biomoleculeModelPDB");
 const cathInfo_pdb = require("../models/cathModel");
 const sequelize = require("../database").sequelize;
 const search_history = require("../models/searchHistoryModel");
-const Op = require("../database").Op;
+const fs = require("fs");
 
 //#region General Functions
 
@@ -79,10 +79,22 @@ exports.searchResult = async (req, res) => {
       max_res
     );
 
+    /* TODO: fix result file */
+
+    console.log(query_results);
+
+    const resultPath = "./public/results/";
+    generateFiles(query_results, resultPath)
+
     let result = {
-      path: "/results/result.hit",
+      path: "/results/result.hit",  // generate a custom file with the final results
       results: query_results
     };
+
+    console.log(result);
+
+    /* end TODO */
+
     res.status(200).json(result);
   } catch (error) {
     res.status(500).send({
@@ -310,6 +322,31 @@ function giveResponse(id, biomolecule, res) {
   } else {
     return res.status(200).json(biomolecule);
   }
+}
+
+function generateFiles(text_input, resultsPath) {
+  let final_text = [];
+
+  let rank = 1;
+  let text = "Rank	EMDB_ID	EUC_D	RESOLUTION \r\n ";
+  for (const molecule of text_input){
+    let emb_id = molecule["biomolecule"]["id"];
+    let distance = molecule["euc_distance"];
+    let resolution = molecule["biomolecule"]["resolution"];
+    let temp_txt = rank + "\t" + emb_id + "\t" + distance + "\t" + resolution + "\r\n ";
+    text += temp_txt;
+    rank += 1;
+  }
+  final_text.push(text);
+  let file = {
+    filename: "result.hit",
+    path: resultsPath + "result.hit"
+  };
+  fs.writeFile(file.path, final_text, function (err) {
+    if (err) {
+      console.log("ERROR - CREANDO result.hit file ")
+    }
+  });
 }
 
 //#endregion
