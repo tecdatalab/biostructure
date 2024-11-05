@@ -100,13 +100,13 @@ class Molecule():
         return self.seg_masks
 
 
-    def getZernikeDescriptors(self):
+    """ def getZernikeDescriptors(self):
         self.zDescriptors = np.ndarray(((self.contoursNum, zernike_vec_len)))
         for i in range(self.contoursNum):
             if self.contour_maks[i].flags['C_CONTIGUOUS']:
                 pass
             else:
-                self.contour_maks[i,:] = self.data[i].ascontiguousarray('C') 
+                self.contour_maks[i,:] = self.data[i].ascontiguousarray('C')  """
 
     def getVolume(self):
         volume_contour_dict = dict()

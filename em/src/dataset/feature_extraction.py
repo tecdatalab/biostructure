@@ -16,6 +16,8 @@ import random
 import copy
 import json
 from json import encoder
+import em.molecule as molecule
+import dataset.metrics as metrics
 
 from skimage.measure import regionprops
 from scipy.ndimage import distance_transform_edt, gaussian_filter

@@ -1,4 +1,4 @@
-from em.dataset.metrics import *
+from dataset.metrics import *
 import em.molecule as molecule
 
 

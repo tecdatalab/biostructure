@@ -1,7 +1,6 @@
 import os
 import argparse
 from em import molecule
-from em.dataset.metrics import matching_iou
 from em.evolutionary_segmentation import evolutionary_segmentation as evo_seg
 from em.evolutionary_segmentation import miscellaneous as misc
 import numpy as np

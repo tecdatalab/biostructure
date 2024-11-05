@@ -1,5 +1,5 @@
 import sys
-from em.dataset.feature_extraction import annotateSample
+from dataset.feature_extraction import annotateSample
 from em.molecule import Molecule 
 import pandas as pd
 import random
