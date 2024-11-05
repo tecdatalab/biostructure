@@ -13,6 +13,7 @@ import copy
 from miscellaneous import *
 import mrcfile
 from metrics import getCorrelation, getRelative_Masks_Overlap
+import em.molecule as molecule
 
 # Sync headers to folder
 def get_headers(header_path):
@@ -962,24 +963,5 @@ def main():
         #    out.write("Simulated maps merged..\n")
         #parallelSimulationSegments(dataset_synthetic_merged, simulated_path, 'dataset_sim_merged.csv')
                 
-        
-
-
-         
-
-
-       
-
-
-
-
-
-       
-
-
-       
-        
-
-
 if __name__ == '__main__':
     main()
