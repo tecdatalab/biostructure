@@ -156,6 +156,54 @@ def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
 
     return result
 
+def generate_sphere_points(n_points=1000):
+    """Generate evenly distributed points on a sphere using fibonacci spiral"""
+    points = []
+    phi = np.pi * (3. - np.sqrt(5.))  # golden angle in radians
+    
+    for i in range(n_points):
+        y = 1 - (i / float(n_points - 1)) * 2  # y goes from 1 to -1
+        radius = np.sqrt(1 - y * y)  # radius at y
+        
+        theta = phi * i  # golden angle increment
+        
+        x = np.cos(theta) * radius
+        z = np.sin(theta) * radius
+        
+        points.append([x, y, z])
+    
+    return np.array(points)
+
+def select_surface_points_from_sphere(region_gt, density_map, contour_level, n_points=1000):
+    """Select surface points by casting rays from sphere points"""
+    center = np.mean(np.where(region_gt > 0), axis=1)
+    
+    distance = distance_transform_edt(region_gt)
+    distance[distance != 1] = 0
+    surface_points = np.array(np.where(distance == 1)).T
+    
+    density_values = density_map[surface_points[:,0], surface_points[:,1], surface_points[:,2]]
+
+    mean_density = np.mean(density_values[density_values >= float(contour_level)])
+
+    sphere_points = generate_sphere_points(n_points)
+    max_radius = np.max(np.linalg.norm(surface_points - center, axis=1))
+    sphere_points = sphere_points * max_radius + center
+    
+    selected_points = []
+    for sphere_point in sphere_points:
+        direction = sphere_point - center
+        direction = direction / np.linalg.norm(direction)
+        
+        distances = np.abs(np.cross(surface_points - center, direction)).sum(axis=1)
+        closest_point_idx = np.argmin(distances)
+        
+        point_density = density_values[closest_point_idx]
+        if point_density >= mean_density:
+            selected_points.append(surface_points[closest_point_idx])
+    
+    return np.array(selected_points)
+
 def annotatePoints(df, i, output_path, pool_size=3, number_points=3, gaussian_std=3):
     map_path = df.iloc[i]['map_path']
     output_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
@@ -184,10 +232,15 @@ def annotatePoints(df, i, output_path, pool_size=3, number_points=3, gaussian_st
             print("Creating pointsample {} for annotated {} ".format(p,basename))
             region_path = os.path.join(output_path,basename)
             index_x, index_y, index_z = np.where(distance == 1)
-            chosen_indexes = np.random.choice(len(index_x), number_points, replace=False)
-            index_x = index_x[chosen_indexes]
-            index_y = index_y[chosen_indexes]
-            index_z = index_z[chosen_indexes]
+            surface_points = select_surface_points_from_sphere(
+                region_gt,
+                tagged_map.data,
+                df.iloc[i]['contourLevel'])
+            chosen_indexes = np.random.choice(len(surface_points), number_points, replace=False)
+            # chosen_indexes = np.random.choice(len(index_x), number_points, replace=False)
+            index_x = surface_points[chosen_indexes][:,0]
+            index_y = surface_points[chosen_indexes][:,1]
+            index_z = surface_points[chosen_indexes][:,2]
             point_array = np.zeros_like(region_gt)
             point_array[index_x,index_y,index_z] = 1.0
             point_array = gaussian_filter(point_array, gaussian_std)
