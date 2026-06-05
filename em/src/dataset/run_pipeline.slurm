@@ -10,13 +10,17 @@
 ##SBATCH --time=1-00:00:00
 
 #Dribe
-##SBATCH --job-name=protpipe
-##SBATCH --output=%j.%N.out
-##SBATCH --nodes=1
-##SBATCH --tasks-per-node=36
-##SBATCH --partition=dribe
-##SBATCH --ntasks=36
-##SBATCH --time=3-00:00:00
+#SBATCH --job-name=biostructure
+#SBATCH --output=%j.%N.out
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=36
+#SBATCH --tasks-per-node=36
+#SBATCH --mem=1000GB
+#SBATCH --partition=dribe-long
+#SBATCH --time=7-00:00:00
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=gergutierrez@estudiantec.cr
 
 #ANDALAN
 ##SBATCH --job-name=proteins
@@ -28,27 +32,77 @@
 ##SBATCH --time=24:00:00
 
 #NUKWA
-#SBATCH --job-name=proteins
-#SBATCH --output=%j.%N.out
-#SBATCH --nodes=1
-#SBATCH --tasks-per-node=48
-#SBATCH --partition=nukwa-debug
-#SBATCH --ntasks=48    
-#SBATCH --time=04:00:00
-#SBATCH --nodelist=nukwa-07.cnca
+##SBATCH --job-name=proteins
+##SBATCH --output=%j.%N.out
+##SBATCH --nodes=1
+##SBATCH --tasks-per-node=48
+##SBATCH --partition=nukwa-debug
+##SBATCH --ntasks=48    
+##SBATCH --time=04:00:00
+##SBATCH --nodelist=nukwa-07.cnca
+
+# Load required modules
 module load gcc/9.3.0
-module load mpich/3.3.2-gcc-9.3.0 
 
-source ~/.bashrc 
-conda activate visual
+# Check initial system state
+echo "Job started at: $(date)"
+echo "Checking initial disk space..."
+df -h /tmp/$USER/conda /data/$USER || true
+echo "Checking initial memory state..."
+free -h
 
-export PYTHONPATH=$PYTHONPATH:/work/mzumbado/biostructure/em/src
+# Set temporary directories for conda
+export CONDA_PKGS_DIRS=/tmp/$USER/conda/pkgs
+export CONDA_ENVS_PATH=/tmp/$USER/conda/envs
+mkdir -p $CONDA_PKGS_DIRS $CONDA_ENVS_PATH
 
-#time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures process_data.py --d 0 --v 0 --g 30 --f 0 --p 1
-time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures feature_extraction.py --p 5
+# Clean existing environment and caches
+rm -rf /tmp/$USER/conda/envs/biostructure
+conda clean --all -y
+rm -rf ~/.cache/pip
 
-#time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures process_data.py --d 1  --v 1 --s 22 29 --g 30 --f 1 --p 1
+# Setup conda environment
+eval "$(/home/$USER/miniconda/bin/conda shell.bash hook)"
+source ~/.bashrc
 
-#probando generacion sintetica
-#time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures process_data.py --d 0 --v 1 --s 27 34 --g 30 --f 1
-#time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures process_data.py --d 0 --v 0 --f 1
+# Create and activate environment with Python 3.10
+conda create --prefix /tmp/$USER/conda/envs/biostructure python=3.10 numpy pandas -y
+source activate /tmp/$USER/conda/envs/biostructure
+
+# Install packages with progress checks
+echo "Installing mrcfile..."
+conda install -y -c conda-forge mrcfile && echo "mrcfile installed"
+
+echo "Installing scipy and scikit-image..."
+conda install -y -c conda-forge scipy scikit-image && echo "scipy and scikit-image installed"
+
+echo "Installing pytorch and biopython..."
+conda install -y -c conda-forge pytorch biopython && echo "pytorch and biopython installed"
+
+# Verify installations
+python -c "import numpy; import pandas; import mrcfile; import scipy; import torch; import Bio; print('All packages verified')"
+
+# Create and prepare output directories
+mkdir -p /home/$USER/extreme_points
+mkdir -p /data/$USER/extreme_points
+chmod 777 /home/$USER/extreme_points
+chmod 777 /data/$USER/extreme_points
+
+# Run feature extraction with monitoring
+echo "Starting feature extraction at $(date)"
+python feature_extraction.py --result_dir /home/$USER/extreme_points --final_dir /data/$USER/extreme_points
+EXIT_CODE=$?
+
+# Check final system state
+echo ""
+echo "Checking final disk space..."
+df -h /tmp/$USER/conda /data/$USER || true
+echo "Checking final memory state..."
+free -h
+echo "Feature extraction exit code: $EXIT_CODE"
+
+# Cleanup
+conda deactivate
+rm -rf /tmp/$USER/conda/pkgs/*
+
+exit $EXIT_CODE

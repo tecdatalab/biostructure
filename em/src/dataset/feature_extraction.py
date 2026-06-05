@@ -1,23 +1,18 @@
 import os
-import subprocess
 from glob import glob
 import argparse
-import sys 
+import gzip
 import mrcfile
 from metrics import getCorrelation, getRelative_Masks_Overlap
-from mpi4py import MPI
-from mpi4py.futures import MPICommExecutor
 from concurrent.futures import wait
 from scipy.spatial import cKDTree
 import numpy as np
 import pandas as pd
-import traceback
-import random
 import copy
 import json
-from json import encoder
-import em.molecule as molecule
-import dataset.metrics as metrics
+import metrics
+import time
+import gc
 
 from skimage.measure import regionprops
 from scipy.ndimage import distance_transform_edt, gaussian_filter
@@ -28,19 +23,47 @@ def convert(o):
     if isinstance(o, np.generic): return o.item()  
     raise TypeError
 
-# Intersección de mapas simulados de pedazos con original
+
+def save_compressed_npy(path, array):
+    temp_path = path + '.tmp'
+    try:
+        with gzip.open(temp_path, 'wb') as f:
+            np.save(f, array)
+        os.replace(temp_path, path)
+    except Exception:
+        if os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
+        raise
+
+
+def load_numpy_array(path):
+    if path.endswith('.gz'):
+        with gzip.open(path, 'rb') as f:
+            return np.load(f, allow_pickle=False)
+
+    arr = np.load(path, allow_pickle=False)
+    if isinstance(arr, np.lib.npyio.NpzFile):
+        # load first dataset from npz container
+        keys = list(arr.files)
+        if keys:
+            return arr[keys[0]]
+    return arr
+
+# Interseccion de mapas simulados de pedazos con original
 # Si hay traslape debe anotarse
-# Obtiene mapa anotado según label, tipo float
+# Obtiene mapa anotado segun label, tipo float
 # Revisa pedazos no asociados, utiliza holgura, hace una pasada
 # obtiene stats
 # Lo guarda en disco
 
 def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
     map_id = df.at[indexes[0], columns['id']]
-    map_path = '/net/kihara/scratch/mzumbado/biostructure/em/src/dataset/models/'+map_id+'.mrc'
+    map_path = '/data/ggutierrez/dataset/models/'+map_id+'_resized.mrc'
     annotated_path = os.path.join(output_dir,os.path.basename(map_path).replace('.','_gt.'))
     contourLvl = float(df.at[indexes[0], columns['contourLevel']])
-    print(map_path)
     map_to_annotate =  mrcfile.open(map_path)
     data_map = map_to_annotate.data
     map_mask = data_map >= contourLvl
@@ -58,10 +81,9 @@ def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
     print('Tagging em map {}'.format(os.path.basename(map_path)))
     try:
         for i in indexes:
-            segment_path = 'simulated/sim_'+map_id+'_'+ df.at[i, columns['chain_id']]+'.mrc'
+            segment_path = '/data/ggutierrez/simulated/simulated_chain/sim_'+map_id+'_'+ df.at[i, columns['chain_id']]+'.mrc'
             segment_label = int(float(df.at[i, columns['chain_label']]))
             chain_label_id_dict[df.at[i,columns['chain_label']]] = df.at[i,columns['chain_id']]
-            print(segment_path)
             segment_map = mrcfile.open(segment_path)
             segment_mask = segment_map.data >= 0.9
             print("Number of voxels in segment {}".format(np.sum(segment_mask)))
@@ -73,7 +95,9 @@ def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
             print("	Matching {} of {} voxels".format(np.sum(masks_intersec), np.sum(segment_mask)))
             segment_map.close()
     except Exception as e:
-            return ValueError('There is a problem getting segments for {}:'.format(segment_path, e))
+            with open('error.txt', 'a') as out:
+                out.write('There is a problem getting segments for {}:{}'.format(segment_map,e))
+            return ValueError('There is a problem getting segments for {}:{}'.format(segment_map, e))
     #import pdb; pdb.set_trace()
     # Get non assigned voxels
     dim1,dim2,dim3 = np.where(data_map_copy == marker)
@@ -157,15 +181,15 @@ def annotateSample(map_id, indexes, df, fullness,columns, output_dir):
     return result
 
 def generate_sphere_points(n_points=1000):
-    """Generate evenly distributed points on a sphere using fibonacci spiral"""
+    print("Generating sphere points...")
     points = []
-    phi = np.pi * (3. - np.sqrt(5.))  # golden angle in radians
+    phi = np.pi * (3. - np.sqrt(5.))
     
     for i in range(n_points):
-        y = 1 - (i / float(n_points - 1)) * 2  # y goes from 1 to -1
-        radius = np.sqrt(1 - y * y)  # radius at y
+        y = 1 - (i / float(n_points - 1)) * 2
+        radius = np.sqrt(1 - y * y)
         
-        theta = phi * i  # golden angle increment
+        theta = phi * i
         
         x = np.cos(theta) * radius
         z = np.sin(theta) * radius
@@ -175,44 +199,76 @@ def generate_sphere_points(n_points=1000):
     return np.array(points)
 
 def select_surface_points_from_sphere(region_gt, density_map, contour_level, n_points=1000):
-    """Select surface points by casting rays from sphere points"""
+    print("Selecting surface points from sphere...")
     center = np.mean(np.where(region_gt > 0), axis=1)
     
     distance = distance_transform_edt(region_gt)
     distance[distance != 1] = 0
     surface_points = np.array(np.where(distance == 1)).T
     
+    # **CRITICAL FIX**: Handle empty surface (e.g., single voxel or no distance==1)
+    if len(surface_points) == 0:
+        print("  WARNING: No surface voxels found...")
+        edge_points = np.array(np.where(region_gt > 0)).T
+        if len(edge_points) == 0:
+            return np.array([])  # Completely empty region
+        surface_points = edge_points  # Fall back to all region points
+    
     density_values = density_map[surface_points[:,0], surface_points[:,1], surface_points[:,2]]
 
-    mean_density = np.mean(density_values[density_values >= float(contour_level)])
+    # Handle case where all density values are below contour level
+    valid_density = density_values[density_values >= float(contour_level)]
+    if len(valid_density) == 0:
+        print(f"  WARNING: No density values >= {contour_level}. Using all available densities.")
+        percentile_density = np.percentile(density_values, 75) if len(density_values) > 0 else 0
+    else:
+        percentile_density = np.percentile(valid_density, 75)
 
     sphere_points = generate_sphere_points(n_points)
     max_radius = np.max(np.linalg.norm(surface_points - center, axis=1))
     sphere_points = sphere_points * max_radius + center
     
+    print("Sphere points generated, selecting based on density...")
     selected_points = []
     for sphere_point in sphere_points:
         direction = sphere_point - center
         direction = direction / np.linalg.norm(direction)
         
         distances = np.abs(np.cross(surface_points - center, direction)).sum(axis=1)
+        # **CRITICAL FIX**: Check if distances is empty before argmin
+        if len(distances) == 0:
+            print("  ERROR: Distances array is empty!")
+            break
+        
         closest_point_idx = np.argmin(distances)
         
         point_density = density_values[closest_point_idx]
-        if point_density >= mean_density:
+        if point_density >= percentile_density:
             selected_points.append(surface_points[closest_point_idx])
     
+    print("Selected {} points from sphere based on density.".format(len(selected_points)))
     return np.array(selected_points)
 
-def annotatePoints(df, i, output_path, pool_size=3, number_points=3, gaussian_std=3):
+def annotatePoints(df, i, output_path, final_output_path=None, pool_size=1, number_points=3, gaussian_std=1):
     map_path = df.iloc[i]['map_path']
-    output_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
-    #print("aa{}".format(df.iloc[i]['tagged_path']))
+    output_rows = []
     tagged_map_path = df.iloc[i]['tagged_path']
+    
+    # **FIX**: Ensure mrcfile data is fully loaded into memory with explicit copy
     tagged_map = mrcfile.open(tagged_map_path)
-    tagged_map_data = tagged_map.data
-    print("unique",np.unique(tagged_map_data))
+    try:
+        # Force full read and copy to memory
+        tagged_map_data = np.array(tagged_map.data, dtype=np.float32, copy=True)
+    except Exception as e:
+        print(f"ERROR: Failed to load mrcfile {tagged_map_path}: {e}")
+        tagged_map.close()
+        return pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
+    
     bbox = None
+    distance = None
+    target_npy_dir = output_path if output_path is not None else final_output_path
+    os.makedirs(target_npy_dir, exist_ok=True)
+    
     for region in regionprops(tagged_map_data.astype(np.int32)):
         label = int(region.label)
         bbox = region.bbox
@@ -226,30 +282,63 @@ def annotatePoints(df, i, output_path, pool_size=3, number_points=3, gaussian_st
             print("Tagged path {} does not have assigned voxels, ommiting extreme point anotation".format(df.iloc[i]['tagged_path']))
             continue
         # Fix to include numpy array path
-        tagged_path = map_path.replace(str(df.iloc[i]['map_path'][-4:]), '_'+str(label)+'.npy')
+        tagged_path = map_path.replace(str(df.iloc[i]['map_path'][-4:]), '_'+str(label)+'.npz')
         for p in range(pool_size):
-            basename = df.iloc[i]['id']+'_'+str(label)+'_'+str(p)+'.npy'
-            print("Creating pointsample {} for annotated {} ".format(p,basename))
-            region_path = os.path.join(output_path,basename)
+            basename = df.iloc[i]['id']+'_' + str(label)+'_' + str(p)+'.npy.gz'
+            print("Creating point sample {} for annotated {} ".format(p,basename))
+            region_path = os.path.join(target_npy_dir,basename)
             index_x, index_y, index_z = np.where(distance == 1)
             surface_points = select_surface_points_from_sphere(
                 region_gt,
-                tagged_map.data,
+                tagged_map_data,
                 df.iloc[i]['contourLevel'])
-            chosen_indexes = np.random.choice(len(surface_points), number_points, replace=False)
+            
+            # **FIX**: Validate surface_points before sampling
+            if len(surface_points) == 0:
+                print(f"WARNING: No surface points found for region {label}. Skipping point sample {p}.")
+                continue
+            
+            if len(surface_points) < number_points:
+                print("Warning: only {} surface points available, need {}; using replace=True".format(len(surface_points), number_points))
+                chosen_indexes = np.random.choice(len(surface_points), number_points, replace=True)
+            else:
+                chosen_indexes = np.random.choice(len(surface_points), number_points, replace=False)
             # chosen_indexes = np.random.choice(len(index_x), number_points, replace=False)
             index_x = surface_points[chosen_indexes][:,0]
             index_y = surface_points[chosen_indexes][:,1]
             index_z = surface_points[chosen_indexes][:,2]
-            point_array = np.zeros_like(region_gt)
+            point_array = np.zeros_like(region_gt, dtype=np.float32)
             point_array[index_x,index_y,index_z] = 1.0
             point_array = gaussian_filter(point_array, gaussian_std)
-            np.save(region_path,point_array)
-            output_df = output_df.append({'id':df.iloc[i]['id'], 'map_path':df.iloc[i]['map_path'], 'contourLevel':df.iloc[i]['contourLevel'], 'subunit':label, 'tagged_path':tagged_path, 'number_points':number_points, 'tagged_points_path':region_path,'min_x':bbox[0], 'min_y':bbox[1],'min_z':bbox[2],'max_x':bbox[3],'max_y':bbox[4],'max_z':bbox[5]}, ignore_index=True) 
+            point_array = point_array.astype(np.float32)
+            save_compressed_npy(region_path, point_array)
+            output_rows.append({
+                'id': df.iloc[i]['id'],
+                'map_path': df.iloc[i]['map_path'],
+                'contourLevel': df.iloc[i]['contourLevel'],
+                'subunit': label,
+                'tagged_path': tagged_path,
+                'number_points': number_points,
+                'tagged_points_path': region_path,
+                'min_x': bbox[0],
+                'min_y': bbox[1],
+                'min_z': bbox[2],
+                'max_x': bbox[3],
+                'max_y': bbox[4],
+                'max_z': bbox[5]
+            })
             del point_array
+    
     tagged_map.close()
     del tagged_map
-    del distance
+    del tagged_map_data
+    if distance is not None:
+        del distance
+    
+    if len(output_rows) > 0:
+        output_df = pd.DataFrame(output_rows)
+    else:
+        output_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
     return output_df
         
 def compute_adjacency(df, i):
@@ -314,12 +403,16 @@ def mapMetricsCompute(row,match_dict):
     tagged_path = row['tagged_path']
     contour = 0.001
     compare_path = match_dict[map_id]
-    sample = molecule.Molecule(tagged_path, contour)
-    labeled = molecule.Molecule(compare_path, contour)
+    sample_map = mrcfile.open(tagged_path)
+    sample = sample_map.data >= contour
+    labeled_map = mrcfile.open(compare_path)
+    labeled = labeled_map.data >= contour
     iou = metrics.intersection_over_union(sample, labeled)
     h = metrics.homogenity(sample, labeled)
     p = metrics.proportion(sample, labeled)
     c = metrics.consistency(sample, labeled)
+    sample_map.close()
+    labeled_map.close()
     return pd.Series( [map_id, row['map_path'], tagged_path, row['contourLevel'], compare_path, iou, h, p, c ], index=['id', 'map_path','tagged_path', 'contourLevel', 'reference_path', 'iou', 'homogenity', 'proportion', 'consistency'])
 
 def doParallelTagging(df, fullness, gt_path, columns, comm, size ):
@@ -327,7 +420,7 @@ def doParallelTagging(df, fullness, gt_path, columns, comm, size ):
     # Construct dataframe to store results
     output_df = pd.DataFrame(columns=['id','map_path','contourLevel','tagged_path','subunits','matched_subunits','voxels','voxels_matched','voxels_discarted','voxels_reassigned','voxels_assigned'])
     print("Spawn procecess...")
-      
+    '''  
     with MPICommExecutor(comm, root=0, worker_size=size) as executor:
         if executor is not None:
             futures = []
@@ -384,8 +477,9 @@ def doParallelTagging(df, fullness, gt_path, columns, comm, size ):
             if matched_num > 0:
                 segments_matched+=1
                 voxels_matched += matched_num
-        output_df = output_df.append({'id':map_id, 'map_path':map_path, 'contourLevel':contour, 'tagged_path':tagged_path, 'subunits':len(voxels_assigned.keys()), 'matched_subunits':segments_matched, 'voxels':voxels_num, 'voxels_matched':voxels_matched, 'voxels_discarted':voxels_discarted, 'voxels_reassigned':voxels_reassigned, 'voxels_assigned':voxels_assigned}, ignore_index=True)
-    ''' 
+        new_row = pd.DataFrame({'id':[map_id], 'map_path':[map_path], 'contourLevel':[contour], 'tagged_path':[tagged_path], 'subunits':[len(voxels_assigned.keys())], 'matched_subunits':[segments_matched], 'voxels':[voxels_num], 'voxels_matched':[voxels_matched], 'voxels_discarted':[voxels_discarted], 'voxels_reassigned':[voxels_reassigned], 'voxels_assigned':[voxels_assigned]})
+        output_df = pd.concat([output_df, new_row], ignore_index=True)
+     
     return output_df
 
 
@@ -401,7 +495,7 @@ def samplingPatches(df, size, extra_width, stride):
     map_data = map_object.data
     map_data = np.copy(map_object.data)
     map_data[map_data<float(row['contourLevel'])]=0
-    mask_data = np.load(row['tagged_path'])
+    mask_data = load_numpy_array(row['tagged_path'])
 
     data_max = np.max(map_data)
     data_min = np.min(map_data)
@@ -444,7 +538,8 @@ def samplingPatches(df, size, extra_width, stride):
     
     for index,row in df.iterrows():
         point_id =row['tagged_points_path'][-5:-4]
-        point_data = np.load(row['tagged_points_path'])[min_x:max_x,min_y:max_y,min_z:max_z]
+        point_data = load_numpy_array(row['tagged_points_path'])
+        point_data = point_data[min_x:max_x,min_y:max_y,min_z:max_z]
         point_data_padded = np.pad(point_data, ((pad0_left, pad0_right), (pad1_left, pad1_right), (pad2_left, pad2_right)))
         all_tensor[df_count+2] = point_data_padded
         
@@ -453,7 +548,8 @@ def samplingPatches(df, size, extra_width, stride):
     patches_tensor = patches_tensor.contiguous().view(-1,12,size,size,size) 
     number_patches = patches_tensor.size(0)
     for i in range(number_patches):#['id','subunit','patch','data_path', 'min_x', 'min_y', 'min_z', 'max_x', 'max_y','max_z']
-        output_df = output_df.append({'id':map_id, 'subunit':segment_id,'patch':i,'data_path':'data_patches/{}_{}.npy'.format(map_id,segment_id)}, ignore_index=True)
+        new_row = pd.DataFrame({'id':[map_id], 'subunit':[segment_id],'patch':[i],'data_path':['data_patches/{}_{}.npy'.format(map_id,segment_id)]})
+        output_df = pd.concat([output_df, new_row], ignore_index=True)
     np.save('data_patches/{}_{}.npy'.format(map_id,segment_id), all_tensor.numpy())
     print("Saved id {} subunit {} with shape {}".format(map_id,segment_id, patches_tensor.shape))
     map_object.close()
@@ -466,7 +562,7 @@ def samplingPatches(df, size, extra_width, stride):
                     
         
             
-def doParallelSamplingPatches(df, shape_size,stride, extra_width, comm, size ):
+""" def doParallelSamplingPatches(df, shape_size,stride, extra_width, comm, size ):
     unique_df = df.groupby(['id','subunit'])
     # Construct dataframe to store results
     output_df = pd.DataFrame(columns=['id','subunit','patch','data_path'])
@@ -489,7 +585,7 @@ def doParallelSamplingPatches(df, shape_size,stride, extra_width, comm, size ):
     for name,group in unique_df:
         out = samplingPatches(group, shape_size, extra_width, stride)
     '''
-    return output_df
+    return output_df """
 
 def doParallelAdjacency(df):
     id_list = df.index.tolist()
@@ -513,65 +609,285 @@ def doParallelAdjacency(df):
     '''
     for i in id_list:
         res = compute_adjacency(df,i)
-        output_df = output_df.append(res, ignore_index=True)
+        output_df = pd.concat([output_df, res.to_frame().T], ignore_index=True)
     return output_df
 
-def doParallelExtremePointAnnotation(df, pool_size, output_path, comm, size):
+def doParallelExtremePointAnnotation(df, pool_size, output_path, final_path=None):
+    import shutil
     indexes = df.index.tolist()
-    output_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
     
-    with MPICommExecutor(comm, root=0, worker_size=size) as executor:
-        if executor is not None:
-            futures = []
-        # For each map, perform annotation
-        for i in indexes:
-            futures.append(executor.submit(annotatePoints, df, i, output_path, pool_size))
-        wait(futures)
-        for f in futures:
+    # If final_path not provided, use output_path for final results
+    if final_path is None:
+        final_path = output_path
+    
+    # Define checkpoint paths for recovery
+    checkpoint_dir = final_path
+    aggregate_checkpoint_path = os.path.join(checkpoint_dir, '.aggregate_checkpoints.csv')
+    processed_log_path = os.path.join(checkpoint_dir, '.processed_indexes.txt')
+    failed_log_path = os.path.join(checkpoint_dir, '.failed_rows.txt')
+    final_csv_path = os.path.join(final_path, 'dataset_extreme_points.csv')
+    
+    def row_key(idx):
+        row = df.iloc[idx]
+        subunit = row.get('subunit', '') if hasattr(row, 'get') else ''
+        return f"{row['id']}|{row['tagged_path']}|{subunit}"
+
+    def write_log(path, line):
+        try:
+            with open(path, 'a') as f:
+                f.write(line + '\n')
+                f.flush()
+                os.fsync(f.fileno())
+        except Exception:
+            pass
+
+    def append_checkpoint_rows(rows):
+        if rows is None or len(rows) == 0:
+            return
+        header = not os.path.exists(aggregate_checkpoint_path)
+        rows.to_csv(aggregate_checkpoint_path, mode='a', header=header, index=False)
+        try:
+            with open(aggregate_checkpoint_path, 'a') as f:
+                f.flush()
+                os.fsync(f.fileno())
+        except Exception:
+            pass
+
+    # Load previously processed row keys to enable recovery
+    processed_keys = set()
+    if os.path.exists(processed_log_path):
+        try:
+            with open(processed_log_path, 'r') as f:
+                processed_keys = set(line.strip() for line in f if line.strip())
+            print(f"✓ Recovery: Found {len(processed_keys)} previously processed row keys")
+        except Exception as e:
+            print(f"Warning: Could not load processed log: {e}")
+    
+    # Load aggregate checkpoint if it exists
+    checkpoint_rows = 0
+    if os.path.exists(aggregate_checkpoint_path):
+        try:
+            with open(aggregate_checkpoint_path, 'r') as f:
+                header = f.readline()
+                checkpoint_rows = sum(1 for _ in f)
+            print(f"✓ Recovery: Found {checkpoint_rows} rows in checkpoint")
+        except Exception as e:
+            print(f"Warning: Could not load checkpoint: {e}")
+    
+    # Process in batches of 5 indexes (reduced from 10 for lower memory)
+    batch_size = 5
+    items_to_process = [idx for idx in indexes if row_key(idx) not in processed_keys]
+    total_items = len(indexes)
+    
+    print(f"\nProcessing Summary: Total={total_items}, Done={len(processed_keys)}, Remaining={len(items_to_process)}\n")
+    
+    for batch_num, batch_start in enumerate(range(0, len(items_to_process), batch_size)):
+        batch_end = min(batch_start + batch_size, len(items_to_process))
+        batch_indexes = items_to_process[batch_start:batch_end]
+        
+        # Progress calculation
+        current_batch = batch_num + 1
+        total_batches = (len(items_to_process) + batch_size - 1) // batch_size
+        processed_so_far = len(processed_keys) + batch_start
+
+        print(f"Batch {current_batch}/{total_batches} | Progress: {processed_so_far}/{total_items}")
+        print("-" * 100)
+        
+        # Process each index in the batch
+        for i in batch_indexes:
+            row_key_value = row_key(i)
             try:
-                res = f.result()
-                output_df = output_df.append(res, ignore_index=True)
-                print(res)
+                res = annotatePoints(df, i, output_path, final_output_path=final_path, pool_size=pool_size)
+
+                append_checkpoint_rows(res)
+                write_log(processed_log_path, row_key_value)
+                processed_keys.add(row_key_value)
+                checkpoint_rows += len(res)
+
+                print(f"  ✓ Index {i:4d} processed | Checkpoint: {checkpoint_rows} rows")
+                gc.collect()
+
             except Exception as e:
-                print("Error annotating extreme points",e)
-    return output_df
-
-
+                error_msg = f"{type(e).__name__}: {str(e)}"
+                write_log(failed_log_path, f"{row_key_value}\t{error_msg}")
+                print(f"  ✗ Index {i:4d} ERROR: {error_msg[:80]}")
+                print(f"     (Saved: {checkpoint_rows} rows in checkpoint)")
+                continue
     
+    # Consolidate all checkpoints into final dataset
+    print("\n" + "=" * 100)
+    print("CONSOLIDATING CHECKPOINT INTO FINAL DATASET")
+    print("=" * 100)
     
+    aggregate_df = None
+    if os.path.exists(aggregate_checkpoint_path):
+        try:
+            final_df = pd.read_csv(aggregate_checkpoint_path, dtype=str)
+            if len(final_df) > 0:
+                if {'id', 'tagged_path', 'subunit'}.issubset(final_df.columns):
+                    final_df['_row_key'] = (
+                        final_df['id'].astype(str) + '|' +
+                        final_df['tagged_path'].astype(str) + '|' +
+                        final_df['subunit'].astype(str)
+                    )
+                else:
+                    final_df['_row_key'] = final_df.index.astype(str)
+                final_df = final_df.drop_duplicates(subset=['_row_key']).drop(columns=['_row_key'])
+                final_df.to_csv(final_csv_path, index=False)
+                aggregate_df = final_df
+                print(f"✓ Created final dataset: {len(final_df)} rows")
+            else:
+                if not os.path.exists(final_csv_path):
+                    empty_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
+                    empty_df.to_csv(final_csv_path, index=False)
+                    aggregate_df = empty_df
+                    print(f"✓ Created empty final dataset header: {final_csv_path}")
+                else:
+                    print(f"✓ Final dataset already exists and checkpoint is empty: {final_csv_path}")
+                    aggregate_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
+        except Exception as e:
+            print(f"⚠ Could not build final dataset from checkpoint: {e}")
+            if not os.path.exists(final_csv_path):
+                empty_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
+                empty_df.to_csv(final_csv_path, index=False)
+                aggregate_df = empty_df
+                print(f"✓ Created empty final dataset header: {final_csv_path}")
+            else:
+                aggregate_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
+    else:
+        empty_df = pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
+        empty_df.to_csv(final_csv_path, index=False)
+        aggregate_df = empty_df
+        print(f"✓ Created empty final dataset header: {final_csv_path}")
 
+    print(f"\n✓ Final dataset: {final_csv_path}")
+    print("=" * 100 + "\n")
 
+    def safe_move_file(src_path, dest_path):
+        try:
+            dest_dir = os.path.dirname(dest_path)
+            if os.path.exists(src_path):
+                file_size = os.path.getsize(src_path)
+                free_space = shutil.disk_usage(dest_dir).free
+                if free_space < file_size + 1024 * 1024:
+                    print(f"Skipping move, not enough space for {os.path.basename(src_path)}: need {file_size} bytes, have {free_space} bytes")
+                    return False
+
+            if os.path.exists(dest_path):
+                os.remove(dest_path)
+            shutil.move(src_path, dest_path)
+            return True
+        except Exception as move_error:
+            # Clean up any partial destination file created during move
+            try:
+                if os.path.exists(dest_path):
+                    os.remove(dest_path)
+            except Exception:
+                pass
+            print(f"Could not move {src_path}: {move_error}")
+            return False
+
+    # Binary .npy.gz files will remain in the temp directory (output_path)
+    # Only the final CSV dataset is saved to final_path
+    print(f"\nBinary output files (.npy.gz) kept in temp directory: {output_path}")
+    print(f"Final dataset CSV saved to: {final_csv_path}\n")
+
+    # Keep checkpoint files for reference (user can delete if restarting)
+    print("Checkpoint files (kept for recovery, delete to restart from scratch):")
+    print(f"  - {aggregate_checkpoint_path}")
+    print(f"  - {processed_log_path}\n")
+
+    return aggregate_df if aggregate_df is not None else pd.DataFrame(columns=['id','map_path','contourLevel','subunit', 'tagged_path', 'number_points','tagged_points_path','min_x','min_y','min_z','max_x','max_y','max_z'])
 
 def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--a', required=False, default=6, help='Annotate data with a fullness parameter')
-    parser.add_argument('--p', required=False, default=5, help='Generate p number of samples for each segment')
     parser.add_argument('--s', required=False, default=96, help='Size of the 3d path for corresponding sample') 
-    parser.add_argument('--result_dir', default='output', required=False, help='output directory to store results')
+    parser.add_argument('--p', required=False, default=1, 
+                      help='Number of point sets to generate')
+    parser.add_argument('--n', required=False, default=3, 
+                      help='Number of points per set')
+    parser.add_argument('--result_dir', required=False,
+                      help='Output directory for temporary results (e.g., /home)')
+    parser.add_argument('--final_dir', required=False,
+                      help='Final output directory (e.g., /data). If not provided, uses result_dir')
 
     opt = parser.parse_args()
-    current_dir = os.getcwd()
     
-    comm = MPI.COMM_WORLD
-    size = comm.Get_size()
+    try:
+        # Set up output directories
+        temp_dir = opt.result_dir
+        final_dir = opt.final_dir if opt.final_dir else opt.result_dir
+        
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir)
+        if not os.path.exists(final_dir):
+            os.makedirs(final_dir)
+        
+        print(f"Temporary output directory: {temp_dir}")
+        print(f"Final output directory: {final_dir}")
+        print(f"Starting processing at {time.strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        # Load dataset in chunks to save memory (reduced chunk_size for lower RAM)
+        chunk_size = 25
+        # Use script directory to find CSV so it works on cluster
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        csv_path = os.path.join(script_dir, 'dataset_exp_tagged.csv')
+
+        print(f"Loading dataset from: {csv_path}")
+
+        for chunk_idx, exp_tagged in enumerate(pd.read_csv(csv_path, 
+                                                         dtype=str, 
+                                                         chunksize=chunk_size)):
+            print()
+            print(f"Processing chunk {chunk_idx + 1}")
+            
+            # **FIX**: Reset index for each chunk to prevent out-of-bounds errors in recovery
+            # When pd.read_csv loads chunks, indices are 0-based for each chunk
+            exp_tagged = exp_tagged.reset_index(drop=True)
+            
+            # Process chunk with temporary and final directories
+            extreme_points_df = doParallelExtremePointAnnotation(
+                exp_tagged,
+                pool_size=int(opt.p),
+                output_path=temp_dir,
+                final_path=final_dir
+            )
+            
+            # Clear memory
+            del extreme_points_df
+            gc.collect()
+            
+        print(f"Processing completed at {time.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"Final dataset saved to {os.path.join(final_dir, 'dataset_extreme_points.csv')}")
+        
+    except Exception as e:
+        print(f"Error in main execution: {str(e)}")
+        raise
     
-    results_path = os.path.join(current_dir, opt.result_dir)
-    gt_path = os.path.join(current_dir, 'ground_truth')
-    if not(os.path.exists(gt_path)):
-        os.mkdir(gt_path)
+    # comm = MPI.COMM_WORLD
+    # size = comm.Get_size()
+    
+    # results_path = os.path.join(current_dir, opt.result_dir)
+    # if not os.path.exists(results_path):
+    #     os.makedirs(results_path)
+        
+    # # Clear any existing intermediate files
+    # for f in glob.glob(os.path.join(results_path, 'intermediate_results_*.csv')):
+    #     os.remove(f)
 
-    # Fullness parameter
-    fullness = int(opt.a)
-    # Pool size parameter
-    pool_size= int(opt.p)
-    patch_size= int(opt.s)
+    # # Fullness parameter
+    # fullness = int(opt.a)
+    # # Pool size parameter
+    # pool_size= int(opt.p)
+    # patch_size= int(opt.s)
 
-    #df_exp_merged = pd.read_csv('dataset_exp_merged.csv', dtype=str)
+    # df_exp_merged = pd.read_csv('dataset_exp_merged.csv', dtype=str)
     # Do parallel computation, one process for each map
     # Get index list to schedule processess 
     # Get id unique values to extract indexes of respective molecule subunits 
-    #exp_tagged = doParallelTagging(df_exp_merged, fullness, gt_path, {'id':'id','contourLevel':'contourLevel', 'chain_label':'chain_label','chain_id':'chain_id'}, comm, size)
+    # exp_tagged = doParallelTagging(df_exp_merged, fullness, gt_path, {'id':'id','contourLevel':'contourLevel', 'chain_label':'chain_label','chain_id':'chain_id'}, comm, size)
     # Perform same procedure for simulated data.
     #df_sim = pd.read_csv('dataset_sim_merged.csv')
     #sim_tagged=  doParallelTagging(df_sim, fullness, gt_path, {'id':'entries','map_path':'map_path','contourLevel':'contourLevel', 'subunit_path':'subunit_path','chain_label':'chain_label','chain_id':'chain_id'})
@@ -587,17 +903,26 @@ def main():
     #exp_tagged.to_csv('dataset_exp_tagged.csv', index=False)
     #sim_metrics.to_csv('dataset_sim_metrics.csv', index = False)         
     #sim_tagged.to_csv('dataset_sim_tagged.csv', index=False) 
-    #exp_tagged = pd.read_csv('dataset_exp_tagged.csv', dtype=str)
-    #extreme_points_df = doParallelExtremePointAnnotation(exp_tagged, pool_size, os.path.join(current_dir,'extreme_points/'), comm, size)
-    #extreme_points_df.to_csv('dataset_extreme_points.csv', index = False)
-    df = pd.read_csv('dataset_extreme_points.csv', dtype=str)
-    output_df = doParallelSamplingPatches(df, patch_size,patch_size//2, 8, comm, size) 
-    output_df.to_csv('dataset_patches.csv', index=False)
+
+    # exp_tagged = pd.read_csv('dataset_exp_tagged.csv', dtype=str)
+
+    # extreme_points_df = doParallelExtremePointAnnotation(
+    #     exp_tagged, 
+    #     pool_size=int(opt.p),
+    #     output_path=results_path
+    # )
+
+    # extreme_points_df.to_csv('dataset_extreme_points.csv', index = False)
+
+    #df = pd.read_csv('dataset_extreme_points.csv', dtype=str)
+    #output_df = doParallelSamplingPatches(df, patch_size,patch_size//2, 8, comm, size) 
+    #output_df.to_csv('dataset_patches.csv', index=False)
     #sim_tagged = pd.read_csv('dataset_sim_tagged.csv')
     #extreme_points_df = doParallelExtremePointAnnotation(sim_tagged, pool_size, os.path.join(current_dir,'extreme_points/'))
     #extreme_points_df.to_csv('dataset_extreme_points_sim.csv', index = False)
     #selected_df = pd.read_csv('dataset_selected.csv')
     #result_df = doParallelAdjacency(selected_df)
     #result_df.to_csv('dataset_selected_adjacency.csv', index=False)
+
 if __name__ == '__main__':
     main()

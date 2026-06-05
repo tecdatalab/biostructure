@@ -10,14 +10,14 @@
 ##SBATCH --time=1-00:00:00
 
 #Dribe
-##SBATCH --job-name=protpipe
-##SBATCH --output=%j.%N.out
-##SBATCH --nodes=1
-##SBATCH --tasks-per-node=30
-##SBATCH --partition=dribe
-##SBATCH --ntasks=30
-##SBATCH --time=3-00:00:00
-##SBATCH --nodelist=dribe-01.cnca
+#SBATCH --job-name=protpipe
+#SBATCH --output=%j.%N.out
+#SBATCH --nodes=1
+#SBATCH --tasks-per-node=30
+#SBATCH --partition=dribe
+#SBATCH --ntasks=30
+#SBATCH --time=3-00:00:00
+#SBATCH --nodelist=dribe-01.cnca
 
 #ANDALAN
 ##SBATCH --job-name=proteins
@@ -29,22 +29,33 @@
 ##SBATCH --time=24:00:00
 
 #NUKWA
-#SBATCH --job-name=proteins
-#SBATCH --output=%j.%N.out
-#SBATCH --nodes=1
-#SBATCH --tasks-per-node=48
-#SBATCH --partition=nukwa
-#SBATCH --ntasks=48    
-#SBATCH --time=1-00:00:00
-#SBATCH --nodelist=nukwa-04.cnca
-#conda init bash 
+##SBATCH --job-name=proteins
+##SBATCH --output=%j.%N.out
+##SBATCH --nodes=1
+##SBATCH --tasks-per-node=48
+##SBATCH --partition=nukwa
+##SBATCH --ntasks=48    
+##SBATCH --time=1-00:00:00
+##SBATCH --nodelist=nukwa-04.cnca
+##conda init bash 
+
+# Load required modules
+module load gcc/9.3.0
+module load mpich/3.3.2-gcc-9.3.0
+
+# Setup conda
+eval "$(/home/ggutierrez/miniconda/bin/conda shell.bash hook)"
 source ~/.bashrc
-#time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures process_data.py --d 1  --v 1 --s 22 29 --g 30 --f 1 --p 1
 
-#probando generacion sintetica
-#time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures process_data.py --d 0 --v 1 --s 27 34 --g 30 --f 1
-#time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures process_data.py --d 0 --v 0 --f 1
+# Create and activate environment
+conda create -n visual python=3.6 -y
 conda activate visual
-export PYTHONPATH=$PYTHONPATH:/work/mzumbado/biostructure
 
-time srun --mpi=pmi2 --cpu-bind=cores /home/mzumbado/.conda/envs/visual/bin/python3.6 -m  mpi4py.futures feature_extraction.py
+# Install required packages
+conda install -y -c conda-forge numpy pandas mpi4py mrcfile scipy scikit-image pytorch
+
+# Set Python path
+export PYTHONPATH=$PYTHONPATH:/work/ggutierrez/biostructure
+
+# Run feature extraction with specific result directory
+time srun --mpi=pmi2 --cpu-bind=cores python -m mpi4py.futures feature_extraction.py --p 3 --n 3 --result_dir /data/ggutierrez/extreme_points
